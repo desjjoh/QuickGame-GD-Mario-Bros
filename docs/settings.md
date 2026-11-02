@@ -133,3 +133,7 @@ Requested corner/landing forgiveness: BasePlayer now includes Motion/CornerCorre
 
 User requested renaming the project to QuickGame-Godot2D (Super Mario Bros). Updated application/config/name from QuickGame-Godot2D to that exact value. README title matches. Workspace folder and resource paths remain unchanged. Godot's default user:// data location is derived from the project name, so it changes unless explicitly overridden; current session data is memory-only and no save migration was performed.
 
+
+## Platformer project identity — 2026-11-02
+
+At the user's request, application/config/name changed from QuickGame-Godot2D (Super Mario Bros) to QuickGame-Godot2D (Platformer). This supersedes the earlier display-name decision: the tutorial covers multiple games. README uses the broader identity; game-specific implementation references remain accurate. The workspace folder is unchanged. The default user:// directory follows the new display name; no saved-data migration was performed.

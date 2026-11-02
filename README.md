@@ -1,6 +1,6 @@
-# QuickGame-Godot2D (Super Mario Bros)
+# QuickGame-Godot2D (Platformer)
 
-A Godot 4.7 reference project exploring a 2D platformer inspired by Super Mario Bros., with 16×16 tiles and sprites.
+A Godot 4.7 platformer tutorial and reference project in the QuickReference series, exploring techniques from multiple games with reusable scenes, entities, and state machines. The current playable example uses Mario with 16×16 tiles and sprites.
 
 Game loads TestLevel through a global handler. Mario's Idle/Move/Slide/Jump states orchestrate horizontal movement, Run, and skid actions using shared per-player motion values. Move plays a three-pose walk/run loop with velocity-based cadence; Idle and Slide use static poses. Variable jumping, solid-ceiling bumps, exclusive entity sound effects, horizontal camera bounds, and a combined outer shadow are implemented. Levels and entities have explicit terminal shutdown; startup still uses _ready(). Right-only horizontal camera scrolling is implemented; enemies, power-ups, disk saves, and respawn are not implemented. Current movement is an approximation, not original-game physics parity.
 

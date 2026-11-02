@@ -299,3 +299,8 @@ Verification: all fourteen regression scenes passed across the final checks. Bot
 
 - Renamed application/config/name and README title to QuickGame-Godot2D (Super Mario Bros), as requested. Workspace directory and resource paths remain unchanged. See settings.md for the default user-data directory implication.
 
+
+## 2026-11-02 — Broader platformer tutorial identity
+
+- Renamed the project display title and README to QuickGame-Godot2D (Platformer), superseding the earlier game-specific title. Updated the introduction to explain the multi-game tutorial scope. Retained historical names and game-specific technical attribution. Workspace folder, resource paths, and gameplay are unchanged.
+- Verification: checked the configured display name and README identity on disk. Gameplay tests were not run for this metadata/documentation change.
