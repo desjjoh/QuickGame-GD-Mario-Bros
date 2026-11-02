@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/blocks/base/base_block.tscn" id="1_base"]
+[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/interactibles/blocks/brick.png" id="2_brick"]
+
+[node name="BrickBlock" instance=ExtResource("1_base")]
+
+[node name="Sprite2D" parent="." index="2"]
+texture = ExtResource("2_brick")

@@ -1,0 +1,22 @@
+[gd_resource type="TileSet" format=3 uid="uid://css6al2yclqkl"]
+
+[ext_resource type="Texture2D" uid="uid://db3dd0duhhhoj" path="res://assets/Overworld (Palette 1)/interactibles/blocks/brick.png" id="1_brick"]
+[ext_resource type="Texture2D" uid="uid://de0xqmdl5jj4c" path="res://assets/Overworld (Palette 1)/interactibles/blocks/question-block.png" id="2_question"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_brick"]
+resource_name = "Brick entity"
+texture = ExtResource("1_brick")
+0:0/0 = 0
+0:0/0/custom_data_0 = "brick"
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_question"]
+resource_name = "Question block entity"
+texture = ExtResource("2_question")
+0:0/0 = 0
+0:0/0/custom_data_0 = "question_block"
+
+[resource]
+custom_data_layer_0/name = "entity_id"
+custom_data_layer_0/type = 4
+sources/0 = SubResource("TileSetAtlasSource_brick")
+sources/1 = SubResource("TileSetAtlasSource_question")

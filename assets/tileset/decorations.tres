@@ -1,0 +1,109 @@
+[gd_resource type="TileSet" format=3 uid="uid://58ym0wu30sv7"]
+
+[ext_resource type="Texture2D" uid="uid://dd217ycxbl8xh" path="res://assets/Overworld (Palette 1)/decorations/bush-left.png" id="1_left"]
+[ext_resource type="Texture2D" uid="uid://clhnt03i3birv" path="res://assets/Overworld (Palette 1)/decorations/bush.png" id="2_middle"]
+[ext_resource type="Texture2D" uid="uid://dlce4sv0xjui1" path="res://assets/Overworld (Palette 1)/decorations/bush-right.png" id="3_right"]
+[ext_resource type="Texture2D" uid="uid://0n3g7jvbjmw6" path="res://assets/Overworld (Palette 1)/decorations/hill.png" id="4_hill"]
+[ext_resource type="Texture2D" uid="uid://bqi05pirxyexu" path="res://assets/Overworld (Palette 1)/decorations/hill-top.png" id="5_hill_top"]
+[ext_resource type="Texture2D" uid="uid://b3y2ahd3toq74" path="res://assets/Overworld (Palette 1)/decorations/hill-left.png" id="6_hill_left"]
+[ext_resource type="Texture2D" uid="uid://dhy767qc2hb4m" path="res://assets/Overworld (Palette 1)/decorations/hill-right.png" id="7_hill_right"]
+[ext_resource type="Texture2D" uid="uid://bn3av6sl27ao5" path="res://assets/Overworld (Palette 1)/decorations/hill-1.png" id="8_hill_1"]
+[ext_resource type="Texture2D" uid="uid://b2slt4pqu7er3" path="res://assets/Overworld (Palette 1)/decorations/hill-2.png" id="9_hill_2"]
+[ext_resource type="Texture2D" uid="uid://llb41udg6cf0" path="res://assets/Overworld (Palette 1)/decorations/cloud-left.png" id="cloud_9"]
+[ext_resource type="Texture2D" uid="uid://ca2m2dlhk3orr" path="res://assets/Overworld (Palette 1)/decorations/cloud.png" id="cloud_10"]
+[ext_resource type="Texture2D" uid="uid://ddeefoxhme2e4" path="res://assets/Overworld (Palette 1)/decorations/cloud-right.png" id="cloud_11"]
+[ext_resource type="Texture2D" uid="uid://dwknp03b0cdqk" path="res://assets/Overworld (Palette 1)/decorations/cloud-bottom-left.png" id="cloud_12"]
+[ext_resource type="Texture2D" uid="uid://dybkctcnle2sn" path="res://assets/Overworld (Palette 1)/decorations/cloud-bottom.png" id="cloud_13"]
+[ext_resource type="Texture2D" uid="uid://dtudps06qm827" path="res://assets/Overworld (Palette 1)/decorations/cloud-bottom-right.png" id="cloud_14"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_left"]
+resource_name = "Bush left"
+texture = ExtResource("1_left")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_middle"]
+resource_name = "Bush middle"
+texture = ExtResource("2_middle")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cloud_10"]
+resource_name = "Cloud top middle"
+texture = ExtResource("cloud_10")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cloud_11"]
+resource_name = "Cloud top right"
+texture = ExtResource("cloud_11")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cloud_12"]
+resource_name = "Cloud bottom left"
+texture = ExtResource("cloud_12")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cloud_13"]
+resource_name = "Cloud bottom middle"
+texture = ExtResource("cloud_13")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cloud_14"]
+resource_name = "Cloud bottom right"
+texture = ExtResource("cloud_14")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_right"]
+resource_name = "Bush right"
+texture = ExtResource("3_right")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hill"]
+resource_name = "Hill fill"
+texture = ExtResource("4_hill")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hill_top"]
+resource_name = "Hill top"
+texture = ExtResource("5_hill_top")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hill_left"]
+resource_name = "Hill left"
+texture = ExtResource("6_hill_left")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hill_right"]
+resource_name = "Hill right"
+texture = ExtResource("7_hill_right")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hill_1"]
+resource_name = "Hill detail 1"
+texture = ExtResource("8_hill_1")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_hill_2"]
+resource_name = "Hill detail 2"
+texture = ExtResource("9_hill_2")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cloud_9"]
+resource_name = "Cloud top left"
+texture = ExtResource("cloud_9")
+0:0/0 = 0
+
+[resource]
+sources/0 = SubResource("TileSetAtlasSource_left")
+sources/1 = SubResource("TileSetAtlasSource_middle")
+sources/2 = SubResource("TileSetAtlasSource_right")
+sources/3 = SubResource("TileSetAtlasSource_hill")
+sources/4 = SubResource("TileSetAtlasSource_hill_top")
+sources/5 = SubResource("TileSetAtlasSource_hill_left")
+sources/6 = SubResource("TileSetAtlasSource_hill_right")
+sources/7 = SubResource("TileSetAtlasSource_hill_1")
+sources/8 = SubResource("TileSetAtlasSource_hill_2")
+sources/9 = SubResource("TileSetAtlasSource_cloud_9")
+sources/10 = SubResource("TileSetAtlasSource_cloud_10")
+sources/11 = SubResource("TileSetAtlasSource_cloud_11")
+sources/12 = SubResource("TileSetAtlasSource_cloud_12")
+sources/13 = SubResource("TileSetAtlasSource_cloud_13")
+sources/14 = SubResource("TileSetAtlasSource_cloud_14")

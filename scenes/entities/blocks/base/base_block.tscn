@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="1_entity"]
+[ext_resource type="Script" path="res://scenes/entities/blocks/base/base_block.gd" id="2_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_block"]
+size = Vector2(16, 16)
+
+[node name="BaseBlock" node_paths=PackedStringArray("sprite") instance=ExtResource("1_entity")]
+texture_filter = 1
+script = ExtResource("2_script")
+sprite = NodePath("Sprite2D")
+
+[node name="Body" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
+position = Vector2(8, 8)
+shape = SubResource("RectangleShape2D_block")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(8, 8)

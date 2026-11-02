@@ -1,0 +1,51 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="1_base"]
+[ext_resource type="Script" path="res://scenes/player/base/base_player.gd" id="2_script"]
+[ext_resource type="PackedScene" path="res://scenes/components/motion/horizontal_movement.tscn" id="3_movement"]
+[ext_resource type="Script" path="res://scenes/components/motion/motion_values.gd" id="4_values"]
+[ext_resource type="PackedScene" path="res://scenes/components/actions/run.tscn" id="5_run"]
+[ext_resource type="PackedScene" path="res://scenes/components/actions/slide.tscn" id="6_slide"]
+[ext_resource type="Script" path="res://scenes/components/motion/gravity.gd" id="7_gravity"]
+[ext_resource type="Script" path="res://scenes/components/actions/jump.gd" id="8_jump"]
+[ext_resource type="Script" path="res://scenes/components/motion/air_movement.gd" id="9_air"]
+[ext_resource type="Script" path="res://scenes/components/motion/corner_correction.gd" id="10_corners"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(16, 16)
+
+[node name="BasePlayer" node_paths=PackedStringArray("animation_player") instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+animation_player = NodePath("Body/AnimationPlayer")
+
+[node name="Body" type="CharacterBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
+position = Vector2(0, -8)
+shape = SubResource("RectangleShape2D_body")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Body"]
+
+[node name="Motion" type="Node" parent="." node_paths=PackedStringArray("body")]
+script = ExtResource("4_values")
+body = NodePath("../Body")
+
+[node name="HorizontalMovement" parent="Motion" instance=ExtResource("3_movement")]
+
+[node name="AirMovement" type="Node" parent="Motion"]
+script = ExtResource("9_air")
+
+[node name="Gravity" type="Node" parent="Motion"]
+script = ExtResource("7_gravity")
+
+[node name="CornerCorrection" type="Node" parent="Motion"]
+script = ExtResource("10_corners")
+
+[node name="Actions" type="Node" parent="."]
+
+[node name="Run" parent="Actions" instance=ExtResource("5_run")]
+
+[node name="Jump" type="Node" parent="Actions"]
+script = ExtResource("8_jump")
+
+[node name="Slide" parent="Actions" instance=ExtResource("6_slide")]
