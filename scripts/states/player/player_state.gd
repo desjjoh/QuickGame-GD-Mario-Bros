@@ -34,3 +34,13 @@ func ground_transition(jump_state: PlayerState, falling_state: PlayerState) -> B
 			player.air_movement.capture(player.motion_values, -1.0 if player.sprite != null and player.sprite.flip_h else 1.0)
 			return jump_state
 	return null
+
+
+func continue_jump_physics(jump_state: BaseState, delta: float) -> BaseState:
+	# Ground states have selected Jump but have not moved this tick.
+	# Enter first so outgoing modifiers are removed and Jump owns takeoff.
+	if not state_machine.change_state(jump_state):
+		return null
+	if entity.is_shutdown or state_machine.current_state != jump_state:
+		return null
+	return jump_state.process_physics(delta)

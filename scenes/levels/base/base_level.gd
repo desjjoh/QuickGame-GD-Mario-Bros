@@ -78,7 +78,7 @@ func clamp_player_to_camera() -> void:
 	var camera := get_viewport().get_camera_2d()
 	if camera == null:
 		return
-	var center := camera.get_screen_center_position().x
+	var center := camera.global_position.x if camera is LevelCamera else camera.get_screen_center_position().x
 	var half_width := get_viewport_rect().size.x / camera.zoom.x / 2.0
 	var inset := minf(horizontal_screen_inset, half_width)
 	var player_position := player.body.global_position
@@ -109,6 +109,7 @@ func spawn_player() -> BasePlayer:
 	player = instance as BasePlayer
 	player.position = players.to_local(player_spawn.global_position)
 	players.add_child(player)
+	player.reset_physics_interpolation()
 	if GameHandler.current_level == self:
 		GameHandler.current_player = player
 	return player

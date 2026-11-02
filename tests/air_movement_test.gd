@@ -1,5 +1,16 @@
 extends Node
 
+signal state_tick_done
+var _pending_tick: Callable
+
+
+func _physics_process(_delta: float) -> void:
+	if _pending_tick.is_valid():
+		var callback := _pending_tick
+		_pending_tick = Callable()
+		callback.call()
+		state_tick_done.emit()
+
 
 func _ready() -> void:
 	call_deferred("run_checks")
@@ -16,17 +27,39 @@ func run_checks() -> void:
 	for state_name in [&"Idle", &"Move", &"Slide"]:
 		for run_pressed in [false, true]:
 			var trial: Node = load("res://scenes/main/game.tscn").instantiate()
+			var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+			fixture.get_node("Layouts/EntityLayout").clear()
+			var floor := fixture.get_node("Layouts/GroundLayout") as TileMapLayer
+			floor.clear()
+			for x in range(16):
+				floor.set_cell(Vector2i(x,13),0,Vector2i.ZERO)
+			fixture.get_node("Players/PlayerSpawn").position = Vector2(40,208)
+			var packed := PackedScene.new()
+			assert(packed.pack(fixture) == OK)
+			fixture.free()
+			trial.initial_level = packed
 			get_tree().root.add_child(trial)
 			await tick(5)
 			var mario := GameHandler.current_player
+			mario.set_physics_process(false)
+			await get_tree().physics_frame
 			mario.body.velocity.x = 60.0
 			mario.state_machine.change_state(mario.state_machine.get_state(state_name))
 			# Previous tick had the opposite Run value.
 			mario.run_action.apply(mario.motion_values, not run_pressed)
-			ControllerHandler.input_secondary = run_pressed
-			ControllerHandler.input_primary_just_pressed = true
-			mario.state_machine.process_physics(1.0 / 60.0)
+			var takeoff_origin := mario.body.global_position
+			_pending_tick = func():
+				ControllerHandler.input_secondary = run_pressed
+				ControllerHandler.input_primary_just_pressed = true
+				mario.state_machine.process_physics(1.0 / 60.0)
+			await state_tick_done
 			assert(mario.state_machine.current_state is MarioJumpState)
+			assert(mario.body.global_position.x > takeoff_origin.x,
+				"Takeoff must not skip horizontal movement from %s" % state_name)
+			assert(absf((mario.body.global_position.x - takeoff_origin.x) - mario.body.velocity.x / 60.0) < 0.1,
+				"Takeoff must consume exactly one movement tick from %s" % state_name)
+			assert(mario.body.global_position.y < takeoff_origin.y,
+				"Takeoff must move upward immediately from %s" % state_name)
 			# Air's modifier masks Run; remove it to inspect the refreshed value.
 			mario.air_movement.end(mario.motion_values)
 			assert(mario.motion_values.max_speed == (150.0 if run_pressed else 90.0),

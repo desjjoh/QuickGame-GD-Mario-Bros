@@ -13,7 +13,7 @@ func _ready() -> void:
 		camera.zoom = Vector2.ONE * zoom
 		camera.position.x = 160.0
 		camera.force_update_scroll()
-		var center := camera.get_screen_center_position().x
+		var center := camera.global_position.x
 		var half: float = get_viewport().get_visible_rect().size.x / zoom / 2.0
 		for side in [-1.0, 1.0]:
 			body.global_position = Vector2(center + side * 1000.0, 90.0)

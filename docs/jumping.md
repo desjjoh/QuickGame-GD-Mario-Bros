@@ -73,3 +73,7 @@ Move keeps its walk/run presentation while unsupported, selects AirMovement on e
 
 Move freezes its current walk texture and animation phase whenever the body is unsupported, by setting AnimationPlayer speed_scale to zero. On landing, the velocity-based cadence is restored without restarting the loop. This also applies on the first support-loss tick; Jump retains its separate static pose. Move exit restores its previous animation speed as usual. Falling-animation regression verifies frozen texture/phase and resumed playback after landing.
 
+
+## Continuous takeoff tick
+
+Idle, Move, and Slide refresh Run and select a grounded jump, then use PlayerState.continue_jump_physics to enter Jump and process its physics immediately. The outgoing state has not moved yet, so Jump consumes exactly one movement step on the takeoff tick. This removes a one-tick horizontal/vertical pause that also stopped the scrolling camera briefly. State exit removes old modifiers before Jump enters; normal FSM return handling still owns any subsequent requested transition. Jump speeds, gravity profiles, and air-control values are unchanged. The air-movement regression verifies immediate horizontal/upward displacement and exactly one horizontal step for takeoff from all three states with both Run contexts.
