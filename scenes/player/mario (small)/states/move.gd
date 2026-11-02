@@ -31,6 +31,8 @@ func process_physics(delta: float) -> BaseState:
 	var player := get_player()
 	var direction := prepare_horizontal_motion()
 	var next := ground_transition(jump_state, self)
+	if next == jump_state and next != null:
+		return continue_jump_physics(next, delta)
 	if next != null:
 		return next
 	if not player.body.is_on_floor():

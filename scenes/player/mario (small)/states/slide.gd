@@ -45,6 +45,8 @@ func process_physics(delta: float) -> BaseState:
 	var player := get_player()
 	var direction := prepare_horizontal_motion()
 	var next := ground_transition(jump_state, move_state)
+	if next == jump_state and next != null:
+		return continue_jump_physics(next, delta)
 	if next != null:
 		return next
 	if _skid_stream != null:

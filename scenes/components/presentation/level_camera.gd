@@ -17,6 +17,7 @@ var _has_target: bool = false
 func reset_target(target: CharacterBody2D) -> void:
 	_target_x = target.global_position.x
 	_has_target = true
+	reset_physics_interpolation()
 	force_update_scroll()
 
 
@@ -29,7 +30,8 @@ func follow_target(target: CharacterBody2D) -> void:
 	if not follow_enabled or advance <= 0.0:
 		return
 	var width := get_viewport_rect().size.x / zoom.x
-	var left := get_screen_center_position().x - width / 2.0
+	# Keep interpolated presentation coordinates out of physics feedback.
+	var left := global_position.x - width / 2.0
 	var screen_x := current_x - target_origin_offset - left
 	if screen_x < scroll_start:
 		return

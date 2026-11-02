@@ -16,3 +16,11 @@ The palette also includes Question block entity (source 1, entity_id question_bl
 ## Planned: per-cell entity properties
 
 A future custom editor tool will let us paint a question block, select its cell, and choose its contents from a dropdown. Configuration will belong to the level and be keyed by grid coordinate, while TileSet custom data continues identifying the entity type. The spawner will configure the generated entity before startup. This workflow is planned, not currently available; item spawning is also unimplemented. See the [per-cell editor decision](decisions.md#2026-11-02---planned-per-cell-entity-editor).
+
+## Static pipes
+
+Select Layouts/GroundLayout and use the terrain TileSet sources Pipe top - left (1), Pipe top - right (2), Pipe body - left (3), and Pipe body - right (4). Paint the two top pieces side by side, then extend the two body pieces downward. Each 16x16 tile has full solid collision on the existing terrain physics layer. These tiles do not spawn entities or support pipe travel; they are appropriate for non-interactive pipes. Original ground remains source 0. No pipe examples were painted automatically.
+
+## Alternate brick
+
+EntityLayout source 2, Alternate brick entity, uses entity_id brick_alternate. TestLevel maps it to scenes/entities/blocks/brick/alternate_brick_block.tscn. This scene inherits BrickBlock and overrides only Sprite2D.texture with brick-alternate.png. Collision, hit acceptance, Active/Bouncing recovery, sound ownership, and shutdown remain inherited. Select Layouts/EntityLayout and the alternate marker to paint it; no existing painted cells were changed.

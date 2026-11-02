@@ -141,3 +141,37 @@ At the user's request, application/config/name changed from QuickGame-Godot2D (S
 ## Shared layout grid — 2026-11-02
 
 User requested grouped, consistently aligned decoration/entity/ground layouts and explicitly required ground in BaseLevel. These are scene/script rules, not Project Settings: Layouts and its TileMapLayer children use identity local transforms; assigned TileSets use 16x16 square cells. BaseLevel now owns all three layers. Existing painted cell data, terrain collision, halo parameters, camera, Input Map, and import settings are preserved.
+
+## Softer halo over blue background - 2026-11-02
+
+At the user's request, BaseLevel's material shadow_color alpha changed from 0.55 to 0.28 and blur_radius from 4 to 6 logical pixels. Shader defaults now match. The Gaussian alpha kernel expands from 9x9 to 13x13 samples, retaining more of the low-weight tail for a gentler cutoff. Centered offset and 8-pixel margins are unchanged. This is scene/shader tuning, not a Project Settings or import change. The low logical viewport resolution still produces pixel stepping; no claim of eliminating all banding is made.
+
+## Soft drop shadow - 2026-11-02
+
+At the user's request, BaseLevel and shader default shadow_offset changed from (0,0) to (3,3) logical pixels. Retained the 6-pixel blur radius, 28% opacity, and 13x13 kernel. Increased CanvasGroup fit_margin and clear_margin from 8 to 12 pixels to accommodate the offset plus blur without clipping. These are scene/shader changes; project and import settings are unchanged.
+
+## Tighter drop shadow - 2026-11-02
+
+User requested less softness and offset. Changed BaseLevel material and shader defaults from offset (3,3) to (2,2), and blur radius from 6 to 4.5 logical pixels. Opacity remains 28%; the 13x13 kernel and 12-pixel margins are unchanged.
+
+## Darker drop shadow - 2026-11-02
+
+At the user's request, increased BaseLevel material and shader default shadow opacity from 28% to 38%. Offset (2,2) and blur radius 4.5 remain unchanged.
+
+## Pipe testing space - 2026-11-02
+
+User requested an expanded level and static pipe tiles. TestLevel camera World Right changes from 256 to 768; World Left remains 0. Extended floor rows 13/14 from columns 0..15 to 0..47 and background width from 256 to 768. Camera thresholds, viewport, spawn, existing decorations/entity markers, and shader tuning remain unchanged. Four pipe atlas sources use full 16x16 terrain collision; no project/input/import parameters changed.
+
+## Eleven-tile stage shift - 2026-11-02
+
+User requested shifting the stage right by 11 blocks. Painted cells moved +11 columns, PlayerSpawn moved +176 pixels on X, camera World Right changed from effective default 768 to explicit 944, and eleven columns of left floor were added. Camera initial center and tracking thresholds remain unchanged. No project/import settings changed.
+
+## Lower test room - 2026-11-02
+
+User requested a one-screen lower area with its own camera that cannot be left except by pipe. Added LowerArea at (0,512), a local (128,120) camera with follow disabled and bounds 0/256, and an arrival marker at (48,208). The camera starts disabled. Painted enclosed solid terrain and added a black 256x240 background. Main camera and current player spawn remain unchanged. No project/input/import settings changed; pipe traversal is still pending.
+
+## Physics interpolation - 2026-11-02
+
+Explicit user approval: enabled physics/common/physics_interpolation in project.godot (previously absent/default false). Physics remains 60 ticks per second; no camera smoothing, Input Map, shader, or painted scene changes. Initial player placement and camera target reset clear interpolation history. Follow/boundary logic now uses authoritative camera coordinates rather than the interpolated rendered center.
+
+A short Forward+ rendered probe on an approximately 240-Hz display confirmed interpolation active, no same-tick physics-follow mismatches, and changing rendered canvas coordinates between physics ticks. This does not guarantee subjective smoothness or eliminate the 256x240 viewport's pixel stepping.

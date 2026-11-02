@@ -11,6 +11,8 @@ func make_game() -> Node:
 	camera.world_right = 768.0
 	level.find_child("PlayerSpawn", true, false).position = Vector2(-88, 208)
 	var ground := level.get_node("Layouts/GroundLayout") as TileMapLayer
+	ground.clear()
+	level.get_node("Layouts/EntityLayout").clear()
 	for x in range(-8, 48):
 		for y in [13, 14]:
 			ground.set_cell(Vector2i(x, y), 0, Vector2i.ZERO)

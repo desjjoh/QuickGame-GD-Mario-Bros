@@ -62,7 +62,7 @@ BaseLevel [CanvasGroup]
 
 BaseLevel owns all three layout layers, including ground. TestLevel supplies their TileSets and painted cells and adds Camera2D under Cameras. BaseLevel resolves its owned nodes through explicit paths: Players/PlayerSpawn, Layouts/EntityLayout, WorldObjects, and Players. Keep those paths when changing scene organization. Layouts uses an editor/runtime tool script to enforce identity local transforms on the group and its TileMapLayer children, plus 16x16 square TileSet cells. Move the level root to relocate the complete stage; individual layer offsets, rotation, and scale are reset. At readiness it orders WorldObjects then Players last; DecorationLayout stays behind gameplay. All contributing visuals use Z=0 so the CanvasGroup halo sees one combined silhouette. See [level shadow](level-shadow.md).
 
-Scene inheritance is BaseLevel -> TestLevel, BaseEntity -> BasePlayer -> Mario, and BaseEntity -> BaseBlock -> BrickBlock/QuestionBlock. Scripts follow the corresponding inheritance; concrete blocks use BaseBlock directly and QuestionBlock and BrickBlock supply shared block-state scripts. States inherit BaseState -> EntityState -> PlayerState -> Mario's concrete state scripts. Shared PlayerState lives under scripts/states/player/.
+Scene inheritance is BaseLevel -> TestLevel, BaseEntity -> BasePlayer -> Mario, and BaseEntity -> BaseBlock -> BrickBlock/QuestionBlock. AlternateBrickBlock inherits BrickBlock and overrides only its sprite texture. Scripts follow the corresponding inheritance; concrete blocks use BaseBlock directly and QuestionBlock and BrickBlock supply shared block-state scripts. States inherit BaseState -> EntityState -> PlayerState -> Mario's concrete state scripts. Shared PlayerState lives under scripts/states/player/.
 
 ## Startup and shutdown
 
@@ -90,7 +90,7 @@ Each entity plays one sound effect at a time; jump, bump, skid, and state effect
 
 ## Level content and assets
 
-TestLevel is one screen wide: ground X=0..256, top Y=208, PlayerSpawn=(40,208), and camera center=(128,120) at 1x zoom. Camera world bounds are 0/256, so this stage has no scroll room; right-only tracking remains implemented for wider levels. There is no automatic death/respawn.
+TestLevel has 944 pixels of horizontal test space: ground X=0..944, top Y=208, PlayerSpawn=(216,208), and initial camera center=(128,120) at 1x zoom. Camera world bounds are 0/944 with right-only tracking. Below the main stage, a separate enclosed 256x240 room starts at (0,512), with an arrival marker at world (48,720) and a disabled fixed camera. It has no separate background fill. Its terrain is painted into the shared GroundLayout. Pipe travel and automatic camera switching are not implemented. There is no automatic death/respawn.
 
 GroundLayout renders solid terrain directly. DecorationLayout renders collision-free bushes, hills, and clouds directly on the same 16x16 grid. EntityLayout is a collision-free authoring layer: its entity_id custom data maps through Entity Scenes to actual BaseEntity scenes under WorldObjects. It hides at runtime. Each spawned entity owns its own collision, detection, and behavior; the spawner does not impose solid collision. See [entity layout](entity-layout.md) and [question block](question-block.md).
 
