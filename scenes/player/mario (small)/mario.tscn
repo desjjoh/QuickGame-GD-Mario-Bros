@@ -90,3 +90,6 @@ sound_effect = ExtResource("13_jump_sound")
 
 [node name="Jump" parent="Actions"]
 sound_effect = ExtResource("13_jump_sound")
+
+[node name="Bonk" parent="Actions"]
+enabled = true

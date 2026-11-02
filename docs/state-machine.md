@@ -2,7 +2,7 @@
 
 Every BaseEntity scene contains a StateMachine instance. Its direct children are states. BaseEntity initializes and starts it in `_ready()` after the children and exported node references are available. Empty machines are valid; machines with states need an Initial State assigned in the Inspector.
 
-The script inheritance hierarchy is `BaseState → EntityState → PlayerState`, with MarioIdleState, MarioMoveState, MarioSlideState, and MarioJumpState as concrete specializations. The shared PlayerState script lives in `scripts/states/player/`. BasePlayer has no concrete state nodes; Mario owns Idle, Move, Slide, and Jump under `scenes/player/mario (small)/states/`. State scenes can be added later when states share meaningful child-node structure.
+The script inheritance hierarchy is `BaseState Ã¢â€ â€™ EntityState Ã¢â€ â€™ PlayerState`, with MarioIdleState, MarioMoveState, MarioSlideState, and MarioJumpState as concrete specializations. The shared PlayerState script lives in `scripts/states/player/`. BasePlayer has no concrete state nodes; Mario owns Idle, Move, Slide, and Jump under `scenes/player/mario (small)/states/`. State scenes can be added later when states share meaningful child-node structure.
 
 ## Inspect Mario
 
@@ -55,3 +55,9 @@ ControllerHandler exposes directional strengths, `input_primary`, `input_seconda
 ## Verification
 
 See [verification](verification.md) for the complete regression runner, coverage, logs, and limits. All test scenes load normal project autoloads. State tests cover ownership, routing, presentation, and terminal shutdown; gameplay tests exercise synthetic controller input through real physics callbacks.
+
+## Block hit states
+
+EntityState.receive_hit defaults to rejection. BaseBlock routes EntityHit messages to its current state. ActiveBlockState accepts a configured upward maneuver and transitions to reaction_state. BouncingBlockState rejects additional hits and owns bounce startup, advancement, and exit cleanup. Its return_state is Inactive for question blocks and Active for bricks. Question-block Inactive uses EntityState's default rejection and presentation exports without processing updates.
+
+Connect Bouncing's inherited entered signal for reaction hooks; its Enter Sound Effect setting can supply state-entry audio. bounce_completed fires once on natural completion before transition, never on shutdown/interruption. exited is a cleanup notification and can also occur on shutdown. No item spawning or extra audio is currently wired. See [question block](question-block.md).

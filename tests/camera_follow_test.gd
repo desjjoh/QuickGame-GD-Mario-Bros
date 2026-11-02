@@ -5,12 +5,12 @@ func make_game() -> Node:
 	# Scrolling needs a wide fixture, independent of the playable test-stage size.
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
 	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
-	var camera := level.get_node("Camera2D") as LevelCamera
+	var camera := level.get_node("Cameras/Camera2D") as LevelCamera
 	camera.position = Vector2(0, 120)
 	camera.world_left = -128.0
 	camera.world_right = 768.0
 	level.find_child("PlayerSpawn", true, false).position = Vector2(-88, 208)
-	var ground := level.get_node("Ground") as TileMapLayer
+	var ground := level.get_node("Layouts/GroundLayout") as TileMapLayer
 	for x in range(-8, 48):
 		for y in [13, 14]:
 			ground.set_cell(Vector2i(x, y), 0, Vector2i.ZERO)

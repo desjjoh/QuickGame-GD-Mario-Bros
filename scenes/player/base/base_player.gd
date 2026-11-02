@@ -7,6 +7,7 @@ extends BaseEntity
 @export var ceiling_bump_sound: AudioStream
 @export var ceiling_bump_speed: float = 3.75
 
+@onready var bonk_action: BonkAction = $Actions/Bonk
 @onready var body: CharacterBody2D = $Body
 @onready var collision_shape: CollisionShape2D = $Body/CollisionShape2D
 @onready var horizontal_movement: HorizontalMovementComponent = $Motion/HorizontalMovement
@@ -43,6 +44,7 @@ func move_body() -> void:
 	if corrected_landing:
 		body.velocity.x = horizontal_speed
 	if rising and body.is_on_ceiling():
+		bonk_action.deliver(self)
 		body.velocity.y = ceiling_bump_speed
 		jump_action.update(motion_values, false)
 		var sound := ceiling_bump_sound

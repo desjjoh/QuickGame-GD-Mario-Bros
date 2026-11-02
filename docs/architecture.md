@@ -11,55 +11,58 @@
 | BasePlayer | Owns the physical body, AnimationPlayer reference, movement/actions, facing, and ceiling response |
 | Mario | Supplies sprites, collision override, concrete states, animation library, and WalkAnimation component |
 | BaseBlock | Supplies a solid 16x16 body and sprite with a top-left grid origin |
-| QuestionBlock | Supplies question artwork and its autoplay animation; concrete states are deferred |
+| QuestionBlock | Owns Active/Bouncing/Inactive states, one-shot hit activation, used artwork, and a sprite bounce |
 | ControllerHandler | Samples one global controller's input intent |
 
 ## Scene composition
 
 ```text
 BaseEntity
-└── StateMachine
+\-- StateMachine
 
 BasePlayer [inherits BaseEntity]
-├── Body [CharacterBody2D]
-│   ├── CollisionShape2D
-│   └── AnimationPlayer
-├── Motion [MotionValues script]
-│   ├── HorizontalMovement
-│   ├── AirMovement
-│   ├── Gravity
-│   └── CornerCorrection
-└── Actions
-    ├── Run
-    ├── Jump
-    └── Slide
++-- Body [CharacterBody2D]
+|   +-- CollisionShape2D
+|   \-- AnimationPlayer
++-- Motion [MotionValues script]
+|   +-- HorizontalMovement
+|   +-- AirMovement
+|   +-- Gravity
+|   \-- CornerCorrection
+\-- Actions
+    +-- Run
+    +-- Jump
+    \-- Slide
 
 Mario [inherits BasePlayer]
-├── StateMachine: Idle, Move, Slide, Jump
-├── Body: small collision override, Sprite2D, walk animation library
-└── Presentation
-    └── WalkAnimation
++-- StateMachine: Idle, Move, Slide, Jump
++-- Body: small collision override, Sprite2D, walk animation library
+\-- Presentation
+    \-- WalkAnimation
 
 BaseBlock [inherits BaseEntity]
-├── Body [StaticBody2D]
-│   └── CollisionShape2D
-└── Sprite2D
++-- Body [StaticBody2D]
+|   \-- CollisionShape2D
+\-- Sprite2D
 ```
 
 Presentation is owned by Mario rather than an empty container on BasePlayer. BasePlayer owns its Body/AnimationPlayer reference; Mario supplies its animation library. Empty inherited state machines are intentional and valid for blocks and the generic player. They are extension points, not extra independently processing states.
 
 ```text
 BaseLevel [CanvasGroup]
-├── Decorations [TileMapLayer]
-├── EntityLayout [TileMapLayer; marker-only]
-├── WorldObjects [generated entities]
-└── Players
-    └── PlayerSpawn
++-- Layouts [fixed 16x16 grid]
+|   +-- DecorationLayout [TileMapLayer]
+|   +-- GroundLayout [TileMapLayer; solid terrain]
+|   \-- EntityLayout [TileMapLayer; marker-only]
++-- WorldObjects [generated entities]
++-- Players
+|   \-- PlayerSpawn
+\-- Cameras
 ```
 
-TestLevel adds Ground and Camera2D. BaseLevel resolves its owned nodes through explicit paths: Players/PlayerSpawn, EntityLayout, WorldObjects, and Players. Keep those paths when changing scene organization. At readiness it orders WorldObjects then Players last; Decorations stays behind gameplay. All contributing visuals use Z=0 so the CanvasGroup halo sees one combined silhouette. See [level shadow](level-shadow.md).
+BaseLevel owns all three layout layers, including ground. TestLevel supplies their TileSets and painted cells and adds Camera2D under Cameras. BaseLevel resolves its owned nodes through explicit paths: Players/PlayerSpawn, Layouts/EntityLayout, WorldObjects, and Players. Keep those paths when changing scene organization. Layouts uses an editor/runtime tool script to enforce identity local transforms on the group and its TileMapLayer children, plus 16x16 square TileSet cells. Move the level root to relocate the complete stage; individual layer offsets, rotation, and scale are reset. At readiness it orders WorldObjects then Players last; DecorationLayout stays behind gameplay. All contributing visuals use Z=0 so the CanvasGroup halo sees one combined silhouette. See [level shadow](level-shadow.md).
 
-Scene inheritance is BaseLevel -> TestLevel, BaseEntity -> BasePlayer -> Mario, and BaseEntity -> BaseBlock -> BrickBlock/QuestionBlock. Scripts follow the corresponding inheritance; concrete blocks currently use BaseBlock directly. States inherit BaseState -> EntityState -> PlayerState -> Mario's concrete state scripts. Shared PlayerState lives under scripts/states/player/.
+Scene inheritance is BaseLevel -> TestLevel, BaseEntity -> BasePlayer -> Mario, and BaseEntity -> BaseBlock -> BrickBlock/QuestionBlock. Scripts follow the corresponding inheritance; concrete blocks use BaseBlock directly and QuestionBlock and BrickBlock supply shared block-state scripts. States inherit BaseState -> EntityState -> PlayerState -> Mario's concrete state scripts. Shared PlayerState lives under scripts/states/player/.
 
 ## Startup and shutdown
 
@@ -89,10 +92,10 @@ Each entity plays one sound effect at a time; jump, bump, skid, and state effect
 
 TestLevel is one screen wide: ground X=0..256, top Y=208, PlayerSpawn=(40,208), and camera center=(128,120) at 1x zoom. Camera world bounds are 0/256, so this stage has no scroll room; right-only tracking remains implemented for wider levels. There is no automatic death/respawn.
 
-Ground renders solid terrain directly. Decorations renders collision-free bushes, hills, and clouds directly on the same 16x16 grid. EntityLayout is a collision-free authoring layer: its entity_id custom data maps through Entity Scenes to actual BaseEntity scenes under WorldObjects. It hides at runtime. Each spawned entity owns its own collision, detection, and behavior; the spawner does not impose solid collision. See [entity layout](entity-layout.md) and [question block](question-block.md).
+GroundLayout renders solid terrain directly. DecorationLayout renders collision-free bushes, hills, and clouds directly on the same 16x16 grid. EntityLayout is a collision-free authoring layer: its entity_id custom data maps through Entity Scenes to actual BaseEntity scenes under WorldObjects. It hides at runtime. Each spawned entity owns its own collision, detection, and behavior; the spawner does not impose solid collision. See [entity layout](entity-layout.md) and [question block](question-block.md).
 
 Environment art is theme-first under assets/Overworld (Palette 1), Underground, and Castle. Shared TileSet resources stay under assets/tileset. Player art stays under assets/player/mario (small); audio stays under assets/sfx. Runtime theme selection is deferred. See [level themes](level-themes.md).
 
 ## Verification and limits
 
-See [verification](verification.md) for the complete test command and scope. Movement remains an approximation of the reference: fixed-point arithmetic, original countdown phases, several collision probes, and update ordering are not cycle-accurate. Gameplay input represents one global controller; session values are memory-only. Enemies, rewards, block reactions, runtime themes, and respawn remain future milestones.
+See [verification](verification.md) for the complete test command and scope. Movement remains an approximation of the reference: fixed-point arithmetic, original countdown phases, several collision probes, and update ordering are not cycle-accurate. Gameplay input represents one global controller; session values are memory-only. Enemies, rewards, brick breaking, runtime themes, and respawn remain future milestones.

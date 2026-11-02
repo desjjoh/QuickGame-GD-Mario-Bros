@@ -137,3 +137,7 @@ User requested renaming the project to QuickGame-Godot2D (Super Mario Bros). Upd
 ## Platformer project identity — 2026-11-02
 
 At the user's request, application/config/name changed from QuickGame-Godot2D (Super Mario Bros) to QuickGame-Godot2D (Platformer). This supersedes the earlier display-name decision: the tutorial covers multiple games. README uses the broader identity; game-specific implementation references remain accurate. The workspace folder is unchanged. The default user:// directory follows the new display name; no saved-data migration was performed.
+
+## Shared layout grid — 2026-11-02
+
+User requested grouped, consistently aligned decoration/entity/ground layouts and explicitly required ground in BaseLevel. These are scene/script rules, not Project Settings: Layouts and its TileMapLayer children use identity local transforms; assigned TileSets use 16x16 square cells. BaseLevel now owns all three layers. Existing painted cell data, terrain collision, halo parameters, camera, Input Map, and import settings are preserved.
