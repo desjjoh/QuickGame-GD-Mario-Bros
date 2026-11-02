@@ -61,7 +61,7 @@ func run_checks() -> void:
 	GameHandler.current_level.keep_player_on_screen = false
 	player.body.global_position.x = 300
 	# This test creates its own ledge now that the playable floor is wider.
-	var ledge_floor := GameHandler.current_level.get_node("Ground") as TileMapLayer
+	var ledge_floor := GameHandler.current_level.get_node("Layouts/GroundLayout") as TileMapLayer
 	for x in range(17, 21):
 		ledge_floor.erase_cell(Vector2i(x, 13))
 		ledge_floor.erase_cell(Vector2i(x, 14))
@@ -73,7 +73,7 @@ func run_checks() -> void:
 	game = load("res://scenes/main/game.tscn").instantiate()
 	get_tree().root.add_child(game)
 	player = GameHandler.current_player
-	var ground: TileMapLayer = GameHandler.current_level.get_node("Ground")
+	var ground: TileMapLayer = GameHandler.current_level.get_node("Layouts/GroundLayout")
 	ground.set_cell(Vector2i(2, 9), 0, Vector2i.ZERO)
 	player.body.global_position.x = 40.0
 	await tick(5)

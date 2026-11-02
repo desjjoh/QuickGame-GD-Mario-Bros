@@ -2,25 +2,25 @@
 
 The initial entries were reconstructed on 2026-11-01 from this project's conversation and current files. They are not a record of exact edit times. Status distinguishes implemented choices from proposals.
 
-## D001 — 16×16 world grid and integer display scaling
+## D001 â€” 16Ã—16 world grid and integer display scaling
 
 Status: implemented.
 
-Use 16×16 tiles and sprites, a 256×240 logical viewport, and a 768×720 initial window. Render the viewport at integer scale to keep pixels consistent. The camera remains at 1× zoom. Window shapes that do not fit an integer scale can leave borders. Configuration was explicitly approved by the user. See [settings](settings.md).
+Use 16Ã—16 tiles and sprites, a 256Ã—240 logical viewport, and a 768Ã—720 initial window. Render the viewport at integer scale to keep pixels consistent. The camera remains at 1Ã— zoom. Window shapes that do not fit an integer scale can leave borders. Configuration was explicitly approved by the user. See [settings](settings.md).
 
-## D002 — Level and character inheritance
+## D002 â€” Level and character inheritance
 
 Status: implemented.
 
 TestLevel inherits BaseLevel. Mario inherits BasePlayer, which inherits BaseEntity. Each concrete character owns its concrete states; common player-state behavior lives in scripts. BasePlayer does not select Idle on behalf of every player. This replaces the earlier implementation where BasePlayer owned Idle.
 
-## D003 — Shared entity root with specialized physics children
+## D003 â€” Shared entity root with specialized physics children
 
 Status: implemented; retained for the first horizontal movement implementation (D010).
 
 BaseEntity extends Node2D so characters and non-character objects can share a scene base while using different physics children. BasePlayer has a CharacterBody2D child. The tradeoff is that entity-root position and physical-body position can diverge. A character-root approach is an alternative to discuss, not an approved migration.
 
-## D004 — Node-based state machine with inherited state scripts
+## D004 â€” Node-based state machine with inherited state scripts
 
 Status: implemented.
 
@@ -28,37 +28,37 @@ Each entity has a separate machine and state instances. Only the active state re
 
 EntityState supplies presentation settings. PlayerState supplies one Controls Enabled flag. The user explicitly removed movement/jump-specific permission flags: each concrete state decides which inputs it accepts.
 
-## D005 — Global game and controller handlers
+## D005 â€” Global game and controller handlers
 
 Status: implemented.
 
 Use approved autoloads under `scripts/handlers/`. GameHandler owns level loading and global session context. ControllerHandler supplies input intent and events; states interpret them. This creates deliberate global dependencies and currently supports one shared input source. Saved session data means in-memory data, not disk persistence.
 
-## D006 — Interactive blocks are entities
+## D006 â€” Interactive blocks are entities
 
 Status: terrain cleanup implemented; static entities planned.
 
 Brick and question-block textures are reserved for future static entities. Their TileSet entries and placed block cells were removed while retaining the image assets. The floor remains tiled terrain.
 
-## D007 — Explicit application and level lifecycle
+## D007 â€” Explicit application and level lifecycle
 
 Status: proposed, not implemented.
 
 The discussed initialize/start/stop/dispose contract should separate node readiness from deliberate gameplay activation. Current code still spawns and starts machines through `_ready()`. Hook names, failure behavior, shutdown order, and any common GameScene base must be settled before implementing that contract.
 
-## D008 — Documentation accompanies every change
+## D008 â€” Documentation accompanies every change
 
 Status: superseded by D009 on 2026-11-01.
 
 Keep current implementation guides, architectural decisions, settings records, and a dated change history. Update them alongside each change. Preserve previous decisions when superseded and record the replacement. Repository instructions are in `AGENTS.md`.
 
-## D009 — Document significant work rather than every edit
+## D009 â€” Document significant work rather than every edit
 
 Status: adopted 2026-11-01 at the user's clarification; supersedes D008.
 
 Update documentation for important milestones, major implementations, architectural decisions, and deliberate settings changes. Routine edits, small fixes, and internal refactors need no individual documentation/history entry unless they materially change documented behavior. Keep current guides accurate and group significant work into meaningful history entries. Settings changes still require prior approval and a settings record.
 
-## D010 — State-driven composition actions and horizontal movement
+## D010 â€” State-driven composition actions and horizontal movement
 
 Status: implemented 2026-11-01.
 
@@ -70,7 +70,7 @@ Retain the existing child-body arrangement for this scoped change; use Body for 
 
 Common presentation options move onto BaseState, including enter/exit sounds, optional exit animation, and lifecycle signals. Machine-owned activation/deactivation wrappers preserve these effects when hooks are overridden. Custom actions use hooks or signals; exit animations do not delay transitions. Actual animation and sound resources remain unassigned.
 
-## D011 — Shared motion values, Run modifier, and static Idle
+## D011 â€” Shared motion values, Run modifier, and static Idle
 
 Status: implemented 2026-11-01; extends D010.
 
@@ -78,7 +78,7 @@ Replace action-owned tuning with per-player MotionValues. Actions and future lev
 
 Idle uses a static sprite pose, not an animation. Shared state options can stop playback and select a frame. Physics fidelity is now an explicit goal; [movement](movement.md) records initial coefficients, source provenance, and remaining differences. Gravity/jump values are deferred until their context-dependent rules are implemented rather than introducing an unused universal gravity constant.
 
-## D012 — Slide as a grounded reversal state
+## D012 â€” Slide as a grounded reversal state
 
 Status: implemented 2026-11-01; extends D010/D011.
 
@@ -88,7 +88,7 @@ Correction on 2026-11-01: release-to-cancel was a bug and has been replaced. Neu
 
 The selected parameters and remaining fidelity boundaries are documented in movement.md. Keep presentation independent through the standard state hooks. Current Slide uses the existing static frame without new art. Do not claim exact original physics until update-order and fixed-point trace comparisons exist.
 
-## D013 — One velocity-driven walk/run animation
+## D013 â€” One velocity-driven walk/run animation
 
 Status: implemented 2026-11-01.
 
@@ -96,7 +96,7 @@ Use the user's three separate walking PNGs in one external Animation resource, a
 
 The movement guide records source-based cadence bands and timer-phase differences. No movement coefficients, input bindings, project settings, or custom import settings change for this milestone.
 
-## D014 — Profile-based Jump, Air, and gravity weight
+## D014 â€” Profile-based Jump, Air, and gravity weight
 
 Status: implemented 2026-11-01.
 
@@ -104,13 +104,13 @@ Add reusable Jump and Gravity action nodes and per-player editable gravity, weig
 
 Weight defaults to one and multiplies gravitational acceleration only. It is a gameplay extension, not a simulation of physical mass or an original-game feature. Jump holds a temporary gravity profile until Air exits; release selects stronger gravity after the minimum rise. Full original air control, fixed-point trajectories, buffering, coyote time, and respawning remain outside this implementation. See jumping.md for provenance and verification.
 
-## D015 — Independent air control preserves skid-jump context
+## D015 â€” Independent air control preserves skid-jump context
 
 Status: implemented 2026-11-01; extends D014.
 
 Capture grounded facing and speed/history before removing Slide, then use AirMovement's own modifier. Braking depends on facing versus travel, not just current input versus velocity. Neutral air input coasts; held reversal continues braking without a grounded skid cutoff. Air cleanup reveals existing ground/level values. Fast-history capture remains a documented proxy rather than a full original latch implementation. No project/input/import settings changed.
 
-## D016 — Component folders reflect responsibility
+## D016 â€” Component folders reflect responsibility
 
 Status: implemented 2026-11-01; replaces the earlier broad Actions grouping.
 
@@ -120,43 +120,63 @@ Separate ongoing Motion behavior (HorizontalMovement, AirMovement, Gravity), sta
 
 These are study resources, not specifications or claims that our architecture exactly matches them:
 
-- [The Shaggy Dev: Godot 4 state machines](https://shaggydev.com/2023/10/08/godot-4-state-machines/) — similar node-based hooks and transitions.
-- [GDQuest: finite state machines](https://www.gdquest.com/tutorial/godot/design-patterns/finite-state-machine/) — alternatives and tradeoffs.
-- [Celeste's selected public source](https://github.com/NoelFB/Celeste) — platformer behavior in C#/Monocle, not a complete Godot project.
+- [The Shaggy Dev: Godot 4 state machines](https://shaggydev.com/2023/10/08/godot-4-state-machines/) â€” similar node-based hooks and transitions.
+- [GDQuest: finite state machines](https://www.gdquest.com/tutorial/godot/design-patterns/finite-state-machine/) â€” alternatives and tradeoffs.
+- [Celeste's selected public source](https://github.com/NoelFB/Celeste) â€” platformer behavior in C#/Monocle, not a complete Godot project.
 
-## 2026-11-01 — CanvasGroup for the level shadow trial
+## 2026-11-01 â€” CanvasGroup for the level shadow trial
 
 Implemented CanvasGroup on BaseLevel to combine all normal child CanvasItems for a single silhouette without a second viewport or reparenting gameplay nodes. This preserves spawning paths and the current camera/physics world. The backdrop stays outside the group; opaque full-screen children, CanvasLayers, clipping, and other screen-reading effects require care. See level-shadow.md. Revisit the composition if those rendering requirements grow.
 
 
-## Terminal shutdown and current scene ownership — 2026-11-01
+## Terminal shutdown and current scene ownership â€” 2026-11-01
 
 Implemented the shutdown portion of D007; separate activation/loading/disposal phases remain proposed. GameHandler shuts down the old level before removing it. BaseLevel shuts down descendant entities. BaseEntity disconnects callbacks, deactivates its state without exit presentation, and stops playback/updates. Shutdown is terminal and idempotent; ordinary machine stop/start remains restartable. Tree-exit cleanup is a fallback, not a substitute for deliberate shutdown before removal. Custom exit hooks own cleanup; standard exit effects are suppressed.
 
 Superseding the earlier sibling data-node placement, Motion now carries MotionValues directly. Mario states refresh Run before grounded takeoff checks. Current architecture.md and state-machine.md describe the implemented contracts.
 
 
-## TileMap-authored entity generation — 2026-11-01
+## TileMap-authored entity generation â€” 2026-11-01
 
 Implemented a generic EntityLayout marker layer and per-level ID-to-scene dictionary. Generate BaseEntity scenes once before player startup rather than requiring manual placement. This supports solid blocks, detection-only entities, and decorations without forcing collision into the spawner. Markers remain available for editor painting and are hidden at runtime. Entities retain lifecycle and shadow ownership. Activation-on-demand and streaming are deferred. See entity-layout.md.
 
 
-## Theme folders before theme selection — 2026-11-02
+## Theme folders before theme selection â€” 2026-11-02
 
 Implemented overworld/underground/castle artwork folders beneath tileset, interactibles, and enemies. Current environment artwork is overworld/palette 1. Shared TileSet definitions remain outside theme folders, and gameplay scenes/scripts remain shared. Runtime theme selection and theme-specific texture/animation binding are deferred for discussion; current resources explicitly reference overworld art. See level-themes.md.
 
 
-## Theme-first artwork organization — 2026-11-02
+## Theme-first artwork organization â€” 2026-11-02
 
 Supersedes the earlier theme-folder decision's category-first layout at the user's request. Group tileset/enemies/interactibles beneath Overworld (Palette 1), Underground, and Castle. Shared TileSet definitions remain under assets/tileset; runtime theme selection remains deferred. See level-themes.md.
 
 
-## Jump presentation versus passive falling — 2026-11-02
+## Jump presentation versus passive falling â€” 2026-11-02
 
 Supersedes the shared Air-state design: Jump starts from a successful Jump action and persists until landing. Move covers ground travel and passive falling, sharing air physics components with Jump but retaining walking presentation. Idle/Slide fall into Move. Physical floor contact remains authoritative for jump permission and landing; state membership alone does not grant floor contact.
 
 
-## Base-scene ownership cleanup — 2026-11-02
+## Base-scene ownership cleanup â€” 2026-11-02
 
 BasePlayer owns shared Body/AnimationPlayer, Motion, and Actions; Mario owns the Presentation container and WalkAnimation. Empty inherited state machines remain valid future behavior extension points. BaseLevel uses explicit owned node paths instead of recursive name discovery; preserve those contracts when regrouping scenes. This supersedes the earlier temporary support for arbitrary spawn/layout nesting. No gameplay or visual tuning changed.
 
+
+## 2026-11-02 â€” Shared level layout grid
+
+BaseLevel owns a Layouts group containing DecorationLayout, GroundLayout, and EntityLayout. Ground is a shared base responsibility; concrete levels assign TileSets and paint cells. The group uses a tool script to reset local transforms and require 16x16 square cells in the editor and runtime. This favors consistent tile/entity alignment over independent layer transforms. Move the level root to relocate the whole stage. Grid enforcement changes TileSet cell dimensions/shape, not atlas texture regions or painted cell data; shared TileSets must follow this contract.
+
+## 2026-11-02 — Offensive hits and two-state block activation
+
+Question blocks use the existing FSM with Active and Inactive. Offensive actions send EntityHit context; blocks decide acceptance in their current state. Mario enables the reusable Bonk action; BasePlayer leaves it disabled by default. Inactive entry owns the bounce, preventing unrelated Active exits from triggering reactions. The used sprite appears immediately and duplicate hits are rejected throughout the reaction. Bounce moves only presentation: stable collision is an intentional simplification of the reference's temporary moving block/metatile handling. No item system or brick-breaking rules are introduced.
+
+## 2026-11-02 — Explicit block reaction phase
+
+Supersedes the earlier two-state question-block decision: QuestionBlock now uses Active -> Bouncing -> Inactive. The reusable BouncingBlockState owns reaction processing, inherited entry presentation/events, natural-completion notification, and cleanup. Bricks use the same Bouncing script but return to Active. Inactive has no bounce responsibility. The used sprite still appears as soon as a question block accepts a hit. Future item spawning and reaction effects can attach to Bouncing entry; they are not implemented here.
+
+## 2026-11-02 - Planned per-cell entity editor
+
+Status: planned; not implemented. The user chose a custom editor tool for configuring individual painted entity cells (option 2), rather than requiring a separate marker tile for every contents variant.
+
+Intended workflow: paint a question block in EntityLayout, select that cell, and choose its contents through an editor dropdown. Store the configuration with the level, keyed by grid coordinate; TileSet custom data continues identifying the entity type. The spawner will apply per-cell configuration before adding the entity to the scene tree. This allows identical question-block markers to have different contents without changing their shared TileSet definition.
+
+Before implementation, define defaults, validation, undo/redo, and what happens to configuration when cells are erased, replaced, or moved. The editor tool, per-cell storage, and item spawning remain future work.

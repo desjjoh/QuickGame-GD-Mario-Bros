@@ -304,3 +304,40 @@ Verification: all fourteen regression scenes passed across the final checks. Bot
 
 - Renamed the project display title and README to QuickGame-Godot2D (Platformer), superseding the earlier game-specific title. Updated the introduction to explain the multi-game tutorial scope. Retained historical names and game-specific technical attribution. Workspace folder, resource paths, and gameplay are unchanged.
 - Verification: checked the configured display name and README identity on disk. Gameplay tests were not run for this metadata/documentation change.
+
+## 2026-11-02 — Inherited level layouts and enforced grid
+
+- Grouped all authoring layers under BaseLevel/Layouts: DecorationLayout, GroundLayout, and EntityLayout. Ground now belongs to BaseLevel; TestLevel supplies TileSets and painted cells. Updated spawning paths and regression fixtures for the inherited hierarchy.
+- Added level_layouts.gd as an editor/runtime tool script enforcing identity local transforms and 16x16 square TileSet cells. Independent layout transforms are reset. The whole stage can still be positioned through its level root. Existing collision, camera, halo, project settings, Input Map, and import settings are unchanged.
+- Verified all three painted tile_map_data byte arrays are unchanged. The existing 15 regression scenes passed. The new grid test initially failed to parse due to a missing explicit type annotation; after correction its focused rerun passed without engine errors or warnings. It verifies inherited ground, transform/cell-size/shape correction, preserved cells, matching grid coordinates, and aligned entity spawning. Interactive editor behavior was not manually inspected.
+- Updated architecture, entity-layout, verification, settings, and decisions documentation.
+
+## 2026-11-02 — Question-block activation and reusable block states
+
+- Added EntityHit context and a reusable Bonk action, disabled on BasePlayer and enabled by Mario. Rising ceiling contacts deliver one center-head-selected hit through BaseBlock to its current EntityState. The existing player ceiling response retains sound ownership. Bricks keep their empty FSM and existing solid behavior.
+- QuestionBlock now supplies Active and Inactive nodes to its inherited machine. Active owns the palette loop and hit acceptance; Inactive immediately rejects further hits, selects the supplied question-block-4.png used sprite, and starts the shared visual bounce on entry. Shutdown/exit restores the sprite origin. No rewards, items, breaking, or new input bindings were added.
+- BlockBounce uses reference-derived initial speed/gravity (-120 px/s and 1125 px/s squared at nominal 60 Hz), while deliberately retaining fixed collision rather than the original temporary metatile/moving-object behavior. See question-block.md for source routines and fidelity limits. No existing project settings, import parameters, painted cells, camera, or halo tuning were changed; the newly supplied texture was imported with defaults.
+- Verification: editor import completed; all 16 regression scenes passed without engine errors or warnings. Expanded question-block coverage includes real jump contact, wrong-maneuver/direction rejection, used presentation, visual motion with fixed collision, repeated-hit rejection, neighboring-block independence, and shutdown during the bounce. Interactive visual/audio playtesting remains to be done.
+
+## 2026-11-02 — Repeatable brick bounce
+
+- BrickBlock now configures the shared block-state scripts as Active -> Bouncing -> Active. The shared reaction state optionally returns to a configured return_state after the bounce; QuestionBlock leaves it unset and stays Inactive. Renamed Active's transition export to reaction_state to support both uses.
+- Bricks accept upward Bonk hits, reject further hits during the reaction, retain their artwork and fixed solid collider, and can bounce again afterward. Strength does not yet select breaking behavior. No terrain painting, project/input/import settings, sound ownership, or motion values changed.
+- Verification: all 16 regression scenes passed without engine errors or warnings. Expanded brick tests cover two real jump contacts on the same brick, visual movement with fixed collision, invalid and repeated-hit rejection, strong hits still bouncing, and shutdown during a bounce. Question-block one-shot behavior also passed. Updated current state, architecture, question-block, and verification guides.
+
+## 2026-11-02 — Explicit question-block Bouncing state
+
+- Split question blocks into Active -> Bouncing -> Inactive. Renamed the shared reaction script from inactive_block_state.gd to bouncing_block_state.gd, preserving its UID. Bricks continue using it for Active -> Bouncing -> Active. Inactive uses the generic EntityState and disables processing; used artwork timing remains immediate on accepted hit.
+- Bouncing exposes inherited entry/exit signals and presentation settings plus a one-shot bounce_completed signal on natural completion. Interruption/shutdown restores presentation without completion. No items or additional audio are spawned.
+- Verification: focused question_block_test and block_test passed without engine errors or warnings. Question-block coverage now checks ordered Bouncing/Inactive transitions, one entry/completion event, rejection during Bouncing, and no completion on interrupted shutdown. The full regression suite was not rerun for this focused state change. Updated current guides and appended the replacement decision.
+
+## 2026-11-02 — Bonk edge-contact correction
+
+- Reproduced an underside collision that failed activation when Mario's center was outside the brick. Removed the center-inside-tile rejection: Bonk now selects one actual ceiling-contact block by nearest center, with a right-block tie break. Side-only contacts and corrected-away corners remain excluded; movement/corner-correction values are unchanged.
+- The new bonk_contact_test failed at the left edge before the fix and passed afterward, covering both edges, a seam, an escaped corner, and horizontal side contact. Focused brick, question-block, and corner-correction regressions also passed without engine errors or warnings. The full 17-scene suite was not rerun. Updated the current hit-selection guide and verification inventory.
+
+## 2026-11-02 — Reference-based Bonk seam selection
+
+- Inspected the reference HeadChk, BlockBufferColli_Head, BlockBuffer_X_Adder, and BlockBufferCollision routines: the head probe uses sprite-left +8 to select one tile. Replaced contact-ranking as the primary selector with a short center-head upward ray after an actual ceiling collision. Exact seams select the right tile; a used block/solid under the probe cannot redirect activation to an active neighbor.
+- Retained contact ranking only when the probe finds no solid, preserving the prior edge-contact fix. This fallback and continuous Godot collision remain explicit adaptations; original fixed-point timing and global BlockBounceTimer behavior are not reproduced. Source: https://gist.github.com/1wErt3r/4048722 .
+- Verification: expanded bonk_contact_test checks the actual block selected left of, at, and right of a seam, plus used-neighbor rejection, isolated edges, corner escape, and side contacts. Focused Bonk, brick, question-block, and corner-correction tests passed without engine errors or warnings. Physics fixture cleanup now waits a frame between trials. Full regression suite not rerun. Updated current behavior and verification guides.

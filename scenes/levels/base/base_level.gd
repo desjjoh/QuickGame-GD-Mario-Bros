@@ -15,7 +15,7 @@ var _layout_spawned: bool = false
 
 @onready var player_spawn: Marker2D = $Players/PlayerSpawn
 @onready var players: Node2D = $Players
-@onready var entity_layout: TileMapLayer = $EntityLayout
+@onready var entity_layout: TileMapLayer = $Layouts/EntityLayout
 @onready var world_objects: Node2D = $WorldObjects
 
 

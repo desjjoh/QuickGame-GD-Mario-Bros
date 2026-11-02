@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b4k50e7vfpdc6" path="res://scenes/levels/base/base_level.gd" id="1_script"]
 [ext_resource type="Shader" uid="uid://cpscldbgpm4tf" path="res://scenes/levels/base/level_shadow.gdshader" id="2_shadow"]
+[ext_resource type="Script" uid="uid://bqgun4j1a4fiw" path="res://scenes/levels/base/level_layouts.gd" id="3_layouts"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_shadow"]
 shader = ExtResource("2_shadow")
@@ -16,18 +17,27 @@ fit_margin = 8.0
 clear_margin = 8.0
 script = ExtResource("1_script")
 
-[node name="Decorations" type="TileMapLayer" parent="."]
+[node name="Layouts" type="Node2D" parent="." unique_id=892449484]
+script = ExtResource("3_layouts")
+
+[node name="DecorationLayout" type="TileMapLayer" parent="Layouts" unique_id=1660503958]
 texture_filter = 1
 collision_enabled = false
 navigation_enabled = false
 
-[node name="EntityLayout" type="TileMapLayer" parent="." unique_id=79489859]
+[node name="GroundLayout" type="TileMapLayer" parent="Layouts" unique_id=929630628]
+texture_filter = 1
+
+[node name="EntityLayout" type="TileMapLayer" parent="Layouts" unique_id=79489859]
 collision_enabled = false
 navigation_enabled = false
 
 [node name="WorldObjects" type="Node2D" parent="." unique_id=1145986567]
 
+[node name="Enemies" type="Node2D" parent="." unique_id=936535126]
+
 [node name="Players" type="Node2D" parent="." unique_id=1625753015]
 
 [node name="PlayerSpawn" type="Marker2D" parent="Players" unique_id=321075723]
 
+[node name="Cameras" type="Node2D" parent="." unique_id=1341731770]
