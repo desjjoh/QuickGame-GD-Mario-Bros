@@ -4,7 +4,8 @@ extends Node
 func _ready() -> void:
 	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
 	level.player_scene = null
-	var layouts := level.get_node("Layouts")
+	level.get_node("Areas/MainArea").apply_theme()
+	var layouts := level.get_node("Areas/MainArea/Layouts")
 	var painted: Dictionary = {}
 	for layer in layouts.get_children():
 		painted[layer.name] = layer.tile_map_data.duplicate()
@@ -30,7 +31,7 @@ func _ready() -> void:
 		assert(entity.position.y == snappedf(entity.position.y, 16))
 	level.free()
 	var base: Node = load("res://scenes/levels/base/base_level.tscn").instantiate()
-	assert(base.get_node("Layouts/GroundLayout") is TileMapLayer)
+	assert(base.get_node("Areas/MainArea/Layouts/GroundLayout") is TileMapLayer)
 	base.free()
 	print("PASS: inherited layouts share a fixed grid, preserve cells, and align spawned entities.")
 	get_tree().quit()

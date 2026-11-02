@@ -28,13 +28,15 @@ signal exited
 @export var physics_updates_enabled: bool = true
 @export var input_enabled: bool = true
 
+var _enter_audio: AudioStreamPlayer2D = null
+
 var entity: BaseEntity
 var state_machine: EntityStateMachine
 
 
 func activate() -> void:
 	apply_presentation()
-	entity.play_sound_effect(enter_sound_effect)
+	_enter_audio = entity.play_sound_effect(enter_sound_effect)
 	enter()
 	entered.emit()
 
@@ -52,7 +54,7 @@ func apply_presentation() -> void:
 		entity.animation_player.stop(true)
 	if entity.sprite != null:
 		if sprite_texture != null:
-			entity.sprite.texture = sprite_texture
+			entity.sprite.texture = entity.resolve_texture(sprite_texture)
 		if sprite_frame >= 0 and sprite_frame < entity.sprite.hframes * entity.sprite.vframes:
 			entity.sprite.frame = sprite_frame
 		entity.sprite.visible = sprite_visible

@@ -42,3 +42,13 @@ func follow_target(target: CharacterBody2D) -> void:
 	var next_left := clampf(left + advance, world_left, maxf(world_left, world_right - width))
 	global_position.x = next_left + width / 2.0
 	force_update_scroll()
+
+
+func snap_to_arrival(target: CharacterBody2D) -> void:
+	# Arrival at another endpoint explicitly resets right-only camera history.
+	if follow_enabled:
+		var width := get_viewport_rect().size.x / zoom.x
+		var left := clampf(target.global_position.x - target_origin_offset - full_speed_start,
+			world_left, maxf(world_left, world_right - width))
+		global_position.x = left + width / 2.0
+	reset_target(target)

@@ -175,3 +175,25 @@ User requested a one-screen lower area with its own camera that cannot be left e
 Explicit user approval: enabled physics/common/physics_interpolation in project.godot (previously absent/default false). Physics remains 60 ticks per second; no camera smoothing, Input Map, shader, or painted scene changes. Initial player placement and camera target reset clear interpolation history. Follow/boundary logic now uses authoritative camera coordinates rather than the interpolated rendered center.
 
 A short Forward+ rendered probe on an approximately 240-Hz display confirmed interpolation active, no same-tick physics-follow mismatches, and changing rendered canvas coordinates between physics ticks. This does not guarantee subjective smoothness or eliminate the 256x240 viewport's pixel stepping.
+
+## Area theme setup - 2026-11-02
+
+User requested area themes using the supplied palette artwork. MainArea selects Overworld; LowerArea selects Underground. Each area now owns its own grid layers, WorldObjects, Arrival, and Camera2D. Underground ground/brick/alternate-brick art replaces matching Overworld textures; missing art falls back unchanged. No project settings, Input Map, import parameters, physics values, shader tuning, or background colors changed.
+
+Normalized LowerArea's origin from (720,240) to (464,384), converted its painted cells to local coordinates, changed Camera2D's local position from (-128,264) to (128,120), and Arrival from (-224,192) to (32,48). All their world positions remain unchanged. The fixed camera's bounds now correctly match its world view at 464/720, replacing stale 0/256 bounds. Main camera remains enabled; LowerArea remains explicitly disabled. Additional area cameras must be disabled until selected; BaseArea otherwise uses Godot's enabled camera default.
+
+## Paintable one-way pipe entrance - 2026-11-02
+
+User requested a paintable pipe entity leading to the second area, deferring return travel. Added EntityLayout source 3 in both theme marker sets and a TestLevel entity mapping. Pipe cap collision is 32x16; centered entry tolerance is 4 horizontal pixels and 1 vertical pixel, with grounded Down input required. BaseLevel switches the selected area camera and resets interpolation during deferred transfer. No project/Input Map/import settings or existing painted cells changed. Existing ui_down/ui_up actions are read through ControllerHandler.
+
+## Full 2x2 pipe stamp and occlusion - 2026-11-02
+
+User requested complete 2x2 pipe painting and foreground coverage for future descent. Pipe collision changed from 32x16 centered (16,8) to 32x32 centered (16,16); four sprites fill the same footprint. EntityLayout source 3 retains its ID but now previews a 2x2 atlas region anchored at the top-left. Added ForegroundObjects after Players, keeping pipe artwork at Z=0 in the existing shadow group. No project settings or existing import parameters changed; the newly generated preview PNG was imported with defaults. Existing painted anchors remain unchanged and now display the larger pipe.
+
+## Named pipe endpoints and route authoring - 2026-11-02
+
+User requested multiple pipe destinations before animations. BaseArea's existing Arrival marker now uses AreaEndpoint with endpoint_id arrival; its position is unchanged. Added an Endpoints container and TestLevel MainArea markers near_start=(48,208), near_end=(880,208). Exit Direction is metadata for future animation, not a new input or movement rule. Added per-area Pipe Routes resources keyed by marker cell, plus a Destination Endpoint Id export on PipeEntrance. Existing pipes default to lower/arrival. No project/Input Map/import parameters, existing painted cells, arrival positions, camera thresholds, or shader tuning changed. Explicit warp arrivals may now reposition scrolling cameras within their existing bounds.
+
+## Pipe entry animation and sound - 2026-11-02
+
+User requested entry animation/transition and supplied smb_pipe.wav. Mario now owns PipeEnter and assigns it through BasePlayer's exported transition-state reference. Default Entry Speed is 60 pixels/second and Entry Duration is 0.8 seconds, based on reference one-pixel/frame motion and a 48-frame timer. Pipe entry temporarily suspends player collision/control and source camera updates; exit/cancellation restores them. The sound uses a nonlooping runtime WAV copy; no project/Input Map/import parameters or existing painted routes/cells were changed. Destination emergence and screen fades remain unimplemented.

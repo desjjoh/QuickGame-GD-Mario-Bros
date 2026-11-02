@@ -9,6 +9,8 @@ func _ready() -> void:
 	layout.set_cell(Vector2i(4, 9), 1, Vector2i.ZERO)
 	layout.set_cell(Vector2i(6, 9), 1, Vector2i.ZERO)
 	var fixture_scene := PackedScene.new()
+	for area in fixture.get_node("Areas").get_children():
+		fixture.set_editable_instance(area, true)
 	assert(fixture_scene.pack(fixture) == OK)
 	fixture.free()
 	game.initial_level = fixture_scene

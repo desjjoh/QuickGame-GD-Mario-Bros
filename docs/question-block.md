@@ -30,6 +30,6 @@ Bouncing inherits BaseState.entered and exited signals plus Enter Sound Effect a
 
 ## Editing and verification
 
-Paint question markers in TestLevel/Layouts/EntityLayout using source 1, entity_id question_block. The level's Entity Scenes dictionary maps this ID to QuestionBlock. Existing painted cells are preserved; tests create independent fixtures.
+Paint question markers in TestLevel/Areas/MainArea/Layouts/EntityLayout using source 1, entity_id question_block. The level's Entity Scenes dictionary maps this ID to QuestionBlock. Existing painted cells are preserved; tests create independent fixtures.
 
 question_block_test verifies palette timings and loop wrap, real Mario jump-to-block activation, invalid-hit rejection, ordered Active -> Bouncing -> Inactive transitions, entry/completion event counts, one-time activation, used appearance, sprite bounce with fixed collision, independence of neighboring blocks, and cleanup during a bounce. Headless checks do not replace visual/audio playtesting.

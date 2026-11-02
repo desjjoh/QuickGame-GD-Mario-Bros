@@ -7,12 +7,14 @@ func _ready() -> void:
 		[79.5, true, true], [80.0, true, true], [80.5, true, true], [62.0, false, false], [80.5, true, false, true]]:
 		var game := load("res://scenes/main/game.tscn").instantiate() as Node
 		var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
-		var layout := fixture.get_node("Layouts/EntityLayout") as TileMapLayer
+		var layout := fixture.get_node("Areas/MainArea/Layouts/EntityLayout") as TileMapLayer
 		layout.clear()
 		layout.set_cell(Vector2i(4, 9), 0, Vector2i.ZERO)
 		if trial[1]:
 			layout.set_cell(Vector2i(5, 9), 1 if trial.size() > 3 else 0, Vector2i.ZERO)
 		var packed := PackedScene.new()
+		for area in fixture.get_node("Areas").get_children():
+			fixture.set_editable_instance(area, true)
 		assert(packed.pack(fixture) == OK)
 		fixture.free()
 		game.initial_level = packed

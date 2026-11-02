@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="AreaTheme" format=3]
+[ext_resource type="Script" path="res://scripts/themes/area_theme.gd" id="1"]
+[ext_resource type="TileSet" path="res://assets/tileset/underground/terrain.tres" id="2"]
+[ext_resource type="TileSet" path="res://assets/tileset/decorations.tres" id="3"]
+[ext_resource type="TileSet" path="res://assets/tileset/underground/entity_layout.tres" id="4"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/blocks/brick.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/blocks/brick-alternate.png" id="6"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Underground"
+terrain = ExtResource("2")
+decorations = ExtResource("3")
+entity_markers = ExtResource("4")
+texture_overrides = Dictionary[String, Texture2D]({
+"res://assets/Overworld (Palette 1)/interactibles/blocks/brick.png": ExtResource("5"),
+"res://assets/Overworld (Palette 1)/interactibles/blocks/brick-alternate.png": ExtResource("6")
+})

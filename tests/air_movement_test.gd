@@ -28,13 +28,15 @@ func run_checks() -> void:
 		for run_pressed in [false, true]:
 			var trial: Node = load("res://scenes/main/game.tscn").instantiate()
 			var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
-			fixture.get_node("Layouts/EntityLayout").clear()
-			var floor := fixture.get_node("Layouts/GroundLayout") as TileMapLayer
+			fixture.get_node("Areas/MainArea/Layouts/EntityLayout").clear()
+			var floor := fixture.get_node("Areas/MainArea/Layouts/GroundLayout") as TileMapLayer
 			floor.clear()
 			for x in range(16):
 				floor.set_cell(Vector2i(x,13),0,Vector2i.ZERO)
 			fixture.get_node("Players/PlayerSpawn").position = Vector2(40,208)
 			var packed := PackedScene.new()
+			for area in fixture.get_node("Areas").get_children():
+				fixture.set_editable_instance(area, true)
 			assert(packed.pack(fixture) == OK)
 			fixture.free()
 			trial.initial_level = packed

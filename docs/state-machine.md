@@ -61,3 +61,7 @@ See [verification](verification.md) for the complete regression runner, coverage
 EntityState.receive_hit defaults to rejection. BaseBlock routes EntityHit messages to its current state. ActiveBlockState accepts a configured upward maneuver and transitions to reaction_state. BouncingBlockState rejects additional hits and owns bounce startup, advancement, and exit cleanup. Its return_state is Inactive for question blocks and Active for bricks. Question-block Inactive uses EntityState's default rejection and presentation exports without processing updates.
 
 Connect Bouncing's inherited entered signal for reaction hooks; its Enter Sound Effect setting can supply state-entry audio. bounce_completed fires once on natural completion before transition, never on shutdown/interruption. exited is a cleanup notification and can also occur on shutdown. No item spawning or extra audio is currently wired. See [question block](question-block.md).
+
+## Controlled pipe entry
+
+Mario owns PipeEnter using the shared PlayerPipeEnterState script; BasePlayer only exports the reference. The state replaces ordinary movement with a controlled descent and disables controls. BaseLevel reserves and validates the route, freezes the source camera/clamp, then commits a deferred handoff on descent_finished. State exit restores collision/visibility; uncommitted exit also restores position and stops its entry audio. BaseState retains its entry audio handle for this ownership-sensitive cleanup. See [pipes](pipes.md#entry-animation-and-sound).

@@ -14,7 +14,7 @@ func _ready() -> void:
 			var level := GameHandler.current_level
 			level.keep_player_on_screen = false
 			(get_viewport().get_camera_2d() as LevelCamera).follow_enabled = false
-			var ground := level.get_node("Layouts/GroundLayout") as TileMapLayer
+			var ground := level.get_node("Areas/MainArea/Layouts/GroundLayout") as TileMapLayer
 			for y in [13, 14]:
 				ground.erase_cell(Vector2i(6, y))
 			var player := level.player
@@ -42,7 +42,7 @@ func _ready() -> void:
 	add_child(wide_game)
 	var wide_level := GameHandler.current_level
 	wide_level.keep_player_on_screen = false
-	var wide_ground := wide_level.get_node("Layouts/GroundLayout") as TileMapLayer
+	var wide_ground := wide_level.get_node("Areas/MainArea/Layouts/GroundLayout") as TileMapLayer
 	for x in [6, 7]:
 		for y in [13, 14]:
 			wide_ground.erase_cell(Vector2i(x, y))

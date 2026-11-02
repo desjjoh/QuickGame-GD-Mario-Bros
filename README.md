@@ -17,6 +17,8 @@ Press the opposite direction while moving to skid. Slide preserves momentum and 
 | Reference | Purpose |
 | --- | --- |
 | [Architecture](docs/architecture.md) | Current ownership, scene hierarchy, and startup flow |
+| [Area themes](docs/level-themes.md) | Area-owned layouts, palette selection, compatible TileSets, and artwork fallback |
+| [Pipes](docs/pipes.md) | Paintable entrance, named endpoint routing, camera switching, and current limitations |
 | [State machine](docs/state-machine.md) | State hooks, presentation, controls, and verification |
 | [Movement](docs/movement.md) | Shared motion values, run modifiers, source conversions, and fidelity limits |
 | [Jumping](docs/jumping.md) | Jump state, passive falling in Move, variable jump height, gravity, weight, and takeoff profiles |
@@ -31,3 +33,9 @@ Documentation records important milestones, major implementations, architectural
 
 Run all regression scenes with ./scripts/run_tests.ps1 -GodotPath 'C:\path\to\Godot_console.exe'. See [verification](docs/verification.md) for coverage and limits.
 
+
+## Area artwork
+
+TestLevel/Areas/MainArea selects Overworld and Areas/LowerArea selects Underground. Paint through the chosen area's Layouts group. Underground currently supplies ground and both brick textures; missing variants retain Overworld artwork. Area themes reuse the existing entity scenes and behaviors. See [area themes](docs/level-themes.md) for configuration.
+
+Paint Pipe entrance (2x2) in an area's EntityLayout, stand centered on it, and hold Down to teleport to LowerArea. Configure return or alternate routes through each area's Pipe Routes array and named Endpoints. Entry descends behind the pipe with sound before the camera handoff; exit animation remains unimplemented. See [pipes](docs/pipes.md).
