@@ -1,0 +1,30 @@
+[gd_scene format=3]
+[ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="1"]
+[ext_resource type="Script" path="res://scenes/entities/pipes/pipe_entrance.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-top-1.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-top-2.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-1.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-2.png" id="6"]
+[sub_resource type="RectangleShape2D" id="shape"]
+size = Vector2(32, 32)
+[node name="PipeEntrance" node_paths=PackedStringArray("sprite") instance=ExtResource("1")]
+script = ExtResource("2")
+texture_filter = 1
+sprite = NodePath("Visuals/TopLeft")
+[node name="Visuals" type="Node2D" parent="."]
+[node name="TopLeft" type="Sprite2D" parent="Visuals"]
+position = Vector2(8, 8)
+texture = ExtResource("3")
+[node name="TopRight" type="Sprite2D" parent="Visuals"]
+position = Vector2(24, 8)
+texture = ExtResource("4")
+[node name="BottomLeft" type="Sprite2D" parent="Visuals"]
+position = Vector2(8, 24)
+texture = ExtResource("5")
+[node name="BottomRight" type="Sprite2D" parent="Visuals"]
+position = Vector2(24, 24)
+texture = ExtResource("6")
+[node name="Body" type="StaticBody2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
+position = Vector2(16, 16)
+shape = SubResource("shape")

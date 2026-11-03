@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="AreaTheme" format=3]
+[ext_resource type="Script" path="res://scripts/themes/area_theme.gd" id="1"]
+[ext_resource type="TileSet" path="res://assets/tileset/terrain.tres" id="2"]
+[ext_resource type="TileSet" path="res://assets/tileset/decorations.tres" id="3"]
+[ext_resource type="TileSet" path="res://assets/tileset/entity_layout.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Overworld"
+terrain = ExtResource("2")
+decorations = ExtResource("3")
+entity_markers = ExtResource("4")

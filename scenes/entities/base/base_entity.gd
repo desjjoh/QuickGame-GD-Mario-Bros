@@ -4,6 +4,7 @@ extends Node2D
 ## Specialized entities own their physics bodies as child nodes.
 
 @export_group("Presentation")
+@export var visual_theme: AreaTheme
 @export var sprite: Sprite2D
 @export var animation_player: AnimationPlayer
 
@@ -14,6 +15,7 @@ var is_shutdown: bool = false
 
 
 func _ready() -> void:
+	_apply_visual_theme()
 	if not state_machine.initialize(self):
 		return
 	if animation_player != null:
@@ -75,3 +77,41 @@ func play_sound_effect(sound: AudioStream) -> AudioStreamPlayer2D:
 	audio.finished.connect(audio.queue_free)
 	audio.play()
 	return audio
+
+
+func resolve_texture(texture: Texture2D) -> Texture2D:
+	return visual_theme.resolve_texture(texture) if visual_theme != null else texture
+
+
+func _apply_visual_theme() -> void:
+	if visual_theme == null:
+		return
+	for child in find_children("*", "Sprite2D", true, false):
+		var child_sprite := child as Sprite2D
+		child_sprite.texture = resolve_texture(child_sprite.texture)
+	if animation_player == null or visual_theme.texture_overrides.is_empty():
+		return
+	# Clone animation containers only; never alter another area's shared assets.
+	for library_name in animation_player.get_animation_library_list():
+		var original := animation_player.get_animation_library(library_name)
+		var library := AnimationLibrary.new()
+		for animation_name in original.get_animation_list():
+			var animation := original.get_animation(animation_name).duplicate() as Animation
+			for track in range(animation.get_track_count()):
+				if animation.track_get_type(track) != Animation.TYPE_VALUE:
+					continue
+				for key in range(animation.track_get_key_count(track)):
+					var value = animation.track_get_key_value(track, key)
+					if value is Texture2D:
+						animation.track_set_key_value(track, key, resolve_texture(value))
+			library.add_animation(animation_name, animation)
+		animation_player.remove_animation_library(library_name)
+		animation_player.add_animation_library(library_name, library)
+
+
+func capture_area_state() -> Dictionary:
+	return {} # Specialized entities opt in to logical progress persistence.
+
+
+func restore_area_state(_data: Dictionary) -> void:
+	pass # Called before entering the tree, before the initial state starts.

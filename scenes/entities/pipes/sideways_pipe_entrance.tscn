@@ -1,0 +1,18 @@
+[gd_scene format=3]
+[ext_resource type="PackedScene" path="res://scenes/entities/pipes/pipe_entrance.tscn" id="1"]
+[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-top-h-1.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-h-1.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-top-h-2.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-h-2.png" id="5"]
+[node name="SidewaysPipeEntrance" instance=ExtResource("1")]
+sideways = true
+destination_area_id = &"main"
+destination_endpoint_id = &"player_spawn"
+[node name="TopLeft" parent="Visuals" index="0"]
+texture = ExtResource("2")
+[node name="TopRight" parent="Visuals" index="1"]
+texture = ExtResource("3")
+[node name="BottomLeft" parent="Visuals" index="2"]
+texture = ExtResource("4")
+[node name="BottomRight" parent="Visuals" index="3"]
+texture = ExtResource("5")

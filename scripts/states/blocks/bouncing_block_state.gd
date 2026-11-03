@@ -1,3 +1,4 @@
+class_name BouncingBlockState
 extends EntityState
 ## Owns the reaction phase; entry presentation/signals come from BaseState.
 

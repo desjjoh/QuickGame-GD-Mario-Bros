@@ -5,8 +5,10 @@
 | Owner | Responsibility |
 | --- | --- |
 | Game | Registers its LevelContainer and initial level with GameHandler |
-| GameHandler | Replaces levels; holds current game, level, player, and in-memory session values |
-| BaseLevel | Generates layout entities, spawns the player, updates camera/bounds, composites the halo, and shuts down entities |
+| GameHandler | Replaces levels; holds current game/player/session values and persistent-in-session area progress |
+| BaseLevelArea | Owns area metadata/templates and loads/frees its runtime layouts, world objects, and camera |
+| AreaTheme | Selects compatible TileSets and entity texture replacements with fallback |
+| BaseLevel | Generates area entities, spawns the player, coordinates deferred area transfer/cameras, updates bounds, composites the shadow, and shuts down entities |
 | BaseEntity | Owns its state machine, callback forwarding, exclusive sound effects, and terminal shutdown |
 | BasePlayer | Owns the physical body, AnimationPlayer reference, movement/actions, facing, and ceiling response |
 | Mario | Supplies sprites, collision override, concrete states, animation library, and WalkAnimation component |
@@ -32,10 +34,11 @@ BasePlayer [inherits BaseEntity]
 \-- Actions
     +-- Run
     +-- Jump
-    \-- Slide
+    +-- Slide
+    \-- Bonk
 
 Mario [inherits BasePlayer]
-+-- StateMachine: Idle, Move, Slide, Jump
++-- StateMachine: Idle, Move, Slide, Jump, PipeEnter
 +-- Body: small collision override, Sprite2D, walk animation library
 \-- Presentation
     \-- WalkAnimation
@@ -43,24 +46,32 @@ Mario [inherits BasePlayer]
 BaseBlock [inherits BaseEntity]
 +-- Body [StaticBody2D]
 |   \-- CollisionShape2D
-\-- Sprite2D
++-- Sprite2D
+\-- Presentation
+    \-- Bounce
 ```
 
 Presentation is owned by Mario rather than an empty container on BasePlayer. BasePlayer owns its Body/AnimationPlayer reference; Mario supplies its animation library. Empty inherited state machines are intentional and valid for blocks and the generic player. They are extension points, not extra independently processing states.
 
 ```text
 BaseLevel [CanvasGroup]
-+-- Layouts [fixed 16x16 grid]
-|   +-- DecorationLayout [TileMapLayer]
-|   +-- GroundLayout [TileMapLayer; solid terrain]
-|   \-- EntityLayout [TileMapLayer; marker-only]
-+-- WorldObjects [generated entities]
-+-- Players
-|   \-- PlayerSpawn
-\-- Cameras
++-- Areas
+|   +-- MainArea [BaseLevelArea]
+|   |   +-- Layouts [fixed 16x16 grid]
+|   |   |   +-- DecorationLayout
+|   |   |   +-- GroundLayout
+|   |   |   \-- EntityLayout
+|   |   +-- WorldObjects
+|   |   +-- Arrival [default endpoint]
+|   |   +-- Endpoints [named markers]
+|   |   \-- Camera2D
+|   \-- LowerArea [same area foundation, Underground theme]
++-- Enemies
+\-- Players
+    \-- PlayerSpawn
 ```
 
-BaseLevel owns all three layout layers, including ground. TestLevel supplies their TileSets and painted cells and adds Camera2D under Cameras. BaseLevel resolves its owned nodes through explicit paths: Players/PlayerSpawn, Layouts/EntityLayout, WorldObjects, and Players. Keep those paths when changing scene organization. Layouts uses an editor/runtime tool script to enforce identity local transforms on the group and its TileMapLayer children, plus 16x16 square TileSet cells. Move the level root to relocate the complete stage; individual layer offsets, rotation, and scale are reset. At readiness it orders WorldObjects then Players last; DecorationLayout stays behind gameplay. All contributing visuals use Z=0 so the CanvasGroup halo sees one combined silhouette. See [level shadow](level-shadow.md).
+BaseLevel owns an Areas container with a reusable MainArea foundation; TestLevel adds LowerArea. Each area selects an AreaTheme, supplies painted cells, and owns its compatible TileSets, generated WorldObjects, and camera. BaseLevel's entity_layout/world_objects properties refer to MainArea for convenience; generation processes each area when its runtime loads. These MainArea convenience properties return null while MainArea is unloaded. Players remain level-owned and normally draw after all area content, including pipes. During transport entry and emergence, their group draws before Areas and is restored on arrival/cancellation. Layout groups enforce identity local transforms and 16x16 square cells. All contributing visuals remain Z=0 so the shared shadow sees their combined silhouette. See [area themes](level-themes.md).
 
 Scene inheritance is BaseLevel -> TestLevel, BaseEntity -> BasePlayer -> Mario, and BaseEntity -> BaseBlock -> BrickBlock/QuestionBlock. AlternateBrickBlock inherits BrickBlock and overrides only its sprite texture. Scripts follow the corresponding inheritance; concrete blocks use BaseBlock directly and QuestionBlock and BrickBlock supply shared block-state scripts. States inherit BaseState -> EntityState -> PlayerState -> Mario's concrete state scripts. Shared PlayerState lives under scripts/states/player/.
 
@@ -68,7 +79,7 @@ Scene inheritance is BaseLevel -> TestLevel, BaseEntity -> BasePlayer -> Mario, 
 
 1. Godot creates GameHandler and ControllerHandler autoloads.
 2. Game registers itself and LevelContainer, then asks GameHandler to load the initial level.
-3. BaseLevel generates EntityLayout entries under WorldObjects before spawning Mario under Players.
+3. Areas apply their theme TileSets; BaseLevel unloads inactive runtime branches, restores/generates the starting area's EntityLayout under its WorldObjects, assigns visual_theme and saved progress before startup, then spawns Mario under Players.
 4. BaseEntity initializes the machine and presentation callbacks, starts the initial state, and subscribes to input.
 5. GameHandler records the player and emits level_changed.
 
@@ -80,7 +91,7 @@ Before replacement, GameHandler calls old_level.shutdown(), then removes and que
 
 The physical Body is a child of the entity root. Movement, camera targeting, interactions, and sound parenting must use Body's world position rather than the stationary root. The feet are the body origin. BasePlayer has a generic 16x16 shape at (0,-8); small Mario overrides it with an 11x14 rectangle at (-0.5,-7), while his sprite remains 16x16 at (0,-8). This approximates terrain probes rather than reproducing every NES foot/enemy collision test.
 
-Motion carries shared defaults and named priority modifiers through MotionValues. Body remains authoritative for velocity. Components do not process independently: states coordinate their use. Actions contains Run, Jump, and Slide; Motion contains continuous physics and corner correction; Mario's Presentation contains animation cadence.
+Motion carries shared defaults and named priority modifiers through MotionValues. Body remains authoritative for velocity. Components do not process independently: states coordinate their use. Actions contains Run, Jump, Slide, and Bonk; Motion contains continuous physics and corner correction; Mario's Presentation contains animation cadence.
 
 Idle, Move, and Slide refresh Run before checking deliberate takeoff. Move handles grounded travel and passive falling. It freezes the current walk pose and loop phase when unsupported and resumes velocity-based cadence on landing. Jump begins only from a successful grounded Jump action and keeps its pose through ascent/descent until landing. Both unsupported paths use AirMovement, with cleanup on landing/exit. Holding input during a fall does not enable a midair jump.
 
@@ -90,12 +101,18 @@ Each entity plays one sound effect at a time; jump, bump, skid, and state effect
 
 ## Level content and assets
 
-TestLevel has 944 pixels of horizontal test space: ground X=0..944, top Y=208, PlayerSpawn=(216,208), and initial camera center=(128,120) at 1x zoom. Camera world bounds are 0/944 with right-only tracking. Below the main stage, a separate enclosed 256x240 room starts at (0,512), with an arrival marker at world (48,720) and a disabled fixed camera. It has no separate background fill. Its terrain is painted into the shared GroundLayout. Pipe travel and automatic camera switching are not implemented. There is no automatic death/respawn.
+The main test area has 944 pixels of horizontal space, ground top Y=208, PlayerSpawn=(48,208), and initial camera center=(128,120). Its world bounds are 0/944 with right-only tracking. LowerArea currently sits at (896,240), with a disabled fixed camera centered at world (1024,360). Painted transport entities use explicit area/target IDs within or between areas. BaseLevel.transport coordinates entry, destination loading, camera handoff and emergence. Destination pipes supply their exit geometry without adjacent markers. Upright and inherited left-facing entrances share travel behavior. Death and respawn remain unimplemented.
 
-GroundLayout renders solid terrain directly. DecorationLayout renders collision-free bushes, hills, and clouds directly on the same 16x16 grid. EntityLayout is a collision-free authoring layer: its entity_id custom data maps through Entity Scenes to actual BaseEntity scenes under WorldObjects. It hides at runtime. Each spawned entity owns its own collision, detection, and behavior; the spawner does not impose solid collision. See [entity layout](entity-layout.md) and [question block](question-block.md).
+GroundLayout renders solid terrain directly. DecorationLayout renders collision-free bushes, hills, and clouds directly on the same 16x16 grid. Each area's EntityLayout is a collision-free authoring layer: its entity_id custom data maps through Entity Scenes to actual BaseEntity scenes under WorldObjects. It hides at runtime. Each spawned entity owns its own collision, detection, and behavior; the spawner does not impose solid collision. See [entity layout](entity-layout.md) and [question block](question-block.md).
 
-Environment art is theme-first under assets/Overworld (Palette 1), Underground, and Castle. Shared TileSet resources stay under assets/tileset. Player art stays under assets/player/mario (small); audio stays under assets/sfx. Runtime theme selection is deferred. See [level themes](level-themes.md).
+Environment art is theme-first under assets/Overworld (Palette 1) and assets/Underground (Palette 2). Shared TileSet resources stay under assets/tileset. Player art stays under assets/player/mario (small); audio stays under assets/sfx. Area themes select compatible TileSets and entity artwork at startup; live theme changes remain deferred. See [level themes](level-themes.md).
 
 ## Verification and limits
 
 See [verification](verification.md) for the complete test command and scope. Movement remains an approximation of the reference: fixed-point arithmetic, original countdown phases, several collision probes, and update ordering are not cycle-accurate. Gameplay input represents one global controller; session values are memory-only. Enemies, rewards, brick breaking, runtime themes, and respawn remain future milestones.
+
+TransportEntity inherits BaseEntity and supplies entry eligibility, a destination resource, opening geometry and a PlayerTransportState. PipeEntrance implements this contract with 2x2 solid collision and the existing ControllerHandler input/ground/alignment checks. Future transport types can provide their own state. BaseLevel.transport validates explicit area/target IDs, coordinates loading and cameras, and records current_area_id/current_target_id in GameHandler. Shared session state is preserved.
+
+PlayerPipeEnterState inherits PlayerTransportState. The level waits for travel_finished before each deferred handoff/completion. Painted TransportPlacement resources stay resident with area metadata; runtime pipe entities provide final feet position, exit direction and distance after loading. No separate arrival marker is required for a pipe target. Legacy spawn endpoints remain compatible. See [transport](transport.md) and [pipes](pipes.md).
+
+Only the occupied area keeps runtime nodes. Inactive roots retain endpoint/configuration metadata and packed definitions for routing; runtime layouts, entities, camera, and collisions are freed. GameHandler preserves used/removed block and tile progress for recreation. All areas remain editable in the local scene. See [area lifecycle](areas.md).

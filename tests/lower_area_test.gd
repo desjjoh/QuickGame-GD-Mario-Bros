@@ -8,33 +8,39 @@ func _ready() -> void:
 	fixture.get_node("Areas/LowerArea").position = Vector2(0,512)
 	fixture.get_node("Areas/LowerArea/Camera2D").position = Vector2(128,120)
 	fixture.get_node("Areas/LowerArea/Arrival").position = Vector2(48,208)
-	var floor := fixture.get_node("Layouts/GroundLayout") as TileMapLayer
+	var floor := fixture.get_node("Areas/LowerArea/Layouts/GroundLayout") as TileMapLayer
 	floor.clear()
-	fixture.get_node("Layouts/EntityLayout").clear()
+	fixture.get_node("Areas/LowerArea/Layouts/EntityLayout").clear()
 	for x in range(16):
-		for y in [32,45,46]:
+		for y in [0,13,14]:
 			floor.set_cell(Vector2i(x,y),0,Vector2i.ZERO)
-	for y in range(33,45):
+	for y in range(1,13):
 		for x in [0,15]:
 			floor.set_cell(Vector2i(x,y),0,Vector2i.ZERO)
 	var packed := PackedScene.new()
+	for area in fixture.get_node("Areas").get_children():
+		fixture.set_editable_instance(area, true)
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
 	game.initial_level = packed
 	add_child(game)
 	var level := GameHandler.current_level
 	var room := level.get_node("Areas/LowerArea") as Node2D
+	assert(not (room as BaseLevelArea).runtime_loaded)
+	assert(not room.has_node("Camera2D"))
+	assert(get_viewport().get_camera_2d() == level.get_node("Areas/MainArea/Camera2D"))
+	assert(level.request_area_transfer(&"lower"))
+	await get_tree().process_frame
 	var camera := room.get_node("Camera2D") as LevelCamera
-	assert(not camera.enabled and not camera.follow_enabled)
-	assert(get_viewport().get_camera_2d() == level.get_node("Cameras/Camera2D"))
-	var ground := level.get_node("Layouts/GroundLayout") as TileMapLayer
+	assert(camera.enabled and not camera.follow_enabled)
+	var ground := level.get_node("Areas/LowerArea/Layouts/GroundLayout") as TileMapLayer
 	for x in range(16):
-		assert(ground.get_cell_source_id(Vector2i(x,32)) == 0)
-		assert(ground.get_cell_source_id(Vector2i(x,45)) == 0)
-	for y in range(33,45):
+		assert(ground.get_cell_source_id(Vector2i(x,0)) == 0)
+		assert(ground.get_cell_source_id(Vector2i(x,13)) == 0)
+	for y in range(1,13):
 		assert(ground.get_cell_source_id(Vector2i(0,y)) == 0)
 		assert(ground.get_cell_source_id(Vector2i(15,y)) == 0)
-	# Simulate arrival only; pipe travel is intentionally not implemented yet.
+	# Continue motion trials in the newly loaded destination area.
 	camera.enabled = true
 	camera.make_current()
 	var player := level.player

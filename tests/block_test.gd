@@ -10,6 +10,8 @@ func _ready() -> void:
 	for cell in [Vector2i(4, 9), Vector2i(5, 9), Vector2i(6, 9), Vector2i(11, 9)]:
 		fixture_layout.set_cell(cell, 0, Vector2i.ZERO)
 	var fixture_scene := PackedScene.new()
+	for area in fixture.get_node("Areas").get_children():
+		fixture.set_editable_instance(area, true)
 	assert(fixture_scene.pack(fixture) == OK)
 	fixture.free()
 	game.initial_level = fixture_scene
@@ -20,7 +22,7 @@ func _ready() -> void:
 	assert(level.entity_layout.tile_set.get_physics_layers_count() == 0)
 	level.spawn_layout_entities()
 	assert(level.world_objects.get_child_count() == 4, "Generation must not duplicate entities.")
-	var block := level.get_node("WorldObjects/brick_4_9") as BaseBlock
+	var block := level.get_node("Areas/MainArea/WorldObjects/brick_4_9") as BaseBlock
 	assert(block.body is StaticBody2D and block.sprite.texture != null)
 	assert(block.state_machine.current_state.name == &"Active")
 	var player := level.player
@@ -71,7 +73,7 @@ func _ready() -> void:
 	layout.tile_set = load("res://assets/tileset/entity_layout.tres")
 	plain.position = Vector2(16, 32)
 	layout.set_cell(Vector2i(-1, 2), 0, Vector2i.ZERO)
-	plain.get_node("WorldObjects").position = Vector2(32, 16)
+	plain.get_node("Areas/MainArea/WorldObjects").position = Vector2(32, 16)
 	plain.entity_scenes[&"brick"] = load("res://scenes/entities/base/base_entity.tscn")
 	add_child(plain)
 	var decoration := plain.world_objects.get_child(0) as BaseEntity

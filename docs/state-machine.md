@@ -61,3 +61,12 @@ See [verification](verification.md) for the complete regression runner, coverage
 EntityState.receive_hit defaults to rejection. BaseBlock routes EntityHit messages to its current state. ActiveBlockState accepts a configured upward maneuver and transitions to reaction_state. BouncingBlockState rejects additional hits and owns bounce startup, advancement, and exit cleanup. Its return_state is Inactive for question blocks and Active for bricks. Question-block Inactive uses EntityState's default rejection and presentation exports without processing updates.
 
 Connect Bouncing's inherited entered signal for reaction hooks; its Enter Sound Effect setting can supply state-entry audio. bounce_completed fires once on natural completion before transition, never on shutdown/interruption. exited is a cleanup notification and can also occur on shutdown. No item spawning or extra audio is currently wired. See [question block](question-block.md).
+
+## Controlled pipe entry
+
+Mario owns PipeEnter using PlayerPipeEnterState, which inherits the shared PlayerTransportState contract. BasePlayer exports the concrete reference; TransportEntity supplies the appropriate state for a source/destination. BaseLevel.transport reserves and validates explicit target IDs, freezes camera/clamp updates during travel, and commits deferred phase transitions on travel_finished. Normal states do not activate between entry and emergence. State exit restores collision/visibility; uncommitted exit also restores position and stops entry audio. BaseState retains the entry audio handle for ownership-sensitive cleanup. The legacy descent_finished signal remains available on PipeEnter. See [transport](transport.md).
+
+
+## Area unload and logical state
+
+Area unload captures logical progress before entity shutdown and frees the instances. Returning constructs new entities and applies restore_area_state before FSM startup; it does not restart shut-down machines. BaseBlock saves Active/Inactive, resolving a Bouncing state's return_state to avoid replaying one-shot reactions. GameHandler owns the snapshots. See [area lifecycle](areas.md).

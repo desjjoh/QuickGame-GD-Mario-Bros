@@ -175,3 +175,57 @@ User requested a one-screen lower area with its own camera that cannot be left e
 Explicit user approval: enabled physics/common/physics_interpolation in project.godot (previously absent/default false). Physics remains 60 ticks per second; no camera smoothing, Input Map, shader, or painted scene changes. Initial player placement and camera target reset clear interpolation history. Follow/boundary logic now uses authoritative camera coordinates rather than the interpolated rendered center.
 
 A short Forward+ rendered probe on an approximately 240-Hz display confirmed interpolation active, no same-tick physics-follow mismatches, and changing rendered canvas coordinates between physics ticks. This does not guarantee subjective smoothness or eliminate the 256x240 viewport's pixel stepping.
+
+## Area theme setup - 2026-11-02
+
+User requested area themes using the supplied palette artwork. MainArea selects Overworld; LowerArea selects Underground. Each area now owns its own grid layers, WorldObjects, Arrival, and Camera2D. Underground ground/brick/alternate-brick art replaces matching Overworld textures; missing art falls back unchanged. No project settings, Input Map, import parameters, physics values, shader tuning, or background colors changed.
+
+Normalized LowerArea's origin from (720,240) to (464,384), converted its painted cells to local coordinates, changed Camera2D's local position from (-128,264) to (128,120), and Arrival from (-224,192) to (32,48). All their world positions remain unchanged. The fixed camera's bounds now correctly match its world view at 464/720, replacing stale 0/256 bounds. Main camera remains enabled; LowerArea remains explicitly disabled. Additional area cameras must be disabled until selected; BaseArea otherwise uses Godot's enabled camera default.
+
+## Paintable one-way pipe entrance - 2026-11-02
+
+User requested a paintable pipe entity leading to the second area, deferring return travel. Added EntityLayout source 3 in both theme marker sets and a TestLevel entity mapping. Pipe cap collision is 32x16; centered entry tolerance is 4 horizontal pixels and 1 vertical pixel, with grounded Down input required. BaseLevel switches the selected area camera and resets interpolation during deferred transfer. No project/Input Map/import settings or existing painted cells changed. Existing ui_down/ui_up actions are read through ControllerHandler.
+
+## Full 2x2 pipe stamp and occlusion - 2026-11-02
+
+User requested complete 2x2 pipe painting and foreground coverage for future descent. Pipe collision changed from 32x16 centered (16,8) to 32x32 centered (16,16); four sprites fill the same footprint. EntityLayout source 3 retains its ID but now previews a 2x2 atlas region anchored at the top-left. Added ForegroundObjects after Players, keeping pipe artwork at Z=0 in the existing shadow group. No project settings or existing import parameters changed; the newly generated preview PNG was imported with defaults. Existing painted anchors remain unchanged and now display the larger pipe.
+
+## Named pipe endpoints and route authoring - 2026-11-02
+
+User requested multiple pipe destinations before animations. BaseArea's existing Arrival marker now uses AreaEndpoint with endpoint_id arrival; its position is unchanged. Added an Endpoints container and TestLevel MainArea markers near_start=(48,208), near_end=(880,208). Exit Direction is metadata for future animation, not a new input or movement rule. Added per-area Pipe Routes resources keyed by marker cell, plus a Destination Endpoint Id export on PipeEntrance. Existing pipes default to lower/arrival. No project/Input Map/import parameters, existing painted cells, arrival positions, camera thresholds, or shader tuning changed. Explicit warp arrivals may now reposition scrolling cameras within their existing bounds.
+
+## Pipe entry animation and sound - 2026-11-02
+
+User requested entry animation/transition and supplied smb_pipe.wav. Mario now owns PipeEnter and assigns it through BasePlayer's exported transition-state reference. Default Entry Speed is 60 pixels/second and Entry Duration is 0.8 seconds, based on reference one-pixel/frame motion and a 48-frame timer. Pipe entry temporarily suspends player collision/control and source camera updates; exit/cancellation restores them. The sound uses a nonlooping runtime WAV copy; no project/Input Map/import parameters or existing painted routes/cells were changed. Destination emergence and screen fades remain unimplemented.
+
+## Unoccupied area runtime unloading - 2026-11-02
+
+User requested unloading unoccupied areas and chose preserving progress. BaseLevel now unloads inactive runtime branches after startup and at area handoff. Area metadata stays registered, while runtime nodes, collisions, actors, and cameras are freed. GameHandler caches per-area tile/block progress in memory. Editor authoring content, project/Input Map/import settings, camera parameters, pipe timing, and shader parameters are unchanged.
+
+## Pipe background priority only during entry - 2026-11-02
+
+User requested normal world ordering for pipes and putting Mario behind them only on entry. Removed ForegroundObjects and the pipe's RemoteTransform2D/reparenting; four pipe sprites stay with their entity. BaseLevel temporarily moves Players before Areas when reserving an entry and restores the saved sibling index on arrival, cancellation, or live state exit. Z indices remain 0; no project/Input Map/import, camera, timing, collision, or shader settings changed.
+
+## Sideways pipe and return route scene configuration - 2026-11-02
+
+Requested sideways tiles/entities and exit functionality add terrain sources 7-10 and entity marker source 4 in both themes. Existing IDs remain stable. New AreaEndpoint Animate Exit defaults false; TestLevel pipe_return enables it with Up at (928,144). LowerArea receives a 2x2 sideways entrance at (14,11); static junction cells (15,11)/(15,12) are removed from its footprint. Shared travel uses 30 px/s horizontally and existing 60 px/s vertically, suppresses controls/collision and restores them afterward. No Project Settings, Input Map, or existing import settings changed.
+
+## Reference pipe travel scene values - 2026-11-02
+
+Requested reference parity assigns Mario PipeEnter's Walk Animation Name to walk and Walk Cadence to Presentation/WalkAnimation. Side Entry Delay defaults to 52/60 seconds; side motion stops after 14 pixels at the aligned opening. AreaEndpoint Exit Distance defaults to 96 pixels, replacing sprite-height-derived emergence travel. Normal upward exit therefore lasts 96 ticks at the existing 60 px/s speed. Sound plays only on entry. The repaired endpoint parents are Areas/MainArea/Endpoints; their IDs and positions are unchanged. No Project Settings, Input Map or import settings changed.
+
+## Vertical pipe entry position and facing - 2026-11-02
+
+Requested behavior supersedes automatic entry centering: preserve the accepted body X coordinate and facing during vertical descent. The four-pixel alignment tolerance remains unchanged. Remove the emergence sound; entry sound remains assigned and nonlooping. Destination emergence placement/facing and travel timing are unchanged. These are script behavior changes, not Project Settings, Input Map or import changes.
+
+## Explicit transport test route and start return pipe - 2026-11-02
+
+User requested shared level transport and a return near the start instead of emergence from the original pipe. Added a source-3 upright EntityLayout marker at MainArea cell (4,11), ID stage_return, Entrance Enabled=false, Exit Enabled=true, Exit Distance=96; its entity supplies feet (80,176). LowerArea's existing sideways marker at (13,11), ID secret_return, targets main/stage_return. The existing MainArea entrance at (57,9), ID secret_entrance, targets lower/arrival. These are area TransportPlacement/TransportDestination Resources. Removed the old pipe_return spatial marker; retained ordinary spawn examples. Existing painted cells are preserved apart from the new clear-footprint marker. No third area/camera, Project Settings, Input Map, shader or import setting changes.
+
+## Secret return destination changed to PlayerSpawn - 2026-11-02
+
+Changed the explicit secret return Destination_start target from stage_return to player_spawn in main. Removed its now-unused Point_start resource and source-3 marker at MainArea cell (4,11). PlayerSpawn remains at its authored position (48,208). The sideways pipe scene's fallback target also uses player_spawn. No project/input/import settings changed.
+
+## Editor-only world boundary guides - 2026-11-02
+
+Requested visual guides for LevelCamera World Left/Right. New scene-script property Editor Guides / Draw World Bounds defaults true; it draws green/orange labeled lines at the existing global bounds without changing their values. No Project Settings, Input Map, import parameters, gameplay camera behavior or shader settings changed.

@@ -8,15 +8,19 @@ LevelCamera exposes Follow Enabled, World Left/Right, Scroll Start, Full Speed S
 
 The camera uses fractional target displacement so a steady 2.5-pixel step remains 2.5 rather than alternating between 2 and 3. The early zone uses a continuous half-speed factor. These are deliberate smoothness adjustments to the reference's integer-step scrolling, preserving the 80/112 thresholds and right-only behavior. Rendering still uses the 256-by-240 pixel-art viewport and physics updates; physics interpolation now smooths rendered movement between these ticks, while frame pacing still depends on the display and renderer. It does not reproduce NES fractional integration, previous-frame rendering order, SideCollisionTimer scroll suppression, moving-platform scroll forces, or every game-mode lock. Reference: ScrollHandler in https://gist.github.com/1wErt3r/4048722 . Solid walls already cancel body movement in Godot. Keep the camera's transform and smoothing at the authored values for this mode.
 
-TestLevel spans 59 columns: floor cells 0 through 58, rows Y=13/14, world X=0 through 944. Initial camera center is (128,120) and PlayerSpawn is (216,208). World Left/Right are 0/944; right-only thresholds and tracking behavior are unchanged. The scrolling test builds its own 896-pixel fixture. Existing block markers are unchanged. BaseLevel owns explicit Players/PlayerSpawn and Layouts/EntityLayout paths; preserve those paths when organizing scenes.
+TestLevel spans 59 columns: floor cells 0 through 58, rows Y=13/14, world X=0 through 944. Initial camera center is (128,120) and PlayerSpawn is (48,208). World Left/Right are 0/944; right-only thresholds and tracking behavior are unchanged. The scrolling test builds its own 896-pixel fixture. Existing block markers are unchanged. BaseLevel owns explicit Players/PlayerSpawn and Areas/MainArea/Layouts/EntityLayout paths; preserve those paths when organizing scenes.
 
 Camera follow tests cover thresholds, slowed/full fractional steps, no backward/vertical scrolling, the right limit, and a live run across the stage. Existing camera-boundary tests disable follow to isolate the clamp. Jump tests create their own floor gap for ledge behavior. There is still no automatic death or respawn.
 
-## Lower test area
+## World boundary guides in the editor
 
-TestLevel/Areas/LowerArea begins at (0,512). Its Camera2D sits at local (128,120), uses LevelCamera with Follow Enabled false, world bounds 0/256, and starts disabled. The main stage camera remains current on startup. When future pipe travel activates the lower camera, the shared level clamp uses its view; physical walls, floor, and ceiling additionally enclose the room. Arrival is local (48,208), world (48,720). No automatic warp/camera-switch API is implemented yet.
+LevelCamera is a tool script that draws labeled vertical guides at its actual global World Left and World Right X coordinates: green on the left, orange on the right. Each guide spans one configured logical viewport height at the camera's vertical position, adjusted for camera zoom. Both authored area cameras can show guides, including an inactive camera. These represent world scrolling edges, not the camera's current screen rectangle.
 
-The room uses GroundLayout columns 0..15 at global rows 32..46: ceiling row 32, floor rows 45/46, and side walls at columns 0/15. Edit its terrain through the shared layout rather than moving a separate TileMap off-grid. LowerArea has no separate background fill; its camera shows the existing viewport background.
+Select an area's Camera2D and edit World Left/World Right to update the guides. Editor Guides / Draw World Bounds defaults to enabled and can hide them per camera. Bounds changes and camera/parent transforms request a redraw; runtime camera movement, clamping, scene colors and Project Settings are unchanged. Drawing is guarded by Engine.is_editor_hint(), so it does not appear during play. If an already-open editor does not pick up the new tool annotation, reopen the scene or restart Godot.
+
+## Area cameras
+
+Cameras now live inside their owning area: Areas/MainArea/Camera2D and Areas/LowerArea/Camera2D. MainArea's camera remains enabled and scrolling; LowerArea's fixed camera remains disabled until future travel logic selects it. LowerArea currently sits at (896,240); its local camera center (128,120) gives world center (1024,360). Arrival is local (32,48), world (928,288). World bounds on the fixed camera are 896/1152. Its terrain and markers now belong to its own Layouts group, preserving all painted world positions. No background fill was added. See [area themes](level-themes.md).
 
 ## Physics interpolation
 
@@ -25,3 +29,13 @@ Project Settings physics/common/physics_interpolation is enabled with user appro
 Do not feed get_screen_center_position back into LevelCamera physics follow or its player clamp: with interpolation enabled this is a presentation coordinate and can introduce feedback lag. The current unrotated, zero-offset LevelCamera uses global_position for those calculations. Camera and lower-room tests construct independent terrain fixtures so level painting does not redefine their expectations.
 
 Jump takeoff must not skip body integration: grounded states now hand the same physics tick to Jump after entering it. A previous transition-only tick left horizontal displacement at zero, causing a visible one-tick camera pause despite nonzero player speed. This is covered by the air-movement takeoff regression; scrolling thresholds and interpolation settings are unchanged.
+
+## Pipe camera selection
+
+Pipe entrance requests are deferred by BaseLevel until the physics callback finishes. Destination selection uses area_id and endpoint_id, with arrival as the default. The level disables other area cameras, enables/makes current the destination camera, and snaps scrolling cameras to reveal the endpoint within world bounds before resetting tracking/interpolation history. Fixed cameras retain their authored position. The player Body is moved and its interpolation history reset first. active_area references the destination scene, while GameHandler stores current_area_id and current_endpoint_id. LowerArea retains its fixed camera. See [pipes](pipes.md).
+
+Animated pipe entry freezes source-camera follow and bounds during the controlled descent. Once the player is hidden and the 0.8-second timer finishes, the existing deferred endpoint handoff moves/resets the body and selects the destination camera. No fade or camera smoothing change is involved. Invalidated routes cancel before camera selection.
+
+Inactive cameras now unload with their area's runtime. Endpoint metadata remains available without a live camera; the destination camera is recreated at handoff and selected/reset before the source camera is freed. The local editor still contains both authored cameras. Never keep an old runtime camera reference across area transitions.
+
+Entry draw-order changes only reorder the Players sibling group before/after Areas. Body positions, camera transforms, interpolation settings, and camera follow priorities are unchanged.

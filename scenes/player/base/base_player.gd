@@ -3,6 +3,9 @@ extends BaseEntity
 ## Player foundation. States coordinate motion, actions, and presentation.
 ## Use body.global_position for the moving player's world position.
 
+@export_group("Transitions")
+@export var pipe_enter_state: PlayerPipeEnterState
+
 @export_group("Ceiling Response")
 @export var ceiling_bump_sound: AudioStream
 @export var ceiling_bump_speed: float = 3.75

@@ -17,6 +17,9 @@
 [ext_resource type="AudioStream" path="res://assets/sfx/smb_bump.wav" id="15_bump_sound"]
 [ext_resource type="AudioStream" path="res://assets/sfx/smb-skid.mp3" id="14_skid_sound"]
 
+[ext_resource type="Script" path="res://scripts/states/player/pipe_enter_state.gd" id="16_pipe_state"]
+[ext_resource type="AudioStream" path="res://assets/sfx/smb_pipe.wav" id="17_pipe_sound"]
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_mario"]
 _data = {
 &"walk": ExtResource("9_walk_animation")
@@ -25,7 +28,9 @@ _data = {
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_small_mario"]
 size = Vector2(11, 14)
 
-[node name="Mario" unique_id=1612993165 node_paths=PackedStringArray("sprite") instance=ExtResource("1_base")]
+
+[node name="Mario" unique_id=1612993165 node_paths=PackedStringArray("pipe_enter_state", "sprite") instance=ExtResource("1_base")]
+pipe_enter_state = NodePath("StateMachine/PipeEnter")
 texture_filter = 1
 script = ExtResource("2_script")
 ceiling_bump_sound = ExtResource("15_bump_sound")
@@ -93,3 +98,14 @@ sound_effect = ExtResource("13_jump_sound")
 
 [node name="Bonk" parent="Actions"]
 enabled = true
+
+[node name="PipeEnter" type="Node" parent="StateMachine" node_paths=PackedStringArray("walk_cadence")]
+script = ExtResource("16_pipe_state")
+walk_animation_name = &"walk"
+walk_cadence = NodePath("../../Presentation/WalkAnimation")
+sprite_texture = ExtResource("6_nrfpf")
+stop_animation_on_enter = true
+enter_sound_effect = ExtResource("17_pipe_sound")
+controls_enabled = false
+input_enabled = false
+frame_updates_enabled = false

@@ -1,6 +1,6 @@
 # QuickGame-Godot2D (Platformer)
 
-A Godot 4.7 platformer tutorial and reference project in the QuickReference series, exploring techniques from multiple games with reusable scenes, entities, and state machines. The current playable example uses Mario with 16×16 tiles and sprites.
+A Godot 4.7 platformer tutorial and reference project in the QuickReference series, exploring techniques from multiple games with reusable scenes, entities, and state machines. The current playable example uses Mario with 16Ã—16 tiles and sprites.
 
 Game loads TestLevel through a global handler. Mario's Idle/Move/Slide/Jump states orchestrate horizontal movement, Run, and skid actions using shared per-player motion values. Move plays a three-pose walk/run loop with velocity-based cadence; Idle and Slide use static poses. Variable jumping, solid-ceiling bumps, exclusive entity sound effects, horizontal camera bounds, and a combined outer shadow are implemented. Levels and entities have explicit terminal shutdown; startup still uses _ready(). Right-only horizontal camera scrolling is implemented; enemies, power-ups, disk saves, and respawn are not implemented. Current movement is an approximation, not original-game physics parity.
 
@@ -17,6 +17,10 @@ Press the opposite direction while moving to skid. Slide preserves momentum and 
 | Reference | Purpose |
 | --- | --- |
 | [Architecture](docs/architecture.md) | Current ownership, scene hierarchy, and startup flow |
+| [Area themes](docs/level-themes.md) | Area-owned layouts, palette selection, compatible TileSets, and artwork fallback |
+| [Area lifecycle](docs/areas.md) | Active-only runtime loading, area unload, and GameHandler progress restoration |
+| [Pipes](docs/pipes.md) | Paintable entrances, animation, sound, and exit behavior |
+| [Transport](docs/transport.md) | Explicit destinations, per-cell routes, area loading, and presentation ownership |
 | [State machine](docs/state-machine.md) | State hooks, presentation, controls, and verification |
 | [Movement](docs/movement.md) | Shared motion values, run modifiers, source conversions, and fidelity limits |
 | [Jumping](docs/jumping.md) | Jump state, passive falling in Move, variable jump height, gravity, weight, and takeoff profiles |
@@ -31,3 +35,11 @@ Documentation records important milestones, major implementations, architectural
 
 Run all regression scenes with ./scripts/run_tests.ps1 -GodotPath 'C:\path\to\Godot_console.exe'. See [verification](docs/verification.md) for coverage and limits.
 
+
+## Area artwork
+
+TestLevel/Areas/MainArea selects Overworld and Areas/LowerArea selects Underground. Paint through the chosen area's Layouts group. Underground currently supplies ground and both brick textures; missing variants retain Overworld artwork. Area themes reuse the existing entity scenes and behaviors. See [area themes](docs/level-themes.md) for configuration.
+
+Paint Pipe entrance (2x2) in an area's EntityLayout, stand centered on it, and hold Down to teleport to LowerArea. Configure explicit destinations through each area's Transport Points array. Destination pipes provide their own exit positions without separate arrival markers. Entry moves behind the pipe with sound before the camera handoff. The secret-area sideways entrance returns directly to PlayerSpawn. See [pipes](docs/pipes.md).
+
+Only the occupied area keeps runtime layouts, entities, collisions, and camera loaded. Inactive endpoint/configuration metadata remains available; GameHandler preserves area progress for return visits. All areas remain visible for editing in the local scene.

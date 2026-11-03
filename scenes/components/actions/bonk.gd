@@ -25,7 +25,7 @@ func deliver(player: BasePlayer) -> bool:
 			# A used block or solid terrain under the probe must not redirect
 			# the attack into a neighboring active block.
 			return target != null and target.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP, strength))
-	var selected: BaseBlock
+	var selected: BaseBlock = null
 	var best_distance: float = INF
 	for index in range(player.body.get_slide_collision_count()):
 		var collision := player.body.get_slide_collision(index)

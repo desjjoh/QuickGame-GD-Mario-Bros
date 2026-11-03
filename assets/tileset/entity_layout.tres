@@ -3,6 +3,8 @@
 [ext_resource type="Texture2D" uid="uid://db3dd0duhhhoj" path="res://assets/Overworld (Palette 1)/interactibles/blocks/brick.png" id="1_brick"]
 [ext_resource type="Texture2D" uid="uid://de0xqmdl5jj4c" path="res://assets/Overworld (Palette 1)/interactibles/blocks/question-block.png" id="2_question"]
 [ext_resource type="Texture2D" uid="uid://mtafpx0sg1e1" path="res://assets/Overworld (Palette 1)/interactibles/blocks/brick-alternate.png" id="3_alternate"]
+[ext_resource type="Texture2D" uid="uid://w03qimtoa0fp" path="res://assets/tileset/previews/pipe_entrance.png" id="4_pipe"]
+[ext_resource type="Texture2D" uid="uid://b87hu6kqi013q" path="res://assets/tileset/previews/sideways_pipe_entrance.png" id="side"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_brick"]
 resource_name = "Brick entity"
@@ -22,9 +24,27 @@ texture = ExtResource("3_alternate")
 0:0/0 = 0
 0:0/0/custom_data_0 = "brick_alternate"
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pipe"]
+resource_name = "Pipe entrance (2x2)"
+texture = ExtResource("4_pipe")
+0:0/size_in_atlas = Vector2i(2, 2)
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(-8, -8)
+0:0/0/custom_data_0 = "pipe_entrance"
+
+[sub_resource type="TileSetAtlasSource" id="Side"]
+resource_name = "Sideways pipe entrance (2x2)"
+texture = ExtResource("side")
+0:0/size_in_atlas = Vector2i(2, 2)
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(-8, -8)
+0:0/0/custom_data_0 = "sideways_pipe_entrance"
+
 [resource]
 custom_data_layer_0/name = "entity_id"
 custom_data_layer_0/type = 4
 sources/0 = SubResource("TileSetAtlasSource_brick")
 sources/1 = SubResource("TileSetAtlasSource_question")
 sources/2 = SubResource("TileSetAtlasSource_alternate")
+sources/3 = SubResource("TileSetAtlasSource_pipe")
+sources/4 = SubResource("Side")
