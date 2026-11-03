@@ -1,16 +1,18 @@
 [gd_resource type="TileSet" format=3 uid="uid://g7pmg7w6xn86"]
 
-[ext_resource type="Texture2D" uid="uid://besv7n8r7umo5" path="res://assets/Underground (Palette 2)/tileset/ground.png" id="1_ground"]
-[ext_resource type="Texture2D" uid="uid://b4yhoscyntoru" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-top-1.png" id="pipe_1"]
-[ext_resource type="Texture2D" uid="uid://r36rk1udyftu" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-top-2.png" id="pipe_2"]
-[ext_resource type="Texture2D" uid="uid://ckbbdea5appnv" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-1.png" id="pipe_3"]
-[ext_resource type="Texture2D" uid="uid://b33g4v20ka1d7" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-2.png" id="pipe_4"]
-[ext_resource type="Texture2D" uid="uid://b4kcp0gpd0oqq" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-3.png" id="pipe_5"]
-[ext_resource type="Texture2D" uid="uid://0fturk85vmqy" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-4.png" id="pipe_6"]
-[ext_resource type="Texture2D" uid="uid://otppgdjske85" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-top-h-1.png" id="side_7"]
-[ext_resource type="Texture2D" uid="uid://dmo5732argm1" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-top-h-2.png" id="side_8"]
-[ext_resource type="Texture2D" uid="uid://davermg57yuu0" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-h-1.png" id="side_9"]
-[ext_resource type="Texture2D" uid="uid://1i7ki0gersip" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-h-2.png" id="side_10"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/tileset/ground.png" id="1_ground"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-top-1.png" id="pipe_1"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-top-2.png" id="pipe_2"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-1.png" id="pipe_3"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-2.png" id="pipe_4"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-3.png" id="pipe_5"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-4.png" id="pipe_6"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-top-h-1.png" id="side_7"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-top-h-2.png" id="side_8"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-h-1.png" id="side_9"]
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-h-2.png" id="side_10"]
+
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/tileset/block.png" id="solid_block"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ground"]
 resource_name = "Ground"
@@ -78,6 +80,12 @@ texture = ExtResource("side_9")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
+[sub_resource type="TileSetAtlasSource" id="SolidBlock"]
+resource_name = "Solid block"
+texture = ExtResource("solid_block")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
 [resource]
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_ground")
@@ -91,3 +99,4 @@ sources/7 = SubResource("Side_7")
 sources/8 = SubResource("Side_8")
 sources/9 = SubResource("Side_9")
 sources/10 = SubResource("Side_10")
+sources/11 = SubResource("SolidBlock")

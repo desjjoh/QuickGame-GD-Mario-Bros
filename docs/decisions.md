@@ -256,3 +256,13 @@ Supersedes summing every positive frame-to-frame X displacement. Retain the furt
 Store soundtrack selection, loop and volume on AreaTheme; let BaseLevelArea.enter_area/exit_area own the actual AudioStreamPlayer. BaseLevel loading does not imply entry: activate only after a committed handoff and camera selection, stop the old area before starting the new one, and leave same-area transport playing continuously. Level shutdown and tree exit provide cleanup. Runtime stream copies provide loops without changing imports. Player SFX remain separate.
 
 Music Enabled is a per-area override, default true, so test rooms can keep their palette theme without music. Missing tracks are silent. Return visits restart tracks; playback position is not part of saved area progress. Non-music regression fixtures disable music using this override, while a dedicated real-track test covers lifecycle and reentrant level replacement. No new global handler, audio bus or project settings are introduced.
+
+## Planned fall death and entity activity - 2026-11-02
+
+Agreed direction, not implemented: BaseLevel will coordinate a guarded on_death lifecycle, initially triggered only by falling below the active viewport. Concrete players own presentation; GameHandler owns session/world progress. Death is distinct from terminal shutdown. Add BaseLevel.reset_progress_on_death, default true, to select clearing versus retaining this level's block/collected-world-coin progress at restart; ordinary area travel remains persistent. Session counters and power-up/life/checkpoint rules are separate. Reference fall timing/audio still require investigation.
+
+Off-camera activity is a separate proposed milestone: always-active, reversible suspension, terminal disposal and deferred activation policies, with camera margins and explicit persistence rules. Suspending saves processing; freeing saves memory. Do not replace current whole-area unloading or add unnecessary physics callbacks to static blocks. See the [implementation plan](death-and-entity-activity-plan.md) for ownership, open choices and verification checkpoints.
+
+## Defer area soundtrack until suitable assets are ready - 2026-11-02
+
+At the user's request, supersede active theme soundtrack playback for now: remove playback implementation, theme music properties/assignments and per-area Music Enabled configuration. Retain generic enter_area/exit_area occupancy hooks, entity SFX and unassigned audio assets. Keep shared test fixture paths, removing only music overrides; the previous music test now checks silent lifecycle behavior. Restore music only after suitable files are supplied and the [detailed backlog](backlog.md) is addressed. Fall death remains independent of soundtrack restoration.

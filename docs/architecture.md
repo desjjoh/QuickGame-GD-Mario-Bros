@@ -117,4 +117,4 @@ PlayerPipeEnterState inherits PlayerTransportState. The level waits for travel_f
 
 Only the occupied area keeps runtime nodes. Inactive roots retain endpoint/configuration metadata and packed definitions for routing; runtime layouts, entities, camera, and collisions are freed. GameHandler preserves used/removed block and tile progress for recreation. All areas remain editable in the local scene. See [area lifecycle](areas.md).
 
-AreaTheme also holds optional music, loop and volume settings. BaseLevelArea.enter_area/exit_area own an independent non-positional music player, separate from entity SFX. BaseLevel activates only the occupied area; loading and editor inspection are silent. Cross-area handoff, unload, level shutdown and tree removal stop old music. Music Enabled is a per-area override for test rooms. See [area lifecycle/music](areas.md#entry-exit-and-theme-music).
+Area music is deferred pending suitable sound files; see the [music restoration backlog](backlog.md#restore-area-music-when-suitable-sound-files-are-available). Area entry/exit hooks remain available; entity SFX are unchanged.

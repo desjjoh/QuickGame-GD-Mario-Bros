@@ -53,7 +53,7 @@ func _draw() -> void:
 		draw_line(start, end, colors[index], -1.0)
 		var label := "World %s: %s" % ["Left" if index == 0 else "Right", edges[index]]
 		var text_width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
-		var text_offset := Vector2(4 if index == 0 else -text_width - 4, 12)
+		var text_offset := Vector2(4.0 if index == 0 else -text_width - 4.0, 12.0)
 		draw_string(font, start + text_offset, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, colors[index])
 
 

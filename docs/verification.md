@@ -26,9 +26,9 @@ The current 32 scenes cover:
 | Transport | Explicit/moved entity targets, non-pipe presentation, saved per-cell resources, exit-only permissions, stale/duplicate/missing/removed rejection and session preservation |
 | Pipe routing | Per-cell route save/reload, named/default endpoints, same-area travel, direction metadata, invalid/stale targets, camera repositioning, and reentry lock |
 | Pipe travel | Vertical descent preserves off-center position and both facing directions; Painted entrance, ground/alignment/control gates, deferred transfer, cameras, movement reset, session preservation, and shutdown |
-| Area music | Real soundtrack decoding, runtime loop copies, entry/exit ownership, preload silence, same-area continuity, per-area disable, missing music, loop/volume settings, no SFX interference, non-overlap, replacement and removal cleanup |
+| Area lifecycle (area_music_test) | Entry/exit ownership, preload stays inactive, cross-area handoff, absence of soundtrack players and shutdown |
 | Area streaming | Actual node/collision removal, repeated visits, progress restoration, removed entities, tile edits, level replacement, and foreground cleanup |
-| Area themes | Independent TileSets, Underground ground/bricks, fallback, resource isolation, inherited bounce, and shutdown |
+| Area themes | Independent TileSets, all 18 Underground texture mappings, terrain collisions, both pipes, question animation/used art, themed previews, decoration fallback, resource isolation, inherited bounce, and shutdown |
 | Lower area | Main camera remains current at startup; simulated arrival uses fixed lower camera and enclosed terrain, with player containment in both directions |
 | Pipe/wall camera | Repeated blocked short hops from both sides at walk/run speeds cannot ratchet scrolling; clearing the pipe resumes rightward tracking |
 | Camera | Edge clamping, scroll thresholds, constant fractional steps, one-way limits, live traversal |
@@ -42,4 +42,4 @@ For scene cleanup, also check scene/resource paths and declared-resource usage, 
 
 Headless tests do not prove subjective movement feel, display frame pacing, speaker output, or renderer performance. A Forward+ render smoke check can catch scene/material failures and layering regressions, but interactive editor playtesting remains useful. No exact NES trace qualification is claimed.
 
-Non-music integration tests use `tests/fixtures/silent_game.tscn` and `silent_level.tscn`, which inherit the real game/stage and disable Music Enabled on both areas. They retain the gameplay and SFX checks without unrelated long-running MP3 playback at immediate process exit. area_music_test uses the real music-enabled game, decodes both supplied tracks to nonzero samples, and allows audio cleanup before quitting. The normal application/test stage keeps music enabled. Headless decoding and playback-state checks do not establish speaker/device output.
+Integration tests retain `tests/fixtures/silent_game.tscn` and `silent_level.tscn` as shared inherited fixtures, now without music overrides. area_music_test retains its existing entry point but checks silent area lifecycle behavior; it no longer decodes soundtrack assets. Music playback and audible-loop qualification are deferred in the [backlog](backlog.md).

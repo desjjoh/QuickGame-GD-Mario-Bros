@@ -12,6 +12,8 @@
 [ext_resource type="Texture2D" uid="uid://davermg57yuu0" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-h-1.png" id="side_9"]
 [ext_resource type="Texture2D" uid="uid://1i7ki0gersip" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-h-2.png" id="side_10"]
 
+[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/tileset/block.png" id="solid_block"]
+
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ground"]
 resource_name = "Ground"
 texture = ExtResource("1_ground")
@@ -78,6 +80,12 @@ texture = ExtResource("side_9")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
+[sub_resource type="TileSetAtlasSource" id="SolidBlock"]
+resource_name = "Solid block"
+texture = ExtResource("solid_block")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
 [resource]
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_ground")
@@ -91,3 +99,4 @@ sources/7 = SubResource("Side_7")
 sources/8 = SubResource("Side_8")
 sources/9 = SubResource("Side_9")
 sources/10 = SubResource("Side_10")
+sources/11 = SubResource("SolidBlock")
