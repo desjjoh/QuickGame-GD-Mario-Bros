@@ -1,18 +1,17 @@
 [gd_resource type="TileSet" format=3 uid="uid://g7pmg7w6xn86"]
 
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/tileset/ground.png" id="1_ground"]
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-top-1.png" id="pipe_1"]
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-top-2.png" id="pipe_2"]
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-1.png" id="pipe_3"]
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-2.png" id="pipe_4"]
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-3.png" id="pipe_5"]
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-4.png" id="pipe_6"]
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-top-h-1.png" id="side_7"]
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-top-h-2.png" id="side_8"]
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-h-1.png" id="side_9"]
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-h-2.png" id="side_10"]
-
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/tileset/block.png" id="solid_block"]
+[ext_resource type="Texture2D" uid="uid://besv7n8r7umo5" path="res://assets/Underground (Palette 2)/tileset/ground.png" id="1_ground"]
+[ext_resource type="Texture2D" uid="uid://b0fmupjqaf7xq" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-top-1.png" id="pipe_1"]
+[ext_resource type="Texture2D" uid="uid://vsm2fsxmwo32" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-top-2.png" id="pipe_2"]
+[ext_resource type="Texture2D" uid="uid://ct34vkixelawr" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-1.png" id="pipe_3"]
+[ext_resource type="Texture2D" uid="uid://b2gxbf88dpuep" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-2.png" id="pipe_4"]
+[ext_resource type="Texture2D" uid="uid://b1d11tpd83pfy" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-3.png" id="pipe_5"]
+[ext_resource type="Texture2D" uid="uid://vqh2obapwfai" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-4.png" id="pipe_6"]
+[ext_resource type="Texture2D" uid="uid://dsh0py6h0d2o6" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-top-h-1.png" id="side_7"]
+[ext_resource type="Texture2D" uid="uid://dtuggrgc7o46e" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-top-h-2.png" id="side_8"]
+[ext_resource type="Texture2D" uid="uid://0uxkflw05bga" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-h-1.png" id="side_9"]
+[ext_resource type="Texture2D" uid="uid://n8epclti4t7k" path="res://assets/Underground (Palette 2)/interactibles/pipes/pipe-h-2.png" id="side_10"]
+[ext_resource type="Texture2D" uid="uid://c0ww4vjjjcp3k" path="res://assets/Underground (Palette 2)/tileset/block.png" id="solid_block"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ground"]
 resource_name = "Ground"
@@ -29,6 +28,12 @@ texture = ExtResource("pipe_1")
 [sub_resource type="TileSetAtlasSource" id="Side_10"]
 resource_name = "pipe-h-2"
 texture = ExtResource("side_10")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[sub_resource type="TileSetAtlasSource" id="SolidBlock"]
+resource_name = "Solid block"
+texture = ExtResource("solid_block")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
@@ -77,12 +82,6 @@ texture = ExtResource("side_8")
 [sub_resource type="TileSetAtlasSource" id="Side_9"]
 resource_name = "pipe-h-1"
 texture = ExtResource("side_9")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="SolidBlock"]
-resource_name = "Solid block"
-texture = ExtResource("solid_block")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 

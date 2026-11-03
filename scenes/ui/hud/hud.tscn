@@ -1,0 +1,105 @@
+[gd_scene format=3]
+[ext_resource type="Theme" path="res://scenes/ui/hud/hud_theme.tres" id="theme"]
+[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/ui/hud-coin.png" id="coin"]
+[ext_resource type="Script" path="res://scenes/components/presentation/synchronized_animation.gd" id="sync"]
+[ext_resource type="Resource" path="res://scenes/components/presentation/palette_pulse.tres" id="cycle"]
+[sub_resource type="AtlasTexture" id="coin_0"]
+atlas = ExtResource("coin")
+region = Rect2(0, 0, 8, 8)
+[sub_resource type="AtlasTexture" id="coin_1"]
+atlas = ExtResource("coin")
+region = Rect2(8, 0, 8, 8)
+[sub_resource type="AtlasTexture" id="coin_2"]
+atlas = ExtResource("coin")
+region = Rect2(16, 0, 8, 8)
+[sub_resource type="SpriteFrames" id="frames"]
+animations = [{
+"frames": [{"duration": 3.0, "texture": SubResource("coin_0")}, {"duration": 1.0, "texture": SubResource("coin_1")}, {"duration": 1.0, "texture": SubResource("coin_2")}, {"duration": 1.0, "texture": SubResource("coin_1")}],
+"loop": true,
+"name": &"default",
+"speed": 7.5
+}]
+[node name="HUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture_filter = 1
+theme = ExtResource("theme")
+[node name="PlayerName" type="Label" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 64.0
+offset_bottom = 24.0
+mouse_filter = 2
+text = "MARIO"
+[node name="Score" type="Label" parent="."]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 24.0
+offset_right = 72.0
+offset_bottom = 32.0
+mouse_filter = 2
+text = " 000000"
+[node name="CoinMultiplier" type="Label" parent="."]
+layout_mode = 0
+offset_left = 96.0
+offset_top = 24.0
+offset_right = 104.0
+offset_bottom = 32.0
+mouse_filter = 2
+text = "×"
+[node name="CoinCount" type="Label" parent="."]
+layout_mode = 0
+offset_left = 104.0
+offset_top = 24.0
+offset_right = 120.0
+offset_bottom = 32.0
+mouse_filter = 2
+text = "00"
+[node name="WorldHeading" type="Label" parent="."]
+layout_mode = 0
+offset_left = 144.0
+offset_top = 16.0
+offset_right = 184.0
+offset_bottom = 24.0
+mouse_filter = 2
+text = "WORLD"
+[node name="WorldValue" type="Label" parent="."]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 24.0
+offset_right = 176.0
+offset_bottom = 32.0
+mouse_filter = 2
+text = "1-1"
+[node name="TimeHeading" type="Label" parent="."]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 16.0
+offset_right = 232.0
+offset_bottom = 24.0
+mouse_filter = 2
+text = "TIME"
+[node name="TimeValue" type="Label" parent="."]
+layout_mode = 0
+offset_left = 208.0
+offset_top = 24.0
+offset_right = 232.0
+offset_bottom = 32.0
+mouse_filter = 2
+text = "400"
+[node name="Coin" type="AnimatedSprite2D" parent="."]
+position = Vector2(88, 24)
+sprite_frames = SubResource("frames")
+centered = false
+
+[node name="Synchronization" type="Node" parent="Coin" node_paths=PackedStringArray("animated_sprite")]
+script = ExtResource("sync")
+cycle = ExtResource("cycle")
+animated_sprite = NodePath("..")
+start_enabled = true

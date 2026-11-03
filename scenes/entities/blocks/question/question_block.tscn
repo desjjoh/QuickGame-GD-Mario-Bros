@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/base/base_block.tscn" id="1_base"]
 [ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/interactibles/blocks/question-block.png" id="2_texture"]
@@ -9,6 +9,9 @@
 [ext_resource type="Script" path="res://scenes/entities/base/states/entity_state.gd" id="6_inactive"]
 
 [ext_resource type="Script" path="res://scripts/states/blocks/bouncing_block_state.gd" id="7_bouncing"]
+
+[ext_resource type="Script" path="res://scenes/components/presentation/synchronized_animation.gd" id="8_sync"]
+[ext_resource type="Resource" path="res://scenes/components/presentation/palette_pulse.tres" id="9_cycle"]
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_question"]
 _data = {&"active": ExtResource("3_active")}
@@ -26,9 +29,9 @@ callback_mode_process = 0
 [node name="StateMachine" parent="." node_paths=PackedStringArray("initial_state")]
 initial_state = NodePath("Active")
 
-[node name="Active" type="Node" parent="StateMachine" node_paths=PackedStringArray("reaction_state")]
+[node name="Active" type="Node" parent="StateMachine" node_paths=PackedStringArray("reaction_state", "synchronized_animation")]
 script = ExtResource("5_active")
-animation_name = &"active"
+synchronized_animation = NodePath("../../Presentation/PaletteAnimation")
 reaction_state = NodePath("../Bouncing")
 input_enabled = false
 frame_updates_enabled = false
@@ -49,3 +52,9 @@ stop_animation_on_enter = true
 input_enabled = false
 frame_updates_enabled = false
 physics_updates_enabled = false
+
+[node name="PaletteAnimation" type="Node" parent="Presentation" node_paths=PackedStringArray("animation_player")]
+script = ExtResource("8_sync")
+cycle = ExtResource("9_cycle")
+animation_player = NodePath("../../AnimationPlayer")
+animation_name = &"active"

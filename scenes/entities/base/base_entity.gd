@@ -12,6 +12,8 @@ extends Node2D
 
 var _active_sound_effect: AudioStreamPlayer2D
 var is_shutdown: bool = false
+var gameplay_suspended: bool = false
+var _suspended_physics: Dictionary[Node, bool] = {}
 
 
 func _ready() -> void:
@@ -42,6 +44,8 @@ func shutdown() -> void:
 	if is_shutdown:
 		return
 	is_shutdown = true
+	for synchronized in find_children("*", "SynchronizedAnimation", true, false):
+		synchronized.set_enabled(false)
 	set_process(false)
 	set_physics_process(false)
 	if not is_instance_valid(state_machine):
@@ -58,6 +62,7 @@ func shutdown() -> void:
 		_active_sound_effect.stop()
 		_active_sound_effect.queue_free()
 	_active_sound_effect = null
+	_suspended_physics.clear()
 
 
 func get_effects_parent() -> Node2D:
@@ -115,3 +120,24 @@ func capture_area_state() -> Dictionary:
 
 func restore_area_state(_data: Dictionary) -> void:
 	pass # Called before entering the tree, before the initial state starts.
+
+
+func set_gameplay_suspended(value: bool) -> void:
+	if is_shutdown or gameplay_suspended == value:
+		return
+	gameplay_suspended = value
+	state_machine.gameplay_suspended = value
+	if value:
+		_suspend_physics_branch(self)
+	else:
+		for node: Node in _suspended_physics:
+			if is_instance_valid(node):
+				node.set_physics_process(_suspended_physics[node])
+		_suspended_physics.clear()
+
+
+func _suspend_physics_branch(node: Node) -> void:
+	_suspended_physics[node] = node.is_physics_processing()
+	node.set_physics_process(false)
+	for child in node.get_children():
+		_suspend_physics_branch(child)

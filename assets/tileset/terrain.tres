@@ -11,8 +11,7 @@
 [ext_resource type="Texture2D" uid="uid://dmo5732argm1" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-top-h-2.png" id="side_8"]
 [ext_resource type="Texture2D" uid="uid://davermg57yuu0" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-h-1.png" id="side_9"]
 [ext_resource type="Texture2D" uid="uid://1i7ki0gersip" path="res://assets/Overworld (Palette 1)/interactibles/pipes/pipe-h-2.png" id="side_10"]
-
-[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/tileset/block.png" id="solid_block"]
+[ext_resource type="Texture2D" uid="uid://bff56bx8ardnb" path="res://assets/Overworld (Palette 1)/tileset/block.png" id="solid_block"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ground"]
 resource_name = "Ground"
@@ -29,6 +28,12 @@ texture = ExtResource("pipe_1")
 [sub_resource type="TileSetAtlasSource" id="Side_10"]
 resource_name = "pipe-h-2"
 texture = ExtResource("side_10")
+0:0/0 = 0
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[sub_resource type="TileSetAtlasSource" id="SolidBlock"]
+resource_name = "Solid block"
+texture = ExtResource("solid_block")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
@@ -77,12 +82,6 @@ texture = ExtResource("side_8")
 [sub_resource type="TileSetAtlasSource" id="Side_9"]
 resource_name = "pipe-h-1"
 texture = ExtResource("side_9")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="SolidBlock"]
-resource_name = "Solid block"
-texture = ExtResource("solid_block")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 

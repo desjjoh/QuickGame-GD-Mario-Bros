@@ -1,0 +1,5 @@
+[gd_resource type="Resource" script_class="CosmeticAnimationCycle" format=3]
+[ext_resource type="Script" path="res://scenes/components/presentation/cosmetic_animation_cycle.gd" id="1"]
+[resource]
+script = ExtResource("1")
+phase_ticks = PackedInt32Array(24, 8, 8, 8)

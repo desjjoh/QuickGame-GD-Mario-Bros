@@ -2,6 +2,22 @@ class_name BaseLevel
 extends CanvasGroup
 ## Shared foundation for playable levels.
 
+signal death_started
+
+@export_group("Death")
+@export var fall_death_enabled: bool = true
+@export_range(0.0, 128.0, 1.0) var fall_death_margin: float = 34.0
+@export var death_sound: AudioStream
+@export_range(0.0, 10.0, 0.1) var death_fallback_delay: float = 1.0
+@export var death_presentation_timeout: float = 10.0
+
+var death_in_progress: bool = false
+var _death_elapsed: float = 0.0
+var _death_audio: AudioStreamPlayer
+var _death_audio_done: bool = true
+var _death_player_done: bool = false
+var _death_restart_queued: bool = false
+
 @export_group("Spawning")
 @export var player_scene: PackedScene
 @export var entity_scenes: Dictionary[StringName, PackedScene] = {}
@@ -111,6 +127,11 @@ func _spawn_area_entities(area: BaseLevelArea, saved_entities: Dictionary) -> vo
 
 
 func _physics_process(_delta: float) -> void:
+	if is_shutdown:
+		return
+	if death_in_progress:
+		_update_death(_delta)
+		return
 	if _transport_state != null:
 		if not _transport_trip_valid() or player.state_machine.current_state != _transport_state:
 			_abort_transport(true)
@@ -121,6 +142,7 @@ func _physics_process(_delta: float) -> void:
 	if camera != null and is_instance_valid(player) and not player.is_shutdown:
 		camera.follow_target(player.body)
 	clamp_player_to_camera()
+	_check_fall_death()
 
 
 func clamp_player_to_camera() -> void:
@@ -177,6 +199,10 @@ func shutdown() -> void:
 	if is_shutdown:
 		return
 	is_shutdown = true
+	if is_instance_valid(_death_audio):
+		_death_audio.stop()
+		_death_audio.queue_free()
+		_death_audio = null
 	_abort_transport(false)
 	set_process(false)
 	set_physics_process(false)
@@ -240,7 +266,7 @@ func _resolve_target(area: BaseLevelArea, id: StringName) -> Object:
 
 
 func _begin_transport(traveler: BasePlayer, destination: TransportDestination, source: TransportEntity, animate_arrival: bool) -> bool:
-	if is_shutdown or _transfer_pending or not is_instance_valid(traveler) or traveler != player or traveler.is_shutdown or destination == null:
+	if is_shutdown or death_in_progress or _transfer_pending or not is_instance_valid(traveler) or traveler != player or traveler.is_shutdown or destination == null:
 		return false
 	if destination.area_id == &"" or destination.target_id == &"":
 		return false
@@ -396,7 +422,7 @@ func can_enter_pipe() -> bool:
 
 
 func can_transport() -> bool:
-	return not is_shutdown and not _transfer_pending and not _transport_input_locked
+	return not is_shutdown and not death_in_progress and not _transfer_pending and not _transport_input_locked
 
 
 func _disconnect_transport_state() -> void:
@@ -474,3 +500,82 @@ func _restore_player_draw_order() -> void:
 		return
 	if is_instance_valid(players) and players.get_parent() == self:
 		move_child(players, mini(original_index, get_child_count() - 1))
+
+
+func _check_fall_death() -> void:
+	if not fall_death_enabled or death_in_progress or _transfer_pending or not is_instance_valid(player) or player.is_shutdown:
+		return
+	var camera := get_viewport().get_camera_2d()
+	if camera == null:
+		return
+	var center_y := camera.global_position.y if camera is LevelCamera else camera.get_screen_center_position().y
+	var bottom := center_y + get_viewport_rect().size.y / camera.zoom.y / 2.0
+	if player.death_envelope_top() > bottom + fall_death_margin:
+		on_death(player, false)
+
+
+func on_death(victim: BasePlayer, present: bool = false) -> bool:
+	if is_shutdown or death_in_progress or _transfer_pending or not is_instance_valid(victim) or victim != player or victim.is_shutdown:
+		return false
+	death_in_progress = true
+	_death_elapsed = 0.0
+	# Suspend gameplay callbacks and physics without pausing AnimationPlayers.
+	for entity in find_children("*", "BaseEntity", true, false):
+		if entity != player:
+			(entity as BaseEntity).set_gameplay_suspended(true)
+	_start_death_audio()
+	player.death_presentation_finished.connect(_on_death_player_finished, CONNECT_ONE_SHOT)
+	player.begin_death(present)
+	if not is_shutdown:
+		death_started.emit()
+	return true
+
+
+func _on_death_player_finished() -> void:
+	if not death_in_progress or is_shutdown:
+		return
+	_death_player_done = true
+	if is_instance_valid(player):
+		var victim := player
+		victim.shutdown()
+		victim.hide()
+		if GameHandler.current_player == victim:
+			GameHandler.current_player = null
+		player = null
+		victim.queue_free()
+
+
+func _start_death_audio() -> void:
+	_death_audio_done = death_sound == null
+	if death_sound == null:
+		return
+	var stream := death_sound.duplicate() as AudioStream
+	if stream is AudioStreamWAV:
+		stream.loop_mode = AudioStreamWAV.LOOP_DISABLED
+	elif stream is AudioStreamMP3 or stream is AudioStreamOggVorbis:
+		stream.loop = false
+	_death_audio = AudioStreamPlayer.new()
+	_death_audio.stream = stream
+	add_child(_death_audio)
+	_death_audio.finished.connect(func(): _death_audio_done = true)
+	_death_audio.play()
+
+
+func _update_death(delta: float) -> void:
+	_death_elapsed += delta
+	var audio_limit := maxf(death_fallback_delay, death_sound.get_length() + 1.0 if death_sound != null else death_fallback_delay)
+	if _death_elapsed >= maxf(death_presentation_timeout, audio_limit):
+		_on_death_player_finished()
+		_death_audio_done = true
+	if not _death_player_done and not is_instance_valid(player):
+		_death_player_done = true
+	if _death_player_done and (_death_audio_done or _death_elapsed >= audio_limit) and (death_sound != null or _death_elapsed >= death_fallback_delay):
+		if not _death_restart_queued:
+			_death_restart_queued = true
+			_restart_after_death.call_deferred()
+
+
+func _restart_after_death() -> void:
+	if is_shutdown or not death_in_progress or GameHandler.current_level != self:
+		return
+	GameHandler.restart_after_death(self, _progress_key)
