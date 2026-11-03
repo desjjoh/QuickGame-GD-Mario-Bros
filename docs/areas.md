@@ -2,15 +2,11 @@
 
 Only the occupied area's runtime content remains loaded. Area roots, Arrival/Endpoints markers, theme/transport configuration, and packed authoring definitions remain available as lightweight routing metadata. Inactive areas free their tile layers, collision objects, generated entities, camera, and other authored runtime branches; they are not merely hidden or paused.
 
-## Entry, exit and theme music
+## Entry and exit lifecycle
 
-BaseLevel calls `enter_area()` only when an area becomes occupied, after loading content and selecting its camera. It calls `exit_area()` through unload and on level shutdown; tree removal is a cleanup fallback. Entry/exit are idempotent. Loading a destination for validation does not activate it or play its soundtrack, and same-area transport does not restart music.
+BaseLevel calls `enter_area()` only when an area becomes occupied, after loading content and selecting its camera. It calls `exit_area()` through unload and on level shutdown; tree removal is a cleanup fallback. Entry/exit are idempotent and maintain is_active. Loading a destination for validation does not activate it.
 
-An active area owns one non-positional AudioStreamPlayer named Music. Entry starts its AreaTheme Music at the beginning; cross-area handoff stops the previous track before starting the destination track. Exit stops and frees the player. Returning to an area restarts its track rather than restoring a saved playback position. Music is independent of the player's exclusive sound-effect channel.
-
-Select MainArea, LowerArea or another BaseLevelArea in the Inspector and turn **Music Enabled** off for a silent test area. It defaults to true. Changing it while active stops/starts music immediately; repeated assignment of the same value does not restart playback. A missing theme or missing Music stream is also silent. Unoccupied and editor-only areas never play music. Reassigning an active area's Theme restarts music from the new resource.
-
-Theme resources expose Music, Music Loop (default true) and Music Volume Db (default 0). Overworld uses `assets/soundtrack/01. Ground Theme.mp3`; Underground uses `assets/soundtrack/02. Underground Theme.mp3`. Looping uses runtime stream copies, leaving shared resources and import settings unchanged. MP3/OGG use native loops; other supported streams restart on completion while the area remains active. Late completion from an older player cannot restart the current track. No music bus, crossfade, pause policy or death-specific music behavior is added here.
+Area music is currently removed pending suitable sound files. Areas create no soundtrack player, and themes expose no music configuration. Entity sound effects remain independent and enabled. See the [music restoration backlog](backlog.md#restore-area-music-when-suitable-sound-files-are-available).
 
 ## Editor and runtime
 

@@ -24,6 +24,8 @@ Press the opposite direction while moving to skid. Slide preserves momentum and 
 | [State machine](docs/state-machine.md) | State hooks, presentation, controls, and verification |
 | [Movement](docs/movement.md) | Shared motion values, run modifiers, source conversions, and fidelity limits |
 | [Jumping](docs/jumping.md) | Jump state, passive falling in Move, variable jump height, gravity, weight, and takeoff profiles |
+| [Death and entity activity plan](docs/death-and-entity-activity-plan.md) | Planned fall-death lifecycle, progress-reset policy, and off-camera entity management |
+| [Backlog](docs/backlog.md) | Deferred features and prerequisites, including restoring area music |
 | [Decisions](docs/decisions.md) | Architectural choices, reasons, tradeoffs, and proposals |
 | [Settings](docs/settings.md) | Deliberate configuration changes and approval history |
 | [History](docs/history.md) | Dated implementation and verification record |
@@ -38,10 +40,10 @@ Run all regression scenes with ./scripts/run_tests.ps1 -GodotPath 'C:\path\to\Go
 
 ## Area artwork
 
-TestLevel/Areas/MainArea selects Overworld and Areas/LowerArea selects Underground. Paint through the chosen area's Layouts group. Underground currently supplies ground and both brick textures; missing variants retain Overworld artwork. Area themes reuse the existing entity scenes and behaviors. See [area themes](docs/level-themes.md) for configuration.
+TestLevel/Areas/MainArea selects Overworld and Areas/LowerArea selects Underground. Paint through the chosen area's Layouts group. Underground supplies ground, solid blocks, both bricks, question-block animation/used art, and all pipe sections with matching paint previews; decorations retain Overworld artwork. Area themes reuse the existing entity scenes and behaviors. See [area themes](docs/level-themes.md) for configuration.
 
 Paint Pipe entrance (2x2) in an area's EntityLayout, stand centered on it, and hold Down to teleport to LowerArea. Configure explicit destinations through each area's Transport Points array. Destination pipes provide their own exit positions without separate arrival markers. Entry moves behind the pipe with sound before the camera handoff. The secret-area sideways entrance returns directly to PlayerSpawn. See [pipes](docs/pipes.md).
 
 Only the occupied area keeps runtime layouts, entities, collisions, and camera loaded. Inactive endpoint/configuration metadata remains available; GameHandler preserves area progress for return visits. All areas remain visible for editing in the local scene.
 
-Occupied areas play their theme's looping soundtrack. Select an area and disable **Music Enabled** to keep a test area silent; configure tracks and volume on the AreaTheme resource. Music stops on area exit and stays independent of player sound effects. See [area lifecycle and music](docs/areas.md#entry-exit-and-theme-music).
+Area music is deferred pending suitable sound files; see the [music restoration backlog](docs/backlog.md#restore-area-music-when-suitable-sound-files-are-available). Area entry/exit hooks remain available; entity SFX are unchanged.

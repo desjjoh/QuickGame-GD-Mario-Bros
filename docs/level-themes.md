@@ -9,13 +9,13 @@ A level contains BaseLevelArea scenes under Areas. Each area owns Layouts (Decor
 
 Select an area and assign its Theme resource in the Inspector before running. The tool script applies its TileSets in the editor and at startup. BaseLevel generates entities only when their area loads and assigns the area's visual_theme and saved progress before the entity enters the tree. Theme selection is a startup/authoring contract; hot-swapping already spawned entities is not implemented.
 
-AreaTheme groups terrain, decoration, and entity-marker TileSets, explicit source-texture-to-replacement mappings, and optional Music with loop/volume settings. These are artwork selections, not palette shaders. Existing sprites and entity scenes remain shared. Missing texture mappings preserve the source texture; missing optional TileSet assignments preserve the layer's assigned TileSet.
+AreaTheme groups terrain, decoration, and entity-marker TileSets, explicit source-texture-to-replacement mappings. These are artwork selections, not palette shaders. Existing sprites and entity scenes remain shared. Missing texture mappings preserve the source texture; missing optional TileSet assignments preserve the layer's assigned TileSet.
 
 ## Supplied Underground art and fallback
 
-Underground currently replaces ground, brick, and alternate brick with the supplied PNGs under assets/Underground (Palette 2). Pipes, question-block animation/used art, and decorations retain Overworld artwork until replacements are provided. Mario is not assigned the area's visual theme.
+Underground maps all 18 supplied PNG counterparts under assets/Underground (Palette 2): ground, solid block, both bricks, all four question-block frames (including used), and all ten pipe sections. Both upright and sideways pipe entities use the replacements, as do terrain pipe tiles. Decorations have no supplied Underground counterparts and retain Overworld artwork. Mario remains independent of the area theme. Mario is not assigned the area's visual theme.
 
-Underground terrain and marker TileSets are under assets/tileset/underground/. They preserve source IDs, atlas coordinates, alternative IDs, entity_id custom data, and collision definitions from the Overworld counterparts. Thus an area's painted cells do not change when selecting the matching theme. Marker textures also preview the correct brick palette in the editor.
+Underground terrain and marker TileSets are under assets/tileset/underground/. They preserve source IDs, atlas coordinates, alternative IDs, entity_id custom data, and collision definitions from the Overworld counterparts. Thus an area's painted cells do not change when selecting the matching theme. Marker textures preview themed bricks and question blocks; Underground-specific 32x32 pipe previews preserve whole-pipe painting. Rebuild both themes' previews with scripts/build_pipe_marker.gd after changing pipe artwork. Existing terrain IDs 0-10 are unchanged; source 11 exposes the matching solid block in both themes with square collision. No painted cells were added or moved.
 
 ## Adding artwork
 
@@ -28,11 +28,11 @@ BaseEntity resolves its child Sprite2D textures and BaseState's static sprite te
 
 ## Current stage migration
 
-Main-area content stays at its original world positions. LowerArea currently sits at (896,240) after a user move; its camera is local (128,120), world (1024,360), and its arrival marker is local (32,48), world (928,288). Lower cells were converted from level coordinates to area-local coordinates with no world-position or tile-ID changes. MainArea's camera stays enabled and LowerArea's stays disabled. Area lifecycle entry now plays the selected theme's music unless Music Enabled is off on that area. Theme selection does not change backgrounds or shader tuning. See [area music lifecycle](areas.md#entry-exit-and-theme-music).
+Main-area content stays at its original world positions. LowerArea currently sits at (896,240) after a user move; its camera is local (128,120), world (1024,360), and its arrival marker is local (32,48), world (928,288). Lower cells were converted from level coordinates to area-local coordinates with no world-position or tile-ID changes. MainArea's camera stays enabled and LowerArea's stays disabled. Theme selection does not change backgrounds or shader tuning. Area music is deferred; see the [backlog](backlog.md).
 
 ## Verification
 
-area_theme_test checks independent terrain textures, retained collisions, missing-art fallback, themed brick spawning and bounce recovery, source-resource isolation, and descendant shutdown. Migration validation compares every saved painted cell's world coordinate and identifiers before/after. Both areas were rendered and visually inspected. Theme resources configure appearance; pipe travel is coordinated separately by BaseLevel.
+area_theme_test checks all 18 texture mappings and dimensions, all 12 terrain sources and retained collisions, both pipe entity variants, marker previews, Underground question animation and used art, decoration fallback, themed brick bounce, source-resource isolation, and descendant shutdown. Migration validation compares every saved painted cell's world coordinate and identifiers before/after. Both areas were rendered and visually inspected. Theme resources configure appearance; pipe travel is coordinated separately by BaseLevel.
 
 ## Editing nested areas safely
 

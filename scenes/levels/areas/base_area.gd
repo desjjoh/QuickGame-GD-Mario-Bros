@@ -1,21 +1,11 @@
 @tool
 class_name BaseLevelArea
 extends Node2D
-## Owns area layouts, entities, camera, theme, and entry/exit music lifecycle.
+## Owns area layouts, entities, camera, theme, and entry/exit lifecycle.
 
 var _runtime_templates: Dictionary[StringName, PackedScene] = {}
 var runtime_loaded: bool = true
 var is_active: bool = false
-var _music_player: AudioStreamPlayer
-
-@export var music_enabled: bool = true:
-	set(value):
-		if music_enabled == value:
-			return
-		music_enabled = value
-		if is_active and not Engine.is_editor_hint():
-			_start_music()
-
 @export var area_id: StringName
 @export var transport_points: Array[TransportPlacement] = []
 var _transport_cells: Dictionary[Vector2i, StringName] = {}
@@ -26,8 +16,6 @@ var _transport_cells: Dictionary[Vector2i, StringName] = {}
 		theme = value
 		if is_inside_tree():
 			apply_theme()
-			if is_active and not Engine.is_editor_hint():
-				_start_music()
 
 
 func _ready() -> void:
@@ -38,48 +26,14 @@ func enter_area() -> void:
 	if Engine.is_editor_hint() or is_active or not runtime_loaded or not is_inside_tree():
 		return
 	is_active = true
-	_start_music()
 
 
 func exit_area() -> void:
 	is_active = false
-	_stop_music()
 
 
 func _exit_tree() -> void:
 	exit_area()
-
-
-func _start_music() -> void:
-	_stop_music()
-	if not is_active or not music_enabled or theme == null or theme.music == null:
-		return
-	var stream := theme.music.duplicate() as AudioStream
-	# Runtime copies leave source resources and their import settings untouched.
-	if stream is AudioStreamMP3 or stream is AudioStreamOggVorbis:
-		stream.loop = theme.music_loop
-	elif stream is AudioStreamWAV:
-		stream.loop_mode = AudioStreamWAV.LOOP_DISABLED
-	_music_player = AudioStreamPlayer.new()
-	_music_player.name = "Music"
-	_music_player.stream = stream
-	_music_player.volume_db = theme.music_volume_db
-	_music_player.finished.connect(_on_music_finished.bind(_music_player))
-	add_child(_music_player)
-	_music_player.play()
-
-
-func _on_music_finished(audio: AudioStreamPlayer) -> void:
-	# Fallback for stream formats without a native loop flag.
-	if audio == _music_player and is_active and music_enabled and theme != null and theme.music_loop and is_instance_valid(_music_player):
-		_music_player.play()
-
-
-func _stop_music() -> void:
-	if is_instance_valid(_music_player):
-		_music_player.stop()
-		_music_player.queue_free()
-	_music_player = null
 
 
 func apply_theme() -> void:
@@ -197,7 +151,7 @@ func prepare_runtime() -> void:
 		return
 	# Capture authoring data before marker-generated entities are created.
 	for child in get_children():
-		if child == _music_player or child.is_queued_for_deletion() or child.name in [&"Arrival", &"Endpoints"]:
+		if child.is_queued_for_deletion() or child.name in [&"Arrival", &"Endpoints"]:
 			continue
 		var copy := child.duplicate()
 		_set_branch_owner(copy, copy)

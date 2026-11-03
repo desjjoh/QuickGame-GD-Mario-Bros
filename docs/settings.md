@@ -237,3 +237,7 @@ Persisted Godot-generated unique_id metadata on BaseArea's authored nodes and re
 ## Area theme soundtrack and silent test areas - 2026-11-02
 
 Requested music lifecycle assigns Overworld Music to assets/soundtrack/01. Ground Theme.mp3 and Underground Music to assets/soundtrack/02. Underground Theme.mp3. New AreaTheme fields default Music Loop=true and Music Volume Db=0. BaseLevelArea Music Enabled defaults true and can disable playback per area. Automated silent_level/silent_game fixtures override both areas to false; the playable test stage remains enabled. Native MP3 looping is enabled only on runtime stream copies; existing imported loop=false values are unchanged. No Project Settings, Input Map or audio-bus settings changed.
+
+## Area music configuration removed - 2026-11-03
+
+At the user's request, remove the AreaTheme Music/Music Loop/Music Volume Db fields and BaseLevelArea Music Enabled property together with area playback. Remove soundtrack resource assignments and test fixture mute overrides. This supersedes the earlier area music configuration; retained audio assets are unassigned. Generic area entry/exit and entity SFX remain. No Project Settings or import settings changed. Future restoration prerequisites are tracked in [backlog](backlog.md).

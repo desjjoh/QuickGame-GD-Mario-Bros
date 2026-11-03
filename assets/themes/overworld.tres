@@ -4,11 +4,9 @@
 [ext_resource type="TileSet" path="res://assets/tileset/decorations.tres" id="3"]
 [ext_resource type="TileSet" path="res://assets/tileset/entity_layout.tres" id="4"]
 
-[ext_resource type="AudioStream" path="res://assets/soundtrack/01. Ground Theme.mp3" id="music"]
 
 [resource]
 script = ExtResource("1")
-music = ExtResource("music")
 display_name = "Overworld"
 terrain = ExtResource("2")
 decorations = ExtResource("3")
