@@ -23,6 +23,8 @@ var _players_draw_index: int = -1
 var _transport_state: PlayerTransportState = null
 var _transport_trip: Dictionary = {}
 var _transport_exiting: bool = false
+var _transport_phase: int = 0
+var _transport_completion_callback: Callable
 
 @onready var player_spawn: Marker2D = $Players/PlayerSpawn
 @onready var players: Node2D = $Players
@@ -57,6 +59,8 @@ func _ready() -> void:
 	var camera := get_viewport().get_camera_2d() as LevelCamera
 	if camera != null and is_instance_valid(player):
 		camera.reset_target(player.body)
+	if not is_shutdown:
+		active_area.enter_area()
 
 
 func spawn_layout_entities() -> void:
@@ -176,6 +180,8 @@ func shutdown() -> void:
 	_abort_transport(false)
 	set_process(false)
 	set_physics_process(false)
+	if is_instance_valid(active_area):
+		active_area.exit_area()
 	if is_instance_valid(active_area) and active_area.runtime_loaded:
 		_save_area(active_area)
 	_shutdown_entities(self)
@@ -257,8 +263,9 @@ func _begin_transport(traveler: BasePlayer, destination: TransportDestination, s
 		"source": weakref(source) if source != null else null, "animate": animate_arrival
 	}
 	_transfer_pending = true
+	_transport_phase += 1
 	if source == null:
-		_finish_transport.call_deferred()
+		_finish_transport.call_deferred(_transport_phase)
 	else:
 		state.configure(source.entry_position(), source.entry_direction())
 		_start_transport_state(state)
@@ -267,7 +274,9 @@ func _begin_transport(traveler: BasePlayer, destination: TransportDestination, s
 
 func _start_transport_state(state: PlayerTransportState) -> void:
 	_transport_state = state
-	state.travel_finished.connect(_on_transport_finished)
+	_transport_phase += 1
+	_transport_completion_callback = _on_transport_finished.bind(_transport_phase)
+	state.travel_finished.connect(_transport_completion_callback)
 	state.exited.connect(_restore_player_draw_order)
 	_players_draw_index = players.get_index()
 	move_child(players, $Areas.get_index())
@@ -306,12 +315,12 @@ func _arrival_data(area: BaseLevelArea, target_id: StringName, animate: bool) ->
 	return {}
 
 
-func _on_transport_finished() -> void:
-	_finish_transport.call_deferred()
+func _on_transport_finished(phase: int) -> void:
+	_finish_transport.call_deferred(phase)
 
 
-func _finish_transport() -> void:
-	if is_shutdown or not _transfer_pending:
+func _finish_transport(phase: int) -> void:
+	if phase != _transport_phase or is_shutdown or not _transfer_pending:
 		return
 	if not _transport_trip_valid() or (_transport_state != null and player.state_machine.current_state != _transport_state):
 		_abort_transport(true)
@@ -352,8 +361,12 @@ func _finish_transport() -> void:
 	active_endpoint = arrival["endpoint"]
 	if previous_area != area:
 		_unload_area(previous_area)
+	area.enter_area()
 	_transport_input_locked = true
 	_record_active_area()
+	if is_shutdown or not is_instance_valid(player) or player.is_shutdown:
+		_abort_transport(false)
+		return
 	var arrival_state := arrival["state"] as PlayerTransportState
 	if arrival_state != null:
 		_transport_trip = trip
@@ -367,10 +380,15 @@ func _finish_transport() -> void:
 
 
 func _record_active_area() -> void:
-	if GameHandler.current_level == self and active_area != null:
-		GameHandler.set_session_value(&"current_area_id", active_area.area_id)
-		GameHandler.set_session_value(&"current_target_id", active_target_id)
-		GameHandler.set_session_value(&"current_endpoint_id", active_target_id)
+	if GameHandler.current_level != self or is_shutdown or not is_instance_valid(active_area):
+		return
+	var keys: Array[StringName] = [&"current_area_id", &"current_target_id", &"current_endpoint_id"]
+	var values: Array = [active_area.area_id, active_target_id, active_target_id]
+	for index in range(keys.size()):
+		# Session observers may replace/shut down the level synchronously.
+		if GameHandler.current_level != self or is_shutdown:
+			return
+		GameHandler.set_session_value(keys[index], values[index])
 
 
 func can_enter_pipe() -> bool:
@@ -382,13 +400,16 @@ func can_transport() -> bool:
 
 
 func _disconnect_transport_state() -> void:
+	# Invalidate queued notifications before another phase/request can begin.
+	_transport_phase += 1
 	_restore_player_draw_order()
 	if is_instance_valid(_transport_state):
 		if _transport_state.exited.is_connected(_restore_player_draw_order):
 			_transport_state.exited.disconnect(_restore_player_draw_order)
-		if _transport_state.travel_finished.is_connected(_on_transport_finished):
-			_transport_state.travel_finished.disconnect(_on_transport_finished)
+		if _transport_completion_callback.is_valid() and _transport_state.travel_finished.is_connected(_transport_completion_callback):
+			_transport_state.travel_finished.disconnect(_transport_completion_callback)
 	_transport_state = null
+	_transport_completion_callback = Callable()
 	_transport_trip.clear()
 	_transport_exiting = false
 

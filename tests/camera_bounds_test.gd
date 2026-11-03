@@ -2,7 +2,7 @@ extends Node
 
 
 func _ready() -> void:
-	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	add_child(game)
 	await get_tree().process_frame
 	var level := GameHandler.current_level

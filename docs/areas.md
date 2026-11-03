@@ -2,6 +2,16 @@
 
 Only the occupied area's runtime content remains loaded. Area roots, Arrival/Endpoints markers, theme/transport configuration, and packed authoring definitions remain available as lightweight routing metadata. Inactive areas free their tile layers, collision objects, generated entities, camera, and other authored runtime branches; they are not merely hidden or paused.
 
+## Entry, exit and theme music
+
+BaseLevel calls `enter_area()` only when an area becomes occupied, after loading content and selecting its camera. It calls `exit_area()` through unload and on level shutdown; tree removal is a cleanup fallback. Entry/exit are idempotent. Loading a destination for validation does not activate it or play its soundtrack, and same-area transport does not restart music.
+
+An active area owns one non-positional AudioStreamPlayer named Music. Entry starts its AreaTheme Music at the beginning; cross-area handoff stops the previous track before starting the destination track. Exit stops and frees the player. Returning to an area restarts its track rather than restoring a saved playback position. Music is independent of the player's exclusive sound-effect channel.
+
+Select MainArea, LowerArea or another BaseLevelArea in the Inspector and turn **Music Enabled** off for a silent test area. It defaults to true. Changing it while active stops/starts music immediately; repeated assignment of the same value does not restart playback. A missing theme or missing Music stream is also silent. Unoccupied and editor-only areas never play music. Reassigning an active area's Theme restarts music from the new resource.
+
+Theme resources expose Music, Music Loop (default true) and Music Volume Db (default 0). Overworld uses `assets/soundtrack/01. Ground Theme.mp3`; Underground uses `assets/soundtrack/02. Underground Theme.mp3`. Looping uses runtime stream copies, leaving shared resources and import settings unchanged. MP3/OGG use native loops; other supported streams restart on completion while the area remains active. Late completion from an older player cannot restart the current track. No music bus, crossfade, pause policy or death-specific music behavior is added here.
+
 ## Editor and runtime
 
 The local editor scene still contains every area's full editable Layouts and camera. BaseLevel is not a tool script, so runtime unloading does not alter the saved stage. In the running game's Remote tree, inactive area roots retain Arrival and Endpoints but have no Layouts, WorldObjects, or Camera2D. Their runtime_loaded flag is false, their root is hidden, and processing is disabled.
@@ -35,3 +45,7 @@ This unloads runtime nodes and physics, not every shared asset resource. Packed 
 ## Verification
 
 area_streaming_test verifies inactive physics has no floor collision, inactive nodes and entity instances are actually freed, endpoints remain resolvable, and repeated visits do not duplicate actors or pipe artwork. Used/removed blocks and tile edits survive visits and level replacement; clearing stored progress is also checked. The pipe entry/rendered checks verify that the destination is still unloaded during descent and the source is unloaded after handoff.
+
+## Inherited scene identity
+
+BaseArea's authored nodes retain Godot-generated unique scene IDs. The playable level keeps Endpoints empty. Routing and scene-hierarchy tests create their own near_start/near_end fixtures under MainArea/Endpoints, with level ownership so native saves retain them. Do not strip unique_id, parent_id_path or editable-instance metadata when editing scene files. scene_hierarchy_test performs three native editor-state save/reload cycles and checks endpoint parents and every painted layout byte array. If Godot already has the older malformed scene open, reload it before saving; in-memory editor state must pick up the repaired hierarchy. Keep the required Layouts, WorldObjects and Endpoints container names; the project uses these paths directly. Stable IDs are serialization metadata, not permission to rename/reparent these inherited containers arbitrarily. The regression verifies native serialization, not every possible editor reparent/undo workflow.

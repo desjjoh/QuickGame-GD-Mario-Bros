@@ -9,7 +9,7 @@ func tick() -> void:
 func _ready() -> void:
 	for direction in [-1.0, 1.0]:
 		for phase in [0.0, 0.5, 1.0, 1.5, 2.0]:
-			var game := load("res://scenes/main/game.tscn").instantiate() as Node
+			var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 			add_child(game)
 			preload("res://tests/test_floor.gd").extend_floor(game)
 			var level := GameHandler.current_level
@@ -39,7 +39,7 @@ func _ready() -> void:
 			Input.action_release(action)
 			Input.action_release(ControllerHandler.secondary_action)
 			game.free()
-	var wide_game := load("res://scenes/main/game.tscn").instantiate() as Node
+	var wide_game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	add_child(wide_game)
 	preload("res://tests/test_floor.gd").extend_floor(wide_game)
 	var wide_level := GameHandler.current_level

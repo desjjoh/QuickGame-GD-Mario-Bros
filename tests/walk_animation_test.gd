@@ -20,7 +20,7 @@ func run_checks() -> void:
 		assert(cadence.get_frame_ticks(direction * 104.99) == 4)
 		assert(cadence.get_frame_ticks(direction * 105.0) == 2)
 	cadence.free()
-	var game: Node = load("res://scenes/main/game.tscn").instantiate()
+	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
 	get_tree().root.add_child(game)
 	preload("res://tests/test_floor.gd").extend_floor(game)
 	var mario := GameHandler.current_player as Mario

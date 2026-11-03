@@ -27,7 +27,7 @@ func run_checks() -> void:
 		key.pressed = true
 		assert(key.is_action_pressed(ControllerHandler.primary_action))
 	for device in [0, 1, 2]:
-		var game: Node = load("res://scenes/main/game.tscn").instantiate()
+		var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
 		get_tree().root.add_child(game)
 		var mario := GameHandler.current_player
 		await tick(5)

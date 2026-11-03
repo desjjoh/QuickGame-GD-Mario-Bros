@@ -7,7 +7,7 @@ func tick() -> void:
 
 
 func _ready() -> void:
-	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	add_child(game)
 	var player := GameHandler.current_player as Mario
 	for frame in range(5):

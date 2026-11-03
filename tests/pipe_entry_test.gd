@@ -2,8 +2,8 @@ extends Node
 
 
 func _ready() -> void:
-	var game := load("res://scenes/main/game.tscn").instantiate() as Node
-	var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
+	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	fixture.get_node("Areas/MainArea/Layouts/EntityLayout").clear()
 	fixture.get_node("Areas/MainArea/Layouts/EntityLayout").set_cell(Vector2i(6,11),3,Vector2i.ZERO)
 	fixture.get_node("Players/PlayerSpawn").position = Vector2(112,176)
@@ -41,6 +41,9 @@ func _ready() -> void:
 			sounds.append(child))
 	assert(level.request_pipe_entry(pipe))
 	assert(level.players.get_index() < level.get_node("Areas").get_index())
+	# Entry aligns feet to the mouth; floor contact may retain a safe-margin offset.
+	var entry_origin := player.body.global_position
+	assert(is_equal_approx(entry_origin.y, pipe.entry_position().y))
 	assert(sounds.size() == 1 and sounds[0].playing)
 	ControllerHandler.input_primary_just_pressed = true
 	ControllerHandler.input_primary = true
@@ -49,7 +52,7 @@ func _ready() -> void:
 	for frame in range(12):
 		player.state_machine.process_physics(1.0/60.0)
 		level._physics_process(1.0/60.0)
-	assert(is_equal_approx(player.body.global_position.y-origin.y,12.0))
+	assert(is_equal_approx(player.body.global_position.y-entry_origin.y,12.0))
 	assert(player.body.global_position.x == origin.x)
 	assert(player.sprite.flip_h, "Vertical entry must preserve left facing.")
 	assert(player.body.velocity == Vector2.ZERO)

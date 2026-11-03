@@ -2,9 +2,9 @@ extends Node
 
 
 func _ready() -> void:
-	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	# Keep collision assertions independent of the user's painted test stage.
-	var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	var fixture_layout := fixture.find_child("EntityLayout", true, false) as TileMapLayer
 	fixture_layout.clear()
 	for cell in [Vector2i(4, 9), Vector2i(5, 9), Vector2i(6, 9), Vector2i(11, 9)]:

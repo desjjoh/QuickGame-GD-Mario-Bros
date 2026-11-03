@@ -14,8 +14,8 @@ func floor_hit(at: Vector2) -> bool:
 
 func _ready() -> void:
 	GameHandler.clear_session()
-	var game := load("res://scenes/main/game.tscn").instantiate() as Node
-	var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
+	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	for area in fixture.get_node("Areas").get_children():
 		area.get_node("Layouts/EntityLayout").clear()
 		var floor := area.get_node("Layouts/GroundLayout") as TileMapLayer
@@ -69,7 +69,7 @@ func _ready() -> void:
 	assert(state["entities"]["brick_3_8"]["removed"])
 	var old_lower: WeakRef = weakref(lower.get_node("WorldObjects/brick_4_9"))
 	for visit in range(3):
-		assert(level.request_area_transfer(&"main",&"near_start"))
+		assert(level.request_area_transfer(&"main",&"player_spawn"))
 		await ticks(2)
 		assert(main.runtime_loaded and not lower.runtime_loaded)
 		assert(old_lower.get_ref() == null)
@@ -91,7 +91,7 @@ func _ready() -> void:
 	await ticks(2)
 	assert(not GameHandler.get_area_progress(progress_key,&"main").is_empty())
 	# The handler also owns progress across replacing the level instance.
-	game = load("res://scenes/main/game.tscn").instantiate() as Node
+	game = load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	game.initial_level = load("res://.godot/validation/streaming-persistence.tscn")
 	add_child(game)
 	level = GameHandler.current_level

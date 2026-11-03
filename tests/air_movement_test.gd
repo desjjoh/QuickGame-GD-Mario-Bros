@@ -26,8 +26,8 @@ func run_checks() -> void:
 	# Exercise the exact grounded-state tick, without input polling races.
 	for state_name in [&"Idle", &"Move", &"Slide"]:
 		for run_pressed in [false, true]:
-			var trial: Node = load("res://scenes/main/game.tscn").instantiate()
-			var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+			var trial: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
+			var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 			fixture.get_node("Areas/MainArea/Layouts/EntityLayout").clear()
 			var floor := fixture.get_node("Areas/MainArea/Layouts/GroundLayout") as TileMapLayer
 			floor.clear()
@@ -101,7 +101,7 @@ func run_checks() -> void:
 	body.free()
 	action.free()
 	for direction in [-1.0, 1.0]:
-		var game: Node = load("res://scenes/main/game.tscn").instantiate()
+		var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
 		get_tree().root.add_child(game)
 		preload("res://tests/test_floor.gd").extend_floor(game)
 		var player := GameHandler.current_player

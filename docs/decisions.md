@@ -240,3 +240,19 @@ Keep ordinary spawn markers and existing scripted/PipeRoute callers compatible. 
 ## Return directly to PlayerSpawn - 2026-11-02
 
 User preference supersedes the temporary start exit pipe: main/player_spawn is a reserved transport destination that resolves the real level Players/PlayerSpawn marker. No duplicate spatial marker or copied position is stored. Arrival restores normal play immediately after source entry finishes, without emergence. Remove the temporary return pipe and placement; retain isolated pipe-to-pipe regression coverage.
+
+## Movement ticks and transport callback ownership - 2026-11-02
+
+Generalize the jump-only same-tick handoff into PlayerState.continue_physics for every pre-integration movement transition. Keep post-integration transitions as ordinary FSM state returns; do not globally auto-run destination state physics, which would duplicate landing/stop movement. Guard the handoff against observer-triggered terminal shutdown.
+
+Bind each deferred transport completion to a monotonically changing phase ID. Disconnect/cancellation invalidates queued callbacks before another phase begins. Recheck level ownership between session notifications and stop old transport work if a handler replaces/shuts down the level. This preserves existing gameplay while making the lifecycle safer for future death/UI observers. Repair the saved endpoint hierarchy and persist native base-area scene identities; retain an editor-state round-trip regression.
+
+## Count new forward progress for one-way scrolling - 2026-11-02
+
+Supersedes summing every positive frame-to-frame X displacement. Retain the furthest target X until an explicit camera reset/arrival, so collision-recovery oscillation and retracing previously covered ground cannot accumulate camera scroll. Follow-disabled cameras continue refreshing their baseline. Keep fractional movement, 80/112 thresholds, camera limits and interpolation settings unchanged. This fixes a reproduced pipe-side hopping drift without modifying player collision or physics tuning.
+
+## Theme music belongs to occupied area lifecycle - 2026-11-02
+
+Store soundtrack selection, loop and volume on AreaTheme; let BaseLevelArea.enter_area/exit_area own the actual AudioStreamPlayer. BaseLevel loading does not imply entry: activate only after a committed handoff and camera selection, stop the old area before starting the new one, and leave same-area transport playing continuously. Level shutdown and tree exit provide cleanup. Runtime stream copies provide loops without changing imports. Player SFX remain separate.
+
+Music Enabled is a per-area override, default true, so test rooms can keep their palette theme without music. Missing tracks are silent. Return visits restart tracks; playback position is not part of saved area progress. Non-music regression fixtures disable music using this override, while a dedicated real-track test covers lifecycle and reentrant level replacement. No new global handler, audio bus or project settings are introduced.

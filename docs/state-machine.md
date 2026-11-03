@@ -70,3 +70,7 @@ Mario owns PipeEnter using PlayerPipeEnterState, which inherits the shared Playe
 ## Area unload and logical state
 
 Area unload captures logical progress before entity shutdown and frees the instances. Returning constructs new entities and applies restore_area_state before FSM startup; it does not restart shut-down machines. BaseBlock saves Active/Inactive, resolving a Bouncing state's return_state to avoid replaying one-shot reactions. GameHandler owns the snapshots. See [area lifecycle](areas.md).
+
+## Movement handoff versus completed movement
+
+PlayerState.continue_physics transfers an unconsumed physics tick to another state through the normal FSM lifecycle. Only pre-movement transitions use it. Landing and other transitions after move_body return a state without running another movement step. Terminal shutdown or a state changed by an observer stops the handoff. See [movement ownership](movement.md#physics-ownership-across-state-changes).

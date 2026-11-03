@@ -12,8 +12,8 @@ func point(cell: Vector2i, id: StringName) -> TransportPlacement:
 	return result
 
 func _ready() -> void:
-	var game = load("res://scenes/main/game.tscn").instantiate()
-	var fixture = load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var game = load("res://tests/fixtures/silent_game.tscn").instantiate()
+	var fixture = load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	var main := fixture.get_node("Areas/MainArea") as BaseLevelArea
 	var layer := main.get_node("Layouts/EntityLayout") as TileMapLayer
 	layer.clear()
@@ -61,7 +61,7 @@ func _ready() -> void:
 	assert(not target is PipeEntrance)
 	var arrivals: Array[Vector2] = []
 	player.state_machine.state_changed.connect(func(_previous: BaseState, next: BaseState):
-		if next == player.state_machine.initial_state:
+		if _previous == null and next == player.state_machine.initial_state:
 			arrivals.append(player.body.global_position))
 	var destination := TransportDestination.create(&"main",&"stage_return")
 	var origin := player.body.global_position

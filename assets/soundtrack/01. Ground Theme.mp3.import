@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://d0c54iitr1u18"
+path="res://.godot/imported/01. Ground Theme.mp3-c2c9afde0ae26688c75ca0d816daab45.mp3str"
+
+[deps]
+
+source_file="res://assets/soundtrack/01. Ground Theme.mp3"
+dest_files=["res://.godot/imported/01. Ground Theme.mp3-c2c9afde0ae26688c75ca0d816daab45.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
