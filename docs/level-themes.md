@@ -7,7 +7,7 @@ A level contains BaseLevelArea scenes under Areas. Each area owns Layouts (Decor
 - TestLevel/Areas/MainArea uses assets/themes/overworld.tres.
 - TestLevel/Areas/LowerArea uses assets/themes/underground.tres.
 
-Select an area and assign its Theme resource in the Inspector before running. The tool script applies its TileSets in the editor and at startup. BaseLevel generates entities from every area's markers and assigns the area's visual_theme before the entity enters the tree. Theme selection is a startup/authoring contract; hot-swapping already spawned entities is not implemented.
+Select an area and assign its Theme resource in the Inspector before running. The tool script applies its TileSets in the editor and at startup. BaseLevel generates entities only when their area loads and assigns the area's visual_theme and saved progress before the entity enters the tree. Theme selection is a startup/authoring contract; hot-swapping already spawned entities is not implemented.
 
 AreaTheme groups terrain, decoration, and entity-marker TileSets plus explicit source-texture-to-replacement mappings. These are artwork selections, not palette shaders. Existing sprites and entity scenes remain shared. Missing texture mappings preserve the source texture; missing optional TileSet assignments preserve the layer's assigned TileSet.
 
@@ -37,3 +37,5 @@ area_theme_test checks independent terrain textures, retained collisions, missin
 ## Editing nested areas safely
 
 BaseLevel and TestLevel persist Editable Children for MainArea; TestLevel also persists it for LowerArea. These flags are required for per-level nested layout and camera overrides to survive editor saving. Expand Areas -> MainArea/LowerArea -> Layouts directly. The area-theme regression saves and reloads the level to verify painted bytes and camera enabled states survive. If an external repair changes the scene file, reload it in the editor before saving an older in-memory copy.
+
+At runtime, inactive areas retain their theme/configuration metadata but free their Layouts and world instances. Theme application runs again when the runtime is recreated; saved cell data and logical block state are restored. The local editor still shows both full layouts. See [area lifecycle](areas.md).

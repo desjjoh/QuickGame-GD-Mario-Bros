@@ -64,4 +64,9 @@ Connect Bouncing's inherited entered signal for reaction hooks; its Enter Sound 
 
 ## Controlled pipe entry
 
-Mario owns PipeEnter using the shared PlayerPipeEnterState script; BasePlayer only exports the reference. The state replaces ordinary movement with a controlled descent and disables controls. BaseLevel reserves and validates the route, freezes the source camera/clamp, then commits a deferred handoff on descent_finished. State exit restores collision/visibility; uncommitted exit also restores position and stops its entry audio. BaseState retains its entry audio handle for this ownership-sensitive cleanup. See [pipes](pipes.md#entry-animation-and-sound).
+Mario owns PipeEnter using PlayerPipeEnterState, which inherits the shared PlayerTransportState contract. BasePlayer exports the concrete reference; TransportEntity supplies the appropriate state for a source/destination. BaseLevel.transport reserves and validates explicit target IDs, freezes camera/clamp updates during travel, and commits deferred phase transitions on travel_finished. Normal states do not activate between entry and emergence. State exit restores collision/visibility; uncommitted exit also restores position and stops entry audio. BaseState retains the entry audio handle for ownership-sensitive cleanup. The legacy descent_finished signal remains available on PipeEnter. See [transport](transport.md).
+
+
+## Area unload and logical state
+
+Area unload captures logical progress before entity shutdown and frees the instances. Returning constructs new entities and applies restore_area_state before FSM startup; it does not restart shut-down machines. BaseBlock saves Active/Inactive, resolving a Bouncing state's return_state to avoid replaying one-shot reactions. GameHandler owns the snapshots. See [area lifecycle](areas.md).

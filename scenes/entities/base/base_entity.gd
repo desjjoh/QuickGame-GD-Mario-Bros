@@ -107,3 +107,11 @@ func _apply_visual_theme() -> void:
 			library.add_animation(animation_name, animation)
 		animation_player.remove_animation_library(library_name)
 		animation_player.add_animation_library(library_name, library)
+
+
+func capture_area_state() -> Dictionary:
+	return {} # Specialized entities opt in to logical progress persistence.
+
+
+func restore_area_state(_data: Dictionary) -> void:
+	pass # Called before entering the tree, before the initial state starts.

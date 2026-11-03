@@ -24,6 +24,8 @@ func _ready() -> void:
 	player.set_physics_process(false)
 	level.set_physics_process(false)
 	pipe.set_physics_process(false)
+	player.body.global_position.x = 110
+	player.face_direction(-1.0)
 	var origin := player.body.global_position
 	var layer := player.body.collision_layer
 	var mask := player.body.collision_mask
@@ -38,6 +40,7 @@ func _ready() -> void:
 		if child is AudioStreamPlayer2D:
 			sounds.append(child))
 	assert(level.request_pipe_entry(pipe))
+	assert(level.players.get_index() < level.get_node("Areas").get_index())
 	assert(sounds.size() == 1 and sounds[0].playing)
 	ControllerHandler.input_primary_just_pressed = true
 	ControllerHandler.input_primary = true
@@ -47,7 +50,8 @@ func _ready() -> void:
 		player.state_machine.process_physics(1.0/60.0)
 		level._physics_process(1.0/60.0)
 	assert(is_equal_approx(player.body.global_position.y-origin.y,12.0))
-	assert(player.body.global_position.x == 112)
+	assert(player.body.global_position.x == origin.x)
+	assert(player.sprite.flip_h, "Vertical entry must preserve left facing.")
 	assert(player.body.velocity == Vector2.ZERO)
 	assert(camera.global_position == camera_origin)
 	assert(player.state_machine.current_state == player.pipe_enter_state)
@@ -55,6 +59,7 @@ func _ready() -> void:
 	transient.free()
 	level._physics_process(1.0/60.0)
 	assert(player.body.global_position == origin)
+	assert(level.players.get_index() > level.get_node("Areas").get_index())
 	assert(player.body.collision_layer == layer and player.body.collision_mask == mask)
 	assert(player.sprite.visible)
 	assert(player.state_machine.current_state == player.state_machine.initial_state)
@@ -67,8 +72,14 @@ func _ready() -> void:
 	level._physics_process(1.0/60.0)
 	assert(level.can_enter_pipe())
 	pipe.destination_endpoint_id = &"arrival"
+	player.body.global_position.x = 114
+	player.face_direction(1.0)
+	origin = player.body.global_position
 	assert(level.request_pipe_entry(pipe))
+	assert(player.body.global_position.x == 114)
+	assert(not player.sprite.flip_h, "Vertical entry must preserve right facing too.")
 	player.state_machine.process_physics(0.1)
+	assert(player.body.global_position.x == 114 and not player.sprite.flip_h)
 	level.shutdown()
 	assert(player.is_shutdown and player.state_machine.current_state == null)
 	assert(player.body.collision_layer == layer and player.body.collision_mask == mask)

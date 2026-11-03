@@ -1,12 +1,17 @@
 extends SceneTree
+## Pack exact source pixels into the two paintable 2x2 marker previews.
 func _initialize() -> void:
-	var image := Image.create(32,32,false,Image.FORMAT_RGBA8)
+	var previews := {
+		"pipe_entrance": ["pipe-top-1", "pipe-top-2", "pipe-1", "pipe-2"],
+		"sideways_pipe_entrance": ["pipe-top-h-1", "pipe-h-1", "pipe-top-h-2", "pipe-h-2"]
+	}
 	var folder := "res://assets/Overworld (Palette 1)/interactibles/pipes/"
-	var files := ["pipe-top-1.png","pipe-top-2.png","pipe-1.png","pipe-2.png"]
-	for index in range(4):
-		var part := (load(folder + files[index]) as Texture2D).get_image()
-		part.convert(Image.FORMAT_RGBA8)
-		image.blit_rect(part,Rect2i(0,0,16,16),Vector2i((index%2)*16,(index >> 1)*16))
 	DirAccess.make_dir_recursive_absolute("res://assets/tileset/previews")
-	assert(image.save_png("res://assets/tileset/previews/pipe_entrance.png") == OK)
+	for preview: String in previews:
+		var image := Image.create(32,32,false,Image.FORMAT_RGBA8)
+		for index in range(4):
+			var part := (load(folder + previews[preview][index] + ".png") as Texture2D).get_image()
+			part.convert(Image.FORMAT_RGBA8)
+			image.blit_rect(part,Rect2i(0,0,16,16),Vector2i((index%2)*16,(index >> 1)*16))
+		assert(image.save_png("res://assets/tileset/previews/" + preview + ".png") == OK)
 	quit()

@@ -204,3 +204,39 @@ BaseLevel revalidates unique IDs and weak targets before deferred movement, reco
 ## 2026-11-02 - Stateful animated pipe entry
 
 Supersedes immediate transfer for interactive pipe entities: reserve and validate the route, enter the concrete player's reusable PipeEnter state, then perform the existing deferred handoff only after descent. BasePlayer exports the state reference without owning concrete state nodes. Normal movement/input/collision and source-camera updates are suspended during entry. State exit owns reversible collision/visibility/audio cleanup; only a committed transfer skips restoring the source position. Missing targets or shutdown cannot leave the player invisible or non-colliding. The direct transfer API remains immediate for scripted routing. No exit animation or fade is introduced.
+
+## 2026-11-02 - Active-area runtime unloading with preserved progress
+
+The user requested unoccupied areas unload and explicitly chose preserving progress on return. Keep lightweight area roots, endpoint/configuration metadata, and packed authoring definitions, while freeing inactive runtime branches (including tile collision, actors, and cameras). Load/restore only at handoff, then save/shut down/free the source. Same-area routing keeps its existing runtime.
+
+GameHandler owns memory-only progress keyed by level/area: tile data, logical block state, and removed marker entities. Capture logical reaction outcomes instead of replaying Bouncing states. New instances receive progress before FSM startup. Templates/theme assets remain cached; full asset eviction and asynchronous streaming are outside this milestone.
+
+## 2026-11-02 - Temporary player background priority
+
+Supersedes the always-foreground pipe-artwork decision. Pipes use normal world hierarchy/draw order and Mario draws in front during ordinary gameplay. BaseLevel owns a reversible draw-order change during pipe entry: move Players before Areas and restore its prior index on completion/cancellation/state exit. This changes rendering without reparenting live entities or changing Z bands, preserving lifecycle, physical transforms, and the shared shadow. Remove the no-longer-needed ForegroundObjects and pipe RemoteTransform2D.
+
+## Directional pipes and emergence - 2026-11-02
+
+Supersedes the earlier deferred-emergence limitation. Reuse the existing PipeEntrance scene/script with an inherited sideways variant, and the concrete player-owned PipeEnter state for entry and exit. AreaEndpoint Animate Exit is opt-in so open-space arrivals remain compatible; position means final feet position and Exit Direction controls emergence. Direct scripted transfer remains immediate. BaseLevel owns both phases, routing, camera handoff and temporary draw order; GameHandler continues owning shared session/progress data. Sideways entry requires grounded wall alignment and right input. Reentry locks until directional input is released.
+
+## Reference pipe presentation and control ownership - 2026-11-02
+
+PipeEnter uses an optional walk animation/cadence reference supplied by the concrete Mario scene for horizontal travel. Vertical travel retains a static pose. Keep the FSM in travel ownership across area handoff; do not start the normal state between entry and emergence. Exit Distance is endpoint configuration, defaulting to 96 pixels. Collision and controls restore at completion, with normal processing on the next physics tick. Input during travel is not buffered. The entry-only sound is suppressed on emergence. This supersedes the previous sprite-height-only exit duration and per-emergence sound.
+
+## Pipe exit sound preference - 2026-11-02
+
+Supersedes the entry-only audio choice above: the user wants the pipe sound on both entry and exit. Use the standard state activation sound for both phases; keep nonlooping playback and existing travel/control timing. Destination-pipe routing instead of separate arrival markers is under discussion and is not implemented.
+
+## Vertical entry pose and silent emergence - 2026-11-02
+
+User preference supersedes exit audio restoration and the earlier automatic-centering choice: vertical entry retains the accepted horizontal position and facing while descending. Keep the alignment/input gates and travel/control timing. Emergence is silent again; upward exit still uses its existing destination position and right-facing pose. Destination-pipe routing remains discussion only.
+
+## Shared explicit transport and entity-owned arrivals - 2026-11-02
+
+Supersedes pipe-to-adjacent-marker routing for new painted pipe authoring. BaseLevel.transport takes the current player, a TransportDestination (area/target IDs) and optional TransportEntity source. Area-owned TransportPlacement resources configure each painted anchor's ID, destination and permissions. Metadata stays resident while the entity is unloaded; the loaded destination entity supplies arrival geometry and PlayerTransportState. The coordinator handles travel phases, cameras, progress and unloading without implementing pipe/vine motion. A non-pipe test presentation exercises this contract; vines themselves remain unimplemented.
+
+Keep ordinary spawn markers and existing scripted/PipeRoute callers compatible. Explicit Transport Points take precedence over legacy route fields. Never select a nearby alternative for missing/duplicate targets. The secret return now targets a distinct exit-only pipe near the stage start, with no separate pipe_return marker. The native resource array is the initial per-cell editor; a custom painting Inspector remains deferred.
+
+## Return directly to PlayerSpawn - 2026-11-02
+
+User preference supersedes the temporary start exit pipe: main/player_spawn is a reserved transport destination that resolves the real level Players/PlayerSpawn marker. No duplicate spatial marker or copied position is stored. Arrival restores normal play immediately after source entry finishes, without emergence. Remove the temporary return pipe and placement; retain isolated pipe-to-pipe regression coverage.

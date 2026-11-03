@@ -26,9 +26,13 @@ func _ready() -> void:
 	add_child(game)
 	var level := GameHandler.current_level
 	var room := level.get_node("Areas/LowerArea") as Node2D
-	var camera := room.get_node("Camera2D") as LevelCamera
-	assert(not camera.enabled and not camera.follow_enabled)
+	assert(not (room as BaseLevelArea).runtime_loaded)
+	assert(not room.has_node("Camera2D"))
 	assert(get_viewport().get_camera_2d() == level.get_node("Areas/MainArea/Camera2D"))
+	assert(level.request_area_transfer(&"lower"))
+	await get_tree().process_frame
+	var camera := room.get_node("Camera2D") as LevelCamera
+	assert(camera.enabled and not camera.follow_enabled)
 	var ground := level.get_node("Areas/LowerArea/Layouts/GroundLayout") as TileMapLayer
 	for x in range(16):
 		assert(ground.get_cell_source_id(Vector2i(x,0)) == 0)
@@ -36,7 +40,7 @@ func _ready() -> void:
 	for y in range(1,13):
 		assert(ground.get_cell_source_id(Vector2i(0,y)) == 0)
 		assert(ground.get_cell_source_id(Vector2i(15,y)) == 0)
-	# Simulate arrival only; pipe travel is intentionally not implemented yet.
+	# Continue motion trials in the newly loaded destination area.
 	camera.enabled = true
 	camera.make_current()
 	var player := level.player

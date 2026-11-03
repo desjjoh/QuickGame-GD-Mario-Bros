@@ -14,4 +14,4 @@ Verified a rendered preview with the project's Forward+ D3D12 renderer. This is 
 
 TestLevel/Background is a rectangular Polygon2D covering the current area (0,0) to (768,240), colored #a2baff. Its Z index is -1, placing it behind the Z=0 CanvasGroup composite rather than contributing to its halo silhouette. The project-wide clear color is unchanged. This is a bounded scene background, not the future area/background management system.
 
-Pipe artwork is rendered under BaseLevel/ForegroundObjects after Players at the same Z=0. It can cover Mario during future descent while remaining part of the single combined shadow; its physics body stays in the area's WorldObjects. No shader or shadow parameters were changed for this ordering.
+Pipe artwork remains in its area's normal WorldObjects hierarchy. Mario normally draws over it; only during entry does the Players group move before Areas to put him behind world artwork. All visuals remain Z=0 inside the combined shadow group, without shader parameter changes or a separate foreground layer.

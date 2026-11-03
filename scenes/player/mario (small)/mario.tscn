@@ -99,8 +99,10 @@ sound_effect = ExtResource("13_jump_sound")
 [node name="Bonk" parent="Actions"]
 enabled = true
 
-[node name="PipeEnter" type="Node" parent="StateMachine"]
+[node name="PipeEnter" type="Node" parent="StateMachine" node_paths=PackedStringArray("walk_cadence")]
 script = ExtResource("16_pipe_state")
+walk_animation_name = &"walk"
+walk_cadence = NodePath("../../Presentation/WalkAnimation")
 sprite_texture = ExtResource("6_nrfpf")
 stop_animation_on_enter = true
 enter_sound_effect = ExtResource("17_pipe_sound")

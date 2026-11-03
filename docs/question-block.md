@@ -6,7 +6,7 @@ QuestionBlock inherits BaseBlock's solid 16x16 body, top-left origin, presentati
 - Bouncing rejects further hits, stops the loop, selects question-block-4.png, and begins the sprite bounce on entry. On completion it transitions to Inactive.
 - Inactive keeps the used sprite and rejects hits, with frame, physics, and input updates disabled.
 
-There are no items, coins, score rewards, persistence, or brick-breaking rules yet. Reloading the level creates fresh active blocks. The solid body stays fixed throughout the visual bounce.
+There are no items, coins, score rewards, or brick-breaking rules yet. Area progress is preserved in GameHandler: returning to an area or replacing the same named level within the session restores used question blocks. A fresh session starts from the authored layout. The solid body stays fixed throughout the visual bounce.
 
 ## Hit delivery and reuse
 
@@ -33,3 +33,5 @@ Bouncing inherits BaseState.entered and exited signals plus Enter Sound Effect a
 Paint question markers in TestLevel/Areas/MainArea/Layouts/EntityLayout using source 1, entity_id question_block. The level's Entity Scenes dictionary maps this ID to QuestionBlock. Existing painted cells are preserved; tests create independent fixtures.
 
 question_block_test verifies palette timings and loop wrap, real Mario jump-to-block activation, invalid-hit rejection, ordered Active -> Bouncing -> Inactive transitions, entry/completion event counts, one-time activation, used appearance, sprite bounce with fixed collision, independence of neighboring blocks, and cleanup during a bounce. Headless checks do not replace visual/audio playtesting.
+
+Area unload during Bouncing saves its logical Inactive result. Restoration selects Inactive before startup, so entry bounce/events are not replayed. See [area lifecycle](areas.md).

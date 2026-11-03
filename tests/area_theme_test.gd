@@ -20,23 +20,28 @@ func _ready() -> void:
 		assert(level.get_node("Areas/" + parts[0] + "/Layouts/" + parts[1]).tile_map_data == saved_cells[path])
 	assert(level.get_node("Areas/MainArea/Camera2D").enabled)
 	assert(not level.get_node("Areas/LowerArea/Camera2D").enabled)
-	level.player_scene = null
 	add_child(level)
 	var main := level.get_node("Areas/MainArea") as BaseLevelArea
 	var lower := level.get_node("Areas/LowerArea") as BaseLevelArea
 	assert(main.theme.display_name == "Overworld")
 	assert(lower.theme.display_name == "Underground")
 	var main_ground := main.get_node("Layouts/GroundLayout") as TileMapLayer
+	assert(not lower.runtime_loaded and not lower.has_node("Layouts"))
+	var main_terrain := main_ground.tile_set
+	var main_decorations := main.theme.decorations
+	assert(level.request_area_transfer(&"lower"))
+	await get_tree().process_frame
+	assert(lower.runtime_loaded and not main.runtime_loaded)
 	var lower_ground := lower.get_node("Layouts/GroundLayout") as TileMapLayer
-	assert(main_ground.tile_set != lower_ground.tile_set)
-	assert((main_ground.tile_set.get_source(0) as TileSetAtlasSource).texture.resource_path.contains("Overworld"))
+	assert(main_terrain != lower_ground.tile_set)
+	assert((main_terrain.get_source(0) as TileSetAtlasSource).texture.resource_path.contains("Overworld"))
 	assert((lower_ground.tile_set.get_source(0) as TileSetAtlasSource).texture.resource_path.contains("Underground"))
 	for source_id in range(5):
 		var source := lower_ground.tile_set.get_source(source_id) as TileSetAtlasSource
 		assert(source.get_tile_data(Vector2i.ZERO,0).get_collision_polygons_count(0) == 1)
 	# Missing pipe and decoration variants retain the original texture resources.
-	assert((main_ground.tile_set.get_source(1) as TileSetAtlasSource).texture == (lower_ground.tile_set.get_source(1) as TileSetAtlasSource).texture)
-	assert(main.get_node("Layouts/DecorationLayout").tile_set == lower.get_node("Layouts/DecorationLayout").tile_set)
+	assert((main_terrain.get_source(1) as TileSetAtlasSource).texture == (lower_ground.tile_set.get_source(1) as TileSetAtlasSource).texture)
+	assert(main_decorations == lower.get_node("Layouts/DecorationLayout").tile_set)
 	var originals := load("res://scenes/entities/blocks/brick/brick_block.tscn").instantiate() as BaseBlock
 	var original_texture: Texture2D = originals.get_node("Sprite2D").texture
 	originals.free()
@@ -56,7 +61,7 @@ func _ready() -> void:
 	# Same painted IDs, different tile textures, and no shared resource mutation.
 	assert(lower.theme.resolve_texture(original_texture).resource_path.contains("Underground"))
 	assert(main.theme.resolve_texture(original_texture) == original_texture)
-	assert(not lower.get_node("Camera2D").enabled)
+	assert(lower.get_node("Camera2D").enabled)
 	level.shutdown()
 	for block in lower.get_node("WorldObjects").get_children():
 		assert(block.is_shutdown)

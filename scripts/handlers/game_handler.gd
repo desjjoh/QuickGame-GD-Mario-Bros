@@ -9,6 +9,7 @@ var current_level: BaseLevel
 var current_player: BasePlayer
 var _level_container: Node2D
 var _session: Dictionary[StringName, Variant] = {}
+var _area_progress: Dictionary = {}
 var _loading: bool = false
 
 
@@ -63,3 +64,18 @@ func get_session_value(key: StringName, fallback: Variant = null) -> Variant:
 
 func clear_session() -> void:
 	_session.clear()
+	_area_progress.clear()
+
+
+func store_area_progress(level_key: String, area_id: StringName, data: Dictionary) -> void:
+	if not _area_progress.has(level_key):
+		_area_progress[level_key] = {}
+	_area_progress[level_key][area_id] = data.duplicate(true)
+
+
+func get_area_progress(level_key: String, area_id: StringName) -> Dictionary:
+	return (_area_progress.get(level_key, {}).get(area_id, {}) as Dictionary).duplicate(true)
+
+
+func forget_area_progress(level_key: String) -> void:
+	_area_progress.erase(level_key)

@@ -26,6 +26,7 @@ func _ready() -> void:
 	route_b.cell = Vector2i(8,11)
 	route_b.destination_area_id = &"main"
 	route_b.destination_endpoint_id = &"near_end"
+	main.transport_points = []
 	main.pipe_routes = [route_a,route_b]
 	(main.get_node("Endpoints/near_end") as AreaEndpoint).exit_direction = AreaEndpoint.ExitDirection.RIGHT
 	for area in fixture.get_node("Areas").get_children():

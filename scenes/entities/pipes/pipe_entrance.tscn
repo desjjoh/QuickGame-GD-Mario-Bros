@@ -24,7 +24,6 @@ texture = ExtResource("5")
 [node name="BottomRight" type="Sprite2D" parent="Visuals"]
 position = Vector2(24, 24)
 texture = ExtResource("6")
-[node name="VisualTransform" type="RemoteTransform2D" parent="."]
 [node name="Body" type="StaticBody2D" parent="."]
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
 position = Vector2(16, 16)

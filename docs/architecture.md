@@ -5,8 +5,8 @@
 | Owner | Responsibility |
 | --- | --- |
 | Game | Registers its LevelContainer and initial level with GameHandler |
-| GameHandler | Replaces levels; holds current game, level, player, and in-memory session values |
-| BaseLevelArea | Owns area layouts, generated world objects, arrival marker, camera, and selected theme |
+| GameHandler | Replaces levels; holds current game/player/session values and persistent-in-session area progress |
+| BaseLevelArea | Owns area metadata/templates and loads/frees its runtime layouts, world objects, and camera |
 | AreaTheme | Selects compatible TileSets and entity texture replacements with fallback |
 | BaseLevel | Generates area entities, spawns the player, coordinates deferred area transfer/cameras, updates bounds, composites the shadow, and shuts down entities |
 | BaseEntity | Owns its state machine, callback forwarding, exclusive sound effects, and terminal shutdown |
@@ -67,12 +67,11 @@ BaseLevel [CanvasGroup]
 |   |   \-- Camera2D
 |   \-- LowerArea [same area foundation, Underground theme]
 +-- Enemies
-+-- Players
-|   \-- PlayerSpawn
-\-- ForegroundObjects [pipe visuals]
+\-- Players
+    \-- PlayerSpawn
 ```
 
-BaseLevel owns an Areas container with a reusable MainArea foundation; TestLevel adds LowerArea. Each area selects an AreaTheme, supplies painted cells, and owns its compatible TileSets, generated WorldObjects, and camera. BaseLevel's entity_layout/world_objects properties refer to MainArea for convenience; generation processes every area. Players remain level-owned and draw after ordinary area content; ForegroundObjects then draws pipe visuals over players. Layout groups enforce identity local transforms and 16x16 square cells. All contributing visuals remain Z=0 so the shared shadow sees their combined silhouette. See [area themes](level-themes.md).
+BaseLevel owns an Areas container with a reusable MainArea foundation; TestLevel adds LowerArea. Each area selects an AreaTheme, supplies painted cells, and owns its compatible TileSets, generated WorldObjects, and camera. BaseLevel's entity_layout/world_objects properties refer to MainArea for convenience; generation processes each area when its runtime loads. These MainArea convenience properties return null while MainArea is unloaded. Players remain level-owned and normally draw after all area content, including pipes. During transport entry and emergence, their group draws before Areas and is restored on arrival/cancellation. Layout groups enforce identity local transforms and 16x16 square cells. All contributing visuals remain Z=0 so the shared shadow sees their combined silhouette. See [area themes](level-themes.md).
 
 Scene inheritance is BaseLevel -> TestLevel, BaseEntity -> BasePlayer -> Mario, and BaseEntity -> BaseBlock -> BrickBlock/QuestionBlock. AlternateBrickBlock inherits BrickBlock and overrides only its sprite texture. Scripts follow the corresponding inheritance; concrete blocks use BaseBlock directly and QuestionBlock and BrickBlock supply shared block-state scripts. States inherit BaseState -> EntityState -> PlayerState -> Mario's concrete state scripts. Shared PlayerState lives under scripts/states/player/.
 
@@ -80,7 +79,7 @@ Scene inheritance is BaseLevel -> TestLevel, BaseEntity -> BasePlayer -> Mario, 
 
 1. Godot creates GameHandler and ControllerHandler autoloads.
 2. Game registers itself and LevelContainer, then asks GameHandler to load the initial level.
-3. Areas apply their theme TileSets; BaseLevel generates each area's EntityLayout under its WorldObjects, assigning visual_theme before startup, then spawns Mario under Players.
+3. Areas apply their theme TileSets; BaseLevel unloads inactive runtime branches, restores/generates the starting area's EntityLayout under its WorldObjects, assigns visual_theme and saved progress before startup, then spawns Mario under Players.
 4. BaseEntity initializes the machine and presentation callbacks, starts the initial state, and subscribes to input.
 5. GameHandler records the player and emits level_changed.
 
@@ -102,7 +101,7 @@ Each entity plays one sound effect at a time; jump, bump, skid, and state effect
 
 ## Level content and assets
 
-The main test area has 944 pixels of horizontal space, ground top Y=208, PlayerSpawn=(48,208), and initial camera center=(128,120). Its world bounds are 0/944 with right-only tracking. LowerArea currently sits at (896,240), with a disabled fixed camera centered at world (1024,360). Painted PipeEntrance entities support travel to named endpoints within or between areas, including active-area and camera selection. Pipe entry animates before the destination handoff; exit animation, death, and respawn remain unimplemented.
+The main test area has 944 pixels of horizontal space, ground top Y=208, PlayerSpawn=(48,208), and initial camera center=(128,120). Its world bounds are 0/944 with right-only tracking. LowerArea currently sits at (896,240), with a disabled fixed camera centered at world (1024,360). Painted transport entities use explicit area/target IDs within or between areas. BaseLevel.transport coordinates entry, destination loading, camera handoff and emergence. Destination pipes supply their exit geometry without adjacent markers. Upright and inherited left-facing entrances share travel behavior. Death and respawn remain unimplemented.
 
 GroundLayout renders solid terrain directly. DecorationLayout renders collision-free bushes, hills, and clouds directly on the same 16x16 grid. Each area's EntityLayout is a collision-free authoring layer: its entity_id custom data maps through Entity Scenes to actual BaseEntity scenes under WorldObjects. It hides at runtime. Each spawned entity owns its own collision, detection, and behavior; the spawner does not impose solid collision. See [entity layout](entity-layout.md) and [question block](question-block.md).
 
@@ -112,6 +111,8 @@ Environment art is theme-first under assets/Overworld (Palette 1) and assets/Und
 
 See [verification](verification.md) for the complete test command and scope. Movement remains an approximation of the reference: fixed-point arithmetic, original countdown phases, several collision probes, and update ordering are not cycle-accurate. Gameplay input represents one global controller; session values are memory-only. Enemies, rewards, brick breaking, runtime themes, and respawn remain future milestones.
 
-PipeEntrance is a BaseEntity with solid 2x2 pipe collision. It requests BaseLevel area transfer through ControllerHandler input and alignment/ground checks. The level owns camera selection and records current_area_id/current_endpoint_id in GameHandler; other shared session state is preserved. See [pipes](pipes.md).
+TransportEntity inherits BaseEntity and supplies entry eligibility, a destination resource, opening geometry and a PlayerTransportState. PipeEntrance implements this contract with 2x2 solid collision and the existing ControllerHandler input/ground/alignment checks. Future transport types can provide their own state. BaseLevel.transport validates explicit area/target IDs, coordinates loading and cameras, and records current_area_id/current_target_id in GameHandler. Shared session state is preserved.
 
-Animated pipe entry is coordinated by BaseLevel and the concrete player's assigned PlayerPipeEnterState. It suspends normal player movement/collision and source camera updates, then uses the existing named-endpoint transfer after descent. Cancellation and shutdown restore temporary state.
+PlayerPipeEnterState inherits PlayerTransportState. The level waits for travel_finished before each deferred handoff/completion. Painted TransportPlacement resources stay resident with area metadata; runtime pipe entities provide final feet position, exit direction and distance after loading. No separate arrival marker is required for a pipe target. Legacy spawn endpoints remain compatible. See [transport](transport.md) and [pipes](pipes.md).
+
+Only the occupied area keeps runtime nodes. Inactive roots retain endpoint/configuration metadata and packed definitions for routing; runtime layouts, entities, camera, and collisions are freed. GameHandler preserves used/removed block and tile progress for recreation. All areas remain editable in the local scene. See [area lifecycle](areas.md).

@@ -36,10 +36,11 @@ func _ready() -> void:
 	var shape := pipe.get_node("Body/CollisionShape2D") as CollisionShape2D
 	assert((shape.shape as RectangleShape2D).size == Vector2(32,32))
 	assert(shape.position == Vector2(16,16))
-	var visuals := level.get_node("ForegroundObjects").get_child(0) as Node2D
+	var visuals := pipe.get_node("Visuals") as Node2D
 	assert(visuals.get_child_count() == 4)
 	assert(visuals.global_position == pipe.global_position)
-	assert(level.get_node("ForegroundObjects").get_index() > level.players.get_index())
+	assert(level.players.get_index() > level.get_node("Areas").get_index())
+	assert(visuals.get_parent() == pipe)
 	assert(visuals.z_index == 0)
 	var source := (main_area.get_node("Layouts/EntityLayout") as TileMapLayer).tile_set.get_source(3) as TileSetAtlasSource
 	assert(source.get_tile_size_in_atlas(Vector2i.ZERO) == Vector2i(2,2))
@@ -96,6 +97,7 @@ func _ready() -> void:
 	pipe._physics_process(1.0/60.0)
 	assert(not level.request_area_transfer(&"lower"), "Only one transfer may be queued.")
 	assert(player.state_machine.current_state is PlayerPipeEnterState)
+	assert(level.players.get_index() < level.get_node("Areas").get_index())
 	assert(not (player.state_machine.current_state as PlayerState).controls_enabled)
 	assert(player.body.collision_layer == 0 and player.body.collision_mask == 0)
 	var entry_origin := player.body.global_position
@@ -125,20 +127,21 @@ func _ready() -> void:
 		await ticks(1)
 	await get_tree().process_frame
 	assert(level.player == player and level.active_area == lower)
+	assert(level.players.get_index() > level.get_node("Areas").get_index())
 	assert(player.body.global_position == lower.get_node("Arrival").global_position)
 	assert(player.body.velocity == Vector2.ZERO)
 	assert(player.body.collision_layer != 0 and player.body.collision_mask != 0)
 	assert(player.sprite.visible)
 	assert(get_viewport().get_camera_2d() == lower.get_node("Camera2D"))
-	assert(not main_area.get_node("Camera2D").enabled)
+	assert(not main_area.runtime_loaded and not main_area.has_node("Camera2D"))
 	assert(GameHandler.get_session_value(&"current_area_id") == &"lower")
 	assert(GameHandler.get_session_value(&"coins") == 7)
 	assert(player.state_machine.current_state == player.state_machine.initial_state)
 	assert(not level.request_area_transfer(&"lower"))
 	ControllerHandler.input_down = 0
 	level.shutdown()
-	assert(pipe.is_shutdown and not level.request_area_transfer(&"main"))
-	assert(visuals.is_queued_for_deletion())
+	assert(not is_instance_valid(pipe) and not level.request_area_transfer(&"main"))
+	assert(not is_instance_valid(visuals) or visuals.is_queued_for_deletion())
 	game.free()
 	await ticks(6)
 	print("PASS: painted solid pipe, alignment/ground/control gates, deferred one-way transfer, camera switch, state reset, session preservation, and shutdown.")
