@@ -10,13 +10,11 @@ func process_physics(delta: float) -> BaseState:
 	var player := get_player()
 	var direction := prepare_horizontal_motion()
 	var next := ground_transition(jump_state, move_state)
-	if next == jump_state and next != null:
-		return continue_jump_physics(next, delta)
 	if next != null:
-		return next
+		return continue_physics(next, delta)
+	if not is_zero_approx(direction) or not is_zero_approx(player.body.velocity.x):
+		return continue_physics(move_state, delta)
 	player.gravity_component.apply(player.motion_values, delta)
 	player.move_body()
-	if not is_zero_approx(direction) or not is_zero_approx(player.body.velocity.x):
-		return move_state
 	return null
 

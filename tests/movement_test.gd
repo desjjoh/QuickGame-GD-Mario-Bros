@@ -13,7 +13,7 @@ func tick(count: int) -> void:
 
 
 func run_checks() -> void:
-	var game: Node = load("res://scenes/main/game.tscn").instantiate()
+	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
 	get_tree().root.add_child(game)
 	preload("res://tests/test_floor.gd").extend_floor(game)
 	var player: BasePlayer = GameHandler.current_player

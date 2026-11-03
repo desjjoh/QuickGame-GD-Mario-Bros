@@ -5,8 +5,8 @@ func _ready() -> void:
 	# Real character sweeps at both edges, a seam, and an escapable corner.
 	for trial in [[63.0, false, true], [72.0, false, true], [81.0, false, true],
 		[79.5, true, true], [80.0, true, true], [80.5, true, true], [62.0, false, false], [80.5, true, false, true]]:
-		var game := load("res://scenes/main/game.tscn").instantiate() as Node
-		var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+		var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
+		var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 		var layout := fixture.get_node("Areas/MainArea/Layouts/EntityLayout") as TileMapLayer
 		layout.clear()
 		layout.set_cell(Vector2i(4, 9), 0, Vector2i.ZERO)

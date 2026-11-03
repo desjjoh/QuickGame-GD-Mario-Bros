@@ -3,8 +3,8 @@ extends Node
 
 func make_game() -> Node:
 	# Scrolling needs a wide fixture, independent of the playable test-stage size.
-	var game := load("res://scenes/main/game.tscn").instantiate() as Node
-	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
+	var level := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	var camera := level.get_node("Areas/MainArea/Camera2D") as LevelCamera
 	camera.position = Vector2(0, 120)
 	camera.world_left = -128.0
@@ -52,6 +52,15 @@ func _ready() -> void:
 	body.global_position.x = 0.0
 	camera.follow_target(body)
 	assert(camera.global_position.x == 5.0, "Camera must not scroll backward.")
+	for cycle in range(8):
+		body.global_position.x = 13.0
+		camera.follow_target(body)
+		body.global_position.x = 0.0
+		camera.follow_target(body)
+	assert(camera.global_position.x == 5.0, "Retracing the same ground must not accumulate one-way scrolling.")
+	body.global_position.x = 13.25
+	camera.follow_target(body)
+	assert(camera.global_position.x == 5.25, "Only new progress beyond the previous furthest position scrolls.")
 	body.global_position.x = 100.0
 	camera.reset_target(body)
 	for frame in range(20):

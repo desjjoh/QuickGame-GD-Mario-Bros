@@ -8,8 +8,8 @@ func ticks(count: int) -> void:
 
 
 func _ready() -> void:
-	var game := load("res://scenes/main/game.tscn").instantiate() as Node
-	var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
+	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	var main := fixture.get_node("Areas/MainArea") as BaseLevelArea
 	var markers := main.get_node("Layouts/EntityLayout") as TileMapLayer
 	markers.clear()

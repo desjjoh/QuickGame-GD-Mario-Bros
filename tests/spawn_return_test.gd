@@ -6,7 +6,7 @@ func ticks(count: int) -> void:
 		await get_tree().process_frame
 
 func _ready() -> void:
-	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	add_child(game)
 	var level: BaseLevel = GameHandler.current_level
 	var main := level.active_area

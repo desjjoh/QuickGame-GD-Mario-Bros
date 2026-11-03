@@ -33,6 +33,17 @@ func _ready() -> void:
 		assert(mario.body.velocity.y < 0, "An unobstructed center head probe must pass the corner.")
 		assert(mario.body.global_position.x < 60 if side < 0 else mario.body.global_position.x > 84)
 		await get_tree().physics_frame
+	# Feet can start above the ledge and cross its top during this one step.
+	for side in [-1.0,1.0]:
+		mario.body.global_position = Vector2(30,120)
+		mario.body.velocity = Vector2(0,-60)
+		mario.body.move_and_slide()
+		mario.body.global_position = Vector2(58 if side < 0 else 87,78.5)
+		mario.body.velocity = Vector2(-side*120,180)
+		mario.move_body()
+		assert(mario.body.is_on_floor(), "A descending top crossing must land on the current tick.")
+		assert(mario.body.global_position.y <= 80.1)
+		assert(is_equal_approx(mario.body.velocity.x,-side*120), "A top crossing must preserve horizontal momentum.")
 	mario.body.global_position = Vector2(72, 110.2)
 	mario.body.velocity = Vector2(0, -240)
 	mario.move_body()

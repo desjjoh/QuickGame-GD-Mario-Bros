@@ -2,9 +2,9 @@ extends Node
 
 
 func _ready() -> void:
-	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	# Keep the containment fixture independent of the user's room painting.
-	var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	fixture.get_node("Areas/LowerArea").position = Vector2(0,512)
 	fixture.get_node("Areas/LowerArea/Camera2D").position = Vector2(128,120)
 	fixture.get_node("Areas/LowerArea/Arrival").position = Vector2(48,208)

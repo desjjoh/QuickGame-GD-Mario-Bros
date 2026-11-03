@@ -13,7 +13,6 @@
 [ext_resource type="Resource" uid="uid://chfcnww7r30v7" path="res://assets/themes/underground.tres" id="12_underground"]
 [ext_resource type="TileSet" uid="uid://g7pmg7w6xn86" path="res://assets/tileset/underground/terrain.tres" id="13_os2yb"]
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/pipe_entrance.tscn" id="13_pipe"]
-[ext_resource type="PackedScene" path="res://scenes/levels/areas/area_endpoint.tscn" id="14_endpoint"]
 [ext_resource type="TileSet" uid="uid://cs6ppr1ph7fpm" path="res://assets/tileset/underground/entity_layout.tres" id="14_v6k17"]
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/sideways_pipe_entrance.tscn" id="side_pipe"]
 [ext_resource type="Script" uid="uid://cd6coksrndgvl" path="res://scripts/levels/transport_destination.gd" id="transport_destination"]
@@ -103,14 +102,6 @@ world_right = 1152.0
 
 [node name="PlayerSpawn" parent="Players" parent_id_path=PackedInt32Array(1625753015) index="0" unique_id=321075723]
 position = Vector2(48, 208)
-
-[node name="Areas_MainArea_Endpoints#near_start" parent="." index="2" unique_id=159469848 instance=ExtResource("14_endpoint")]
-position = Vector2(48, 208)
-endpoint_id = &"near_start"
-
-[node name="Areas_MainArea_Endpoints#near_end" parent="." index="3" unique_id=573444023 instance=ExtResource("14_endpoint")]
-position = Vector2(880, 208)
-endpoint_id = &"near_end"
 
 [editable path="Areas/MainArea"]
 [editable path="Areas/LowerArea"]

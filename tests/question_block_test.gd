@@ -2,8 +2,8 @@ extends Node
 
 
 func _ready() -> void:
-	var game := load("res://scenes/main/game.tscn").instantiate() as Node
-	var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
+	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	var layout := fixture.find_child("EntityLayout", true, false) as TileMapLayer
 	layout.clear()
 	layout.set_cell(Vector2i(4, 9), 1, Vector2i.ZERO)

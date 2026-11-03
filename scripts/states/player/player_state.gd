@@ -36,11 +36,11 @@ func ground_transition(jump_state: PlayerState, falling_state: PlayerState) -> B
 	return null
 
 
-func continue_jump_physics(jump_state: BaseState, delta: float) -> BaseState:
-	# Ground states have selected Jump but have not moved this tick.
-	# Enter first so outgoing modifiers are removed and Jump owns takeoff.
-	if not state_machine.change_state(jump_state):
+func continue_physics(next_state: BaseState, delta: float) -> BaseState:
+	# Use only before this tick has integrated the body. Enter the next state
+	# first so its motion profile owns the one remaining integration step.
+	if not state_machine.change_state(next_state):
 		return null
-	if entity.is_shutdown or state_machine.current_state != jump_state:
+	if entity.is_shutdown or state_machine.current_state != next_state or not next_state.physics_updates_enabled:
 		return null
-	return jump_state.process_physics(delta)
+	return next_state.process_physics(delta)

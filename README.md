@@ -43,3 +43,5 @@ TestLevel/Areas/MainArea selects Overworld and Areas/LowerArea selects Undergrou
 Paint Pipe entrance (2x2) in an area's EntityLayout, stand centered on it, and hold Down to teleport to LowerArea. Configure explicit destinations through each area's Transport Points array. Destination pipes provide their own exit positions without separate arrival markers. Entry moves behind the pipe with sound before the camera handoff. The secret-area sideways entrance returns directly to PlayerSpawn. See [pipes](docs/pipes.md).
 
 Only the occupied area keeps runtime layouts, entities, collisions, and camera loaded. Inactive endpoint/configuration metadata remains available; GameHandler preserves area progress for return visits. All areas remain visible for editing in the local scene.
+
+Occupied areas play their theme's looping soundtrack. Select an area and disable **Music Enabled** to keep a test area silent; configure tracks and volume on the AreaTheme resource. Music stops on area exit and stays independent of player sound effects. See [area lifecycle and music](docs/areas.md#entry-exit-and-theme-music).

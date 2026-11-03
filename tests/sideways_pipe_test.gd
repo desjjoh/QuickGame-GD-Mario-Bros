@@ -1,14 +1,19 @@
 extends Node
 
+signal physics_step_finished
+
+func _physics_process(_delta: float) -> void:
+	physics_step_finished.emit()
+
 func ticks(count: int) -> void:
 	for frame in range(count):
-		await get_tree().physics_frame
-		await get_tree().process_frame
+		await physics_step_finished
 
 func _ready() -> void:
-	var game = load("res://scenes/main/game.tscn").instantiate()
+	process_physics_priority = 200
+	var game = load("res://tests/fixtures/silent_game.tscn").instantiate()
 	# Keep pipe-emergence coverage independent of the stage's current return route.
-	var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	fixture.get_node("Areas/MainArea/Layouts/EntityLayout").set_cell(Vector2i(4,11),3,Vector2i.ZERO)
 	var arrival := TransportPlacement.new()
 	arrival.cell = Vector2i(4,11)
@@ -28,6 +33,7 @@ func _ready() -> void:
 	add_child(game)
 	var level: BaseLevel = GameHandler.current_level
 	assert(level.request_area_transfer(&"lower"))
+	await get_tree().process_frame
 	await ticks(5)
 	var lower: BaseLevelArea = level.active_area
 	var pipe: PipeEntrance = null
@@ -82,6 +88,7 @@ func _ready() -> void:
 	await ticks(39)
 	assert(level.active_area == lower, "At side-entry tick 79 the 52-tick concealed wait is not finished.")
 	await ticks(1) # 28 moving ticks + 52 concealed ticks.
+	await get_tree().process_frame # Complete the deferred area handoff.
 	assert(level.active_area.area_id == &"main")
 	assert(not lower.runtime_loaded)
 	assert(player.state_machine.current_state == player.pipe_enter_state)
@@ -111,6 +118,7 @@ func _ready() -> void:
 	Input.action_press(ControllerHandler.left_action)
 	Input.action_press(ControllerHandler.primary_action)
 	await ticks(1)
+	await get_tree().process_frame # Complete the deferred control handoff.
 	assert(player.body.global_position == end_position, "Final emergence tick cannot execute normal movement/jump.")
 	assert(player.state_machine.current_state != player.pipe_enter_state)
 	assert(player.body.collision_mask == original_mask)
@@ -126,5 +134,6 @@ func _ready() -> void:
 	assert(GameHandler.get_session_value(&"current_area_id") == &"main")
 	game.free()
 	await ticks(6)
+	await get_tree().process_frame
 	print("PASS: sideways pipe activates from walking contact, streams areas, emerges upward and restores collision/control/draw order.")
 	get_tree().quit()

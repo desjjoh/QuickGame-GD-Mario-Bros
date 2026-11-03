@@ -2,7 +2,7 @@
 
 ## Ownership and API
 
-`BaseLevel.transport(traveler, destination, source = null) -> bool` coordinates travel for its current player. TransportDestination is a Resource with Area Id and Target Id. Both must identify one exact destination; there is no proximity search or automatic pipe pairing. The bool means the request was accepted, not that deferred travel has completed. Only one request may be pending.
+`BaseLevel.transport(traveler, destination, source = null) -> bool` coordinates travel for its current player. TransportDestination is a Resource with Area Id and Target Id. Both must identify one exact destination; there is no proximity search or automatic pipe pairing. The bool means the request was accepted, not that deferred travel has completed. Only one request may be pending. Completion callbacks carry their phase identity; cancellation or a phase change invalidates previously queued notifications, so duplicate entry completion cannot also complete emergence.
 
 ```gdscript
 var destination := TransportDestination.create(&"main", &"player_spawn")
@@ -34,9 +34,9 @@ A destination pipe can be exit-only. Routes are directional: setting A's destina
 
 ## Loading and validation
 
-Area roots retain TransportPlacement resources, standalone spawn metadata, and lightweight painted-anchor identities while runtime nodes are unloaded. Validate IDs and metadata before starting source entry. At handoff, revalidate, load the destination, restore progress, resolve the actual target entity and ask it for exit geometry/state. Only after resolving the target does the level commit movement, select its camera, and unload the source. Missing target entities after loading cancel travel and unload the newly loaded destination.
+Area roots retain TransportPlacement resources, standalone spawn metadata, and lightweight painted-anchor identities while runtime nodes are unloaded. Validate IDs and metadata before starting source entry. At handoff, revalidate, load the destination, restore progress, resolve the actual target entity and ask it for exit geometry/state. Only after resolving the target does the level commit movement, select its camera, unload/exit the source, and enter the destination. Area exit stops source music before destination entry starts its theme soundtrack; same-area travel keeps the existing track. Music Enabled=false gives silent test areas. Missing target entities after loading cancel travel and unload the newly loaded destination.
 
-Missing/duplicate areas or IDs, empty IDs, disabled exits, removed target entities, invalidated definitions, wrong player ownership and concurrent requests are rejected. Duplicate Cell configurations are authoring errors and skip spawning that entity. Deleting a target or changing metadata during travel cannot silently choose another destination. Cancellation restores the source position/collision/visibility; interruption/shutdown use the existing lifecycle cleanup.
+Missing/duplicate areas or IDs, empty IDs, disabled exits, removed target entities, invalidated definitions, wrong player ownership and concurrent requests are rejected. Duplicate Cell configurations are authoring errors and skip spawning that entity. Deleting a target or changing metadata during travel cannot silently choose another destination. Cancellation restores the source position/collision/visibility; interruption/shutdown use the existing lifecycle cleanup. Session observers can synchronously replace or shut down a level: transport stops publishing old IDs when ownership changes and does not restart the old player afterward.
 
 The destination area is authoritative for its target's position. Generic transport does not carry hardcoded pipe coordinates. Area loading is synchronous; this is runtime-node unloading, not asynchronous loading or full texture eviction. See [area lifecycle](areas.md).
 
@@ -47,7 +47,7 @@ The destination area is authoritative for its target's position. Generic transpo
 | Main secret entrance | MainArea cell (57,9), ID secret_entrance | lower / arrival; descends then arrives at the existing open-space spawn |
 | Secret-area return | LowerArea cell (13,11), ID secret_return | main / player_spawn; resumes normal play at the level spawn |
 
-The former pipe_return marker and temporary start return pipe are removed. near_start/near_end standalone spawn examples remain. Return uses the existing main area and camera. The source area unloads after handoff and previous block/tile progress is restored on return.
+The former pipe_return marker and temporary start return pipe are removed. The near_start/near_end example markers are also removed from the playable stage; tests create their own standalone endpoints when needed. Return uses the existing main area and camera. The source area unloads after handoff and previous block/tile progress is restored on return.
 
 ## Compatibility
 

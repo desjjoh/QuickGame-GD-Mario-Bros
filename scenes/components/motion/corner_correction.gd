@@ -63,9 +63,11 @@ func _correct_landing(body: CharacterBody2D, shape: CollisionShape2D, half: Vect
 		if hit.is_empty() or (hit.normal as Vector2).y > -0.7:
 			continue
 		var penetration: float = feet_y - (hit.position as Vector2).y
-		if penetration <= 0.0 or penetration > landing_tolerance:
+		# Also handle this tick crossing the top from above. Waiting until the
+		# feet are already below it lets the diagonal side sweep kill speed.
+		if penetration > landing_tolerance or penetration + motion.y <= 0.0:
 			continue
-		var lift := penetration + 0.1
+		var lift := maxf(penetration + 0.1, 0.0)
 		var raised := body.global_position - Vector2(0, lift)
 		if not _clear(body, raised) or not _clear(body, raised + Vector2(motion.x, 0)):
 			continue

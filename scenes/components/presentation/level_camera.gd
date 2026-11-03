@@ -68,10 +68,16 @@ func follow_target(target: CharacterBody2D) -> void:
 	if not _has_target:
 		reset_target(target)
 	var current_x := target.global_position.x
-	var advance := current_x - _target_x
-	_target_x = current_x
-	if not follow_enabled or advance <= 0.0:
+	if not follow_enabled:
+		_target_x = current_x
 		return
+	# Count new rightward territory once. Collision recovery can oscillate
+	# around a wall by a fraction of a pixel; adding every positive half
+	# of that oscillation would permanently ratchet this one-way camera.
+	var advance := current_x - _target_x
+	if advance <= 0.0:
+		return
+	_target_x = current_x
 	var width := get_viewport_rect().size.x / zoom.x
 	# Keep interpolated presentation coordinates out of physics feedback.
 	var left := global_position.x - width / 2.0

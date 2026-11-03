@@ -229,3 +229,11 @@ Changed the explicit secret return Destination_start target from stage_return to
 ## Editor-only world boundary guides - 2026-11-02
 
 Requested visual guides for LevelCamera World Left/Right. New scene-script property Editor Guides / Draw World Bounds defaults true; it draws green/orange labeled lines at the existing global bounds without changing their values. No Project Settings, Input Map, import parameters, gameplay camera behavior or shader settings changed.
+
+## Reliability audit: stable inherited scene identities - 2026-11-02
+
+Persisted Godot-generated unique_id metadata on BaseArea's authored nodes and repaired TestLevel's near_start/near_end parent paths/identity paths under Areas/MainArea/Endpoints. Existing endpoint IDs/positions, painted layout data, camera settings and movement values are unchanged. The movement/transport fixes alter callback ordering/ownership, not tuning or Project Settings. No Input Map, import, shader or physics-rate settings changed. Reload an already-open TestLevel before saving the repaired hierarchy.
+
+## Area theme soundtrack and silent test areas - 2026-11-02
+
+Requested music lifecycle assigns Overworld Music to assets/soundtrack/01. Ground Theme.mp3 and Underground Music to assets/soundtrack/02. Underground Theme.mp3. New AreaTheme fields default Music Loop=true and Music Volume Db=0. BaseLevelArea Music Enabled defaults true and can disable playback per area. Automated silent_level/silent_game fixtures override both areas to false; the playable test stage remains enabled. Native MP3 looping is enabled only on runtime stream copies; existing imported loop=false values are unchanged. No Project Settings, Input Map or audio-bus settings changed.

@@ -54,7 +54,7 @@ func run_checks() -> void:
 	values.free()
 	run.free()
 	action.free()
-	var game: Node = load("res://scenes/main/game.tscn").instantiate()
+	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
 	get_tree().root.add_child(game)
 	preload("res://tests/test_floor.gd").extend_floor(game)
 	var player := GameHandler.current_player
@@ -129,5 +129,7 @@ func run_checks() -> void:
 				Input.action_release(ControllerHandler.secondary_action)
 				await tick(2)
 	game.free()
+	# Let queued sound deletions and the audio-server cleanup finish before quit.
+	await tick(6)
 	print("PASS: skid rates, cancellation, release-to-stop skid retention in both directions and speed modes, sprite/facing retention, and modifier cleanup.")
 	get_tree().quit()

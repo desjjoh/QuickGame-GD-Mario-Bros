@@ -102,3 +102,11 @@ Run `godot --headless --path . tests/walk_animation_test.tscn --max-fps 60` for 
 
 
 
+
+## Physics ownership across state changes
+
+Every ordinary movement tick integrates the body exactly once. A state that chooses its replacement before moving calls PlayerState.continue_physics(next_state, delta): the FSM exits the old state, enters the new one, then the new state consumes that tick. This covers first input from Idle, skid entry/cancellation, passive-fall handoff and jump takeoff. Motion modifiers are changed before integration, not one frame later. The helper stops if an observer shuts down the entity, replaces the state, or disables its physics updates.
+
+Transitions chosen after integration (landing, coming to rest, finishing a skid) return the next state normally. They do not call continue_physics, which would move twice. The FSM itself does not automatically loop over transitions; each state explicitly owns whether its movement step remains outstanding.
+
+movement_handoff_test uses a Mario subclass that counts actual move_body calls. It covers 44 combinations in both directions with Run on/off, checks first-tick acceleration, passive-fall gravity, landing/stop behavior, horizontal displacement and matching camera movement. It also verifies that shutdown from a state-change observer prevents further movement.

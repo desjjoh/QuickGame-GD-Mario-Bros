@@ -7,8 +7,11 @@
 [ext_resource type="Texture2D" uid="uid://u8v7p2v8ep1r" path="res://assets/Underground (Palette 2)/interactibles/blocks/brick.png" id="5"]
 [ext_resource type="Texture2D" uid="uid://e53t4gbes427" path="res://assets/Underground (Palette 2)/interactibles/blocks/brick-alternate.png" id="6"]
 
+[ext_resource type="AudioStream" path="res://assets/soundtrack/02. Underground Theme.mp3" id="music"]
+
 [resource]
 script = ExtResource("1")
+music = ExtResource("music")
 display_name = "Underground"
 terrain = ExtResource("2")
 decorations = ExtResource("3")

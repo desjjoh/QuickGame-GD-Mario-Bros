@@ -31,15 +31,13 @@ func process_physics(delta: float) -> BaseState:
 	var player := get_player()
 	var direction := prepare_horizontal_motion()
 	var next := ground_transition(jump_state, self)
-	if next == jump_state and next != null:
-		return continue_jump_physics(next, delta)
 	if next != null:
-		return next
+		return continue_physics(next, delta)
 	if not player.body.is_on_floor():
 		return _process_falling(player, direction, delta)
 	
 	if player.slide_action.can_start(player.body, direction):
-		return slide_state
+		return continue_physics(slide_state, delta)
 	
 	# Low-speed reversal finishes immediately instead of entering a visible skid.
 	if player.slide_action.is_opposing(player.body, direction):

@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://ep7nxhc15ghx"
+path="res://.godot/imported/02. Underground Theme.mp3-a6e02b0389a58926373a2408c31aa533.mp3str"
+
+[deps]
+
+source_file="res://assets/soundtrack/02. Underground Theme.mp3"
+dest_files=["res://.godot/imported/02. Underground Theme.mp3-a6e02b0389a58926373a2408c31aa533.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -158,7 +158,7 @@ func run_checks() -> void:
 	assert(reentrant.is_shutdown and reentrant.state_machine.current_state == null)
 	assert(reentrant_state.calls.count("exit") == 2)
 	reentrant.free()
-	var game: Node = load("res://scenes/main/game.tscn").instantiate()
+	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
 	get_tree().root.add_child(game)
 	var level: BaseLevel = game.get_node("LevelContainer").get_child(0)
 	assert(level.player is Mario)
@@ -175,7 +175,7 @@ func run_checks() -> void:
 	level.tree_exiting.connect(func():
 		assert(previous_player.is_shutdown, "Cleanup must precede level removal.")
 	)
-	assert(GameHandler.load_level(load("res://scenes/levels/test_level.tscn")))
+	assert(GameHandler.load_level(load("res://tests/fixtures/silent_level.tscn")))
 	assert(level.is_shutdown and previous_player.is_shutdown)
 	assert(previous_player.state_machine.current_state == null)
 	assert(previous_player.motion_values.acceleration == previous_player.motion_values.base_acceleration)

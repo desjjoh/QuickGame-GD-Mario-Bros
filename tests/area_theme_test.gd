@@ -2,7 +2,7 @@ extends Node
 
 
 func _ready() -> void:
-	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	# Editing and saving nested areas must retain each painted layer and camera.
 	var saved_cells: Dictionary = {}
 	for area_name in ["MainArea", "LowerArea"]:
