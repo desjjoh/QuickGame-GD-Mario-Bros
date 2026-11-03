@@ -4,14 +4,27 @@ This guide records deferred work, not implemented features.
 
 ## Next session - 2026-11-04
 
-Start with the [death and entity activity plan](death-and-entity-activity-plan.md). These features remain planned, not implemented.
+Update 2026-11-03: pit death, shared gameplay suspension, cleanup, death event audio and PlayerSpawn restart are now implemented. The agreed global reset_progress_on_death=false replaces the per-level default-true proposal below. See [death lifecycle](death.md). Remaining work: visible hit-death presentation and general off-camera entity policies.
 
-1. Implement BaseLevel's guarded on_death lifecycle, initially triggered only when the player falls below the active viewport. Coordinate control lock, player-owned presentation, completion and PlayerSpawn restart; prevent duplicate/stale completion and conflicts with transport/shutdown. Music is deferred and must not block this work.
-2. Add BaseLevel.reset_progress_on_death, default true. GameHandler clears this level's world progress when enabled and preserves it when disabled. Cover all areas and prevent unload/shutdown from rewriting cleared snapshots. Future collected-world-coin progress follows the same policy; session counters/lives/power-ups need separate rules.
-3. Then implement off-camera activity policies: always active, reversible suspension, disposal for temporary entities, and deferred activation for painted enemies. Define camera margins, callback/animation/timer gating and resumption; preserve solid collision where required. Suspension saves CPU; despawning saves memory. Existing whole-area unloading remains.
-4. Decide enemy respawn/persistence rules before applying disposal to authored enemies. Enemies do not exist yet; establish the shared lifecycle with a test entity rather than adding enemy gameplay in this milestone.
+Next work: general off-camera entity activity. Start from the [remaining plan](death-and-entity-activity-plan.md#second-milestone-off-camera-entity-activity). Define camera margins and reversible suspension versus terminal disposal/deferred activation. Shared suspension now exists, but automatic visibility tracking and enemy respawn/persistence policies do not. Enemies remain unimplemented. Work in small checkpoints with a test entity; visible hit-death presentation is also still deferred.
 
-Work in small checkpoints: finish and verify fall death first, then entity suspension/disposal. Inspect reference fall timing before choosing constants. See the linked plan for details and acceptance checks.
+## P2: Standalone level death cannot restart
+
+Status: open; reproduced during PR review on 2026-11-03 and deferred to the backlog at the user's request.
+
+Reproduction: open scenes/levels/test_level.tscn, run the current scene with F6, and fall into a pit. Mario is shut down/removed and world gameplay is suspended. When death finishes, BaseLevel._restart_after_death rejects the restart because GameHandler.current_level does not own this standalone level. The restart has already been marked queued, leaving the scene frozen without a player.
+
+Affected code: [BaseLevel](../scenes/levels/base/base_level.gd), especially on_death, _update_death and _restart_after_death. The normal Game-owned F5 restart path has passing regression coverage; the missing path is standalone execution.
+
+Decide and implement an explicit standalone policy: support restarting the directly run level, or reject/disable unsupported death before destructive cleanup. Preserve the ownership guard that prevents an old level from restarting over a replacement game session.
+
+Acceptance checks:
+
+- Exercise standalone F6 pit death through completion; no permanent frozen, playerless scene.
+- Verify the chosen standalone behavior with and without death audio.
+- Retain F5 PlayerSpawn restart, both global world-progress policies and unchanged lives.
+- Verify duplicate death and stale completion cannot reload or overwrite another level.
+- Add focused regression coverage and update the death guide with the supported standalone contract.
 
 ## Restore area music when suitable sound files are available
 

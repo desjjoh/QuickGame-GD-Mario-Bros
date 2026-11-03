@@ -2,7 +2,7 @@
 
 QuestionBlock inherits BaseBlock's solid 16x16 body, top-left origin, presentation bounce component, and terminal shutdown. Its existing state machine owns three states:
 
-- Active plays the looping question animation and accepts an upward `bonk` hit.
+- Active samples the shared cosmetic animation clock and accepts an upward `bonk` hit.
 - Bouncing rejects further hits, stops the loop, selects question-block-4.png, and begins the sprite bounce on entry. On completion it transitions to Inactive.
 - Inactive keeps the used sprite and rejects hits, with frame, physics, and input updates disabled.
 
@@ -18,7 +18,7 @@ Other players can enable/configure Bonk or supply another action that sends Enti
 
 ## Presentation and reference
 
-Active uses AnimationPlayer with animations/active.tres. The palette cycle is bright/medium/dark/medium for 24/8/8/8 nominal 60-Hz frames, or 0.8 seconds total. Textures question-block.png through question-block-4.png live under assets/Overworld (Palette 1)/interactibles/blocks/. The fourth texture is the used appearance, not a fourth loop frame.
+Active enables Presentation/PaletteAnimation, which samples the [shared clock](animation-clock.md) through the existing AnimationPlayer and animations/active.tres. Native playback is paused; joining an area immediately selects the global phase. State exit disables synchronization before the reaction takes control. The palette cycle is bright/medium/dark/medium for 24/8/8/8 nominal 60-Hz frames, or 0.8 seconds total. Textures question-block.png through question-block-4.png live under assets/Overworld (Palette 1)/interactibles/blocks/. The fourth texture is the used appearance, not a fourth loop frame.
 
 The [reference disassembly](https://gist.github.com/1wErt3r/4048722) supplies ColorRotatePalette's palette phases, BumpBlock's initial Y speed of -2 pixels/frame, and ImposeGravityBlock's force of $50/256 pixels/frame squared. BlockBounce converts the latter two at nominal 60 Hz to initial_speed=-120 pixels/second and gravity=1125 pixels/second squared. It advances the sprite offset and restores its starting position on return or state exit/shutdown. These values are editable on BaseBlock/Presentation/Bounce.
 

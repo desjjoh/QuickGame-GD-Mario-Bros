@@ -266,3 +266,23 @@ Off-camera activity is a separate proposed milestone: always-active, reversible 
 ## Defer area soundtrack until suitable assets are ready - 2026-11-02
 
 At the user's request, supersede active theme soundtrack playback for now: remove playback implementation, theme music properties/assignments and per-area Music Enabled configuration. Retain generic enter_area/exit_area occupancy hooks, entity SFX and unassigned audio assets. Keep shared test fixture paths, removing only music overrides; the previous music test now checks silent lifecycle behavior. Restore music only after suitable files are supplied and the [detailed backlog](backlog.md) is addressed. Fall death remains independent of soundtrack restoration.
+
+## Pit death ownership and global world-progress policy - 2026-11-03
+
+Supersedes the planned BaseLevel reset_progress_on_death=true setting: use GameHandler.reset_progress_on_death=false globally, preserving world progress by default. Do not deduct lives. BaseLevel coordinates optional presentation, world gameplay suspension, level-owned death audio and deferred restart; off-screen players immediately shut down/free. Preserve cosmetic animation, a deliberate difference from some reference enemy animation freezes. Generic suspension gates FSM callbacks while retaining state and collision for solid world objects; terminal shutdown remains separate. Save the active snapshot through shutdown before optionally clearing the level key, then reload at the real PlayerSpawn. Area soundtrack restoration and general off-camera spawning/disposal remain deferred. See [death lifecycle](death.md).
+
+## Persistent screen-space HUD - 2026-11-03
+
+Use a Game-owned CanvasLayer outside LevelContainer so every stage and future transition screen shares one HUD. ScreenContainer holds future screen content below HUD. Use a BMFont definition over the supplied alphabet texture instead of painting text into a TileMap or changing the PNG import type. Keep an 8px layout and native glyph advance, with static scene-authored values for this milestone. Adapt reference palette timing to the supplied three-frame Overworld coin atlas; area-specific UI variants and data binding remain deferred. See [UI](ui.md).
+
+## Unified foreground shadow and player-over-HUD ordering - 2026-11-03
+
+User clarification supersedes the independent CanvasLayer HUD: all world/UI/player foreground pixels must form one shadow, with Mario in front of HUD. Game owns a persistent SharedShadow CanvasGroup and UI becomes a camera-compensated Control. RenderingServer routing preserves logical gameplay hierarchy while ordering world, UI and player; pipe travel retains behind-world ordering. Disable the nested level composite only at runtime under Game, retaining base-scene standalone previews and per-level material authoring. Avoid duplicated shadow passes and physics reparenting. Rendered pixel assertions establish the overlap contract; see [shared shadow](level-shadow.md).
+
+## Keep shared composition in screen space - 2026-11-03
+
+Following reported moving-HUD fragmentation, replace inverse camera compensation on UI with a fixed Game CanvasLayer at layer 0. SharedShadow and UI stay in screen space; submit the final camera transform only on world/player render roots before draw. Disable additional interpolation on those proxy RIDs without changing descendant body interpolation or physics. This retains one shadow and player-over-HUD order, avoiding camera counter-motion on glyphs. Whole-image comparisons can include legitimate moving clouds through transparent UI gaps; the regression compares fixed foreground glyph pixels separately.
+
+## Shared cosmetic phase sampling - 2026-11-03
+
+Use one physics-tick clock as a child of existing GameHandler, with shared cycle resources and phase-change subscriptions instead of separate animation starts or per-object timers. Preserve the existing 24/8/8/8 phase durations. HUD coin continuously samples; question Active enables synchronization and releases it before bounce/used presentation. Keep the clock running through death suspension, area changes, reloads and session clearing. Theme artwork remains local. Future coins reuse the component; local action animation remains independent. No extra autoload registration is required. See [animation clock](animation-clock.md).

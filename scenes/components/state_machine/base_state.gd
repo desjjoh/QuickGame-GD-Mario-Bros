@@ -8,6 +8,7 @@ signal exited
 
 @export_group("Enter Presentation")
 @export var animation_name: StringName = &""
+@export var synchronized_animation: SynchronizedAnimation
 ## Null preserves the current texture. Static poses can be assigned per state.
 @export var sprite_texture: Texture2D
 @export var stop_animation_on_enter: bool = false
@@ -36,12 +37,16 @@ var state_machine: EntityStateMachine
 
 func activate() -> void:
 	apply_presentation()
+	if synchronized_animation != null:
+		synchronized_animation.set_enabled(true)
 	_enter_audio = entity.play_sound_effect(enter_sound_effect)
 	enter()
 	entered.emit()
 
 
 func deactivate(play_exit_presentation: bool = true) -> void:
+	if synchronized_animation != null:
+		synchronized_animation.set_enabled(false)
 	exit()
 	if play_exit_presentation and not entity.is_shutdown:
 		_play_animation(exit_animation_name)

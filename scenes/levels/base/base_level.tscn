@@ -4,6 +4,8 @@
 [ext_resource type="Shader" uid="uid://cpscldbgpm4tf" path="res://scenes/levels/base/level_shadow.gdshader" id="2_shadow"]
 [ext_resource type="PackedScene" path="res://scenes/levels/areas/base_area.tscn" id="3_area"]
 
+[ext_resource type="AudioStream" path="res://assets/soundtrack/smb_mariodie.wav" id="death_sound"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_shadow"]
 shader = ExtResource("2_shadow")
 shader_parameter/shadow_offset = Vector2(2, 2)
@@ -16,6 +18,7 @@ material = SubResource("ShaderMaterial_shadow")
 fit_margin = 12.0
 clear_margin = 12.0
 script = ExtResource("1_script")
+death_sound = ExtResource("death_sound")
 
 [node name="Areas" type="Node2D" parent="." unique_id=638828059]
 

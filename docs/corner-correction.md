@@ -13,3 +13,5 @@ This component is a bounded adaptation for Godot's swept rectangle, not an exact
 All level visuals keep Z=0 for CanvasGroup composition. BaseLevel orders WorldObjects and then Players last on readiness, so Mario draws over terrain and blocks while decorations remain behind. The base scene also places Players after WorldObjects. Collision and visual draw order remain independent.
 
 Regression checks cover both landing corners and rising corners, momentum preservation, centered ceiling bumps, deep wall contacts, complete misses, and low-ceiling rejection. Existing gap/ledge, jump, block, slide, air, camera-boundary, and lifecycle checks also pass.
+
+In Game, the shared compositor also places the HUD between world and player render branches, preserving logical scene parents and Z=0. See [shadow composition](level-shadow.md).

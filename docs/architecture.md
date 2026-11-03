@@ -101,7 +101,7 @@ Each entity plays one sound effect at a time; jump, bump, skid, and state effect
 
 ## Level content and assets
 
-The main test area has 944 pixels of horizontal space, ground top Y=208, PlayerSpawn=(48,208), and initial camera center=(128,120). Its world bounds are 0/944 with right-only tracking. LowerArea currently sits at (896,240), with a disabled fixed camera centered at world (1024,360). Painted transport entities use explicit area/target IDs within or between areas. BaseLevel.transport coordinates entry, destination loading, camera handoff and emergence. Destination pipes supply their exit geometry without adjacent markers. Upright and inherited left-facing entrances share travel behavior. Death and respawn remain unimplemented.
+The main test area has 944 pixels of horizontal space, ground top Y=208, PlayerSpawn=(48,208), and initial camera center=(128,120). Its world bounds are 0/944 with right-only tracking. LowerArea currently sits at (896,240), with a disabled fixed camera centered at world (1024,360). Painted transport entities use explicit area/target IDs within or between areas. BaseLevel.transport coordinates entry, destination loading, camera handoff and emergence. Destination pipes supply their exit geometry without adjacent markers. Upright and inherited left-facing entrances share travel behavior. Pit death and PlayerSpawn restart are implemented; visible hit-death presentation, lives and checkpoints remain future work.
 
 GroundLayout renders solid terrain directly. DecorationLayout renders collision-free bushes, hills, and clouds directly on the same 16x16 grid. Each area's EntityLayout is a collision-free authoring layer: its entity_id custom data maps through Entity Scenes to actual BaseEntity scenes under WorldObjects. It hides at runtime. Each spawned entity owns its own collision, detection, and behavior; the spawner does not impose solid collision. See [entity layout](entity-layout.md) and [question block](question-block.md).
 
@@ -109,7 +109,7 @@ Environment art is theme-first under assets/Overworld (Palette 1) and assets/Und
 
 ## Verification and limits
 
-See [verification](verification.md) for the complete test command and scope. Movement remains an approximation of the reference: fixed-point arithmetic, original countdown phases, several collision probes, and update ordering are not cycle-accurate. Gameplay input represents one global controller; session values are memory-only. Enemies, rewards, brick breaking, runtime themes, and respawn remain future milestones.
+See [verification](verification.md) for the complete test command and scope. Movement remains an approximation of the reference: fixed-point arithmetic, original countdown phases, several collision probes, and update ordering are not cycle-accurate. Gameplay input represents one global controller; session values are memory-only. Enemies, rewards, brick breaking, runtime themes, and checkpoints/game over remain future milestones. Pit death now restarts the level at PlayerSpawn; see [death lifecycle](death.md).
 
 TransportEntity inherits BaseEntity and supplies entry eligibility, a destination resource, opening geometry and a PlayerTransportState. PipeEntrance implements this contract with 2x2 solid collision and the existing ControllerHandler input/ground/alignment checks. Future transport types can provide their own state. BaseLevel.transport validates explicit area/target IDs, coordinates loading and cameras, and records current_area_id/current_target_id in GameHandler. Shared session state is preserved.
 
@@ -118,3 +118,9 @@ PlayerPipeEnterState inherits PlayerTransportState. The level waits for travel_f
 Only the occupied area keeps runtime nodes. Inactive roots retain endpoint/configuration metadata and packed definitions for routing; runtime layouts, entities, camera, and collisions are freed. GameHandler preserves used/removed block and tile progress for recreation. All areas remain editable in the local scene. See [area lifecycle](areas.md).
 
 Area music is deferred pending suitable sound files; see the [music restoration backlog](backlog.md#restore-area-music-when-suitable-sound-files-are-available). Area entry/exit hooks remain available; entity SFX are unchanged.
+
+BaseLevel owns pit-death detection and world suspension. BasePlayer owns optional presentation and terminal cleanup; GameHandler restarts the loaded level and applies its global reset_progress_on_death policy (default false). Death audio is level-owned and separate from deferred area soundtracks. See [death lifecycle](death.md).
+
+Game also owns UI (a screen-space Control) and SharedShadow. The compositor combines world, UI and foreground player into one shadow using render-only routing; logical gameplay parents remain intact. HUD survives level replacement and draws above ScreenContainer transition content, while Mario normally draws above HUD. Game is a fixed CanvasLayer; its 8x8 UI stays at identity while only world/player render roots receive the camera matrix; see [UI](ui.md) and [shadow composition](level-shadow.md).
+
+GameHandler also owns a single CosmeticAnimationClock child. Shared cycle resources drive HUD coin and Active question-block presentation through phase-change subscriptions, independent of entity gameplay suspension and local player/action animation. Late-loaded objects join the current phase; shutdown unregisters them. See [animation clock](animation-clock.md).

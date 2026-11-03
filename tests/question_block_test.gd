@@ -41,7 +41,8 @@ func _ready() -> void:
 	for frame in range(10):
 		await get_tree().physics_frame
 		await get_tree().process_frame
-	assert(block.animation_player.current_animation_position > 0.03)
+	var phase := (block.get_node("Presentation/PaletteAnimation").cycle as CosmeticAnimationCycle).phase_at(GameHandler.animation_clock.tick_count)
+	assert(block.sprite.texture.resource_path.ends_with(["question-block.png","question-block-2.png","question-block-3.png","question-block-2.png"][phase]))
 	# Invalid attacks leave the block active; real upward player contact activates it.
 	assert(not block.receive_hit(EntityHit.new(level.player, &"dash", Vector2.UP)))
 	assert(not block.receive_hit(EntityHit.new(level.player, &"bonk", Vector2.DOWN)))

@@ -74,3 +74,5 @@ Area unload captures logical progress before entity shutdown and frees the insta
 ## Movement handoff versus completed movement
 
 PlayerState.continue_physics transfers an unconsumed physics tick to another state through the normal FSM lifecycle. Only pre-movement transitions use it. Landing and other transitions after move_body return a state without running another movement step. Terminal shutdown or a state changed by an observer stops the handoff. See [movement ownership](movement.md#physics-ownership-across-state-changes).
+
+States may optionally reference Synchronized Animation for cosmetic cycles. Activation enables the component after enter presentation; deactivation disables it before exit, giving the next state full sprite ownership. This samples the global clock rather than independently playing a timeline. Entity shutdown also disables descendant synchronization components. See [animation clock](animation-clock.md).

@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="AreaTheme" format=3]
-[ext_resource type="Script" path="res://scripts/themes/area_theme.gd" id="1"]
-[ext_resource type="TileSet" path="res://assets/tileset/terrain.tres" id="2"]
-[ext_resource type="TileSet" path="res://assets/tileset/decorations.tres" id="3"]
-[ext_resource type="TileSet" path="res://assets/tileset/entity_layout.tres" id="4"]
+[gd_resource type="Resource" script_class="AreaTheme" format=3 uid="uid://f1lw5jaxr5tn"]
 
+[ext_resource type="Script" uid="uid://cskir81ip20rf" path="res://scripts/themes/area_theme.gd" id="1"]
+[ext_resource type="TileSet" uid="uid://dy01p3ioyfiqi" path="res://assets/tileset/terrain.tres" id="2"]
+[ext_resource type="TileSet" uid="uid://58ym0wu30sv7" path="res://assets/tileset/decorations.tres" id="3"]
+[ext_resource type="TileSet" uid="uid://css6al2yclqkl" path="res://assets/tileset/entity_layout.tres" id="4"]
 
 [resource]
 script = ExtResource("1")

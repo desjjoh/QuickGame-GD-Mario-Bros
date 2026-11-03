@@ -8,10 +8,15 @@ Run the complete regression set from the project root, passing the console Godot
 
 The runner discovers tests/*_test.tscn, uses the normal project/autoload startup at a 60 FPS cap, and bounds each run with --quit-after 1800. A zero exit code alone is insufficient: each scene must print PASS, with no SCRIPT ERROR, ERROR, or WARNING lines. A failed scene makes the command fail. Logs are written under .godot/validation. APPDATA/LOCALAPPDATA overrides are restored afterward.
 
-The current 32 scenes cover:
+The current 37 scenes cover:
 
 | Area | Coverage |
 | --- | --- |
+| Death | Pit visibility threshold, suspension/animation, player cleanup, optional presentation, death audio, global preserve/reset across areas, spawn restart, unchanged lives and stale completion |
+| HUD | 8px glyph metrics/grid, static values, input pass-through, coin cadence and persistence across camera/area/level changes and transition content |
+| HUD scrolling | Fixed screen-space structure; rendered foreground glyph comparison through changing physics-camera speed at multiple render rates (rendered checks skipped headlessly) |
+| Shared shadow | Rendered foreground occlusion, HUD-cast shadow, fractional camera stability, logical player ownership, pipe draw mode and replacement |
+| Shared animation clock | Exact 48-tick phases/wrap, late/themed joins, death suspension, bounce/used ownership, cleanup and continuity across area/level/session changes |
 | States/lifecycle | Ownership, presentation hooks, callback gates, shutdown once, replacement, nested entities, input disconnection |
 | Movement handoffs | 44 combinations across Idle/Move/Slide/Jump, exactly one body integration, first-tick acceleration, falling gravity, matching camera displacement and shutdown during transition |
 | Scene hierarchy | Three native editor-state save/reload cycles preserve nested endpoint parents and all painted layouts |

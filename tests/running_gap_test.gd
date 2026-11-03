@@ -44,6 +44,8 @@ func _ready() -> void:
 	preload("res://tests/test_floor.gd").extend_floor(wide_game)
 	var wide_level := GameHandler.current_level
 	wide_level.keep_player_on_screen = false
+	# This fixture inspects continued falling, independently of the death lifecycle.
+	wide_level.fall_death_enabled = false
 	var wide_ground := wide_level.get_node("Areas/MainArea/Layouts/GroundLayout") as TileMapLayer
 	for x in [6, 7]:
 		for y in [13, 14]:

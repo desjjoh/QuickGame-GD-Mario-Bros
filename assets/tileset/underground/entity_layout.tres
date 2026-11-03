@@ -1,10 +1,10 @@
 [gd_resource type="TileSet" format=3 uid="uid://cs6ppr1ph7fpm"]
 
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/blocks/brick.png" id="1_brick"]
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/blocks/question-block.png" id="2_question"]
-[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/interactibles/blocks/brick-alternate.png" id="3_alternate"]
-[ext_resource type="Texture2D" path="res://assets/tileset/underground/previews/pipe_entrance.png" id="4_pipe"]
-[ext_resource type="Texture2D" path="res://assets/tileset/underground/previews/sideways_pipe_entrance.png" id="side"]
+[ext_resource type="Texture2D" uid="uid://u8v7p2v8ep1r" path="res://assets/Underground (Palette 2)/interactibles/blocks/brick.png" id="1_brick"]
+[ext_resource type="Texture2D" uid="uid://cenncqdpy2ifh" path="res://assets/Underground (Palette 2)/interactibles/blocks/question-block.png" id="2_question"]
+[ext_resource type="Texture2D" uid="uid://e53t4gbes427" path="res://assets/Underground (Palette 2)/interactibles/blocks/brick-alternate.png" id="3_alternate"]
+[ext_resource type="Texture2D" uid="uid://5qf43ud83trt" path="res://assets/tileset/underground/previews/pipe_entrance.png" id="4_pipe"]
+[ext_resource type="Texture2D" uid="uid://dnvspcge3gjbk" path="res://assets/tileset/underground/previews/sideways_pipe_entrance.png" id="side"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_brick"]
 resource_name = "Brick entity"

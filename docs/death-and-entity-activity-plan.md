@@ -1,39 +1,10 @@
 # Planned death lifecycle and off-camera entity activity
 
-Status: planning only, agreed direction recorded on 2026-11-02. None of the death hooks, reset configuration, respawn flow, or entity activity policies below is implemented yet. Existing area unloading and progress restoration remain available.
+Status updated 2026-11-03: pit death, shared suspension, player cleanup, death SFX and PlayerSpawn restart are implemented; see the [current death guide](death.md). The global GameHandler.reset_progress_on_death flag defaults to false (preserve world progress), superseding the per-level default-true proposal below. Visible Mario hit-death presentation, lives/game over and general off-camera policies remain planned. The earlier design below is retained as planning context where not superseded.
 
-## First milestone: falling death
+## Completed first milestone: falling death
 
-Start with falling below the active camera viewport. Enemy damage, hazards, death UI, lives, checkpoints and game-over behavior are later work.
-
-BaseLevel will coordinate a guarded `on_death(player)` lifecycle entry point that future hazards can also call. The exact GDScript API/signature is to be settled during implementation. The player owns its death presentation; GameHandler owns shared session data and saved world progress; the active area owns its camera and occupancy lifecycle. Area music is currently removed; restoration is tracked in the [backlog](backlog.md).
-
-Proposed sequence: Playing -> Death triggered -> Death presentation -> Restart -> Playing.
-
-1. During physics, compare the player's world-space bounds with the active camera's bottom edge. Trigger after the player has fallen fully below the viewport. Do not add a bottom clamp that pushes the player back on screen. Confirm the cutoff and timing against the decompiled reference before choosing constants.
-2. Accept death once for the current player/level. Reject duplicate calls, shutdown/stale ownership, and requests during transport. Death is a gameplay phase, separate from terminal shutdown.
-3. Lock controls and discard pending actions, freeze camera tracking, and notify GameHandler. Music interruption is deferred until soundtrack support returns; death must work without it. Verify the reference's fall-death timing and audio sequence before implementing exact presentation details; these are not established parity claims.
-4. Let the concrete player complete its death presentation through a reusable player contract/state. Falling off-screen must not reposition Mario into view for an enemy-hit death hop. A future damage death may use a different presentation.
-5. At completion, apply the level's progress-reset policy, reload/restart the level and spawn at the real PlayerSpawn. Use existing shutdown/cleanup for removed objects. Guard delayed completion against duplicate callbacks or level replacement, as with transport.
-
-The initial restart target is PlayerSpawn. Checkpoint selection and life exhaustion are deferred. Death-specific music/SFX assets and timing still need inspection; do not assume a particular supplied asset exists.
-
-## Agreed configuration: progress on death
-
-Add this exported BaseLevel property during the death milestone:
-
-```gdscript
-@export var reset_progress_on_death: bool = true
-```
-
-This is planned scene configuration, not a currently available Inspector property or a Project Settings change.
-
-- Enabled (default): clear this level's saved world progress before restarting, restoring used/broken blocks and collected world coins to their authored layout.
-- Disabled: retain this level's saved world progress through restart, restoring used/broken blocks and removed collected coins as they were before death.
-
-GameHandler owns clearing/preserving the stored progress; BaseLevel supplies the policy. Apply it across all areas of this level, including the active area's latest state, without clearing unrelated levels. Ensure shutdown/unload cannot write an old snapshot back after a reset. Ordinary pipe travel continues preserving progress regardless of this flag.
-
-This flag governs world state only. Score, the player's coin counter, lives, power-ups and checkpoints need separate policies; resetting a world coin does not by itself define what happens to a session counter. Collectible coins and their progress records are not implemented yet, so they must join this contract when added.
+BaseLevel now coordinates pit detection, world suspension, player cleanup, level-owned death audio and restart. GameHandler.reset_progress_on_death=false is the global configuration; it preserves world progress by default. This supersedes the former per-level default-true proposal. See [death lifecycle](death.md) for current behavior and limitations. Visible Mario hit-death presentation and other death causes remain future work.
 
 ## Second milestone: off-camera entity activity
 
@@ -62,4 +33,4 @@ Death checks should cover both area cameras, one-time triggers, control/camera l
 
 Entity activity checks should cover margins, stable pause/resume, callback gating, retained solid collision, once-only disposal, authored-object persistence and coexistence with whole-area unloading. Avoid adding per-frame work to static entities solely to disable callbacks they never had.
 
-Update current guides and verification when these features are implemented. This document records the next-work plan; no death or off-camera feature tests have been run because these features do not exist yet.
+Update current guides and verification when these features are implemented. Death and shared suspension now have regression coverage; see the current guide. General off-camera activation/disposal features remain unimplemented and unqualified.

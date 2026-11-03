@@ -9,7 +9,7 @@ extends BaseEntity
 
 
 func receive_hit(hit: EntityHit) -> bool:
-	if is_shutdown or not state_machine.current_state is EntityState:
+	if is_shutdown or gameplay_suspended or not state_machine.current_state is EntityState:
 		return false
 	return (state_machine.current_state as EntityState).receive_hit(hit)
 

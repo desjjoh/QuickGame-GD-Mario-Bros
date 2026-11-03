@@ -3,7 +3,13 @@ extends BaseEntity
 ## Player foundation. States coordinate motion, actions, and presentation.
 ## Use body.global_position for the moving player's world position.
 
+signal death_presentation_finished
+
+var is_dead: bool = false
+var _death_finished: bool = false
+
 @export_group("Transitions")
+@export var death_state: PlayerState
 @export var pipe_enter_state: PlayerPipeEnterState
 
 @export_group("Ceiling Response")
@@ -65,3 +71,41 @@ func face_direction(direction: float) -> void:
 	if state_machine.current_state != null:
 		state_machine.current_state.apply_sprite_offset()
 
+
+
+func begin_death(present: bool = false) -> void:
+	if is_dead or is_shutdown:
+		return
+	is_dead = true
+	state_machine.stop(false)
+	if is_shutdown:
+		return
+	if ControllerHandler.input_received.is_connected(state_machine.process_input):
+		ControllerHandler.input_received.disconnect(state_machine.process_input)
+	body.velocity = Vector2.ZERO
+	body.collision_layer = 0
+	body.collision_mask = 0
+	jump_action.active = false
+	if is_instance_valid(_active_sound_effect):
+		_active_sound_effect.stop()
+	if present and death_state != null:
+		death_state.controls_enabled = false
+		death_state.input_enabled = false
+		if state_machine.change_state(death_state):
+			return
+	finish_death()
+
+
+func finish_death() -> void:
+	if not is_dead or _death_finished or is_shutdown:
+		return
+	_death_finished = true
+	death_presentation_finished.emit()
+
+
+func death_envelope_top() -> float:
+	# Stable authored collision envelope; independent of animation frames.
+	var rectangle := collision_shape.shape as RectangleShape2D
+	if rectangle != null:
+		return collision_shape.to_global(Vector2(0, -rectangle.size.y / 2.0)).y
+	return body.global_position.y

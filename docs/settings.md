@@ -241,3 +241,27 @@ Requested music lifecycle assigns Overworld Music to assets/soundtrack/01. Groun
 ## Area music configuration removed - 2026-11-03
 
 At the user's request, remove the AreaTheme Music/Music Loop/Music Volume Db fields and BaseLevelArea Music Enabled property together with area playback. Remove soundtrack resource assignments and test fixture mute overrides. This supersedes the earlier area music configuration; retained audio assets are unassigned. Generic area entry/exit and entity SFX remain. No Project Settings or import settings changed. Future restoration prerequisites are tracked in [backlog](backlog.md).
+
+## Pit death configuration - 2026-11-03
+
+User-approved first death implementation adds BaseLevel Fall Death Enabled=true, Fall Death Margin=2 pixels, Death Fallback Delay=1 second and Death Presentation Timeout=10 seconds. Death Sound references assets/soundtrack/smb_mariodie.wav on the base scene. GameHandler.reset_progress_on_death=false is global script configuration, preserving block/world progress; it replaces the earlier proposed per-level reset flag. Lives are unchanged. Runtime audio copies disable looping without changing existing import settings. No Project Settings or Input Map changes.
+
+## Deeper pit death cutoff - 2026-11-03
+
+User-approved reference adjustment changes BaseLevel Fall Death Margin from 2 to 34 pixels. Since small Mario's collision-envelope top is 14 pixels above his feet, death now triggers after feet pass viewport bottom +48 (Y=288 in the main view), two tiles deeper than before. This translates the reference's 32px drawing-envelope origin approximately; immediate cleanup, one-shot sound and restart timing are unchanged. No Project Settings or import changes.
+
+## Persistent HUD scene configuration - 2026-11-03
+
+Requested UI implementation adds Game/UI CanvasLayer at layer 10 with a full-viewport ScreenContainer and HUD. HUD uses nearest filtering, an 8px bitmap font/advance, 8px-aligned offsets and mouse pass-through. Coin uses the supplied Overworld 24x8 atlas with durations 3/1/1/1 at 7.5 steps/s. No existing import parameters, Project Settings, input bindings, world grid, camera or player configuration changed. Labels are static placeholders.
+
+## Shared HUD/world/player composition - 2026-11-03
+
+User-approved rendering change replaces Game/UI CanvasLayer layer 10 with a screen-space Control and adds Game/SharedShadow CanvasGroup with existing 12px margins. UI and compositor disable interpolation locally; native camera/body interpolation and Project Settings are unchanged. Game routes all contributors at Z=0 in world/UI/player order, temporarily returning the player behind world during pipes. Per-level material values remain the source and move to the runtime compositor without shader tuning changes; standalone base-scene composition remains. Existing import settings, physics values and level painting are unchanged.
+
+## Fixed screen-space shadow compositor - 2026-11-03
+
+Rendering bugfix changes Game root from Node to CanvasLayer at layer 0 and removes inverse camera transforms from UI. World/player render-root RIDs disable interpolation individually because their submitted camera transform is already interpolated; child body interpolation remains enabled. No Project Settings, existing import parameters, camera thresholds, player movement values or shader tuning changed. Shared world/UI/player shadow and foreground ordering remain.
+
+## Shared cosmetic animation configuration - 2026-11-03
+
+Requested global synchronization adds palette_pulse.tres with phase_ticks=[24,8,8,8], clock priority -90 and component offset default 0. HUD coin native autoplay is replaced by its enabled synchronization component. Question Active references its presentation component, with independent animation-name playback replaced by clock sampling. Existing texture/timeline resources and themes are retained. No Project Settings, Input Map, existing import settings or gameplay tuning changed.

@@ -2,13 +2,13 @@
 
 A Godot 4.7 platformer tutorial and reference project in the QuickReference series, exploring techniques from multiple games with reusable scenes, entities, and state machines. The current playable example uses Mario with 16Ã—16 tiles and sprites.
 
-Game loads TestLevel through a global handler. Mario's Idle/Move/Slide/Jump states orchestrate horizontal movement, Run, and skid actions using shared per-player motion values. Move plays a three-pose walk/run loop with velocity-based cadence; Idle and Slide use static poses. Variable jumping, solid-ceiling bumps, exclusive entity sound effects, horizontal camera bounds, and a combined outer shadow are implemented. Levels and entities have explicit terminal shutdown; startup still uses _ready(). Right-only horizontal camera scrolling is implemented; enemies, power-ups, disk saves, and respawn are not implemented. Current movement is an approximation, not original-game physics parity.
+Game loads TestLevel through a global handler. Mario's Idle/Move/Slide/Jump states orchestrate horizontal movement, Run, and skid actions using shared per-player motion values. Move plays a three-pose walk/run loop with velocity-based cadence; Idle and Slide use static poses. Variable jumping, solid-ceiling bumps, exclusive entity sound effects, horizontal camera bounds, and a combined outer shadow are implemented. Levels and entities have explicit terminal shutdown; startup still uses _ready(). Right-only horizontal camera scrolling is implemented; enemies, power-ups, disk saves, checkpoints, and game over are not implemented. Pit death restarts at PlayerSpawn without deducting lives. Current movement is an approximation, not original-game physics parity.
 
 ## Run
 
 Open `project.godot` in Godot 4.7 and press **F5**. The configured main scene is `scenes/main/game.tscn`. Open `scenes/levels/test_level.tscn` to inspect the floor and spawn marker, or `scenes/player/mario (small)/mario.tscn` to inspect the player and Idle state.
 
-Use left/right arrows to move; hold Left Shift or the gamepad left face button to run. Release direction to brake. Press Space (primary) to jump; hold for a higher jump. The camera scrolls right as Mario advances and does not scroll back. Falling has no automatic respawn. Restart with F8 then F5 to reset his position.
+Use left/right arrows to move; hold Left Shift or the gamepad left face button to run. Release direction to brake. Press Space (primary) to jump; hold for a higher jump. The camera scrolls right as Mario advances and does not scroll back. Falling fully below the active camera triggers death, freezes gameplay, plays the death sound and restarts at PlayerSpawn. World progress is preserved by default through GameHandler.reset_progress_on_death=false.
 
 Press the opposite direction while moving to skid. Slide preserves momentum and brakes before reversing. Releasing direction retains the skid pose until stopping; actively resuming the original travel direction cancels the skid. No crouching slide or new input binding is involved.
 
@@ -16,6 +16,8 @@ Press the opposite direction while moving to skid. Slide preserves momentum and 
 
 | Reference | Purpose |
 | --- | --- |
+| [Animation clock](docs/animation-clock.md) | Shared cosmetic phases, late joins and future coin setup |
+| [UI and HUD](docs/ui.md) | Persistent screen layer, 8x8 bitmap text, static values and animated coin |
 | [Architecture](docs/architecture.md) | Current ownership, scene hierarchy, and startup flow |
 | [Area themes](docs/level-themes.md) | Area-owned layouts, palette selection, compatible TileSets, and artwork fallback |
 | [Area lifecycle](docs/areas.md) | Active-only runtime loading, area unload, and GameHandler progress restoration |
@@ -24,6 +26,7 @@ Press the opposite direction while moving to skid. Slide preserves momentum and 
 | [State machine](docs/state-machine.md) | State hooks, presentation, controls, and verification |
 | [Movement](docs/movement.md) | Shared motion values, run modifiers, source conversions, and fidelity limits |
 | [Jumping](docs/jumping.md) | Jump state, passive falling in Move, variable jump height, gravity, weight, and takeoff profiles |
+| [Death lifecycle](docs/death.md) | Pit detection, suspension, cleanup, death sound, restart and global progress policy |
 | [Death and entity activity plan](docs/death-and-entity-activity-plan.md) | Planned fall-death lifecycle, progress-reset policy, and off-camera entity management |
 | [Backlog](docs/backlog.md) | Deferred features and prerequisites, including restoring area music |
 | [Decisions](docs/decisions.md) | Architectural choices, reasons, tradeoffs, and proposals |
@@ -47,3 +50,7 @@ Paint Pipe entrance (2x2) in an area's EntityLayout, stand centered on it, and h
 Only the occupied area keeps runtime layouts, entities, collisions, and camera loaded. Inactive endpoint/configuration metadata remains available; GameHandler preserves area progress for return visits. All areas remain visible for editing in the local scene.
 
 Area music is deferred pending suitable sound files; see the [music restoration backlog](docs/backlog.md#restore-area-music-when-suitable-sound-files-are-available). Area entry/exit hooks remain available; entity SFX are unchanged.
+
+Game owns a persistent 8x8-grid HUD above world content and below Mario. World, HUD and player share one soft-shadow composite. Score, coin, world and time values are static placeholders; only the default Overworld coin animates. See [UI and HUD](docs/ui.md).
+
+HUD coin and active question blocks sample a global 48-tick cosmetic cycle, so newly loaded objects stay synchronized. Walking and action animations retain their local timing.

@@ -7,6 +7,8 @@ extends Node
 
 
 func _ready() -> void:
+	$SharedShadow.configure(level_container, $UI)
+	GameHandler.level_changed.connect($SharedShadow.bind_level)
 	GameHandler.attach_game(self, level_container)
 	if initial_level == null:
 		push_error("Game needs an initial level assigned in the Inspector.")
@@ -16,4 +18,6 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	if GameHandler.level_changed.is_connected($SharedShadow.bind_level):
+		GameHandler.level_changed.disconnect($SharedShadow.bind_level)
 	GameHandler.detach_game(self)

@@ -12,6 +12,7 @@ var _states: Dictionary[StringName, BaseState] = {}
 var _initialized: bool = false
 var _transitioning: bool = false
 var _shutdown: bool = false
+var gameplay_suspended: bool = false
 
 
 func initialize(owner_entity: BaseEntity) -> bool:
@@ -74,7 +75,7 @@ func get_state(state_name: StringName) -> BaseState:
 
 
 func change_state(next_state: BaseState) -> bool:
-	if not _initialized or _shutdown or _transitioning or next_state == null:
+	if not _initialized or _shutdown or gameplay_suspended or _transitioning or next_state == null:
 		return false
 	if not _states.values().has(next_state):
 		push_error("Cannot transition to a state owned by another machine.")
@@ -101,16 +102,22 @@ func change_state(next_state: BaseState) -> bool:
 
 
 func update(delta: float) -> void:
+	if gameplay_suspended or _shutdown:
+		return
 	if current_state != null and current_state.frame_updates_enabled:
 		_transition_if_requested(current_state.update(delta))
 
 
 func process_physics(delta: float) -> void:
+	if gameplay_suspended or _shutdown:
+		return
 	if current_state != null and current_state.physics_updates_enabled:
 		_transition_if_requested(current_state.process_physics(delta))
 
 
 func process_input(event: InputEvent) -> void:
+	if gameplay_suspended or _shutdown:
+		return
 	if current_state != null and current_state.input_enabled:
 		if current_state is PlayerState and not current_state.controls_enabled:
 			return
@@ -118,6 +125,8 @@ func process_input(event: InputEvent) -> void:
 
 
 func on_animation_finished(animation: StringName) -> void:
+	if gameplay_suspended or _shutdown:
+		return
 	if current_state != null:
 		_transition_if_requested(current_state.animation_finished(animation))
 
