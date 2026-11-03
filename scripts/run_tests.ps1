@@ -27,7 +27,7 @@ try {
         if ($engineExitCode -ne 0 -or -not ($output -match '^PASS:') -or
             ($output -match '^(SCRIPT ERROR|ERROR|WARNING):')) {
             $failedTests += $scene.BaseName
-            Write-Host ('FAIL: ' + $scene.BaseName)
+            Write-Host ('FAIL: ' + $scene.BaseName + ' (engine exit ' + $engineExitCode + ')')
             $output | ForEach-Object { Write-Host $_ }
         } else {
             Write-Host ('PASS: ' + $scene.BaseName)

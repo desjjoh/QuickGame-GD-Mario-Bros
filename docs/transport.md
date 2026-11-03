@@ -58,3 +58,7 @@ Existing `request_pipe_entry(pipe)` delegates to transport. Existing PipeRoute r
 ## Verification
 
 transport_test saves/reloads configured resources and exercises a non-pipe test entity/state, exact and moved target geometry, one-way permissions, duplicate/missing/stale rejection, wrong player ownership, preserved session data and removed destinations while unloaded. sideways_pipe_test uses an isolated pipe-to-pipe fixture to preserve animation, sound, control timing, camera/draw order and unloading coverage. spawn_return_test verifies the playable secret return follows the actual PlayerSpawn even when moved while MainArea is unloaded, restoring normal control without an exit pipe or emergence. Existing routing/entry/streaming checks cover legacy compatibility and lifecycle behavior.
+
+## Covered area handoff
+
+With Game transitions enabled, completed pipe entry requests a global quick blackout before committing transport. HUD, world and player remain hidden during destination/theme changes; input and entity gameplay resume after the minimum hold. Named destinations and pipe entry/exit ownership remain unchanged. See [transitions](transitions.md).

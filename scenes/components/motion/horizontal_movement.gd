@@ -11,3 +11,9 @@ func apply(body: CharacterBody2D, values: MotionValues, direction: float, delta:
 		
 	body.velocity.x = move_toward(body.velocity.x, target, rate * delta)
 
+	# Directional acceleration clamps only its own side, as ImposeFriction does.
+	# Neutral input must coast; opposing momentum belongs to the Slide action.
+	if direction > 0.0:
+		body.velocity.x = minf(body.velocity.x, values.max_speed)
+	elif direction < 0.0:
+		body.velocity.x = maxf(body.velocity.x, -values.max_speed)

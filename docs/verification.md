@@ -8,7 +8,7 @@ Run the complete regression set from the project root, passing the console Godot
 
 The runner discovers tests/*_test.tscn, uses the normal project/autoload startup at a 60 FPS cap, and bounds each run with --quit-after 1800. A zero exit code alone is insufficient: each scene must print PASS, with no SCRIPT ERROR, ERROR, or WARNING lines. A failed scene makes the command fail. Logs are written under .godot/validation. APPDATA/LOCALAPPDATA overrides are restored afterward.
 
-The current 37 scenes cover:
+The current 38 scenes cover:
 
 | Area | Coverage |
 | --- | --- |
@@ -17,6 +17,7 @@ The current 37 scenes cover:
 | HUD scrolling | Fixed screen-space structure; rendered foreground glyph comparison through changing physics-camera speed at multiple render rates (rendered checks skipped headlessly) |
 | Shared shadow | Rendered foreground occlusion, HUD-cast shadow, fractional camera stability, logical player ownership, pipe draw mode and replacement |
 | Shared animation clock | Exact 48-tick phases/wrap, late/themed joins, death suspension, bounce/used ownership, cleanup and continuity across area/level/session changes |
+| Run release | Tick-ten directional walk clamp, both directions, re-press, neutral braking, skid/air ownership, level cap precedence and once-only state handoff timing |
 | States/lifecycle | Ownership, presentation hooks, callback gates, shutdown once, replacement, nested entities, input disconnection |
 | Movement handoffs | 44 combinations across Idle/Move/Slide/Jump, exactly one body integration, first-tick acceleration, falling gravity, matching camera displacement and shutdown during transition |
 | Scene hierarchy | Three native editor-state save/reload cycles preserve nested endpoint parents and all painted layouts |
@@ -33,7 +34,7 @@ The current 37 scenes cover:
 | Pipe travel | Vertical descent preserves off-center position and both facing directions; Painted entrance, ground/alignment/control gates, deferred transfer, cameras, movement reset, session preservation, and shutdown |
 | Area lifecycle (area_music_test) | Entry/exit ownership, preload stays inactive, cross-area handoff, absence of soundtrack players and shutdown |
 | Area streaming | Actual node/collision removal, repeated visits, progress restoration, removed entities, tile edits, level replacement, and foreground cleanup |
-| Area themes | Independent TileSets, all 18 Underground texture mappings, terrain collisions, both pipes, question animation/used art, themed previews, decoration fallback, resource isolation, inherited bounce, and shutdown |
+| Area themes | Independent TileSets, all 19 Underground texture mappings, terrain collisions, both pipes, question animation/used art, themed previews, decoration fallback, resource isolation, inherited bounce, and shutdown |
 | Lower area | Main camera remains current at startup; simulated arrival uses fixed lower camera and enclosed terrain, with player containment in both directions |
 | Pipe/wall camera | Repeated blocked short hops from both sides at walk/run speeds cannot ratchet scrolling; clearing the pipe resumes rightward tracking |
 | Camera | Edge clamping, scroll thresholds, constant fractional steps, one-way limits, live traversal |
@@ -48,3 +49,17 @@ For scene cleanup, also check scene/resource paths and declared-resource usage, 
 Headless tests do not prove subjective movement feel, display frame pacing, speaker output, or renderer performance. A Forward+ render smoke check can catch scene/material failures and layering regressions, but interactive editor playtesting remains useful. No exact NES trace qualification is claimed.
 
 Integration tests retain `tests/fixtures/silent_game.tscn` and `silent_level.tscn` as shared inherited fixtures, now without music overrides. area_music_test retains its existing entry point but checks silent area lifecycle behavior; it no longer decodes soundtrack assets. Music playback and audible-loop qualification are deferred in the [backlog](backlog.md).
+
+## Global transition milestone - 2026-11-03
+
+All 39 regression scenes passed without engine errors or warnings. transition_test additionally passed under Forward+ D3D12 with rendered black-cover pixel assertions and quick/card captures. It exercises enabled startup, real pipe travel, death restart, slow loading, minimum holds, controller/entity restoration, overlap rejection and cancellation/stale transactions. Timing-focused existing fixtures disable transitions explicitly. These checks do not establish subjective transition pacing or exact NES frame traces.
+
+ledge_camera_test adds 72 Jump-state corner landings across block/pipe-width geometry, both directions, two speeds and multiple contact phases/depths; a rendered run at a 240 FPS cap checks horizontal displacement and camera advance. hud_test checks Underground atlas mapping, Overworld fallback/reload, resource isolation and retained global animation phase. Monitor frame pacing remains unconfirmed.
+
+## Deterministic bonk sweeps and process exits
+
+bonk_contact_test executes its character sweeps in a physics callback and asserts Engine.is_in_physics_frame(). Calling move_and_slide from a render-frame continuation made its integration delta depend on render cadence; the original fixture reproduced its X=72 failure at a 240 FPS cap. Fixed sweeps passed eight headless stress runs across 45/60/144/240 FPS caps and a rendered Forward+ run at 240. Gameplay collision rules were not changed.
+
+The runner reports engine exit codes and continues rejecting nonzero exits even when assertions print PASS. A separate native access violation (Windows 0xC0000005) reproduced once in thirty launches of an empty scene with the project autoloads. Loading TransitionCoordinator at runtime instead of statically constructing it in GameHandler removes that static script dependency cycle; the same probe then passed one hundred launches. No automatic retry, crash-code exemption or arbitrary shutdown wait was added. This is bounded local evidence, not a guarantee against every native engine failure.
+
+Final verification for this milestone: the complete forty-scene suite passed with zero engine errors, warnings and nonzero exits after the dependency/sweep corrections. The transition wait helper subsequently switched its timeout from render frames to physics ticks; focused headless and Forward+ D3D12 runs at a 240 FPS cap passed. This avoids an artificial 0.75-second timeout on a 0.8-second pipe entry. Documentation UTF-8/file links and whitespace checks passed. CI has not been run or inspected for this commit. The reported intermittent monitor hitch remains open.

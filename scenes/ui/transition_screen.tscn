@@ -1,0 +1,47 @@
+[gd_scene format=3]
+[ext_resource type="Theme" path="res://scenes/ui/hud/hud_theme.tres" id="theme"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-small-idle.png" id="portrait"]
+[node name="TransitionScreen" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture_filter = 1
+theme = ExtResource("theme")
+[node name="Cover" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0,0,0,1)
+[node name="Card" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+[node name="World" type="Label" parent="Card"]
+offset_left = 88.0
+offset_top = 80.0
+offset_right = 160.0
+offset_bottom = 88.0
+mouse_filter = 2
+text = "WORLD 1-1"
+[node name="Portrait" type="Sprite2D" parent="Card"]
+position = Vector2(96,104)
+texture = ExtResource("portrait")
+centered = false
+[node name="Lives" type="Label" parent="Card"]
+offset_left = 120.0
+offset_top = 112.0
+offset_right = 144.0
+offset_bottom = 120.0
+mouse_filter = 2
+text = "× 3"

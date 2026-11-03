@@ -38,6 +38,12 @@ func _ready() -> void:
 	super()
 
 
+func _physics_process(delta: float) -> void:
+	if not is_shutdown and not is_dead:
+		run_action.advance_timer()
+	super(delta)
+
+
 func _on_jump_started() -> void:
 	play_sound_effect(jump_action.sound_effect)
 

@@ -12,14 +12,21 @@ var _session: Dictionary[StringName, Variant] = {}
 var _area_progress: Dictionary = {}
 var _loading: bool = false
 var animation_clock := CosmeticAnimationClock.new()
+# Load the coordinator at runtime: it refers back to GameHandler/BaseLevel.
+# Keeping it out of this autoload's static dependency graph avoids a script
+# resource cycle surviving engine shutdown.
+var transitions: Variant
 # Global world-progress policy; session counters/lives are unaffected.
 var reset_progress_on_death: bool = false
 var _current_level_scene: PackedScene
 
 
 func _ready() -> void:
+	transitions = load("res://scripts/handlers/transition_coordinator.gd").new()
 	animation_clock.name = "AnimationClock"
 	add_child(animation_clock)
+	transitions.name = "Transitions"
+	add_child(transitions)
 
 
 func attach_game(game: Node, level_container: Node2D) -> void:
@@ -30,6 +37,7 @@ func attach_game(game: Node, level_container: Node2D) -> void:
 func detach_game(game: Node) -> void:
 	if current_game != game:
 		return
+	transitions.detach_game(game)
 	if is_instance_valid(current_level):
 		current_level.shutdown()
 	_current_level_scene = null
@@ -95,6 +103,14 @@ func forget_area_progress(level_key: String) -> void:
 func restart_after_death(level: BaseLevel, progress_key: String) -> bool:
 	if current_level != level or _current_level_scene == null or _loading:
 		return false
+	if transitions.available():
+		return transitions.begin(level, _restart_death_now.bind(level,progress_key), &"level") > 0
+	return _restart_death_now(level,progress_key)
+
+
+func _restart_death_now(level: BaseLevel, progress_key: String) -> bool:
+	if current_level != level or _current_level_scene == null:
+		return false
 	var scene := _current_level_scene
 	# Shutdown saves the final active snapshot before a deliberate reset.
 	level.shutdown()
@@ -102,4 +118,12 @@ func restart_after_death(level: BaseLevel, progress_key: String) -> bool:
 		return false
 	if reset_progress_on_death:
 		forget_area_progress(progress_key)
+	return load_level(scene)
+
+
+func transition_to_level(scene: PackedScene) -> bool:
+	if scene == null: return false
+	if transitions.available():
+		var owner := current_level as Node if is_instance_valid(current_level) else current_game
+		return transitions.begin(owner, load_level.bind(scene), &"level") > 0
 	return load_level(scene)

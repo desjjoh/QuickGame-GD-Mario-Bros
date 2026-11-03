@@ -3,3 +3,4 @@
 [ext_resource type="PackedScene" path="res://tests/fixtures/silent_level.tscn" id="2"]
 [node name="Game" instance=ExtResource("1")]
 initial_level = ExtResource("2")
+transitions_enabled = false

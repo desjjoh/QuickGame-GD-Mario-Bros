@@ -1,5 +1,6 @@
 [gd_scene format=3]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud/hud.tscn" id="hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/transition_screen.tscn" id="transition"]
 [node name="UI" type="Control"]
 physics_interpolation_mode = 2
 mouse_filter = 2
@@ -11,4 +12,5 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+[node name="TransitionScreen" parent="ScreenContainer" instance=ExtResource("transition")]
 [node name="HUD" parent="." instance=ExtResource("hud")]

@@ -286,3 +286,27 @@ Following reported moving-HUD fragmentation, replace inverse camera compensation
 ## Shared cosmetic phase sampling - 2026-11-03
 
 Use one physics-tick clock as a child of existing GameHandler, with shared cycle resources and phase-change subscriptions instead of separate animation starts or per-object timers. Preserve the existing 24/8/8/8 phase durations. HUD coin continuously samples; question Active enables synchronization and releases it before bounce/used presentation. Keep the clock running through death suspension, area changes, reloads and session clearing. Theme artwork remains local. Future coins reuse the component; local action animation remains independent. No extra autoload registration is required. See [animation clock](animation-clock.md).
+
+## Grounded run-release retention and directional clamp - 2026-11-03
+
+At the user's request for closer reference movement, replace gradual same-direction run-to-walk slowing with a 10-tick per-player retention countdown and one-sided directional cap. BasePlayer advances the timer before FSM physics exactly once, matching DecTimers ordering; RunAction preparation reloads/selects profiles without advancing time. Retain run speed on released ticks 1-9, then clamp to effective walking speed on tick 10. Keep neutral braking, Slide and AirMovement ownership; higher-priority overrides remain effective. Full fixed-point/friction/animation-latch parity remains outside this scoped rule. See [movement](movement.md).
+
+## Global covered transition lifecycle - 2026-11-03
+
+Keep transition coordination under existing GameHandler and screen presentation in persistent Game. Cover must render before loading begins; work completion and physics-frame minima both gate reveal. Area swaps use full black including HUD to conceal theme changes. Level startup/respawn brackets a HUD-visible splash with two quick black phases. Use reference-derived defaults of 12 quick ticks and 147 card ticks, with explicit limits on exact NES timing claims. Preserve immediate load_level compatibility and opt out existing timing fixtures; test the enabled path separately. See [transitions](transitions.md).
+
+## Neutral braking independent of Run - 2026-11-03
+
+Select grounded neutral friction from speed and retained running history, following ChkRFast, rather than the held Run modifier. Carry that history explicitly into Jump and passive falling. Keep air neutral momentum and opposite-input braking; releasing Run alone does not impose an air speed cap. Preserve continuous Godot velocity rather than introducing a fixed-point integrator in this correction. See [movement](movement.md).
+
+## Transition blanking and black background clarification - 2026-11-03
+
+Use explicit world/player/HUD visibility changes plus an opaque full-viewport ColorRect to adapt the original display-blanking presentation to Godot. The original disables PPU background/sprite output; our cover is a presentation background and does not replace streaming, change area background colors or emulate PPU registers. Quick phases hide HUD; the intermediate splash shows HUD over black. Preserve reference-derived minimum timing as a deliberate adaptation, not an exact original frame trace. See [transitions](transitions.md#black-screen-original-and-godot-implementation).
+
+## Area-themed HUD coin artwork - 2026-11-03
+
+Reuse AreaTheme.texture_overrides for the supplied Underground HUD coin atlas instead of adding a second theme system. HUD owns private SpriteFrames/AtlasTexture resources and remaps canonical Overworld atlas references on area/level changes; no animation restart or clock reset occurs. Keep region layout/cadence and missing-art fallback. Quick transitions already hide HUD during area changes. See [UI](ui.md).
+
+## Runtime coordinator dependency and deterministic regression sweeps - 2026-11-03
+
+Create TransitionCoordinator by runtime script loading under GameHandler, keeping the transitions member dynamic to break the static script dependency back through GameHandler/BaseLevel. Empty-scene autoload stress changed from one native shutdown failure in thirty launches to zero in one hundred after this change. Keep normal lifecycle ownership and reject every nonzero engine exit in validation. Run bonk collision fixtures in physics callbacks so their sweep delta matches production rather than render cadence. Do not relax collision assertions or add retries to mask failures.

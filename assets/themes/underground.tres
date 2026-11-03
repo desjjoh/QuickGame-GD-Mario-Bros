@@ -23,6 +23,8 @@
 [ext_resource type="Texture2D" uid="uid://c0ww4vjjjcp3k" path="res://assets/Underground (Palette 2)/tileset/block.png" id="art_16"]
 [ext_resource type="Texture2D" uid="uid://besv7n8r7umo5" path="res://assets/Underground (Palette 2)/tileset/ground.png" id="art_17"]
 
+[ext_resource type="Texture2D" path="res://assets/Underground (Palette 2)/ui/hud-coin.png" id="hud_coin"]
+
 [resource]
 script = ExtResource("1")
 display_name = "Underground"
@@ -30,6 +32,7 @@ terrain = ExtResource("2")
 decorations = ExtResource("3")
 entity_markers = ExtResource("4")
 texture_overrides = Dictionary[String, Texture2D]({
+"res://assets/Overworld (Palette 1)/ui/hud-coin.png": ExtResource("hud_coin"),
 "res://assets/Overworld (Palette 1)/interactibles/blocks/brick-alternate.png": ExtResource("art_0"),
 "res://assets/Overworld (Palette 1)/interactibles/blocks/brick.png": ExtResource("art_1"),
 "res://assets/Overworld (Palette 1)/interactibles/blocks/question-block-2.png": ExtResource("art_2"),

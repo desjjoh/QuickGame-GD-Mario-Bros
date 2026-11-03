@@ -13,7 +13,7 @@ extends Node2D
 var _active_sound_effect: AudioStreamPlayer2D
 var is_shutdown: bool = false
 var gameplay_suspended: bool = false
-var _suspended_physics: Dictionary[Node, bool] = {}
+var _suspended_physics: Dictionary[int, Dictionary] = {}
 
 
 func _ready() -> void:
@@ -130,14 +130,15 @@ func set_gameplay_suspended(value: bool) -> void:
 	if value:
 		_suspend_physics_branch(self)
 	else:
-		for node: Node in _suspended_physics:
+		for record: Dictionary in _suspended_physics.values():
+			var node := (record.node as WeakRef).get_ref() as Node
 			if is_instance_valid(node):
-				node.set_physics_process(_suspended_physics[node])
+				node.set_physics_process(record.enabled)
 		_suspended_physics.clear()
 
 
 func _suspend_physics_branch(node: Node) -> void:
-	_suspended_physics[node] = node.is_physics_processing()
+	_suspended_physics[node.get_instance_id()] = {"node":weakref(node), "enabled":node.is_physics_processing()}
 	node.set_physics_process(false)
 	for child in node.get_children():
 		_suspend_physics_branch(child)

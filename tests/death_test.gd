@@ -9,6 +9,7 @@ func ticks(count: int) -> void:
 
 func make_game() -> Node:
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	game.transitions_enabled = false
 	var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
 	fixture.death_fallback_delay = 0.05
 	fixture.death_sound = null

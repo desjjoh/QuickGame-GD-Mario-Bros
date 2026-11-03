@@ -35,7 +35,26 @@ The following are our conversions at a nominal 60 updates/s, not measured Godot 
 | Walk | `0x18 / 16` pixels/frame | 90 | `0x98 / 4096` pixels/frame² | 133.59375 |
 | Run | `0x28 / 16` pixels/frame | 150 | `0xE4 / 4096` pixels/frame² | 200.390625 |
 
-Original code also selects friction by speed, doubles it for facing/movement disagreement, uses a running timer, and integrates fixed-point values. We use continuous Godot velocity, symmetric caps, and immediate run-profile selection/removal. Slide adds selected skid thresholds and friction, described below. Outside Slide, braking uses the selected walk/run profile. This is not frame-exact parity; timer retention, full friction/animation-latch rules, subpixel rounding, update order, and collision differences remain to qualify. Nominal 60 Hz is not exact NTSC timing. Jump and variable jumping are implemented separately; water behavior is not implemented.
+Original code also selects friction by speed, doubles it for facing/movement disagreement, uses a running timer, and integrates fixed-point values. We use continuous Godot velocity and symmetric limits, with the grounded same-direction run-retention and cap rule below. Slide adds selected skid thresholds and friction, described below. Outside Slide, neutral braking selects reference friction from speed and retained running history, independently of the Run button. This is not frame-exact parity; full friction/animation-latch rules, subpixel rounding, broader update order, and collision differences remain to qualify. Nominal 60 Hz is not exact NTSC timing. Jump and variable jumping are implemented separately; water behavior is not implemented.
+
+## Releasing Run while continuing in the same direction
+
+RunAction has Retention Ticks=10. While grounded and holding the direction of travel, Run reloads that countdown. BasePlayer decrements it once before state physics, matching the reference's DecTimers-before-X_Physics ordering. Preparation may be invoked twice during an Idle/Move/Slide handoff, but it never advances the timer itself.
+
+After the last held-Run tick loaded 10:
+
+| Released tick, direction still held | Remaining | Speed cap |
+| --- | --- | --- |
+| 1-9 | 9-1 | Run: 150 px/s |
+| 10 onward | 0 | Walk: 90 px/s |
+
+When the cap drops, HorizontalMovement applies a one-sided directional clamp during that same movement step, following ImposeFriction's directional speed limit. It no longer eases excess speed toward the walking cap over roughly 27 ticks. Re-pressing Run reloads the countdown immediately. Higher-priority motion overrides still determine the effective cap.
+
+This rule is specifically for grounded continuing-direction input. Neutral input retains gradual braking with no blanket overspeed clamp; reversal remains owned by Slide. Neutral friction uses 133.59375 pixels/s² normally, or 182.8125 with retained running history or speed at least 123.75 pixels/s. AirMovement keeps its separate speed/history profile and momentum even when the run timer expires during a jump. Neutral friction and retained running history are described below; this does not port every ProcPRun branch.
+
+RunAction.apply remains a low-level immediate modifier API. PlayerState.prepare_horizontal_motion calls prepare_ground_profile with input/ground context; BasePlayer owns advance_timer. New consumers that need retention must provide the same once-per-physics-tick ownership. The timer is per player, unrelated to the cosmetic animation clock, and freezes with suspended player processing. A newly instantiated player starts at zero.
+
+run_release_test checks both directions, exact expiry, re-press, neutral braking, skidding, effective level caps, duplicate state preparation and jumping on the expiry tick. Velocity/countdown assertions are exact at nominal 60Hz; displacement checks allow the same small contact-recovery tolerance as existing movement tests.
 
 ## Slide state and action
 
@@ -92,7 +111,7 @@ Inspected script defaults and scene overrides, then ran the loaded player throug
 
 From rest with direction held, the first nonzero Godot velocity occurred on tick 2. Walk reached its cap on tick 42 (0.700 seconds), Run on tick 46 (0.767 seconds). A separate forward-only integer speed accumulator using the reference increments reaches its caps on ticks 41 and 45. That comparison checks arithmetic only: it is not an emulator trace and does not validate collisions, facing initialization, or the whole original update pipeline.
 
-Idle currently spends one physics tick returning Move without applying movement. The same transition-only pattern exists when entering/leaving Slide. These are candidates for a separate update-order correction, not evidence that the baseline acceleration should be increased. Dynamic braking friction, running-timer retention, full skid/animation latch rules, and fixed-point positioning remain known differences. Playback rate/frame-phase limitations are documented above. Visual input latency and perceived sluggishness were not measured in this headless audit.
+Idle currently spends one physics tick returning Move without applying movement. The same transition-only pattern exists when entering/leaving Slide. These are candidates for a separate update-order correction, not evidence that the baseline acceleration should be increased. Neutral braking and running-timer retention have since been implemented as described above. Full skid/animation latch rules and fixed-point positioning remain known differences. Playback rate/frame-phase limitations are documented above. Visual input latency and perceived sluggishness were not measured in this headless audit.
 
 Run `godot --headless --path . tests/movement_test.tscn --max-fps 60`. Checks use synthetic actions through ControllerHandler and real physics callbacks. They cover walk/run speed selection, braking, reversal, static Idle, bindings, modifier precedence/removal, per-instance defaults, velocity forwarding, and timestep-independent velocity. The test prints PASS on completion; process exit alone is not evidence of passing. Original frame trajectories, audible effects, and visual animation remain unverified.
 
@@ -110,3 +129,9 @@ Every ordinary movement tick integrates the body exactly once. A state that choo
 Transitions chosen after integration (landing, coming to rest, finishing a skid) return the next state normally. They do not call continue_physics, which would move twice. The FSM itself does not automatically loop over transitions; each state explicitly owns whether its movement step remains outstanding.
 
 movement_handoff_test uses a Mario subclass that counts actual move_body calls. It covers 44 combinations in both directions with Run on/off, checks first-tick acceleration, passive-fall gravity, landing/stop behavior, horizontal displacement and matching camera movement. It also verifies that shutdown from a state-change observer prevents further movement.
+
+## Neutral release order and airborne braking
+
+Ground neutral input follows ChkRFast: B alone does not select running acceleration. The fast-history latch is set at 105 pixels/s or above and retained during neutral coasting; continuing direction below that threshold clears it after profile selection. Friction uses the prior latch or the instantaneous 123.75 pixels/s threshold. Facing/moving disagreement doubles it. With Run held alone, GetPlayerAnimSpeed's low-speed cutoff clears horizontal speed below 41.25 pixels/s; fully released input continues ordinary braking instead. This preserves gradual neutral braking without clamping overspeed to walking speed.
+
+Air has no neutral drag in the reference LRAir path: no horizontal input skips ImposeFriction. Opposing input brakes with the air profile, then accelerates through zero; the facing mismatch changes its rate after reversal. Ground running history is passed explicitly into Jump and passive falling so low-speed takeoff does not lose it when the ground modifier is removed. Run release does not cap airborne speed. Continuous velocity remains an adaptation of the source fixed-point integrator.

@@ -39,3 +39,7 @@ Reload restores the original MainArea camera and the actual Players/PlayerSpawn 
 The reference's PlayerHole/HoleDie separates off-screen fall handling from visible PlayerDeath presentation and uses death-event music before PlayerLoseLife. TimerControl also gates enemy movement and some enemy animation. Our independent audio completion, optional presentation and continuing cosmetic animation are deliberate adaptations, not cycle-accurate parity. See the [disassembly](https://gist.github.com/1wErt3r/4048722).
 
 The death regression covers threshold visibility, duplicate/transport rejection, player state/input cleanup and freeing, reversible suspension with continuing animation, the optional presentation contract, real one-shot sound decoding/playback, restart at PlayerSpawn, both global progress policies across active/inactive areas, unchanged lives and stale restart ownership. See [verification](verification.md) for executed checks and limitations.
+
+## Presented restart
+
+After the existing death wait/jingle, GameHandler restarts through the global level transition: quick black, load, splash with HUD, quick black, gameplay. Progress-reset configuration and no-lives-deduction behavior remain unchanged. Standalone restart limitations still apply. See [transitions](transitions.md).

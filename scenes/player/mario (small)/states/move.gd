@@ -59,7 +59,7 @@ func process_physics(delta: float) -> BaseState:
 
 func _process_falling(player: BasePlayer, direction: float, delta: float) -> BaseState:
 	if not _falling:
-		player.air_movement.begin(player.motion_values, -1.0 if player.sprite != null and player.sprite.flip_h else 1.0)
+		player.air_movement.begin(player.motion_values, -1.0 if player.sprite != null and player.sprite.flip_h else 1.0, player.run_action.running_history)
 		_falling = true
 	player.air_movement.apply(player.motion_values, direction, delta)
 	player.gravity_component.apply(player.motion_values, delta)
