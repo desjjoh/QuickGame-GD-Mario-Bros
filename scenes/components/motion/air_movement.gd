@@ -16,15 +16,15 @@ var _fast_history: bool = false
 var _facing: float = 1.0
 
 
-func capture(values: MotionValues, facing: float) -> void:
+func capture(values: MotionValues, facing: float, running_history: bool = false) -> void:
 	_facing = facing
-	_fast_history = absf(values.velocity.x) >= history_speed_threshold or is_equal_approx(values.acceleration, history_acceleration)
+	_fast_history = running_history or absf(values.velocity.x) >= history_speed_threshold or is_equal_approx(values.acceleration, history_acceleration)
 	_captured = true
 
 
-func begin(values: MotionValues, facing: float) -> void:
+func begin(values: MotionValues, facing: float, running_history: bool = false) -> void:
 	if not _captured:
-		capture(values, facing)
+		capture(values, facing, running_history)
 	update_profile(values)
 
 

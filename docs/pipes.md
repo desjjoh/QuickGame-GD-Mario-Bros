@@ -35,3 +35,7 @@ pipe_entry_test covers entry controls, timing, camera freeze, sound, invalid tar
 ## Reference correspondence
 
 [SMB disassembly](https://gist.github.com/1wErt3r/4048722): EnterSidePipe supplies right input and stops on a 16px boundary; normal side travel uses the $34 timer. PlayerEntrance rises from $f0 to $90, then PlayerRdy selects normal control for the next frame and faces right. Our transport targets relocate that sequence to arbitrary openings. The special page-zero intro's $a0 delay is not selected automatically; use Side Entry Delay when authoring it. Our horizontal motion remains a constant 30 px/s adaptation rather than emulating every fractional friction update. Full NES frame-trace equivalence is not claimed.
+
+## Transition presentation
+
+Completed entry commits area travel behind the global quick black screen, including HUD. Destination pipe emergence starts after reveal; area travel does not show the level splash. See [transitions](transitions.md).

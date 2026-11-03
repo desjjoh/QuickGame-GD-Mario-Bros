@@ -68,3 +68,7 @@ These describe the previous intended contract, not a commitment to reuse every i
 6. Update current area/theme/transport guides, settings where applicable, verification and milestone history. Distinguish headless decoding/state checks from audible loop quality and speaker output.
 
 Completion requires suitable files and audible validation; the previous decode/loop-flag assertions did not establish seamless playback. Crossfades, loop points, buses and death music remain proposals until implemented and verified.
+
+## Intermittent camera hitch at 240 Hz
+
+Open: capture the reported occasional hitch during normal play with [the opt-in frame pacing scene](frame-pacing.md). Automated 240 FPS traversal did not reproduce a delayed frame or interpolation mismatch. Correlate a visible hitch with frame intervals, camera progress and engine timing before changing VSync, physics, viewport, interpolation or renderer settings. Host render completion is not display scanout evidence.

@@ -91,7 +91,7 @@ func run_checks() -> void:
 	await tick(90)
 	assert(player.state_machine.current_state is MarioIdleState)
 	assert(player.sprite.texture.resource_path == "res://assets/player/mario (small)/mario-small-idle.png")
-	assert(player.motion_values.acceleration == player.motion_values.base_acceleration)
+	assert(player.motion_values.acceleration == player.run_action.history_acceleration)
 	# Releasing direction, with or without Run held, must retain the skid pose
 	# and modifier until stopping, in both travel directions and speed modes.
 	for travel_direction in [1.0, -1.0]:
@@ -125,7 +125,11 @@ func run_checks() -> void:
 					await tick(1)
 				assert(player.state_machine.current_state is MarioIdleState)
 				assert(player.sprite.texture.resource_path == "res://assets/player/mario (small)/mario-small-idle.png")
-				assert(player.motion_values.acceleration == (player.run_action.acceleration if ControllerHandler.input_secondary else player.motion_values.base_acceleration))
+				assert(not player.motion_values._modifiers.has(&"slide"))
+				# The exit tick retains the pre-stop facing-mismatch profile;
+				# Idle selects the stationary neutral profile on its next tick.
+				await tick(2)
+				assert(player.motion_values.acceleration == (player.run_action.history_acceleration if player.run_action.running_history else player.run_action.neutral_acceleration))
 				Input.action_release(ControllerHandler.secondary_action)
 				await tick(2)
 	game.free()

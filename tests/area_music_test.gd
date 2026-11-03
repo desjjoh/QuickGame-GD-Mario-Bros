@@ -2,6 +2,7 @@ extends Node
 
 func _ready() -> void:
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	game.transitions_enabled = false
 	add_child(game)
 	var level := GameHandler.current_level
 	var main := level.active_area

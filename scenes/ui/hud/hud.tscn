@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/ui/hud-coin.png" id="coin"]
 [ext_resource type="Script" path="res://scenes/components/presentation/synchronized_animation.gd" id="sync"]
 [ext_resource type="Resource" path="res://scenes/components/presentation/palette_pulse.tres" id="cycle"]
+[ext_resource type="Script" path="res://scenes/ui/hud/hud.gd" id="hud_script"]
 [sub_resource type="AtlasTexture" id="coin_0"]
 atlas = ExtResource("coin")
 region = Rect2(0, 0, 8, 8)
@@ -20,6 +21,7 @@ animations = [{
 "speed": 7.5
 }]
 [node name="HUD" type="Control"]
+script = ExtResource("hud_script")
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

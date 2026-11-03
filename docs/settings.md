@@ -265,3 +265,11 @@ Rendering bugfix changes Game root from Node to CanvasLayer at layer 0 and remov
 ## Shared cosmetic animation configuration - 2026-11-03
 
 Requested global synchronization adds palette_pulse.tres with phase_ticks=[24,8,8,8], clock priority -90 and component offset default 0. HUD coin native autoplay is replaced by its enabled synchronization component. Question Active references its presentation component, with independent animation-name playback replaced by clock sampling. Existing texture/timeline resources and themes are retained. No Project Settings, Input Map, existing import settings or gameplay tuning changed.
+
+## Run-release countdown - 2026-11-03
+
+User-approved movement change adds RunAction Retention Ticks=10 (per-player script default, editable on Actions/Run). Grounded continuing-direction input retains the run profile for released ticks 1-9 and clamps to the effective walking cap on tick 10. Existing 150/90 px/s caps, acceleration/deceleration coefficients and reversal/jump/air values are unchanged; HorizontalMovement now enforces its one-sided directional cap immediately. No Project Settings, Input Map, import settings or camera tuning changed.
+
+## Transition defaults - 2026-11-03
+
+Game.transitions_enabled defaults to true. GameHandler/Transitions uses area_minimum_frames = 12 and level_minimum_frames = 147. The area minimum applies to each quick black phase around the level card as well. HUD is hidden during quick phases to cover theme changes and restored for the card. These are script/scene defaults; no Project Settings, input mappings or existing asset import settings changed. See [transitions](transitions.md).

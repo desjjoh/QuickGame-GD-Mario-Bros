@@ -16,6 +16,7 @@ func _physics_process(_delta: float) -> void:
 func _ready() -> void:
 	process_physics_priority = 200
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	game.transitions_enabled = false
 	add_child(game)
 	assert(game is CanvasLayer)
 	var level := GameHandler.current_level

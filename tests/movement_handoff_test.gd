@@ -81,6 +81,8 @@ func run_checks() -> void:
 					player.body.velocity = Vector2(0,60 if trial.ground else 0)
 					player.move_body()
 					player.body.velocity = Vector2(direction * trial.speed,60 if trial.get("land",false) else 0)
+					# Each teleported case starts with independent run-timer history.
+					player.run_action.remaining_ticks = 0
 					player.run_action.apply(player.motion_values,run_pressed)
 					player.face_direction(direction)
 					player.body_steps = 0

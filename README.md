@@ -54,3 +54,5 @@ Area music is deferred pending suitable sound files; see the [music restoration 
 Game owns a persistent 8x8-grid HUD above world content and below Mario. World, HUD and player share one soft-shadow composite. Score, coin, world and time values are static placeholders; only the default Overworld coin animates. See [UI and HUD](docs/ui.md).
 
 HUD coin and active question blocks sample a global 48-tick cosmetic cycle, so newly loaded objects stay synchronized. Walking and action animations retain their local timing.
+
+Global [transitions](docs/transitions.md) cover area/theme swaps with full black including HUD, and bracket the initial/respawn splash with quick black phases.

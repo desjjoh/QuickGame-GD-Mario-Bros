@@ -19,7 +19,7 @@ Use cosmetic-only texture/frame tracks. Do not attach gameplay method calls, mov
 
 ## Current bindings
 
-HUD/Coin/Synchronization starts enabled and drives the existing Overworld coin atlas. Native autoplay is off. QuestionBlock/Presentation/PaletteAnimation starts disabled; its Active state's Synchronized Animation property enables it on activation and disables it before exit. Bouncing and Inactive therefore retain exclusive control of the used sprite and cannot be overwritten by a later clock phase.
+HUD/Coin/Synchronization starts enabled and drives the active area's HUD coin atlas, falling back to Overworld. Native autoplay is off. QuestionBlock/Presentation/PaletteAnimation starts disabled; its Active state's Synchronized Animation property enables it on activation and disables it before exit. Bouncing and Inactive therefore retain exclusive control of the used sprite and cannot be overwritten by a later clock phase.
 
 BaseState supports the optional synchronized_animation reference for reuse by other state-driven objects. Choose this ownership instead of independent playback for the same cosmetic target. BaseEntity.shutdown disables all descendant synchronization components, including always-on components without a state binding; tree exit also unsubscribes. Empty subscription groups release their resources. Gameplay suspension does not unsubscribe cosmetic clients.
 
@@ -31,7 +31,7 @@ BaseState supports the optional synchronized_animation reference for reuse by ot
 4. Remove native autoplay. Use Start Enabled for always-on cosmetics, or bind the component to the owning state's Synchronized Animation property with Start Enabled=false.
 5. Configure any offset before activation. Runtime cycle/offset changes require disabling and enabling the component again to re-register.
 
-No world coin entity, pickup logic, counter updates or coin persistence is implemented by this milestone. Area-specific HUD coin artwork also remains deferred. Edit the cycle resource to change runtime cadence; SpriteFrames speed/durations and the AnimationPlayer resource alone are not the global clock's source of timing.
+No world coin entity, pickup logic, counter updates or coin persistence is implemented by this milestone. HUD coin artwork now switches between Overworld and Underground without restarting the clock. Edit the cycle resource to change runtime cadence; SpriteFrames speed/durations and the AnimationPlayer resource alone are not the global clock's source of timing.
 
 ## Reference and verification
 

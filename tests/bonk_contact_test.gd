@@ -1,5 +1,15 @@
 extends Node
 
+signal sweep_finished
+var pending_sweep: Callable
+
+func _physics_process(_delta: float) -> void:
+	if pending_sweep.is_valid():
+		var sweep := pending_sweep
+		pending_sweep = Callable()
+		sweep.call()
+		sweep_finished.emit()
+
 
 func _ready() -> void:
 	# Real character sweeps at both edges, a seam, and an escapable corner.
@@ -24,26 +34,31 @@ func _ready() -> void:
 		player.set_physics_process(false)
 		await get_tree().physics_frame
 		await get_tree().process_frame
-		if trial.size() > 3:
-			var used := level.world_objects.get_node("question_block_5_9") as BaseBlock
-			used.state_machine.change_state(used.state_machine.get_state(&"Inactive"))
-		player.body.global_position = Vector2(trial[0], 175)
-		player.body.velocity = Vector2(0, -120)
-		player.move_body()
-		var reactions := 0
-		for block in level.world_objects.get_children():
-			if block.state_machine.current_state.name == &"Bouncing":
-				reactions += 1
-		assert(reactions == (1 if trial[2] else 0), "Bonk edge/seam trial failed at X=%s" % trial[0])
-		assert(player.body.is_on_ceiling() == (trial[2] or trial.size() > 3))
-		if trial[1] and trial[2]:
-			var expected := "brick_4_9" if trial[0] < 80.0 else "brick_5_9"
-			assert(level.world_objects.get_node(expected).state_machine.current_state.name == &"Bouncing", "Wrong seam target at X=%s" % trial[0])
-		# Horizontal side contacts are never offensive ceiling contacts.
-		player.body.global_position = Vector2(57, 157)
-		player.body.velocity = Vector2(180, 0)
-		player.move_body()
-		assert(not player.bonk_action.deliver(player))
+		# CharacterBody2D chooses its integration delta from the calling loop.
+		# Execute sweeps during physics, matching production player movement.
+		pending_sweep = func():
+			assert(Engine.is_in_physics_frame())
+			if trial.size() > 3:
+				var used := level.world_objects.get_node("question_block_5_9") as BaseBlock
+				used.state_machine.change_state(used.state_machine.get_state(&"Inactive"))
+			player.body.global_position = Vector2(trial[0], 175)
+			player.body.velocity = Vector2(0, -120)
+			player.move_body()
+			var reactions := 0
+			for block in level.world_objects.get_children():
+				if block.state_machine.current_state.name == &"Bouncing":
+					reactions += 1
+			assert(reactions == (1 if trial[2] else 0), "Bonk edge/seam trial failed at X=%s" % trial[0])
+			assert(player.body.is_on_ceiling() == (trial[2] or trial.size() > 3))
+			if trial[1] and trial[2]:
+				var expected := "brick_4_9" if trial[0] < 80.0 else "brick_5_9"
+				assert(level.world_objects.get_node(expected).state_machine.current_state.name == &"Bouncing", "Wrong seam target at X=%s" % trial[0])
+			# Horizontal side contacts are never offensive ceiling contacts.
+			player.body.global_position = Vector2(57, 157)
+			player.body.velocity = Vector2(180, 0)
+			player.move_body()
+			assert(not player.bonk_action.deliver(player))
+		await sweep_finished
 		game.free()
 		await get_tree().physics_frame
 		await get_tree().process_frame

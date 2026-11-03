@@ -2,6 +2,7 @@ extends Node
 
 func _ready() -> void:
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	game.transitions_enabled = false
 	add_child(game)
 	var ui := game.get_node("UI") as Control
 	var hud := ui.get_node("HUD") as Control
@@ -25,6 +26,7 @@ func _ready() -> void:
 	await get_tree().create_timer(0.45).timeout
 	var cycle := coin.get_node("Synchronization").cycle as CosmeticAnimationCycle
 	assert(coin.frame == cycle.phase_at(GameHandler.animation_clock.tick_count))
+	assert((coin.sprite_frames.get_frame_texture(&"default",0) as AtlasTexture).atlas.resource_path.contains("Overworld"))
 	# Camera and area changes cannot move/recreate screen-space UI.
 	game.get_node("SharedShadow").sync_rendering()
 	var position_before := hud.get_global_transform_with_canvas()
@@ -33,7 +35,25 @@ func _ready() -> void:
 	# Headless mode has no pre-draw pass; explicitly synchronize that render contract.
 	game.get_node("SharedShadow").sync_rendering()
 	assert(game.get_node("UI/HUD") == hud and hud.get_global_transform_with_canvas().is_equal_approx(position_before))
+	for index in range(4):
+		assert((coin.sprite_frames.get_frame_texture(&"default",index) as AtlasTexture).atlas.resource_path.contains("Underground"))
+	assert(coin.frame == cycle.phase_at(GameHandler.animation_clock.tick_count))
+	if DisplayServer.get_name() != "headless":
+		await RenderingServer.frame_post_draw
+		assert(get_viewport().get_texture().get_image().save_png("res://.godot/validation/hud-underground.png") == OK)
+	var underground_theme := GameHandler.current_level.active_area.theme
+	GameHandler.current_level.active_area.theme = AreaTheme.new()
+	hud._refresh_theme()
+	assert((coin.sprite_frames.get_frame_texture(&"default",0) as AtlasTexture).atlas.resource_path.contains("Overworld"))
+	GameHandler.current_level.active_area.theme = underground_theme
+	hud._refresh_theme()
+	# The saved scene remains Overworld; runtime theme changes are local.
+	var untouched: Node = load("res://scenes/ui/hud/hud.tscn").instantiate()
+	var original := untouched.get_node("Coin") as AnimatedSprite2D
+	assert((original.sprite_frames.get_frame_texture(&"default",0) as AtlasTexture).atlas.resource_path.contains("Overworld"))
+	untouched.free()
 	assert(GameHandler.load_level(game.initial_level))
+	assert((coin.sprite_frames.get_frame_texture(&"default",0) as AtlasTexture).atlas.resource_path.contains("Overworld"))
 	assert(game.get_node("UI/HUD") == hud)
 	GameHandler.set_session_value(&"score",12345)
 	for name in values: assert(hud.get_node(NodePath(name)).text == values[name])

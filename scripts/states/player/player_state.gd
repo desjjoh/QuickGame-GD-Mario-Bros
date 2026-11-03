@@ -18,20 +18,22 @@ func prepare_horizontal_motion() -> float:
 	# Grounded states call this before ground_transition so takeoff captures
 	# this tick's Run modifier, including simultaneous Run/Jump changes.
 	var player := get_player()
-	player.run_action.apply(player.motion_values, controls_enabled and ControllerHandler.input_secondary)
-	return get_movement_axis().x
+	var direction := get_movement_axis().x
+	var facing := -1.0 if player.sprite != null and player.sprite.flip_h else 1.0
+	player.run_action.prepare_ground_profile(player.motion_values, controls_enabled and ControllerHandler.input_secondary, direction, player.body.is_on_floor(), facing)
+	return direction
 
 
 func ground_transition(jump_state: PlayerState, falling_state: PlayerState) -> BaseState:
 	var player := get_player()
 	if not player.body.is_on_floor():
 		if falling_state != self:
-			player.air_movement.capture(player.motion_values, -1.0 if player.sprite != null and player.sprite.flip_h else 1.0)
+			player.air_movement.capture(player.motion_values, -1.0 if player.sprite != null and player.sprite.flip_h else 1.0, player.run_action.running_history)
 			return falling_state
 		return null
 	if controls_enabled and ControllerHandler.input_primary_just_pressed:
 		if player.jump_action.begin(player.motion_values):
-			player.air_movement.capture(player.motion_values, -1.0 if player.sprite != null and player.sprite.flip_h else 1.0)
+			player.air_movement.capture(player.motion_values, -1.0 if player.sprite != null and player.sprite.flip_h else 1.0, player.run_action.running_history)
 			return jump_state
 	return null
 

@@ -39,3 +39,7 @@ Animated pipe entry freezes source-camera follow and bounds during the controlle
 Inactive cameras now unload with their area's runtime. Endpoint metadata remains available without a live camera; the destination camera is recreated at handoff and selected/reset before the source camera is freed. The local editor still contains both authored cameras. Never keep an old runtime camera reference across area transitions.
 
 Entry draw-order changes only reorder the Players sibling group before/after Areas. Body positions, camera transforms, interpolation settings, and camera follow priorities are unchanged.
+
+## Intermittent high-refresh pacing
+
+An occasional hitch on a 240 Hz monitor remains under investigation. Opt-in normal-play and automatic timing capture instructions, measurements and limitations are in [frame pacing](frame-pacing.md). No camera behavior or Project Settings were changed by this investigation.

@@ -96,6 +96,20 @@ func run_checks() -> void:
 		action.update_profile(values)
 		assert(is_equal_approx(values.acceleration, 182.8125))
 		action.end(values)
+	# Low-speed takeoff retains the ground running latch. Neutral air coasts,
+	# opposite input brakes across zero, then facing mismatch doubles friction.
+	for direction in [-1.0, 1.0]:
+		body.velocity.x = direction * 80.0
+		action.capture(values, direction, true)
+		action.begin(values, direction)
+		action.apply(values, 0.0, 1.0 / 60.0)
+		assert(body.velocity.x == direction * 80.0)
+		action.apply(values, -direction, 1.0 / 60.0)
+		assert(is_equal_approx(body.velocity.x, direction * (80.0 - 182.8125 / 60.0)))
+		body.velocity.x = -direction * 10.0
+		action.apply(values, -direction, 1.0 / 60.0)
+		assert(is_equal_approx(body.velocity.x, -direction * (10.0 + 365.625 / 60.0)))
+		action.end(values)
 	assert(values.acceleration == values.base_acceleration)
 	values.free()
 	body.free()
@@ -129,7 +143,8 @@ func run_checks() -> void:
 		Input.action_release(ControllerHandler.primary_action)
 		await tick(90)
 		assert(player.body.is_on_floor())
-		assert(player.motion_values.acceleration == player.run_action.acceleration)
+		assert(player.motion_values.acceleration == player.run_action.history_acceleration)
+		assert(player.motion_values.deceleration == player.run_action.history_acceleration)
 		Input.action_release(ControllerHandler.secondary_action)
 		game.free()
 	print("PASS: air rates, facing-based braking, fast history, neutral coasting, skid-jump capture in both directions, and landing cleanup.")

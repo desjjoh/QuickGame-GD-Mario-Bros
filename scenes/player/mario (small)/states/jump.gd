@@ -7,7 +7,7 @@ extends PlayerState
 
 func enter() -> void:
 	var player := get_player()
-	player.air_movement.begin(player.motion_values, -1.0 if player.sprite != null and player.sprite.flip_h else 1.0)
+	player.air_movement.begin(player.motion_values, -1.0 if player.sprite != null and player.sprite.flip_h else 1.0, player.run_action.running_history)
 
 
 func exit() -> void:
