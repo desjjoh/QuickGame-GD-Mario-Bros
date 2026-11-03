@@ -8,6 +8,24 @@ Update 2026-11-03: pit death, shared gameplay suspension, cleanup, death event a
 
 Next work: general off-camera entity activity. Start from the [remaining plan](death-and-entity-activity-plan.md#second-milestone-off-camera-entity-activity). Define camera margins and reversible suspension versus terminal disposal/deferred activation. Shared suspension now exists, but automatic visibility tracking and enemy respawn/persistence policies do not. Enemies remain unimplemented. Work in small checkpoints with a test entity; visible hit-death presentation is also still deferred.
 
+## P2: Standalone level death cannot restart
+
+Status: open; reproduced during PR review on 2026-11-03 and deferred to the backlog at the user's request.
+
+Reproduction: open scenes/levels/test_level.tscn, run the current scene with F6, and fall into a pit. Mario is shut down/removed and world gameplay is suspended. When death finishes, BaseLevel._restart_after_death rejects the restart because GameHandler.current_level does not own this standalone level. The restart has already been marked queued, leaving the scene frozen without a player.
+
+Affected code: [BaseLevel](../scenes/levels/base/base_level.gd), especially on_death, _update_death and _restart_after_death. The normal Game-owned F5 restart path has passing regression coverage; the missing path is standalone execution.
+
+Decide and implement an explicit standalone policy: support restarting the directly run level, or reject/disable unsupported death before destructive cleanup. Preserve the ownership guard that prevents an old level from restarting over a replacement game session.
+
+Acceptance checks:
+
+- Exercise standalone F6 pit death through completion; no permanent frozen, playerless scene.
+- Verify the chosen standalone behavior with and without death audio.
+- Retain F5 PlayerSpawn restart, both global world-progress policies and unchanged lives.
+- Verify duplicate death and stale completion cannot reload or overwrite another level.
+- Add focused regression coverage and update the death guide with the supported standalone contract.
+
 ## Restore area music when suitable sound files are available
 
 Status: deferred at the user's request on 2026-11-02. Suitable soundtrack files are not ready. Area music playback, theme music fields/assignments and the Music Enabled override have been removed. Generic area entry/exit and active-area tracking remain. Existing soundtrack files are retained unassigned; their presence is not approval to use them again. Entity sound effects remain enabled.
