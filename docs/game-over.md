@@ -16,7 +16,7 @@ TransitionStage.wait_for_presentation is opt-in and defaults false for existing 
 
 ## Cleanup and title return
 
-At the covered operation, the old level is shut down first, allowing its final snapshot, then removed and queued for deletion. GameHandler explicitly clears its one-level progress store afterward. No fresh player or negative-lives intro is created. Score/coin totals remain visible during game over. On completion, cleanup is repeated defensively, input confirmation is consumed, and GameHandler creates the existing title/TestLevel background. Top score survives; automatic top-score promotion remains deferred. Starting a new game resets score/coins, Small form and reserves=2.
+At the covered operation, the old level is shut down first, allowing its final snapshot, then removed and queued for deletion. Its one-level progress store remains available throughout the card. No fresh player or negative-lives intro is created. Score/coin totals remain visible during game over. On completion, level retirement is checked again, input confirmation is consumed, and GameHandler.show_title performs the common title-entry cleanup: finish any outgoing level shutdown, clear its progress cache, then create the existing title/TestLevel background. This also clears progress when returning from playable TestLevel to the same scene used as the title background. Top score survives; automatic top-score promotion remains deferred. Starting a new game resets score/coins, Small form and reserves=2.
 
 Holding Start through the card cannot immediately start another game: ControllerHandler requires release before its next Start edge, including release tracking while gameplay intent is disabled. Game replacement/detach and old completion are ownership-checked; a cancelled old card cannot overwrite a newer external level. A replacement initialized during a cancelled transition has its obsolete transition flag cleared without overriding a newer active transaction. With transitions explicitly disabled (test/direct-flow fallback), final death cleans up and returns to the title immediately without presentation/audio.
 
@@ -28,7 +28,8 @@ GameHandler holds _progress_level_key plus one _area_progress dictionary indexed
 - Recreating the same named level after death retains it, unless the explicit reset_progress_on_death override is enabled.
 - Loading a different logical level clears it after old shutdown and before new readiness.
 - Returning from another level starts a fresh visit, even if the scene was played previously.
-- Game over explicitly clears it, including cancellation/detach cleanup; loading the title background also selects a different logical level.
+- Entering the title via show_title clears it after outgoing shutdown, regardless of why the menu is shown; game-over presentation itself preserves it.
+- Detaching Game does not enter the menu and leaves the final snapshot available. External replacement follows normal level-identity rules; a stale game-over callback cannot clear the replacement store.
 - clear_session clears the store and player defaults, retaining top score.
 
 Logical identity uses the registered level scene path; anonymous/standalone fixtures retain their instance-scoped behavior. Runtime unload/reload of areas does not select a new level. Shared assets and packed templates are still cached; this is progress ownership, not full texture eviction or disk saves. Collectible coin entities are not implemented yet; the generic store can already hold their future collection flags.

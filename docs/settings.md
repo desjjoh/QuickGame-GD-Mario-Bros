@@ -313,3 +313,18 @@ User authorized relocating assets/Overworld (Palette 1) to assets/palettes/overw
 ## Game-over lifecycle defaults - 2026-11-04
 
 User approved NES reserve semantics (stored default/reset 2, displayed +1; terminal -1) and explicit game-over cleanup. Reserve clamp is -1..98 so display fits 0..99. Added game_over transition: 12 initial hidden frames, 378-frame HUD-visible card, 12 hidden outro. New optional TransitionStage wait_for_presentation=false and completion_timeout_frames=600 preserve existing stage behavior; the game-over card opts in and uses a ten-second audio watchdog. New smb_gameover.wav mix trim=-5 dB plus existing master=-3 dB. These are script/resource defaults within the authorized feature, not Project Settings/Input Map/import changes. No black overlay or clear-color override was added.
+
+
+## Separable Game shadow - 2026-11-04
+
+User authorized trying a two-pass blur after reporting no drops with the shared shader disabled. Game/SharedShadow changes from CanvasGroup to Node2D and owns two runtime SubViewports sized to the logical view plus 12px padding per edge. Default offset/blur/opacity and Shadow Shader Enabled=true are unchanged. Disabled bypasses capture and stops both buffer updates. BaseLevel's standalone/editor reference shader remains unchanged. These are scene/render implementation changes; no Project Settings, Input Map or import parameters changed. This supersedes the earlier Game/SharedShadow CanvasGroup implementation above.
+
+
+## Title-menu Select - 2026-11-04
+
+User requested Select-based menu navigation and approved a dedicated select Input Map action: Tab (physical key) plus gamepad View/Back (JOY_BUTTON_BACK, button 4, any device), deadzone 0.5. Previously Select was unbound and ControllerHandler.select_action was empty; it now defaults to select and publishes a just-pressed edge. Select cycles 1 PLAYER GAME / 1 PLAYER TEST; Start confirms. No other bindings or settings changed.
+
+
+## Main-area right boundary reconciliation - 2026-11-04
+
+User set World Right=2624 in the open scenes/levels/1-1.tscn scene, but Game loaded scenes/levels/worlds/world 1/1-1.tscn with 2688. Rendered diagnostics confirmed the loaded path/value and a right edge at 2688, 64px past the intended guide. Matched the active MainArea Camera2D.world_right to 2624. Artwork, pipe routes, camera code and Project Settings were unchanged. Both source copies still exist; future stage edits should use the active worlds/world 1 scene until the duplicate is consolidated.

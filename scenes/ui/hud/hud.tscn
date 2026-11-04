@@ -79,6 +79,8 @@ offset_right = 176.0
 offset_bottom = 32.0
 mouse_filter = 2
 text = "1-1"
+horizontal_alignment = 2
+clip_text = true
 [node name="TimeHeading" type="Label" parent="."]
 layout_mode = 0
 offset_left = 200.0

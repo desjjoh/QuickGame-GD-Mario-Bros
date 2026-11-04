@@ -95,3 +95,13 @@ Formatting is now consistent and repeatable; default gdtoolkit lint still report
 Fixed during this review: HUD live area-theme changes now refresh its coin automatically, with old-area subscriptions released on rebind/removal. The previous test's manual refresh workaround has been removed. Existing F6 standalone death and native-shutdown issues above remain open.
 
 Also fixed during cleanup: title background gameplay suspension now includes painted world entities. The title test accepts authored blocks and verifies their suspended callbacks instead of requiring an empty sandbox.
+
+
+## Game-over audio teardown warning - 2026-11-04
+
+Open: the full 47-scene run during shadow work had passing game_over_test assertions/exit zero but leaked AudioStreamWAV and AudioStreamPlaybackWAV. The same warning reproduced with the committed pre-blur renderer, identifying an existing audio teardown path rather than proving a shadow regression. Explicitly clearing the card's stream did not resolve it and was reverted. Reduce the rapid game-over cancellation/free scenario and verify playback lifetime without arbitrary waits or warning exemptions. Keep the runner strict; this is separate from the native access-violation backlog and the user-visible frame drops.
+
+
+## Intermittent Run loss after landing - 2026-11-04
+
+Open: user reports Run feels dropped mainly after jump/landing and re-press restores it. Continuous held-input regression passed 16 keyboard/simulated-controller jump/landing cycles in both directions, with correct grounded caps and no stale air modifier. Capture a hardware occurrence with [Run input diagnostics](run-input.md) before changing polling, buffering or physics. The opt-in readout separates per-device X, mapped action, handler, input gate and movement modifiers; normal gameplay behavior is unchanged.

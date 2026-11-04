@@ -52,6 +52,8 @@ func process_physics(delta: float) -> BaseState:
 	var next := ground_transition(jump_state, move_state)
 	if next != null:
 		return continue_physics(next, delta)
+	if is_zero_approx(player.body.velocity.x):
+		return continue_physics(move_state if not is_zero_approx(direction) else idle_state, delta)
 	if _skid_stream != null:
 		_skid_elapsed += delta
 		if _skid_elapsed >= maxf(skid_repeat_interval, 0.001):
@@ -70,6 +72,8 @@ func process_physics(delta: float) -> BaseState:
 	player.move_body()
 	if not player.body.is_on_floor():
 		_stop_slide_sound()
-	if stopped or is_zero_approx(player.body.velocity.x):
+	# A solid wall stops physical velocity immediately, but retain this tick's
+	# skid pose using the pre-collision braking result. Resolve it next tick.
+	if stopped:
 		return move_state if not is_zero_approx(direction) else idle_state
 	return null

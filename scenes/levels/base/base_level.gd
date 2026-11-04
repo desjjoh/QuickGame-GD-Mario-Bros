@@ -183,11 +183,12 @@ func clamp_player_to_camera() -> void:
 	var player_position := player.body.global_position
 	var left_edge := center - half_width + inset
 	var right_edge := center + half_width - inset
-	# Resolve the boundary like a wall: cancel motion into it, even if input
-	# has already reversed. Preserve motion away from it and vertical speed.
+	# KeepOnscr clamps position but retains outward momentum while input
+	# points back into the screen, allowing reversal friction to finish the skid.
+	var direction := ControllerHandler.get_axis().x if player.can_read_controller_input() else 0.0
 	if (
-		(player_position.x <= left_edge and player.body.velocity.x < 0.0)
-		or (player_position.x >= right_edge and player.body.velocity.x > 0.0)
+		(player_position.x <= left_edge and player.body.velocity.x < 0.0 and direction <= 0.0)
+		or (player_position.x >= right_edge and player.body.velocity.x > 0.0 and direction >= 0.0)
 	):
 		player.body.velocity.x = 0.0
 	player_position.x = clampf(

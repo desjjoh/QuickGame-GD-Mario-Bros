@@ -45,6 +45,13 @@ func _ready() -> void:
 		GameHandler.get_area_progress(key, &"probe").is_empty(),
 		"Old visit cannot write into a new visit of the same level."
 	)
+	# Title owns clearing even when gameplay and background are the same scene.
+	assert(GameHandler.load_level(load("res://scenes/levels/test_level.tscn")))
+	var test_key := GameHandler.current_level._progress_key
+	GameHandler.store_area_progress(test_key, &"probe", {"used": true}, GameHandler.current_level)
+	assert(GameHandler.show_title(game.initial_level))
+	assert(GameHandler.current_level._progress_key == test_key)
+	assert(GameHandler.get_area_progress(test_key, &"probe").is_empty())
 	game.free()
 	await get_tree().process_frame
 	GameHandler.clear_session()

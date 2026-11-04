@@ -6,22 +6,22 @@ GameHandler owns title creation and game-flow decisions. Normal F5 startup shows
 
 Persistent Game owns LevelContainer and screen-space UI. GameHandler creates scenes/ui/title/title_screen.tscn under UI/ScreenContainer and loads its exported background_level into LevelContainer through the existing immediate loading lifecycle. The title Control contains the 1 PLAYER GAME label, themed start-cursor sprite, TOP- six-digit score label and ©1985 NINTENDO copyright line. All use the 8x8 UI grid. Menu and top-score text use the existing white HUD font; copyright uses the Overworld alternate alphabet through alphabet-alt.fnt, including its supplied © glyph. No second-player option is introduced; TitleCard displays the supplied logo artwork. Existing HUD remains present with bound session values. Top score reads GameHandler.top_score initially and updates through session_value_changed; no automatic record promotion or disk persistence is implemented.
 
-The menu emits start_requested; it does not directly replace levels or initialize session data. GameHandler's GameFlow is DETACHED, TITLE, STARTING, PLAYING or GAME_OVER. The active flow is available globally and flow_changed reports changes. Game.start_with_title defaults to true; initial_level remains the first gameplay target (1-1), rather than the title background. Direct gameplay fixtures explicitly use start_with_title=false. TestLevel's scene controls remain normal when run directly with F6; only GameHandler's title usage suspends its player.
+The menu emits start_requested with an optional target scene; it does not directly replace levels or initialize session data. GameHandler's GameFlow is DETACHED, TITLE, STARTING, PLAYING or GAME_OVER. The active flow is available globally and flow_changed reports changes. Game.start_with_title defaults to true; initial_level remains the first gameplay target (1-1), rather than the title background. Direct gameplay fixtures explicitly use start_with_title=false. TestLevel's scene controls remain normal when run directly with F6; only GameHandler's title usage suspends its player.
 
 ## Starting and cleanup
 
-1. Title samples ControllerHandler's Start edge while visible. GameHandler accepts it only in TITLE with no active transition.
+1. Title samples ControllerHandler's Start edge to confirm while visible. GameHandler accepts it only in TITLE with no active transition.
 2. Confirmation is consumed, flow becomes STARTING and the menu hides. Repeated/held requests cannot start another load.
-3. The existing level transition hides gameplay/HUD and runs the first-level operation. The title background shuts down, previous session/progress is cleared, and 1-1 loads.
+3. The existing level transition hides gameplay/HUD and runs the first-level operation. The title background shuts down, previous session/progress is cleared, and the selected level loads (1-1 by default, or an explicitly supplied destination).
 4. The current level intro and timed holds complete. The title UI is released and flow becomes PLAYING; the new Mario receives gameplay control.
 
 There is no new black overlay or clear-color override. Transitions continue to use the existing viewport background. Entity and area lifecycle cleanup remains owned by their existing methods. Title Mario's suspension is not copied onto the new gameplay player.
 
-Cancellation/failure restores a usable title through deferred recovery: cancellation may originate inside level tree removal, where adding/removing new children is unsafe. Recovery carries a weak reference to the expected Game and checks that Game still owns the STARTING flow. Detaching the Game invalidates recovery and clears title/level ownership; no menu is recreated over a closing game. This does not implement game over, pause or return-to-title gameplay UI.
+Cancellation/failure restores a usable title through deferred recovery: cancellation may originate inside level tree removal, where adding/removing new children is unsafe. Recovery carries a weak reference to the expected Game and checks that Game still owns the STARTING flow. Detaching the Game invalidates recovery and clears title/level ownership; no menu is recreated over a closing game. Game-over return uses the same title creation path; pause and manual return-to-title gameplay UI remain deferred.
 
 ## Input
 
-The approved control-binding scope adds the start Input Map action: Enter, keypad Enter and gamepad Start/Menu (JOY_BUTTON_START, index 6, any device). ControllerHandler.start_action now defaults to start, and input_start_just_pressed supplies one-edge menu intent. Select stays unbound because there is no alternate option yet. Existing gameplay bindings are preserved.
+The approved control-binding scope adds the start Input Map action: Enter, keypad Enter and gamepad Start/Menu (JOY_BUTTON_START, index 6, any device). ControllerHandler.start_action now defaults to start, and input_start_just_pressed supplies one-edge menu intent. Select uses the approved select Input Map action: Tab and gamepad View/Back (JOY_BUTTON_BACK, index 4, any device). ControllerHandler supplies input_select_just_pressed; the binding remains available for future menus. The current one-option title does not change selection on Select or Up/Down. Existing gameplay bindings are preserved.
 
 Enter is already a primary binding, so consume_menu_confirmation suppresses that held primary intent until release. This prevents confirming the menu from immediately jumping after reveal, including direct-load testing. Release tracking continues while transition input is disabled, so a later fresh Jump is not blocked by an earlier Enter press. A gamepad Start press does not block an unrelated later Jump when primary was not held. Fresh gameplay input works normally after release.
 
@@ -58,3 +58,12 @@ Both PNGs are batch exports of the supplied start-title.aseprite sources using t
 Title tests allow authored block scenery in the shared sandbox and verify that every existing background entity is gameplay-suspended. Static/cosmetic background animation is still allowed; no entity movement or demo playback is introduced.
 
 Game over explicitly shuts down/removes the departed stage and clears its progress before returning here. Holding Start through the game-over card requires release before a new title Start edge. Returning preserves the earned score/coin totals and top score until normal new-game initialization resets player/session values. See [game over](game-over.md).
+
+
+## Alternate stage launch
+
+The visible menu contains only 1 PLAYER GAME, with the themed cursor fixed at (72,144). The temporary 1 PLAYER TEST entry and its title-specific configuration are removed. Select bindings remain available; no Input Map settings changed during removal.
+
+GameHandler.start_new_game(destination: PackedScene = null) still accepts an optional stage. Call it while the title is active to launch that scene through the existing new-session reset and intro transition; omit the argument to use Game.initial_level. The override does not replace the normal first-level reference. TestLevel remains the title background and a directly runnable scene. Common title entry owns progress cleanup after outgoing shutdown.
+
+The title regression checks keyboard and controller Start into 1-1, an inert Select press with one visible option, explicit TestLevel launch through the handler, preserved default destination, cancellation, fresh gameplay controls and cleanup.

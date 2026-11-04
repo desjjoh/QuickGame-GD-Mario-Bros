@@ -7,6 +7,7 @@ signal flow_changed(value: GameFlow)
 var flow: GameFlow = GameFlow.DETACHED
 var _title_screen: Control
 var _first_level: PackedScene
+var _start_level: PackedScene
 var _detaching: bool = false
 
 signal level_changed(level: BaseLevel)
@@ -78,10 +79,9 @@ func detach_game(game: Node) -> void:
 	transitions.detach_game(game)
 	_clear_title()
 	_first_level = null
+	_start_level = null
 	if is_instance_valid(current_level):
 		current_level.shutdown()
-	if flow == GameFlow.GAME_OVER:
-		clear_level_progress()
 	_current_level_scene = null
 	current_game = null
 	_level_container = null
@@ -110,7 +110,7 @@ func load_level(scene: PackedScene) -> bool:
 	var level_key := current_level.scene_file_path
 	if level_key.is_empty():
 		level_key = "runtime:%s" % current_level.get_instance_id()
-	select_level_progress(level_key, flow == GameFlow.GAME_OVER)
+	select_level_progress(level_key)
 	stage_label = current_level.stage_label
 	time_remaining = current_level.starting_time
 	current_player = null
@@ -302,6 +302,11 @@ func show_title(first_level: PackedScene) -> bool:
 		return false
 	_title_screen = screen
 	_set_flow(GameFlow.TITLE)
+	# Returning to the menu owns cache disposal. Shutdown must save its final
+	# snapshot before clearing, including a same-scene TestLevel return.
+	if is_instance_valid(current_level):
+		current_level.shutdown()
+	clear_level_progress()
 	if not load_level(screen.background_level):
 		_clear_title()
 		return false
@@ -315,7 +320,7 @@ func show_title(first_level: PackedScene) -> bool:
 	return true
 
 
-func start_new_game() -> bool:
+func start_new_game(destination: PackedScene = null) -> bool:
 	if (
 		flow != GameFlow.TITLE
 		or _detaching
@@ -325,6 +330,7 @@ func start_new_game() -> bool:
 		return false
 	if not _title_screen.is_visible_in_tree():
 		return false
+	_start_level = destination if destination != null else _first_level
 	ControllerHandler.consume_menu_confirmation()
 	_set_flow(GameFlow.STARTING)
 	_title_screen.hide()
@@ -341,16 +347,17 @@ func start_new_game() -> bool:
 
 
 func _load_first_level() -> bool:
-	if flow != GameFlow.STARTING or _detaching or _first_level == null:
+	if flow != GameFlow.STARTING or _detaching or _start_level == null:
 		return false
 	# Shutdown saves old progress before the new session deliberately clears it.
 	if is_instance_valid(current_level):
 		current_level.shutdown()
 	clear_session()
-	return load_level(_first_level)
+	return load_level(_start_level)
 
 
 func _start_finished(success: bool) -> void:
+	_start_level = null
 	if _detaching or not is_instance_valid(current_game):
 		return
 	if success:
@@ -402,7 +409,7 @@ func _retire_game_over_level(source: WeakRef) -> bool:
 	if is_instance_valid(current_level) and current_level != level:
 		return false
 	if is_instance_valid(level):
-		# Shutdown may save progress; discard it only after that final snapshot.
+		# Preserve the final snapshot until the return-to-title lifecycle clears it.
 		level.shutdown()
 		if is_instance_valid(current_level) and current_level != level:
 			return false
@@ -412,7 +419,6 @@ func _retire_game_over_level(source: WeakRef) -> bool:
 	current_level = null
 	current_player = null
 	_current_level_scene = null
-	clear_level_progress()
 	return true
 
 

@@ -59,6 +59,13 @@ func _ready() -> void:
 	GameHandler.stage_label = "2-3"
 	GameHandler.time_remaining = 321
 	assert(hud.get_node("WorldValue").text == "2-3" and hud.get_node("TimeValue").text == "321")
+	GameHandler.stage_label = "TEST LEVEL"
+	assert(hud.get_node("WorldValue").text == "TES" and GameHandler.stage_label == "TEST LEVEL")
+	GameHandler.stage_label = "2"
+	assert(hud.get_node("WorldValue").text == "2")
+	assert(hud.get_node("WorldValue").horizontal_alignment == HORIZONTAL_ALIGNMENT_RIGHT)
+	assert(hud.get_node("WorldValue").size.x == 24.0)
+	GameHandler.stage_label = "2-3"
 	var intro: Node = load("res://scenes/ui/transitions/level_intro.tscn").instantiate()
 	game.get_node("UI/ScreenContainer").add_child(intro)
 	assert(intro.get_node("World").text == "WORLD 2-3" and intro.get_node("Lives").text == "6")

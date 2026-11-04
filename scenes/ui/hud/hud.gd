@@ -30,7 +30,7 @@ func _on_session_value_changed(key: StringName, _value: Variant) -> void:
 func _refresh_values() -> void:
 	$Score.text = " %06d" % GameHandler.player_status.score
 	$CoinCount.text = "%02d" % GameHandler.player_status.coins
-	$WorldValue.text = GameHandler.stage_label
+	$WorldValue.text = GameHandler.stage_label.left(3)
 	$TimeValue.text = "%03d" % GameHandler.time_remaining
 
 

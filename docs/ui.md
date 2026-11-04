@@ -49,3 +49,5 @@ The title copyright line uses the supplied alternate alphabet as an 8x8 bitmap f
 TitleScreen includes the supplied 192x96 title card at native size above the copyright line. Its PNG follows AreaTheme.texture_overrides alongside the cursor; both palette Aseprite originals are retained as editable sources.
 
 HUD binds the current area theme signal and releases the old connection on area/level replacement and tree exit. Live theme edits refresh the coin without private helper calls, changing atlas references while preserving the global animation phase.
+
+WORLD displays the first three characters of stage_label, right-aligned within its fixed 24px (three 8px characters) field. The full stage label remains available to other presentations.

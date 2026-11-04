@@ -28,7 +28,8 @@ func _ready() -> void:
 				for vertical_speed in [-200.0, 0.0, 200.0]:
 					body.velocity = Vector2(side * 150.0, vertical_speed)
 					level.clamp_player_to_camera()
-					assert(body.velocity == Vector2(0.0, vertical_speed))
+					var expected_speed: float = side * 150.0 if direction * side < 0.0 else 0.0
+					assert(body.velocity == Vector2(expected_speed, vertical_speed))
 					body.velocity = Vector2(-side * 150.0, vertical_speed)
 					level.clamp_player_to_camera()
 					assert(body.velocity == Vector2(-side * 150.0, vertical_speed))
@@ -45,12 +46,11 @@ func _ready() -> void:
 	ControllerHandler.input_left = 1.0
 	ControllerHandler.input_right = 0.0
 	level.clamp_player_to_camera()
-	assert(body.velocity.x == 0.0)
+	assert(body.velocity.x == 150.0)
 	Input.action_press(ControllerHandler.left_action)
 	for frame in range(50):
 		await get_tree().physics_frame
 		await get_tree().process_frame
-		assert(not player.state_machine.current_state is MarioSlideState)
 	assert(body.is_on_floor())
 	assert(body.global_position.x < 249.0)
 	assert(player.sprite.flip_h)
@@ -61,6 +61,6 @@ func _ready() -> void:
 	assert(body.global_position.x == -1000.0)
 	game.free()
 	print(
-		"PASS: camera bounds at both zooms, both edges, inward/outward/neutral input, horizontal speed reset, preserved vertical motion, and opt-out."
+		"PASS: camera bounds at both zooms, both edges, inward/outward/neutral input, reversal momentum retention, preserved vertical motion, and opt-out."
 	)
 	get_tree().quit()

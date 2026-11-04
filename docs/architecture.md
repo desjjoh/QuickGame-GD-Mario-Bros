@@ -8,7 +8,7 @@
 | GameHandler | Replaces levels; owns typed PlayerStatus, app-session top score, stage display values, routing metadata and in-session area progress |
 | BaseLevelArea | Owns area metadata/templates and loads/frees its runtime layouts, world objects, and camera |
 | AreaTheme | Selects compatible TileSets and entity texture replacements with fallback |
-| BaseLevel | Generates area entities, spawns the player, coordinates deferred area transfer/cameras, updates bounds, composites the shadow, and shuts down entities |
+| BaseLevel | Generates area entities, spawns the player, coordinates deferred area transfer/cameras, updates bounds, supplies shadow settings/standalone preview, and shuts down entities |
 | BaseEntity | Owns its state machine, callback forwarding, exclusive sound effects, and terminal shutdown |
 | BasePlayer | Owns the physical body, AnimationPlayer reference, movement/actions, facing, and ceiling response |
 | Mario | Supplies sprites, collision override, concrete states, animation library, and WalkAnimation component |
@@ -121,7 +121,7 @@ Area music is deferred pending suitable sound files; see the [music restoration 
 
 BaseLevel owns pit-death detection and world suspension. BasePlayer owns optional presentation and terminal cleanup; GameHandler restarts the loaded level and applies its global reset_progress_on_death policy (default false). Death audio is level-owned and separate from deferred area soundtracks. See [death lifecycle](death.md).
 
-Game also owns UI (a screen-space Control) and SharedShadow. The compositor combines world, UI and foreground player into one shadow using render-only routing; logical gameplay parents remain intact. HUD survives level replacement and draws above ScreenContainer transition content, while Mario normally draws above HUD. Game is a fixed CanvasLayer; its 8x8 UI stays at identity while only world/player render roots receive the camera matrix; see [UI](ui.md) and [shadow composition](level-shadow.md).
+Game also owns UI (a screen-space Control) and SharedShadow. The compositor captures world, UI and foreground player into a logical-resolution foreground buffer and applies horizontal/vertical alpha blur using render-only routing; logical gameplay parents remain intact. HUD survives level replacement and draws above ScreenContainer transition content, while Mario normally draws above HUD. Game is a fixed CanvasLayer; its 8x8 UI stays at identity while only world/player render roots receive the camera matrix; see [UI](ui.md) and [shadow composition](level-shadow.md).
 
 GameHandler also owns a single CosmeticAnimationClock child. Shared cycle resources drive HUD coin and Active question-block presentation through phase-change subscriptions, independent of entity gameplay suspension and local player/action animation. Late-loaded objects join the current phase; shutdown unregisters them. See [animation clock](animation-clock.md).
 
@@ -147,4 +147,4 @@ GameHandler owns one PlayerStatus Resource for form, score, coins and lives. It 
 
 Playable stages are grouped under scenes/levels/worlds/<world>/, starting with worlds/world 1/1-1.tscn. Shared base and area scenes remain under levels/base and levels/areas, and the reusable menu/test sandbox stays levels/test_level.tscn.
 
-GameHandler now owns a single logical level's area progress instead of a multi-level cache, and GameFlow includes GAME_OVER. Negative reserves select the named game-over presentation after death completion; explicit shutdown/clear precedes title return. PlayerStatus stores two reserves and the intro displays three attempts. See [game over](game-over.md).
+GameHandler now owns a single logical level's area progress instead of a multi-level cache, and GameFlow includes GAME_OVER. Negative reserves select the named game-over presentation after death completion; level retirement preserves the final snapshot during the card, and common title entry clears the cache after shutdown. PlayerStatus stores two reserves and the intro displays three attempts. See [game over](game-over.md).

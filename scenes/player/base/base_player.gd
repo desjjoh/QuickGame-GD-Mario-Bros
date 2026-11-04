@@ -62,6 +62,10 @@ func move_body() -> void:
 	body.move_and_slide()
 	if corrected_landing:
 		body.velocity.x = horizontal_speed
+	# ImpedePlayerMove stops momentum into solid sides. Godot can retain
+	# velocity at a floor/wall contact even when displacement is blocked.
+	if body.is_on_wall() and body.velocity.x * body.get_wall_normal().x < 0.0:
+		body.velocity.x = 0.0
 	if rising and body.is_on_ceiling():
 		bonk_action.deliver(self)
 		body.velocity.y = ceiling_bump_speed

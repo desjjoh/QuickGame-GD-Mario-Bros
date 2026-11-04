@@ -1,6 +1,6 @@
 # Camera frame pacing investigation
 
-The intermittent camera hitch reported on a 240 Hz monitor remains unconfirmed. Do not treat the diagnostic results below as a fix or proof of presentation on that monitor. Camera thresholds, VSync, physics tick rate, viewport resolution and renderer settings have not been changed.
+The user reported no drops with the shadow disabled on 2026-11-04, making the shadow path the leading suspect. The exact cause of the intermittent hitch on the 240 Hz monitor remains unconfirmed. Do not treat the diagnostic results below as a fix or proof of presentation on that monitor. Camera thresholds, VSync, physics tick rate, viewport resolution and renderer settings have not been changed.
 
 ## Current findings
 
@@ -47,3 +47,18 @@ Godot distinguishes jitter, stutter and input lag in its [rendering guidance](ht
 The reported hitch happens mostly while jumping around pipes and blocks. ledge_camera_test exercises 72 controlled Jump-state descending corner contacts across 16/32px surfaces, both directions, walk/run speeds, three subpixel overlaps and three vertical positions. Its rendered 240 FPS-cap run preserved one horizontal step and matching right-only camera advance. These contacts use static geometry matching block/pipe widths, not full animated entities; this checks the movement path, not every real-stage interaction or rendered monitor frame. Existing corner, wall-hop and stepped-gap regressions cover additional geometry. No movement/camera correction was made from these results.
 
 Capture now also records player position/velocity, total physics body displacement, native move_and_slide displacement, floor contact and state code (0 absent, 1 Idle, 2 Move, 3 Slide, 4 Jump, 5 other). Manual landing correction intentionally consumes horizontal motion before move_and_slide, so native displacement alone can be zero while total displacement is correct. Compare total movement against camera movement and frame timing. Teleports and scene changes must be excluded. These fields help correlate the reported real-stage hitch; they do not classify a correction as a defect automatically.
+
+
+## Shadow comparison - 2026-11-04
+
+The automatic fixture accepts --pacing-shadow=legacy, --pacing-shadow=two-pass or --pacing-shadow=off. Omit the option to honor Game's saved toggle. Use the same command and route for each mode:
+
+```powershell
+& '<Godot console executable>' --path . res://tools/diagnostics/frame_pacing_probe.tscn --max-fps 240 -- --pacing-auto --pacing-seconds=10 --pacing-shadow=two-pass
+```
+
+Legacy is a diagnostic-only reconstruction of the previous CanvasGroup effect, intended for the controlled automatic fixture; it is not another production rendering mode. Two-pass forces the optimized effect on. Off bypasses it and stops buffer updates. No saved settings change.
+
+CSV now also records render_cpu_ms (summed viewport CPU rendering plus frame setup), render_gpu_ms (summed active viewport GPU rendering) and cumulative canvas_compilations. Timing is enabled only by the diagnostic scene. These asynchronous engine measurements are not exact event traces; a compilation-count change near a hitch is a lead, not proof of causation. Exclude transitions/toggle changes from steady-state comparisons; the recorder selects its timed viewport set at startup. No per-frame image readback is used.
+
+A short local comparison on the RTX 3070 Ti/D3D12 at a 240 FPS cap found a lower median GPU time for the separable effect, with increased CPU rendering time. Neither mode reproduced the reported visible drop. See verification.md for numbers and scope. GPU power state, OS scheduling and presentation can affect results; assess the user's real-stage route before declaring the hitch fixed. Godot documents viewport timing and the need to sum drawn viewports in its [RenderingServer reference](https://docs.godotengine.org/en/4.7/classes/class_renderingserver.html#class-renderingserver-method-viewport-get-measured-render-time-gpu).

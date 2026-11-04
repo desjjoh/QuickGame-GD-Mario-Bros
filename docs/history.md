@@ -670,3 +670,18 @@ Connected accepted BaseLevel.on_death to GameHandler.set_lives(current - 1), wit
 ## 2026-11-04 - Game over and single-level progress ownership
 
 Added GAME_OVER flow, a timed game_over definition/card and one-shot supplied jingle, optional bounded presentation completion, explicit shutdown-before-clear and safe title return. Reserve lives now start at 2 and display 3, with zero still playable and -1 ending the run. GameHandler stores only the selected level's area snapshots; different levels clear after old shutdown, same-level death/areas retain, and stale instances cannot overwrite a later visit. Added a Start release gate and corrected external transition-cancellation flags. Added game_over_test and level_progress_test, updated status/death assertions, and documented current ownership/limits. No new autoload, Project Settings, Input Map, background override or source-audio/import changes were introduced. Final checks are recorded in verification.md.
+
+
+## 2026-11-04 - Two-pass shared shadow experiment
+
+After the user reported no drops with the effect disabled, replaced Game's CanvasGroup blur with a transparent foreground capture, horizontal alpha pass and vertical/composite pass. Retained the original Gaussian weights, sharp foreground, shadow tuning, input/physics scene ownership and diagnostic toggle. Added padded logical-resolution buffers, same-frame/numerical image checks and opt-in legacy/two-pass/off profiling with viewport timings/compilation counts. Standalone/editor levels retain the original reference shader. Updated shadow, frame-pacing, architecture and settings guides. Local rendered comparisons show lower GPU time with extra CPU cost; the reported hitch was not reproduced automatically and needs user playtesting. Full regression and pre-change audio-warning comparison are recorded in verification.md.
+
+
+## 2026-11-04 - Reference edge skids and title-owned progress cleanup
+
+Restored KeepOnscr's inward-input exception so clamped screen-edge reversal skids retain momentum. Solid-wall contact explicitly stops velocity into the surface, while Slide preserves its collision-frame pose and resolves the stop on the next tick. Added live collision/edge coverage and updated boundary expectations. Moved cache disposal out of game-over retirement and flow-specific loading into common show_title after outgoing shutdown; the card retains the final snapshot, including before a same-scene TestLevel-to-title return. Game detach preserves the final snapshot rather than applying game-over-specific cleanup. Updated lifecycle/camera guides and progress/game-over regressions. Settings, bindings, physics rate and renderer configuration were unchanged by this milestone.
+
+
+## 2026-11-04 - Remove duplicate 1-1 scene
+
+User approved removing scenes/levels/1-1.tscn after duplicate scene paths caused editor boundary changes to differ from Game's loaded stage. Verified serialized paint data matches the canonical scenes/levels/worlds/world 1/1-1.tscn and preserved the removed file in ignored validation storage before deleting it. The world-folder scene retains its UID, corrected secret_exit route, World Right=2624 and existing unsmoothed camera configuration. No runtime references point to the removed path. Close any old editor tab without saving it again; future edits use the canonical scene.

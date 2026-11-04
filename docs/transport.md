@@ -45,7 +45,7 @@ The destination area is authoritative for its target's position. Generic transpo
 | Entity | Placement | Destination / behavior |
 | --- | --- | --- |
 | Main secret entrance | MainArea cell (57,9), ID secret_entrance | lower / arrival; descends then arrives at the existing open-space spawn |
-| Secret-area return | LowerArea cell (13,11), ID secret_return | main / player_spawn; resumes normal play at the level spawn |
+| Secret-area return | LowerArea cell (13,11), ID secret_return | main / secret_exit; emerges upward from the exit-only pipe at MainArea (162,11) |
 
 The former pipe_return marker and temporary start return pipe are removed. The near_start/near_end example markers are also removed from the playable stage; tests create their own standalone endpoints when needed. Return uses the existing main area and camera. The source area unloads after handoff and previous block/tile progress is restored on return.
 
@@ -62,3 +62,5 @@ transport_test saves/reloads configured resources and exercises a non-pipe test 
 ## Covered area handoff
 
 With Game transitions enabled, completed pipe entry requests a global quick blackout before committing transport. HUD, world and player remain hidden during destination/theme changes; input and entity gameplay resume after the minimum hold. Named destinations and pipe entry/exit ownership remain unchanged. See [transitions](transitions.md).
+
+The sole 1-1 scene is scenes/levels/worlds/world 1/1-1.tscn, which Game loads. The duplicate at scenes/levels/1-1.tscn was removed after matching its painted layout to the active scene.
