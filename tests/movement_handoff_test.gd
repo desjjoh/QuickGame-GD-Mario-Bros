@@ -32,10 +32,12 @@ func run_checks() -> void:
 	var sprite := character.sprite
 	var animator := character.animation_player
 	var pipe_state := character.pipe_enter_state
+	var controller_input := character.controller_input_enabled
 	character.set_script(Probe)
 	character.sprite = sprite
 	character.animation_player = animator
 	character.pipe_enter_state = pipe_state
+	character.controller_input_enabled = controller_input
 	var character_scene := PackedScene.new()
 	assert(character_scene.pack(character) == OK)
 	character.free()

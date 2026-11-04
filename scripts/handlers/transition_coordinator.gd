@@ -1,5 +1,7 @@
 class_name TransitionCoordinator
 extends Node
+const Definition = preload("res://scripts/transitions/transition_definition.gd")
+const Stage = preload("res://scripts/transitions/transition_stage.gd")
 ## Global transaction lifecycle; the persistent Game supplies screen presentation.
 
 signal started(id: int, kind: StringName)
@@ -8,21 +10,24 @@ signal loaded(id: int, success: bool)
 signal finished(id: int, success: bool)
 signal frame_advanced
 
-@export var area_minimum_frames: int = 12
-@export var level_minimum_frames: int = 147
+@export var definitions: Array[Definition] = [
+ preload("res://assets/transitions/area.tres"),
+ preload("res://assets/transitions/level.tres"),
+]
+var _definitions: Dictionary[StringName, Definition] = {}
+var _definition: Definition
 var busy: bool = false
+var _finishing: bool = false
 var phase: StringName = &"idle"
 var elapsed_frames: int = 0
 var phase_frames: int = 0
 var _id: int = 0
 var _presented: bool = false
 var _executing: bool = false
-var _kind: StringName = &"area"
 var _replaced_level: bool = false
 var _required: int = 1
-var _card_required: int = 1
 var _game: Node
-var _view: Control
+var _view: Node
 var _hud: Control
 var _hud_visible: bool = true
 var _owner: WeakRef
@@ -37,9 +42,20 @@ var _controller_enabled: bool = true
 
 func _ready() -> void:
 	process_physics_priority = -80
+	for definition in definitions:
+		register_definition(definition)
 	GameHandler.level_changed.connect(_on_level_changed)
 
-func attach_game(game: Node, view: Control) -> void:
+func register_definition(definition: Definition) -> bool:
+	if busy or _finishing or definition == null or not definition.is_valid() or _definitions.has(definition.id): return false
+	# Never mutate shared .tres assets through runtime/test configuration.
+	_definitions[definition.id] = definition.duplicate(true) as Definition
+	return true
+
+func get_definition(kind: StringName) -> Definition:
+	return _definitions.get(kind)
+
+func attach_game(game: Node, view: Node) -> void:
 	cancel()
 	_game = game
 	_view = view
@@ -55,21 +71,22 @@ func detach_game(game: Node) -> void:
 func available() -> bool:
 	return is_instance_valid(_game) and GameHandler.current_game == _game and bool(_game.get("transitions_enabled")) and is_instance_valid(_view)
 
-func begin(owner: Node, operation: Callable, kind: StringName = &"area", completion: Callable = Callable(), validator: Callable = Callable()) -> int:
-	if busy or not available() or not is_instance_valid(owner) or not operation.is_valid(): return 0
-	if owner != _game and owner != GameHandler.current_level: return 0
+func begin(transition_owner: Node, operation: Callable, kind: StringName = &"area", completion: Callable = Callable(), validator: Callable = Callable()) -> int:
+	if busy or _finishing or not available() or not is_instance_valid(transition_owner) or not operation.is_valid(): return 0
+	if transition_owner != _game and transition_owner != GameHandler.current_level: return 0
+	var definition := get_definition(kind)
+	if definition == null or not definition.is_valid(): return 0
+	_definition = definition.duplicate(true) as Definition
 	_id += 1
 	var ticket := _id
 	busy = true
 	phase = &"covering"
-	_kind = kind
 	_replaced_level = false
 	elapsed_frames = 0
 	phase_frames = 0
 	_presented = false
-	_required = maxi(1, area_minimum_frames)
-	_card_required = maxi(1, level_minimum_frames)
-	_owner = weakref(owner)
+	_required = _definition.minimum_frames
+	_owner = weakref(transition_owner)
 	_operation = operation
 	_callback = completion
 	_validator = validator
@@ -79,7 +96,7 @@ func begin(owner: Node, operation: Callable, kind: StringName = &"area", complet
 	_game.get_node("LevelContainer").hide()
 	_hud_visible = _hud.visible
 	_hud.hide()
-	_view.get_node("Card").hide()
+	_view.clear_presentation()
 	_view.show()
 	_pause_level(GameHandler.current_level)
 	started.emit(ticket,kind)
@@ -116,9 +133,9 @@ func _run(ticket: int) -> void:
 	phase = &"holding"
 	if not await _hold_frames(ticket,_required): return
 	var success: bool = result == true
-	if _kind == &"level" and success:
-		if not await _show_stage(ticket,&"card",true,_card_required): return
-		if not await _show_stage(ticket,&"outro",false,_required): return
+	if success:
+		for stage in _definition.stages:
+			if not await _show_stage(ticket,stage): return
 	if _validator.is_valid(): success = success and bool(_validator.call())
 	_finish(success)
 
@@ -128,16 +145,19 @@ func _hold_frames(ticket: int, count: int) -> bool:
 		if not _valid(ticket): return false
 	return _valid(ticket)
 
-func _show_stage(ticket: int, stage: StringName, show_card: bool, count: int) -> bool:
-	phase = stage
+func _show_stage(ticket: int, stage: Stage) -> bool:
+	phase = stage.phase
 	phase_frames = 0
 	_presented = false
-	_view.get_node("Card").visible = show_card
-	_hud.visible = show_card and _hud_visible
+	_hud.visible = stage.show_hud and _hud_visible
+	if not _view.show_presentation(stage.scene):
+		if _valid(ticket): _finish(false)
+		return false
+	if not _valid(ticket): return false
 	await _present_frame()
 	if not _valid(ticket): return false
 	_presented = true
-	return await _hold_frames(ticket,count)
+	return await _hold_frames(ticket,stage.minimum_frames)
 
 func _physics_process(_delta: float) -> void:
 	if busy and (not available() or _owner == null or not is_instance_valid(_owner.get_ref())):
@@ -165,7 +185,7 @@ func _pause_level(level: BaseLevel) -> void:
 
 func _on_level_changed(level: BaseLevel) -> void:
 	if not busy: return
-	if _executing and _kind == &"level" and not _replaced_level:
+	if _executing and _definition.allow_level_replacement and not _replaced_level:
 		_replaced_level = true
 		_owner = weakref(_game)
 		_pause_level(level)
@@ -181,6 +201,7 @@ func _finish(success: bool) -> void:
 	var ticket := _id
 	var callback := _callback
 	_id += 1 # Invalidate pending render/physics/operation continuations.
+	_finishing = true
 	busy = false
 	phase = &"idle"
 	_executing = false
@@ -200,10 +221,14 @@ func _finish(success: bool) -> void:
 		if is_instance_valid(players): players.visible = record.visible
 	_players.clear()
 	if is_instance_valid(_game): _game.get_node("LevelContainer").visible = _container_visible
-	if is_instance_valid(_view): _view.hide()
+	if is_instance_valid(_view):
+		_view.clear_presentation()
+		_view.hide()
+	_definition = null
 	if is_instance_valid(_hud): _hud.visible = _hud_visible
 	ControllerHandler.enabled = _controller_enabled
 	ControllerHandler.input_primary_just_pressed = false
 	frame_advanced.emit() # Release cancelled minimum-frame waiters.
+	_finishing = false
 	if callback.is_valid(): callback.call(success)
 	finished.emit(ticket,success)

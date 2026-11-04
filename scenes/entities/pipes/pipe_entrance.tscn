@@ -9,6 +9,7 @@
 size = Vector2(32, 32)
 [node name="PipeEntrance" node_paths=PackedStringArray("sprite") instance=ExtResource("1")]
 script = ExtResource("2")
+controller_input_enabled = true
 texture_filter = 1
 sprite = NodePath("Visuals/TopLeft")
 [node name="Visuals" type="Node2D" parent="."]

@@ -1,5 +1,6 @@
 class_name MarioSlideState
 extends PlayerState
+const AudioMix = preload("res://scripts/audio/sound_effect_mix.gd")
 ## Faces opposite momentum while the Slide action brakes the physical body.
 
 @export var move_state: PlayerState
@@ -20,8 +21,7 @@ func enter() -> void:
 	player.face_direction(get_movement_axis().x)
 	if slide_sound != null and player.body.is_on_floor() and not is_zero_approx(player.body.velocity.x):
 		# Retrigger short bursts rather than looping the full recording.
-		_skid_stream = slide_sound.duplicate() as AudioStreamMP3
-		_skid_stream.loop = false
+		_skid_stream = AudioMix.one_shot_copy(slide_sound) as AudioStreamMP3
 		_slide_audio = player.play_sound_effect(_skid_stream)
 	_skid_elapsed = 0.0
 

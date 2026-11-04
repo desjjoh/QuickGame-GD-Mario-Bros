@@ -19,7 +19,7 @@ func exit() -> void:
 func process_physics(delta: float) -> BaseState:
 	var player := get_player()
 	var direction := get_movement_axis().x
-	player.jump_action.update(player.motion_values, controls_enabled and ControllerHandler.input_primary)
+	player.jump_action.update(player.motion_values, controller_controls_available() and ControllerHandler.input_primary)
 	player.air_movement.apply(player.motion_values, direction, delta)
 	player.gravity_component.apply(player.motion_values, delta)
 	player.move_body()

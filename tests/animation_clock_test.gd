@@ -53,6 +53,7 @@ func _ready() -> void:
 	clock.set_physics_process(true)
 	# GameHandler session reset and real area/level recreation must not reset phase.
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	game.start_with_title = false
 	game.transitions_enabled = false
 	add_child(game)
 	var tick_before := clock.tick_count

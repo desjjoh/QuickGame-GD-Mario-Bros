@@ -46,6 +46,14 @@ secondary={
 ]
 }
 
+start={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194309)
+, Object(InputEventKey,"physical_keycode":4194310)
+, Object(InputEventJoypadButton,"device":-1,"button_index":6)
+]
+}
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

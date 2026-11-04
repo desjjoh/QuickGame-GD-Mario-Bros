@@ -1,0 +1,29 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://scenes/ui/title/title_screen.gd" id="script"]
+[ext_resource type="PackedScene" path="res://scenes/levels/test_level.tscn" id="background"]
+[ext_resource type="Theme" path="res://scenes/ui/hud/hud_theme.tres" id="font"]
+[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/ui/start-cursor.png" id="cursor"]
+[node name="TitleScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture_filter = 1
+theme = ExtResource("font")
+script = ExtResource("script")
+background_level = ExtResource("background")
+[node name="PlayerOne" type="Label" parent="."]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 144.0
+offset_right = 184.0
+offset_bottom = 152.0
+mouse_filter = 2
+text = "1 PLAYER GAME"
+[node name="Cursor" type="Sprite2D" parent="."]
+position = Vector2(72,144)
+texture = ExtResource("cursor")
+centered = false

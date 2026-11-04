@@ -310,3 +310,31 @@ Reuse AreaTheme.texture_overrides for the supplied Underground HUD coin atlas in
 ## Runtime coordinator dependency and deterministic regression sweeps - 2026-11-03
 
 Create TransitionCoordinator by runtime script loading under GameHandler, keeping the transitions member dynamic to break the static script dependency back through GameHandler/BaseLevel. Empty-scene autoload stress changed from one native shutdown failure in thirty launches to zero in one hundred after this change. Keep normal lifecycle ownership and reject every nonzero engine exit in validation. Run bonk collision fixtures in physics callbacks so their sweep delta matches production rather than render cadence. Do not relax collision assertions or add retries to mask failures.
+
+## Non-destructive SFX balance - 2026-11-03
+
+Use a shared editable gain Resource for entity effects and level-owned death playback. Match relative source levels using measured active energy and the actual repeated skid burst, then tune by listening. Preserve recording dynamics, pitch and existing cancellation/lifecycle timing; do not permanently normalize source files or change import settings. Preserve original source identity on private one-shot copies so each path receives the same intended trim. See [audio](audio.md).
+
+## Named transition definitions and display blanking - 2026-11-03
+
+At the user's request, supersede the earlier ColorRect blanking decision: remove Cover and use hidden world/player/HUD with a temporary RenderingServer default clear color, restoring the previous value on all terminal paths. This does not modify Project Settings and assumes one active Game; future additional viewports need an explicit clear-color ownership policy. Extract the current intro into a Control scene and describe area/level holds, HUD visibility and expected replacement in Resource definitions. Keep lifecycle/cancellation shared, register unique named types, snapshot active configuration, and avoid hardcoded Card nodes or level-name presentation/replacement branches. Do not add game-over screens or session flow yet.
+
+## Preserve the existing transition background - 2026-11-03
+
+User clarified that removing Cover also meant removing the imposed black background. This supersedes the temporary clear-color portion of the preceding transition decision. Remove all renderer clear-color writes and background-color definition/stage properties. Hide gameplay as before and render presentation scenes against the existing viewport background. Named types, stages, timing and lifecycle ownership remain.
+
+## Separate the connected stage from the test/menu sandbox - 2026-11-03
+
+Rename the existing stage to 1-1, retaining both areas, painted data, scene UID and transport behavior. Keep Game and established regression fixtures pointing to that stage. Create the new TestLevel as a direct BaseLevel sibling with one fixed-screen Overworld area; do not derive it from the large stage or inherit its second area/routes. Reuse the entity palette and basic floor for testing, while leaving decorations/markers empty. Start-menu integration remains deferred per the user's instruction.
+
+## GameHandler-owned title without a demo - 2026-11-03
+
+Create TitleScreen and its TestLevel background through GameHandler, with explicit TITLE/STARTING/PLAYING flow and no transition on application boot. Suspend title Mario without disabling ControllerHandler; F6 testing of the background retains normal controls. Use the white HUD font for 1 PLAYER GAME, the supplied cursor, and no demo, second-player option or additional title text. Keep alphabet-alt for later copyright display. Start uses existing level presentation into 1-1 and initializes a fresh session. Consume confirmation input, reject repeated requests and defer failed/cancelled recovery using weak Game ownership to avoid rebuilding UI during tree removal. Menu presentation emits intent; session and loading decisions remain in GameHandler.
+
+## Explicit entity controller capability - 2026-11-03
+
+Default BaseEntity controller access to false; opt player and interactive pipe scenes in explicitly. Synchronize actual global signal connections on initialization, property changes, suspension and shutdown rather than dispatching events into every static block. Gate player/pipe direct polling through the same capability, and prevent dead players reconnecting. Keep per-state input controls separate from entity eligibility. This first step does not change frame/physics scheduling, free placed objects or implement enemy spawners. No measured memory/performance claim is made beyond removing unnecessary input subscriptions/dispatch.
+
+## Buffered activity belongs to BaseArea - 2026-11-03
+
+User specified area ownership because unoccupied area runtimes already unload. Use the area camera and two editable margins (64-pixel activation, 96-pixel deactivation), centralized weak registrations and geometry bounds rather than a global manager or notifier on every object. Preserve placed-object instances/collision/progress; independently gate activity and gameplay suspension. EnemySpawner alone owns disposable actors, with reentry rearming to avoid repeated respawning near one spawn point. This adapts reference offscreen policies rather than claiming exact NES thresholds. Initial implementation scans registered objects; optimize further only with measurements.

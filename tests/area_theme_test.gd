@@ -63,7 +63,7 @@ func _ready() -> void:
 	assert(lower.theme.resolve_texture(original_texture).resource_path.contains("Underground"))
 	assert(main.theme.resolve_texture(original_texture) == original_texture)
 	# Every supplied counterpart is mapped, including all question animation frames.
-	assert(lower.theme.texture_overrides.size() == 19)
+	assert(lower.theme.texture_overrides.size() == 20)
 	for source_path: String in lower.theme.texture_overrides:
 		var replacement := lower.theme.resolve_texture(load(source_path))
 		assert(replacement.resource_path == source_path.replace("Overworld (Palette 1)", "Underground (Palette 2)"))

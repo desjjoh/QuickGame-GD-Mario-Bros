@@ -2,11 +2,11 @@
 
 A Godot 4.7 platformer tutorial and reference project in the QuickReference series, exploring techniques from multiple games with reusable scenes, entities, and state machines. The current playable example uses Mario with 16Ã—16 tiles and sprites.
 
-Game loads TestLevel through a global handler. Mario's Idle/Move/Slide/Jump states orchestrate horizontal movement, Run, and skid actions using shared per-player motion values. Move plays a three-pose walk/run loop with velocity-based cadence; Idle and Slide use static poses. Variable jumping, solid-ceiling bumps, exclusive entity sound effects, horizontal camera bounds, and a combined outer shadow are implemented. Levels and entities have explicit terminal shutdown; startup still uses _ready(). Right-only horizontal camera scrolling is implemented; enemies, power-ups, disk saves, checkpoints, and game over are not implemented. Pit death restarts at PlayerSpawn without deducting lives. Current movement is an approximation, not original-game physics parity.
+GameHandler opens a title screen over TestLevel; Start loads 1-1 through the existing transition lifecycle. Mario's Idle/Move/Slide/Jump states orchestrate horizontal movement, Run, and skid actions using shared per-player motion values. Move plays a three-pose walk/run loop with velocity-based cadence; Idle and Slide use static poses. Variable jumping, solid-ceiling bumps, exclusive entity sound effects, horizontal camera bounds, and a combined outer shadow are implemented. Levels and entities have explicit terminal shutdown; startup still uses _ready(). Right-only horizontal camera scrolling is implemented; enemies, power-ups, disk saves, checkpoints, and game over are not implemented. Pit death restarts at PlayerSpawn without deducting lives. Current movement is an approximation, not original-game physics parity.
 
 ## Run
 
-Open `project.godot` in Godot 4.7 and press **F5**. The configured main scene is `scenes/main/game.tscn`. Open `scenes/levels/test_level.tscn` to inspect the floor and spawn marker, or `scenes/player/mario (small)/mario.tscn` to inspect the player and Idle state.
+Open `project.godot` in Godot 4.7 and press **F5**. The configured main scene is `scenes/main/game.tscn`. The title opens first; press Enter or controller Start/Menu to begin. Open `scenes/levels/1-1.tscn` to inspect the floor and spawn marker, or `scenes/player/mario (small)/mario.tscn` to inspect the player and Idle state.
 
 Use left/right arrows to move; hold Left Shift or the gamepad left face button to run. Release direction to brake. Press Space (primary) to jump; hold for a higher jump. The camera scrolls right as Mario advances and does not scroll back. Falling fully below the active camera triggers death, freezes gameplay, plays the death sound and restarts at PlayerSpawn. World progress is preserved by default through GameHandler.reset_progress_on_death=false.
 
@@ -43,7 +43,7 @@ Run all regression scenes with ./scripts/run_tests.ps1 -GodotPath 'C:\path\to\Go
 
 ## Area artwork
 
-TestLevel/Areas/MainArea selects Overworld and Areas/LowerArea selects Underground. Paint through the chosen area's Layouts group. Underground supplies ground, solid blocks, both bricks, question-block animation/used art, and all pipe sections with matching paint previews; decorations retain Overworld artwork. Area themes reuse the existing entity scenes and behaviors. See [area themes](docs/level-themes.md) for configuration.
+1-1/Areas/MainArea selects Overworld and Areas/LowerArea selects Underground. Paint through the chosen area's Layouts group. Underground supplies ground, solid blocks, both bricks, question-block animation/used art, and all pipe sections with matching paint previews; decorations retain Overworld artwork. Area themes reuse the existing entity scenes and behaviors. See [area themes](docs/level-themes.md) for configuration.
 
 Paint Pipe entrance (2x2) in an area's EntityLayout, stand centered on it, and hold Down to teleport to LowerArea. Configure explicit destinations through each area's Transport Points array. Destination pipes provide their own exit positions without separate arrival markers. Entry moves behind the pipe with sound before the camera handoff. The secret-area sideways entrance returns directly to PlayerSpawn. See [pipes](docs/pipes.md).
 
@@ -56,3 +56,5 @@ Game owns a persistent 8x8-grid HUD above world content and below Mario. World, 
 HUD coin and active question blocks sample a global 48-tick cosmetic cycle, so newly loaded objects stay synchronized. Walking and action animations retain their local timing.
 
 Global [transitions](docs/transitions.md) cover area/theme swaps with full black including HUD, and bracket the initial/respawn splash with quick black phases.
+
+`scenes/levels/1-1.tscn` is the existing connected stage. `scenes/levels/test_level.tscn` is the one-screen sandbox and title background: one Overworld area and fixed 256x240 camera. F6 permits normal isolated testing; title use suspends Mario. The menu uses the white HUD font and a single-player cursor. Press Enter or controller Start/Menu to enter 1-1. See [title flow](docs/title-screen.md).

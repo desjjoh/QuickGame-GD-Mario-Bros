@@ -1,5 +1,6 @@
 class_name PlayerPipeEnterState
 extends PlayerTransportState
+const AudioMix = preload("res://scripts/audio/sound_effect_mix.gd")
 ## Directional pipe entry and emergence; normal movement and collisions are suspended.
 
 signal descent_finished
@@ -32,8 +33,7 @@ var _committed: bool = false
 func _ready() -> void:
 	# One-shot runtime copy; preserve the supplied asset's import settings.
 	if enter_sound_effect is AudioStreamWAV:
-		enter_sound_effect = enter_sound_effect.duplicate()
-		(enter_sound_effect as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_DISABLED
+		enter_sound_effect = AudioMix.one_shot_copy(enter_sound_effect)
 
 
 func configure(opening: Vector2, direction: Vector2 = Vector2.DOWN, emerging: bool = false, distance: float = 0.0) -> void:

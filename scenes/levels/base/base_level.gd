@@ -1,5 +1,6 @@
 class_name BaseLevel
 extends CanvasGroup
+const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
 ## Shared foundation for playable levels.
 
 signal death_started
@@ -596,6 +597,7 @@ func _start_death_audio() -> void:
 		stream.loop = false
 	_death_audio = AudioStreamPlayer.new()
 	_death_audio.stream = stream
+	_death_audio.volume_db = SOUND_MIX.volume_for(death_sound)
 	add_child(_death_audio)
 	_death_audio.finished.connect(func(): _death_audio_done = true)
 	_death_audio.play()

@@ -272,4 +272,32 @@ User-approved movement change adds RunAction Retention Ticks=10 (per-player scri
 
 ## Transition defaults - 2026-11-03
 
-Game.transitions_enabled defaults to true. GameHandler/Transitions uses area_minimum_frames = 12 and level_minimum_frames = 147. The area minimum applies to each quick black phase around the level card as well. HUD is hidden during quick phases to cover theme changes and restored for the card. These are script/scene defaults; no Project Settings, input mappings or existing asset import settings changed. See [transitions](transitions.md).
+Game.transitions_enabled defaults to true. Original implementation used area_minimum_frames = 12 and level_minimum_frames = 147; these have been superseded by the definition resources below. The area minimum applies to each quick black phase around the level card as well. HUD is hidden during quick phases to cover theme changes and restored for the card. These are script/scene defaults; no Project Settings, input mappings or existing asset import settings changed. See [transitions](transitions.md).
+
+## SFX playback balance - 2026-11-03
+
+User requested consistent effect levels. New assets/audio/sound_effect_mix.tres defines master_volume_db=-3 and per-stream trims: jump 0, bump -4, pipe -1.5, skid -3.5, death -5 dB. Previously these runtime players used the engine-default 0 dB without shared source compensation. BaseEntity and BaseLevel now apply this profile before playback. These are runtime gain defaults in a new Resource, not changes to Project Settings, Input Map, source recordings or import parameters. See [audio](audio.md).
+
+## Definition-driven transitions and Cover removal - 2026-11-03
+
+User authorized removing Cover and preparing multiple transition types. Timings now live in assets/transitions/area.tres (minimum_frames=12) and level.tres (initial 12; intro stage 147 with HUD; blank outro 12). TransitionScreen/Cover is removed; existing intro artwork/layout moves to scenes/ui/transitions/level_intro.tscn. A temporary RenderingServer clear color supplies black while gameplay is hidden; its prior runtime value is restored on every terminal path. This is process-wide render state, not a persisted Project Settings change. No project/input/import setting was modified. See [transitions](transitions.md).
+
+## Transition background correction - 2026-11-03
+
+The user rejected the temporary black clear-color override. It has been removed along with definition/stage background_color fields. Transition code no longer reads or writes the renderer clear color; the existing background is used throughout. This supersedes the temporary-render-state description above. No Project Settings changed.
+
+## Stage rename and independent one-screen sandbox - 2026-11-03
+
+User authorized renaming the existing test stage to 1-1 and creating an unconnected one-screen test level. Game.initial_level now references scenes/levels/1-1.tscn, preserving its existing stage behavior and serialized UID. The new scenes/levels/test_level.tscn inherits BaseLevel with one Overworld MainArea, camera center (128,120), World Left/Right=0/256, Follow Enabled=false, spawn (48,208), ground columns 0..15 at rows 13/14 and empty decoration/entity markers/transport placements. No Game, menu or transport destination references the new scene. These are new scene defaults and an existing reference migration, not Project Settings/Input Map/import changes.
+
+## Title startup and Start bindings - 2026-11-03
+
+User authorized creating the single-player title and binding controls. Added Input Map start (deadzone 0.5) with Enter, keypad Enter and gamepad Start/Menu (JOY_BUTTON_START=6, any device). ControllerHandler.start_action changed from empty to start; Select remains empty. Existing primary/secondary and directional mappings were preserved. Added Game.start_with_title=true as normal startup policy; initial_level remains 1-1. TitleScreen.background_level references TestLevel. Gameplay fixtures explicitly opt out with start_with_title=false. No display, renderer, physics or import settings changed. This supersedes the previous instruction to leave TestLevel unconnected, following the user's subsequent request to use it behind the title.
+
+## Entity controller capability - 2026-11-03
+
+User requested controller input opt-in as the first entity activity change. New BaseEntity.controller_input_enabled defaults to false. BasePlayer and PipeEntrance scenes explicitly set it true; derived Mario and sideways pipe scenes inherit it. These are scene/script capability defaults within the requested scope, with no Input Map, Project Settings or import changes. Existing state Controls Enabled remains a separate gate. See [entity activity](entity-activity.md).
+
+## Area camera activity defaults - 2026-11-03
+
+Within the authorized activity/spawner work, BaseLevelArea adds Camera Activity / Activation Buffer=64 pixels and Deactivation Buffer=96 pixels, clamped at runtime to at least the activation margin. These are new exported script defaults, not changes to camera scrolling, Project Settings, Input Map or import settings. EnemySpawner adds Enabled=true and Respawn On Reentry=true; Enemy Scene is unassigned by default. No spawner instances were added to levels. See [entity activity](entity-activity.md).

@@ -1,5 +1,6 @@
 class_name BasePlayer
 extends BaseEntity
+const AudioMix = preload("res://scripts/audio/sound_effect_mix.gd")
 ## Player foundation. States coordinate motion, actions, and presentation.
 ## Use body.global_position for the moving player's world position.
 
@@ -65,8 +66,7 @@ func move_body() -> void:
 		var sound := ceiling_bump_sound
 		if sound is AudioStreamWAV:
 			# One-shot playback without trusting embedded WAV loop metadata.
-			sound = sound.duplicate()
-			(sound as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_DISABLED
+			sound = AudioMix.one_shot_copy(sound)
 		play_sound_effect(sound)
 
 
@@ -115,3 +115,7 @@ func death_envelope_top() -> float:
 	if rectangle != null:
 		return collision_shape.to_global(Vector2(0, -rectangle.size.y / 2.0)).y
 	return body.global_position.y
+
+
+func can_read_controller_input() -> bool:
+	return not is_dead and super.can_read_controller_input()
