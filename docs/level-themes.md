@@ -13,7 +13,7 @@ AreaTheme groups terrain, decoration, and entity-marker TileSets, explicit sourc
 
 ## Supplied Underground art and fallback
 
-Underground maps all 20 supplied PNG counterparts under assets/Underground (Palette 2): ground, solid block, both bricks, all four question-block frames (including used), and all ten pipe sections, plus the HUD coin atlas and title cursor. Both upright and sideways pipe entities use the replacements, as do terrain pipe tiles. Decorations have no supplied Underground counterparts and retain Overworld artwork. Mario remains independent of the area theme. Mario is not assigned the area's visual theme.
+Underground maps all 21 supplied PNG counterparts under assets/palettes/underground: ground, solid block, both bricks, all four question-block frames (including used), and all ten pipe sections, plus the HUD coin atlas, title cursor and title card. Both upright and sideways pipe entities use the replacements, as do terrain pipe tiles. Decorations have no supplied Underground counterparts and retain Overworld artwork. Mario remains independent of the area theme. Mario is not assigned the area's visual theme.
 
 Underground terrain and marker TileSets are under assets/tileset/underground/. They preserve source IDs, atlas coordinates, alternative IDs, entity_id custom data, and collision definitions from the Overworld counterparts. Thus an area's painted cells do not change when selecting the matching theme. Marker textures preview themed bricks and question blocks; Underground-specific 32x32 pipe previews preserve whole-pipe painting. Rebuild both themes' previews with scripts/build_pipe_marker.gd after changing pipe artwork. Existing terrain IDs 0-10 are unchanged; source 11 exposes the matching solid block in both themes with square collision. No painted cells were added or moved.
 
@@ -43,3 +43,9 @@ At runtime, inactive areas retain their theme/configuration metadata but free th
 The persistent HUD listens for active-area changes and resolves its canonical Overworld coin atlas through the same AreaTheme texture mapping. It updates private AtlasTexture resources without restarting synchronized playback. Missing theme art falls back to the canonical atlas. See [UI](ui.md).
 
 TitleScreen also resolves its canonical start cursor through the active background area's theme. Underground supplies the mapped cursor; missing art falls back to Overworld. BaseLevelArea emits area_theme_changed after applying a newly selected theme, allowing title artwork to refresh without per-frame polling. Level/area binding and exit disconnects prevent stale subscriptions. Menu text remains the white HUD font.
+
+## Palette asset folders
+
+Themed artwork lives under assets/palettes/overworld and assets/palettes/underground, retaining decorations, interactibles, tileset and ui subfolders where present. Future themes should follow assets/palettes/<theme>. Display names remain Overworld/Underground. Shared TileSet resources remain under assets/tileset and AreaTheme selectors under assets/themes. All canonical texture-override keys and values use the new paths; fonts retain relative atlas filenames within their ui folder. Adding artwork alone still does not create a theme mapping or a font binding.
+
+Underground.title_accent_font selects its own ui/alphabet-alt.fnt for the title copyright. The font uses the supplied Underground atlas; white HUD/menu/top-score text remains unchanged. Missing/null font assignments still fall back to Overworld.

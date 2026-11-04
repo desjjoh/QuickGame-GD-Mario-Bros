@@ -301,3 +301,11 @@ User requested controller input opt-in as the first entity activity change. New 
 ## Area camera activity defaults - 2026-11-03
 
 Within the authorized activity/spawner work, BaseLevelArea adds Camera Activity / Activation Buffer=64 pixels and Deactivation Buffer=96 pixels, clamped at runtime to at least the activation margin. These are new exported script defaults, not changes to camera scrolling, Project Settings, Input Map or import settings. EnemySpawner adds Enabled=true and Respawn On Reentry=true; Enemy Scene is unassigned by default. No spawner instances were added to levels. See [entity activity](entity-activity.md).
+
+## Player status and stage display defaults - 2026-11-04
+
+Within the approved status/UI milestone, new-game defaults are Small form, score=0, coins=0, lives=3. App-session top score initially=0 and survives new games. New BaseLevel Stage Display exports are stage_label=1-1 and starting_time=400; level load initializes GameHandler display values. The title adds a white 8x8-grid TopScore label at (80,184); intro Lives width is 32 pixels to accommodate two digits. These are new runtime/scene defaults, not Project Settings/Input Map/import changes. Existing project.godot edits were present before this work and were preserved. No life deduction, countdown or automatic top-score update was enabled.
+
+## Palette source-path migration - 2026-11-04
+
+User authorized relocating assets/Overworld (Palette 1) to assets/palettes/overworld and assets/Underground (Palette 2) to assets/palettes/underground, including all reference updates. Existing import UIDs and semantic parameters were preserved; source_file/cache paths changed for the relocation and Godot rebuilt its generated cache. No Project Settings or Input Map changes were made. The bitmap-font importer automatically marked its PNG page to skip import; the existing texture import configuration was restored. Existing unrelated settings/artwork edits were preserved.

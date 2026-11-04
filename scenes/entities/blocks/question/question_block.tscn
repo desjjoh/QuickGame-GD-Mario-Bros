@@ -1,10 +1,10 @@
 [gd_scene load_steps=11 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/base/base_block.tscn" id="1_base"]
-[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/interactibles/blocks/question-block.png" id="2_texture"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/blocks/question-block.png" id="2_texture"]
 [ext_resource type="Animation" path="res://scenes/entities/blocks/question/animations/active.tres" id="3_active"]
 
-[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/interactibles/blocks/question-block-4.png" id="4_used"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/blocks/question-block-4.png" id="4_used"]
 [ext_resource type="Script" path="res://scripts/states/blocks/active_block_state.gd" id="5_active"]
 [ext_resource type="Script" path="res://scenes/entities/base/states/entity_state.gd" id="6_inactive"]
 

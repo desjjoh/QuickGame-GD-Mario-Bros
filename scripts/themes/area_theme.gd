@@ -4,6 +4,8 @@ extends Resource
 ## Compatible visual assets for an area theme.
 
 @export var display_name: String
+## Optional copyright/accent font; title falls back to the Overworld alternate atlas.
+@export var title_accent_font: Font
 @export var terrain: TileSet
 @export var decorations: TileSet
 @export var entity_markers: TileSet

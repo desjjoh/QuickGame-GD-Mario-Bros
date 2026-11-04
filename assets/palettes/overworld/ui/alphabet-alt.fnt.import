@@ -1,0 +1,17 @@
+[remap]
+
+importer="font_data_bmfont"
+type="FontFile"
+uid="uid://bt3j4x25o4t34"
+path="res://.godot/imported/alphabet-alt.fnt-bd7e3965e6ee92e96a84038dac3c1e89.fontdata"
+
+[deps]
+
+source_file="res://assets/palettes/overworld/ui/alphabet-alt.fnt"
+dest_files=["res://.godot/imported/alphabet-alt.fnt-bd7e3965e6ee92e96a84038dac3c1e89.fontdata"]
+
+[params]
+
+fallbacks=[]
+compress=true
+scaling_mode=2

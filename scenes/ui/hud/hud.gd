@@ -1,6 +1,6 @@
 extends Control
 ## Persistent HUD artwork follows the active area without restarting its clock.
-const DEFAULT_COIN = preload("res://assets/Overworld (Palette 1)/ui/hud-coin.png")
+const DEFAULT_COIN = preload("res://assets/palettes/overworld/ui/hud-coin.png")
 @onready var coin: AnimatedSprite2D = $Coin
 
 func _ready() -> void:
@@ -8,12 +8,20 @@ func _ready() -> void:
  GameHandler.level_changed.connect(_on_level_changed)
  GameHandler.session_value_changed.connect(_on_session_value_changed)
  _refresh_theme()
+ _refresh_values()
 
 func _on_level_changed(_level: BaseLevel) -> void:
  _refresh_theme()
 
 func _on_session_value_changed(key: StringName, _value: Variant) -> void:
  if key == &"current_area_id": _refresh_theme()
+ if key in [&"score", &"coins", &"stage_label", &"time_remaining"]: _refresh_values()
+
+func _refresh_values() -> void:
+ $Score.text = " %06d" % GameHandler.player_status.score
+ $CoinCount.text = "%02d" % GameHandler.player_status.coins
+ $WorldValue.text = GameHandler.stage_label
+ $TimeValue.text = "%03d" % GameHandler.time_remaining
 
 func _refresh_theme() -> void:
  var texture: Texture2D = DEFAULT_COIN

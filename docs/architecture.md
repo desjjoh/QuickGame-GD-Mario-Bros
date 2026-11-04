@@ -5,7 +5,7 @@
 | Owner | Responsibility |
 | --- | --- |
 | Game | Registers its LevelContainer and initial level with GameHandler |
-| GameHandler | Replaces levels; holds current game/player/session values and persistent-in-session area progress |
+| GameHandler | Replaces levels; owns typed PlayerStatus, app-session top score, stage display values, routing metadata and in-session area progress |
 | BaseLevelArea | Owns area metadata/templates and loads/frees its runtime layouts, world objects, and camera |
 | AreaTheme | Selects compatible TileSets and entity texture replacements with fallback |
 | BaseLevel | Generates area entities, spawns the player, coordinates deferred area transfer/cameras, updates bounds, composites the shadow, and shuts down entities |
@@ -105,7 +105,7 @@ The main test area has 944 pixels of horizontal space, ground top Y=208, PlayerS
 
 GroundLayout renders solid terrain directly. DecorationLayout renders collision-free bushes, hills, and clouds directly on the same 16x16 grid. Each area's EntityLayout is a collision-free authoring layer: its entity_id custom data maps through Entity Scenes to actual BaseEntity scenes under WorldObjects. It hides at runtime. Each spawned entity owns its own collision, detection, and behavior; the spawner does not impose solid collision. See [entity layout](entity-layout.md) and [question block](question-block.md).
 
-Environment art is theme-first under assets/Overworld (Palette 1) and assets/Underground (Palette 2). Shared TileSet resources stay under assets/tileset. Player art stays under assets/player/mario (small); audio stays under assets/sfx. Area themes select compatible TileSets and entity artwork at startup; live theme changes remain deferred. See [level themes](level-themes.md).
+Environment art is theme-first under assets/palettes/overworld and assets/palettes/underground. Shared TileSet resources stay under assets/tileset. Player art stays under assets/player/mario (small); audio stays under assets/sfx. Area themes select compatible TileSets and entity artwork at startup; live theme changes remain deferred. See [level themes](level-themes.md).
 
 ## Verification and limits
 
@@ -140,3 +140,7 @@ GameHandler owns TitleScreen creation and GameFlow (DETACHED/TITLE/STARTING/PLAY
 BaseEntity controller access now defaults off. BasePlayer and interactive pipes opt in through their scene properties; live changes and reversible suspension synchronize signal subscriptions, and direct polling uses the same availability checks. BaseArea now owns buffered off-camera activity; state-driven scheduling inside the activity region remains deferred. See [entity activity](entity-activity.md).
 
 BaseLevelArea now owns buffered camera activity for its resident non-player entities and EnemySpawner nodes. Placed objects sleep in place; only spawner-owned actors are disposable. Activity and gameplay suspension are independent. See [entity activity](entity-activity.md) for current behavior; this supersedes the earlier planned off-camera description.
+
+## Typed player/session status
+
+GameHandler owns one PlayerStatus Resource for form, score, coins and lives. It forwards validated changes through session_value_changed; existing generic session APIs route reserved keys to the same record. HUD/title/intro initialize from current values and subscribe to changes. Top score is separate from new-game resets, with no automatic promotion or disk saving. BaseLevel supplies stage display defaults; area travel retains them. See [player status](player-status.md).

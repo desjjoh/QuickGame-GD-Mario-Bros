@@ -31,7 +31,7 @@ func _ready() -> void:
 		check_pair(first,coin,clock,cycle)
 		if later != null:
 			check_pair(later,coin,clock,cycle)
-			assert(later.sprite.texture.resource_path.contains("Underground"))
+			assert(later.sprite.texture.resource_path.contains("/palettes/underground/"))
 		clock._physics_process(1.0/60.0)
 	first.set_gameplay_suspended(false)
 	assert(first.receive_hit(EntityHit.new(null,&"bonk",Vector2.UP)))

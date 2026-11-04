@@ -24,6 +24,7 @@ entity_scenes = Dictionary[StringName, PackedScene]({
 })
 
 [node name="MainArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="0" unique_id=250103957]
+process_physics_priority = 110
 theme = ExtResource("theme")
 
 [node name="DecorationLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="0" unique_id=1428866671]

@@ -71,19 +71,37 @@ func run_checks() -> void:
   var label := title.get_node("PlayerOne") as Label
   var hud := game.get_node("UI/HUD") as Control
   assert(label.text == "1 PLAYER GAME")
+  var copyright_label := title.get_node("Copyright") as Label
+  assert(copyright_label.text == "©1985 NINTENDO" and copyright_label.position == Vector2(104,120))
+  var accent := copyright_label.get_theme_font(&"font")
+  var expected_accent := load("res://assets/palettes/overworld/ui/alphabet-alt.fnt") as Font
+  if background.active_area.theme != null and background.active_area.theme.title_accent_font != null:
+   expected_accent = background.active_area.theme.title_accent_font
+  assert(accent == expected_accent)
+  assert(accent.has_char(169) and accent.get_string_size(copyright_label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,8).x == 112)
+
   assert(label.get_theme_font(&"font").resource_path == hud.get_theme_font(&"font",&"Label").resource_path)
   assert(label.get_theme_color(&"font_color") == Color.WHITE)
   var cursor := title.get_node("Cursor") as Sprite2D
   assert(cursor.texture.get_size() == Vector2(8,8))
   var area := background.active_area
   var original_theme := area.theme
-  var canonical := load("res://assets/Overworld (Palette 1)/ui/start-cursor.png") as Texture2D
+  var canonical := load("res://assets/palettes/overworld/ui/start-cursor.png") as Texture2D
   var expected := original_theme.resolve_texture(canonical) if original_theme != null else canonical
   assert(cursor.texture == expected)
+  var title_card := title.get_node("TitleCard") as Sprite2D
+  var canonical_card := load("res://assets/palettes/overworld/ui/start-title.png") as Texture2D
+  var expected_card := original_theme.resolve_texture(canonical_card) if original_theme != null else canonical_card
+  assert(title_card.texture == expected_card and title_card.texture.get_size() == Vector2(192,96))
+  assert(title_card.position == Vector2(32,32) and title_card.scale == Vector2.ONE and not title_card.centered)
   area.theme = load("res://assets/themes/overworld.tres")
-  assert(cursor.texture.resource_path.contains("Overworld"))
+  assert(cursor.texture.resource_path.contains("/palettes/overworld/"))
+  assert(copyright_label.get_theme_font(&"font").resource_path == "res://assets/palettes/overworld/ui/alphabet-alt.fnt")
+  assert(title_card.texture == canonical_card)
   area.theme = load("res://assets/themes/underground.tres")
-  assert(cursor.texture.resource_path == "res://assets/Underground (Palette 2)/ui/start-cursor.png")
+  assert(cursor.texture.resource_path == "res://assets/palettes/underground/ui/start-cursor.png")
+  assert(title_card.texture.resource_path == "res://assets/palettes/underground/ui/start-title.png")
+  assert(copyright_label.get_theme_font(&"font").resource_path == "res://assets/palettes/underground/ui/alphabet-alt.fnt")
   if DisplayServer.get_name() != "headless":
    await RenderingServer.frame_post_draw
    assert(get_viewport().get_texture().get_image().save_png("res://.godot/validation/title-underground-cursor.png") == OK)
@@ -91,16 +109,27 @@ func run_checks() -> void:
   # A title created with an Underground background joins the correct theme.
   var themed_title: Control = load("res://scenes/ui/title/title_screen.tscn").instantiate()
   game.get_node("UI/ScreenContainer").add_child(themed_title)
-  assert((themed_title.get_node("Cursor") as Sprite2D).texture.resource_path.contains("Underground"))
+  assert((themed_title.get_node("Cursor") as Sprite2D).texture.resource_path.contains("/palettes/underground/"))
+  assert(themed_title.get_node("Copyright").get_theme_font(&"font").resource_path == "res://assets/palettes/underground/ui/alphabet-alt.fnt")
+  assert(themed_title.get_node("TitleCard").texture.resource_path == "res://assets/palettes/underground/ui/start-title.png")
   themed_title.free()
   area.theme = AreaTheme.new()
-  assert(cursor.texture.resource_path.contains("Overworld"))
+  assert(title_card.texture == canonical_card)
+  assert(cursor.texture.resource_path.contains("/palettes/overworld/"))
   area.theme = null
-  assert(cursor.texture.resource_path.contains("Overworld"))
+  assert(title_card.texture == canonical_card)
+  assert(cursor.texture.resource_path.contains("/palettes/overworld/"))
+  var accent_theme := AreaTheme.new()
+  accent_theme.title_accent_font = hud.get_theme_font(&"font", &"Label")
+  area.theme = accent_theme
+  assert(copyright_label.get_theme_font(&"font") == accent_theme.title_accent_font)
   area.theme = original_theme
+  assert(copyright_label.get_theme_font(&"font") == expected_accent)
+  assert(title_card.texture == expected_card)
   assert(cursor.texture == expected)
   var source_title: Control = load("res://scenes/ui/title/title_screen.tscn").instantiate()
-  assert((source_title.get_node("Cursor") as Sprite2D).texture.resource_path.contains("Overworld"))
+  assert((source_title.get_node("Cursor") as Sprite2D).texture.resource_path.contains("/palettes/overworld/"))
+  assert(source_title.get_node("TitleCard").texture == canonical_card)
   source_title.free()
   var origin := mario.body.global_position
   Input.action_press(ControllerHandler.right_action)

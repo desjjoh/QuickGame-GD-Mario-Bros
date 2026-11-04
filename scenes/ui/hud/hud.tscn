@@ -1,6 +1,6 @@
 [gd_scene format=3]
 [ext_resource type="Theme" path="res://scenes/ui/hud/hud_theme.tres" id="theme"]
-[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/ui/hud-coin.png" id="coin"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/ui/hud-coin.png" id="coin"]
 [ext_resource type="Script" path="res://scenes/components/presentation/synchronized_animation.gd" id="sync"]
 [ext_resource type="Resource" path="res://scenes/components/presentation/palette_pulse.tres" id="cycle"]
 [ext_resource type="Script" path="res://scenes/ui/hud/hud.gd" id="hud_script"]

@@ -7,6 +7,6 @@ stream_volume_db = Dictionary[String, float]({
 "res://assets/sfx/smb_jump-small.wav": 0.0,
 "res://assets/sfx/smb_bump.wav": -4.0,
 "res://assets/sfx/smb_pipe.wav": -1.5,
-"res://assets/sfx/smb-skid.mp3": -3.5,
+"res://assets/sfx/smb-skid.mp3": 2.5,
 "res://assets/soundtrack/smb_mariodie.wav": -5.0
 })

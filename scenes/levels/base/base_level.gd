@@ -5,6 +5,10 @@ const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
 
 signal death_started
 
+@export_group("Stage Display")
+@export var stage_label: String = "1-1"
+@export_range(0, 999) var starting_time: int = 400
+
 @export_group("Death")
 @export var fall_death_enabled: bool = true
 @export_range(0.0, 128.0, 1.0) var fall_death_margin: float = 34.0

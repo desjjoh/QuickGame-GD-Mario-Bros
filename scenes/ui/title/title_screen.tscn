@@ -2,7 +2,9 @@
 [ext_resource type="Script" path="res://scenes/ui/title/title_screen.gd" id="script"]
 [ext_resource type="PackedScene" path="res://scenes/levels/test_level.tscn" id="background"]
 [ext_resource type="Theme" path="res://scenes/ui/hud/hud_theme.tres" id="font"]
-[ext_resource type="Texture2D" path="res://assets/Overworld (Palette 1)/ui/start-cursor.png" id="cursor"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/ui/start-cursor.png" id="cursor"]
+[ext_resource type="FontFile" path="res://assets/palettes/overworld/ui/alphabet-alt.fnt" id="accent_font"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/ui/start-title.png" id="title_card"]
 [node name="TitleScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -26,4 +28,28 @@ text = "1 PLAYER GAME"
 [node name="Cursor" type="Sprite2D" parent="."]
 position = Vector2(72,144)
 texture = ExtResource("cursor")
+centered = false
+
+[node name="TopScore" type="Label" parent="."]
+layout_mode = 0
+offset_left = 96.0
+offset_top = 184.0
+offset_right = 184.0
+offset_bottom = 192.0
+mouse_filter = 2
+text = "TOP- 000000"
+
+[node name="Copyright" type="Label" parent="."]
+layout_mode = 0
+offset_left = 104.0
+offset_top = 120.0
+offset_right = 216.0
+offset_bottom = 128.0
+mouse_filter = 2
+theme_override_fonts/font = ExtResource("accent_font")
+text = "©1985 NINTENDO"
+
+[node name="TitleCard" type="Sprite2D" parent="."]
+position = Vector2(32,32)
+texture = ExtResource("title_card")
 centered = false
