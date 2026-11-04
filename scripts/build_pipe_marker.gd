@@ -1,4 +1,6 @@
 extends SceneTree
+
+
 ## Pack exact source pixels into the two paintable 2x2 marker previews.
 func _initialize() -> void:
 	var previews := {
@@ -7,13 +9,21 @@ func _initialize() -> void:
 	}
 	for theme: String in ["overworld", "underground"]:
 		var folder := "res://assets/palettes/" + theme + "/interactibles/pipes/"
-		var output := "res://assets/tileset/" + ("underground/" if theme == "underground" else "") + "previews/"
+		var output := (
+			"res://assets/tileset/"
+			+ ("underground/" if theme == "underground" else "")
+			+ "previews/"
+		)
 		DirAccess.make_dir_recursive_absolute(output)
 		for preview: String in previews:
-			var image := Image.create(32,32,false,Image.FORMAT_RGBA8)
+			var image := Image.create(32, 32, false, Image.FORMAT_RGBA8)
 			for index in range(4):
-				var part := (load(folder + previews[preview][index] + ".png") as Texture2D).get_image()
+				var part := (
+					(load(folder + previews[preview][index] + ".png") as Texture2D).get_image()
+				)
 				part.convert(Image.FORMAT_RGBA8)
-				image.blit_rect(part,Rect2i(0,0,16,16),Vector2i((index%2)*16,(index >> 1)*16))
+				image.blit_rect(
+					part, Rect2i(0, 0, 16, 16), Vector2i((index % 2) * 16, (index >> 1) * 16)
+				)
 			assert(image.save_png(output + preview + ".png") == OK)
 	quit()

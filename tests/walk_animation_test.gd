@@ -25,12 +25,17 @@ func run_checks() -> void:
 	preload("res://tests/test_floor.gd").extend_floor(game)
 	var mario := GameHandler.current_player as Mario
 	var move_state := mario.state_machine.get_state(&"Move")
-	assert(move_state.animation_name == &"walk", "Mario Move must select walk in its saved scene configuration.")
+	assert(
+		move_state.animation_name == &"walk",
+		"Mario Move must select walk in its saved scene configuration."
+	)
 	assert(not move_state.stop_animation_on_enter)
 	for state_name in [&"Idle", &"Slide"]:
 		var static_state := mario.state_machine.get_state(state_name)
-		assert(static_state.sprite_texture != null and static_state.stop_animation_on_enter,
-			"Mario's static states must stop playback and restore their assigned texture.")
+		assert(
+			static_state.sprite_texture != null and static_state.stop_animation_on_enter,
+			"Mario's static states must stop playback and restore their assigned texture."
+		)
 	var animation := mario.animation_player.get_animation(&"walk")
 	assert(animation.loop_mode == Animation.LOOP_LINEAR)
 	assert(animation.track_get_key_count(0) == 3)
@@ -40,7 +45,9 @@ func run_checks() -> void:
 	await tick(5)
 	assert(mario.body.is_on_floor())
 	mario.set_physics_process(false)
-	mario.animation_player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	mario.animation_player.callback_mode_process = (
+		AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	)
 	mario.state_machine.change_state(mario.state_machine.get_state(&"Move"))
 	assert(mario.sprite.texture.resource_path.ends_with("mario-small-walk-1.png"))
 	mario.animation_player.advance(7.0 / 60.0 + 0.000001)
@@ -52,7 +59,9 @@ func run_checks() -> void:
 	mario.state_machine.change_state(mario.state_machine.get_state(&"Idle"))
 	assert(not mario.animation_player.is_playing() and mario.animation_player.speed_scale == 1.0)
 	assert(mario.sprite.texture.resource_path.ends_with("mario-small-idle.png"))
-	mario.animation_player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_PHYSICS
+	mario.animation_player.callback_mode_process = (
+		AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_PHYSICS
+	)
 	mario.set_physics_process(true)
 	Input.action_press(ControllerHandler.right_action)
 	await tick(60)
@@ -66,7 +75,10 @@ func run_checks() -> void:
 	Input.action_press(ControllerHandler.secondary_action)
 	await tick(2)
 	assert(ControllerHandler.input_secondary and mario.body.velocity.x < 105.0)
-	assert(is_equal_approx(mario.animation_player.speed_scale, 1.75), "Run input alone must not select fast cadence.")
+	assert(
+		is_equal_approx(mario.animation_player.speed_scale, 1.75),
+		"Run input alone must not select fast cadence."
+	)
 	await tick(25)
 	assert(is_equal_approx(mario.animation_player.speed_scale, 3.5))
 	Input.action_release(ControllerHandler.right_action)
@@ -79,6 +91,7 @@ func run_checks() -> void:
 	assert(mario.sprite.texture.resource_path.ends_with("mario-small-idle.png"))
 	Input.action_release(ControllerHandler.secondary_action)
 	game.free()
-	print("PASS: three-pose loop, exact cadence boundaries in both directions, velocity-based speed changes, live frame progression, braking slowdown, and static Idle restoration.")
+	print(
+		"PASS: three-pose loop, exact cadence boundaries in both directions, velocity-based speed changes, live frame progression, braking slowdown, and static Idle restoration."
+	)
 	get_tree().quit()
-

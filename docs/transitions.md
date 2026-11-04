@@ -6,7 +6,7 @@ GameHandler owns TransitionCoordinator as a child; persistent Game owns UI/Scree
 
 Area/pipe transfer: hide world, player and HUD; present a frame with the existing viewport background; perform destination work; submit destination camera/theme state while hidden; honor the minimum hold; restore visibility and input. Pipe emergence proceeds after reveal. Area travel has no splash card.
 
-Starting a game from the title and death restart: quick hidden phase, load, level-intro presentation with HUD, quick hidden phase, gameplay. The existing intro now lives in scenes/ui/transitions/level_intro.tscn. Its WORLD 1-1, portrait and × 3 remain static placeholders; no life deduction or value binding was added. Death still waits for its existing jingle lifecycle before requesting restart.
+Starting a game from the title and death restart: quick hidden phase, load, level-intro presentation with HUD, quick hidden phase, gameplay. The existing intro now lives in scenes/ui/transitions/level_intro.tscn. Its stage label and lives read GameHandler values; the portrait remains Small Mario. Accepted death has already reduced lives before the intro is created. Death still waits for its existing jingle lifecycle before requesting restart.
 
 A rendered frame acknowledges blanking before work starts. Headless checks use a process-frame acknowledgement. The initial minimum includes time spent loading; slow work cannot be revealed before completion and destination render submission. Each later stage holds its own minimum physics ticks after its first submitted frame. Async callables are supported, but current level creation remains synchronous; no threaded disk loader was added.
 
@@ -44,7 +44,7 @@ Defaults are assets/transitions/area.tres and level.tres. The coordinator regist
 
 To add a future type: create a Control presentation scene, create its definition/stages, register the definition (or include it in the coordinator's exported definitions), then request its ID. Loading behavior remains the supplied operation, not something inferred from the type name. The current public GameHandler level/death calls and BaseLevel pipe calls still request level or area.
 
-This milestone adds timed presentation extensibility, not game-over logic, menus, lives handling, interactive waiting, audio cues or a generic game-flow framework. Completion still restores the saved gameplay state. GameHandler must own the eventual next destination/session decision for game over; transition artwork must not independently reset lives or load levels from its cleanup callback.
+Named stages now also support the game-over presentation and optional completion waiting. GameHandler owns the destination/session decision; transition artwork does not reset lives or load levels from its cleanup callback. Existing cards keep timed-only behavior unless wait_for_presentation is enabled.
 
 ## Timing reference
 
@@ -63,3 +63,5 @@ Only one transaction is active. Invalid owners, unexpected level replacement, de
 transition_test exercises existing startup/respawn and actual pipe transfer, render-before-work sequencing, unchanged background pixels with no Cover node or clear-color override, custom named presentation/HUD/timing, resource isolation and active snapshots, unknown/duplicate/invalid rejection, scripted initialization cancellation, generic replacement permission, slow work and stale/cancelled transactions. Rendered checks capture quick/intro images. Headless checks cannot qualify physical monitor pacing or subjective presentation. The separately tracked intermittent native engine shutdown issue is not resolved by this feature.
 
 Normal application startup now opens the [title](title-screen.md) through immediate background loading, with no transition. Confirming Start invokes the level definition into 1-1. Direct gameplay fixtures may opt out of title startup to isolate existing behavior.
+
+Game over adds a game_over definition (12 hidden / 378 card with HUD / 12 hidden). Its card waits for one-shot audio completion with bounded fallback, and its GameHandler completion returns to title after explicit old-level progress cleanup. No background override is introduced. See [game over](game-over.md).

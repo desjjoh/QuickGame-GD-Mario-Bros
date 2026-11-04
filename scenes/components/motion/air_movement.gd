@@ -18,7 +18,11 @@ var _facing: float = 1.0
 
 func capture(values: MotionValues, facing: float, running_history: bool = false) -> void:
 	_facing = facing
-	_fast_history = running_history or absf(values.velocity.x) >= history_speed_threshold or is_equal_approx(values.acceleration, history_acceleration)
+	_fast_history = (
+		running_history
+		or absf(values.velocity.x) >= history_speed_threshold
+		or is_equal_approx(values.acceleration, history_acceleration)
+	)
 	_captured = true
 
 
@@ -30,15 +34,26 @@ func begin(values: MotionValues, facing: float, running_history: bool = false) -
 
 func update_profile(values: MotionValues) -> void:
 	var fast := absf(values.velocity.x) >= fast_speed_threshold
-	var rate := fast_acceleration if fast else (history_acceleration if _fast_history else normal_acceleration)
+	var rate := (
+		fast_acceleration
+		if fast
+		else (history_acceleration if _fast_history else normal_acceleration)
+	)
 	if not is_zero_approx(values.velocity.x) and signf(values.velocity.x) != _facing:
 		rate *= facing_mismatch_multiplier
-	values.set_modifier(&"air", {
-		&"max_speed": fast_max_speed if fast else normal_max_speed,
-		&"acceleration": rate,
-		&"deceleration": 0.0,
-		&"reversal_multiplier": 1.0,
-	}, 300)
+	(
+		values
+		. set_modifier(
+			&"air",
+			{
+				&"max_speed": fast_max_speed if fast else normal_max_speed,
+				&"acceleration": rate,
+				&"deceleration": 0.0,
+				&"reversal_multiplier": 1.0,
+			},
+			300
+		)
+	)
 
 
 func apply(values: MotionValues, direction: float, delta: float) -> void:
@@ -47,11 +62,14 @@ func apply(values: MotionValues, direction: float, delta: float) -> void:
 		return
 	var velocity := values.velocity
 	var change := values.acceleration * clampf(direction, -1.0, 1.0) * delta
-	velocity.x = minf(velocity.x + change, values.max_speed) if direction > 0.0 else maxf(velocity.x + change, -values.max_speed)
+	velocity.x = (
+		minf(velocity.x + change, values.max_speed)
+		if direction > 0.0
+		else maxf(velocity.x + change, -values.max_speed)
+	)
 	values.velocity = velocity
 
 
 func end(values: MotionValues) -> void:
 	values.remove_modifier(&"air")
 	_captured = false
-

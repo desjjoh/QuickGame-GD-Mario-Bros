@@ -32,8 +32,8 @@ func run_checks() -> void:
 			var floor := fixture.get_node("Areas/MainArea/Layouts/GroundLayout") as TileMapLayer
 			floor.clear()
 			for x in range(16):
-				floor.set_cell(Vector2i(x,13),0,Vector2i.ZERO)
-			fixture.get_node("Players/PlayerSpawn").position = Vector2(40,208)
+				floor.set_cell(Vector2i(x, 13), 0, Vector2i.ZERO)
+			fixture.get_node("Players/PlayerSpawn").position = Vector2(40, 208)
 			var packed := PackedScene.new()
 			for area in fixture.get_node("Areas").get_children():
 				fixture.set_editable_instance(area, true)
@@ -56,16 +56,32 @@ func run_checks() -> void:
 				mario.state_machine.process_physics(1.0 / 60.0)
 			await state_tick_done
 			assert(mario.state_machine.current_state is MarioJumpState)
-			assert(mario.body.global_position.x > takeoff_origin.x,
-				"Takeoff must not skip horizontal movement from %s" % state_name)
-			assert(absf((mario.body.global_position.x - takeoff_origin.x) - mario.body.velocity.x / 60.0) < 0.1,
-				"Takeoff must consume exactly one movement tick from %s" % state_name)
-			assert(mario.body.global_position.y < takeoff_origin.y,
-				"Takeoff must move upward immediately from %s" % state_name)
+			assert(
+				mario.body.global_position.x > takeoff_origin.x,
+				"Takeoff must not skip horizontal movement from %s" % state_name
+			)
+			assert(
+				(
+					absf(
+						(
+							(mario.body.global_position.x - takeoff_origin.x)
+							- mario.body.velocity.x / 60.0
+						)
+					)
+					< 0.1
+				),
+				"Takeoff must consume exactly one movement tick from %s" % state_name
+			)
+			assert(
+				mario.body.global_position.y < takeoff_origin.y,
+				"Takeoff must move upward immediately from %s" % state_name
+			)
 			# Air's modifier masks Run; remove it to inspect the refreshed value.
 			mario.air_movement.end(mario.motion_values)
-			assert(mario.motion_values.max_speed == (150.0 if run_pressed else 90.0),
-				"Run must refresh before takeoff from %s" % state_name)
+			assert(
+				mario.motion_values.max_speed == (150.0 if run_pressed else 90.0),
+				"Run must refresh before takeoff from %s" % state_name
+			)
 			ControllerHandler.input_primary_just_pressed = false
 			ControllerHandler.input_secondary = false
 			trial.free()
@@ -119,8 +135,12 @@ func run_checks() -> void:
 		get_tree().root.add_child(game)
 		preload("res://tests/test_floor.gd").extend_floor(game)
 		var player := GameHandler.current_player
-		var forward: StringName = ControllerHandler.right_action if direction > 0.0 else ControllerHandler.left_action
-		var backward: StringName = ControllerHandler.left_action if direction > 0.0 else ControllerHandler.right_action
+		var forward: StringName = (
+			ControllerHandler.right_action if direction > 0.0 else ControllerHandler.left_action
+		)
+		var backward: StringName = (
+			ControllerHandler.left_action if direction > 0.0 else ControllerHandler.right_action
+		)
 		Input.action_press(forward)
 		Input.action_press(ControllerHandler.secondary_action)
 		await tick(65)
@@ -147,6 +167,7 @@ func run_checks() -> void:
 		assert(player.motion_values.deceleration == player.run_action.history_acceleration)
 		Input.action_release(ControllerHandler.secondary_action)
 		game.free()
-	print("PASS: air rates, facing-based braking, fast history, neutral coasting, skid-jump capture in both directions, and landing cleanup.")
+	print(
+		"PASS: air rates, facing-based braking, fast history, neutral coasting, skid-jump capture in both directions, and landing cleanup."
+	)
 	get_tree().quit()
-

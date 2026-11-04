@@ -14,17 +14,28 @@ func deliver(player: BasePlayer) -> bool:
 	# Prefer the reference's single center-head probe over contact ordering.
 	var shape := player.collision_shape.shape as RectangleShape2D
 	if shape != null:
-		var head := Vector2(player.body.global_position.x, player.collision_shape.global_position.y - shape.size.y / 2.0)
+		var head := Vector2(
+			player.body.global_position.x,
+			player.collision_shape.global_position.y - shape.size.y / 2.0
+		)
 		# Exact cell boundaries belong to the right-hand tile.
 		head.x += 0.0001
-		var query := PhysicsRayQueryParameters2D.create(head + Vector2(0, 0.5), head - Vector2(0, 0.5), player.body.collision_mask, [player.body.get_rid()])
+		var query := PhysicsRayQueryParameters2D.create(
+			head + Vector2(0, 0.5),
+			head - Vector2(0, 0.5),
+			player.body.collision_mask,
+			[player.body.get_rid()]
+		)
 		var hit := player.body.get_world_2d().direct_space_state.intersect_ray(query)
 		if not hit.is_empty():
 			var collider := hit.collider as Node
 			var target := collider.get_parent() as BaseBlock if collider != null else null
 			# A used block or solid terrain under the probe must not redirect
 			# the attack into a neighboring active block.
-			return target != null and target.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP, strength))
+			return (
+				target != null
+				and target.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP, strength))
+			)
 	var selected: BaseBlock = null
 	var best_distance: float = INF
 	for index in range(player.body.get_slide_collision_count()):
@@ -40,7 +51,14 @@ func deliver(player: BasePlayer) -> bool:
 		# Trust the actual ceiling contact, including partial head overlap.
 		# Prefer the nearest block center; choose the right block on a tie.
 		var distance := absf(target.to_local(player.body.global_position).x - 8.0)
-		if distance < best_distance or (is_equal_approx(distance, best_distance) and selected != null and target.global_position.x > selected.global_position.x):
+		if (
+			distance < best_distance
+			or (
+				is_equal_approx(distance, best_distance)
+				and selected != null
+				and target.global_position.x > selected.global_position.x
+			)
+		):
 			selected = target
 			best_distance = distance
 	if selected != null:

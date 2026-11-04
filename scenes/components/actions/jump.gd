@@ -21,7 +21,11 @@ var _released: bool = false
 func begin(values: MotionValues) -> bool:
 	if not values.body.is_on_floor():
 		return false
-	if jump_speeds.size() != speed_thresholds.size() + 1 or rising_gravities.size() != jump_speeds.size() or falling_gravities.size() != jump_speeds.size():
+	if (
+		jump_speeds.size() != speed_thresholds.size() + 1
+		or rising_gravities.size() != jump_speeds.size()
+		or falling_gravities.size() != jump_speeds.size()
+	):
 		push_error("Jump arrays must contain one value per speed band.")
 		return false
 	var profile := 0
@@ -46,10 +50,11 @@ func update(values: MotionValues, held: bool) -> void:
 		return
 	if not held and _origin_y - values.body.global_position.y >= minimum_release_height:
 		_released = true
-	values.set_modifier(&"jump", {&"gravity": _fall if _released or values.velocity.y >= 0.0 else _rise}, 250)
+	values.set_modifier(
+		&"jump", {&"gravity": _fall if _released or values.velocity.y >= 0.0 else _rise}, 250
+	)
 
 
 func end(values: MotionValues) -> void:
 	active = false
 	values.remove_modifier(&"jump")
-

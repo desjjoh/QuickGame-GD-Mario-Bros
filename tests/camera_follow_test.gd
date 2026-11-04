@@ -57,21 +57,31 @@ func _ready() -> void:
 		camera.follow_target(body)
 		body.global_position.x = 0.0
 		camera.follow_target(body)
-	assert(camera.global_position.x == 5.0, "Retracing the same ground must not accumulate one-way scrolling.")
+	assert(
+		camera.global_position.x == 5.0,
+		"Retracing the same ground must not accumulate one-way scrolling."
+	)
 	body.global_position.x = 13.25
 	camera.follow_target(body)
-	assert(camera.global_position.x == 5.25, "Only new progress beyond the previous furthest position scrolls.")
+	assert(
+		camera.global_position.x == 5.25,
+		"Only new progress beyond the previous furthest position scrolls."
+	)
 	body.global_position.x = 100.0
 	camera.reset_target(body)
 	for frame in range(20):
 		var before := camera.global_position.x
 		body.global_position.x += 2.5
 		camera.follow_target(body)
-		assert(is_equal_approx(camera.global_position.x - before, 2.5),
-			"Steady running must not alternate between 2- and 3-pixel camera steps.")
+		assert(
+			is_equal_approx(camera.global_position.x - before, 2.5),
+			"Steady running must not alternate between 2- and 3-pixel camera steps."
+		)
 	body.global_position.x = 2000.0
 	camera.follow_target(body)
-	assert(camera.global_position == Vector2(640, 120), "Stop at right world boundary; Y stays fixed.")
+	assert(
+		camera.global_position == Vector2(640, 120), "Stop at right world boundary; Y stays fixed."
+	)
 	game.free()
 	game = make_game()
 	add_child(game)
@@ -92,5 +102,7 @@ func _ready() -> void:
 	assert(level.player.body.is_on_floor())
 	assert(level.player.body.global_position.x <= 761.0)
 	game.free()
-	print("PASS: reference scroll thresholds, early/full-speed steps, no backward/vertical scroll, world limits, and live run to level end.")
+	print(
+		"PASS: reference scroll thresholds, early/full-speed steps, no backward/vertical scroll, world limits, and live run to level end."
+	)
 	get_tree().quit()

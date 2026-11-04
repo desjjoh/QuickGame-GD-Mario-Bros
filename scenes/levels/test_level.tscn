@@ -39,7 +39,7 @@ tile_map_data = PackedByteArray("AAAAAAIAAAAAAAAAAAAAAAMAAgAAAAAAAAAAAAQAAgAAAAA
 tile_set = ExtResource("11_a5rnb")
 
 [node name="Arrival" parent="Areas/MainArea" index="2" unique_id=1254188347]
-position = Vector2(32, 208)
+position = Vector2(48, 208)
 
 [node name="Camera2D" parent="Areas/MainArea" index="3" unique_id=254826152]
 position = Vector2(128, 120)
@@ -48,6 +48,6 @@ world_left = 0.0
 world_right = 256.0
 
 [node name="PlayerSpawn" parent="Players" parent_id_path=PackedInt32Array(1625753015) index="0" unique_id=321075723]
-position = Vector2(32, 208)
+position = Vector2(48, 208)
 
 [editable path="Areas/MainArea"]

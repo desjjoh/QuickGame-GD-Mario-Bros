@@ -1,7 +1,9 @@
 extends Node
 ## Run with Godot --headless --path . tests/state_machine_test.tscn
 
-class ProbeState extends PlayerState:
+
+class ProbeState:
+	extends PlayerState
 	var calls: Array[String] = []
 	var next_state: BaseState
 	var transitions_on_enter: bool = false
@@ -89,7 +91,9 @@ func run_checks() -> void:
 	var lifecycle_events: Array[String] = []
 	first.exited.connect(func(): lifecycle_events.append("first_exited"))
 	second.entered.connect(func(): lifecycle_events.append("second_entered"))
-	machine.state_changed.connect(func(_old: BaseState, _new: BaseState): lifecycle_events.append("changed"))
+	machine.state_changed.connect(
+		func(_old: BaseState, _new: BaseState): lifecycle_events.append("changed")
+	)
 	assert(machine.change_state(first))
 	assert(first.calls == ["enter"], "Same-state requests must not re-enter.")
 	assert(not machine.change_state(null))
@@ -109,7 +113,10 @@ func run_checks() -> void:
 	assert(lifecycle_events == ["first_exited", "second_entered", "changed"])
 	assert(one.find_children("*", "AudioStreamPlayer2D", false, false).size() == 2)
 	var audio: AudioStreamPlayer2D = one.find_children("*", "AudioStreamPlayer2D", false, false)[0]
-	assert(not audio.playing and audio.is_queued_for_deletion(), "New effects must stop the previous entity sound immediately.")
+	assert(
+		not audio.playing and audio.is_queued_for_deletion(),
+		"New effects must stop the previous entity sound immediately."
+	)
 	audio.finished.emit()
 	assert(audio.is_queued_for_deletion())
 	assert(not second.transitions_on_enter, "Nested transitions must be rejected.")
@@ -135,8 +142,10 @@ func run_checks() -> void:
 	assert(not machine.change_state(second))
 	assert(not ControllerHandler.input_received.is_connected(machine.process_input))
 	assert(not one.animation_player.animation_finished.is_connected(machine.on_animation_finished))
-	assert(one.find_children("*", "AudioStreamPlayer2D", false, false).size() == sounds_before,
-		"Shutdown must skip exit presentation.")
+	assert(
+		one.find_children("*", "AudioStreamPlayer2D", false, false).size() == sounds_before,
+		"Shutdown must skip exit presentation."
+	)
 	for effect: AudioStreamPlayer2D in one.find_children("*", "AudioStreamPlayer2D", false, false):
 		assert(not effect.playing)
 	var calls_after := first.calls.duplicate()
@@ -146,8 +155,10 @@ func run_checks() -> void:
 	assert(first.calls == calls_after)
 	var two_state := two.state_machine.current_state as ProbeState
 	get_tree().root.remove_child(two)
-	assert(two.is_shutdown and two_state.calls.count("exit") == 1,
-		"Tree removal must perform fallback cleanup.")
+	assert(
+		two.is_shutdown and two_state.calls.count("exit") == 1,
+		"Tree removal must perform fallback cleanup."
+	)
 	one.free()
 	two.free()
 	var reentrant := make_entity()
@@ -169,22 +180,36 @@ func run_checks() -> void:
 	var previous_player := level.player
 	previous_player.body.velocity.x = 150.0
 	previous_player.state_machine.change_state(previous_player.state_machine.get_state(&"Slide"))
-	assert(previous_player.motion_values.acceleration != previous_player.motion_values.base_acceleration)
+	assert(
+		(
+			previous_player.motion_values.acceleration
+			!= previous_player.motion_values.base_acceleration
+		)
+	)
 	var nested := make_entity(level.players)
 	var nested_state := nested.state_machine.current_state as ProbeState
-	level.tree_exiting.connect(func():
-		assert(previous_player.is_shutdown, "Cleanup must precede level removal.")
+	level.tree_exiting.connect(
+		func(): assert(previous_player.is_shutdown, "Cleanup must precede level removal.")
 	)
 	assert(GameHandler.load_level(load("res://tests/fixtures/silent_level.tscn")))
 	assert(level.is_shutdown and previous_player.is_shutdown)
 	assert(previous_player.state_machine.current_state == null)
-	assert(previous_player.motion_values.acceleration == previous_player.motion_values.base_acceleration)
+	assert(
+		(
+			previous_player.motion_values.acceleration
+			== previous_player.motion_values.base_acceleration
+		)
+	)
 	assert(level.spawn_player() == null)
 	assert(nested.is_shutdown and nested_state.calls.count("exit") == 1)
 	assert(GameHandler.current_level != level)
 	assert(GameHandler.current_player != previous_player)
 	assert(GameHandler.get_session_value(&"test_score") == 100)
-	assert(not ControllerHandler.input_received.is_connected(previous_player.state_machine.process_input))
+	assert(
+		not ControllerHandler.input_received.is_connected(
+			previous_player.state_machine.process_input
+		)
+	)
 	var base: BasePlayer = load("res://scenes/player/base/base_player.tscn").instantiate()
 	get_tree().root.add_child(base)
 	assert(base.state_machine.current_state == null)
@@ -201,5 +226,7 @@ func run_checks() -> void:
 	GameHandler.clear_session()
 	game.free()
 	assert(GameHandler.current_game == null and GameHandler.current_level == null)
-	print("PASS: state transitions, presentation, isolated entities, Mario-owned Idle, global game ownership, level replacement, session data, and controller permissions.")
+	print(
+		"PASS: state transitions, presentation, isolated entities, Mario-owned Idle, global game ownership, level replacement, session data, and controller permissions."
+	)
 	get_tree().quit()

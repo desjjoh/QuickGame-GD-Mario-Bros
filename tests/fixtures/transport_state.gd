@@ -6,8 +6,12 @@ var original_position: Vector2
 var original_mask: int
 var committed: bool = false
 
-func configure(at: Vector2, _direction: Vector2 = Vector2.DOWN, _emerging: bool = false, _distance: float = 0.0) -> void:
+
+func configure(
+	at: Vector2, _direction: Vector2 = Vector2.DOWN, _emerging: bool = false, _distance: float = 0.0
+) -> void:
 	target_position = at
+
 
 func enter() -> void:
 	frames = 0
@@ -16,6 +20,7 @@ func enter() -> void:
 	original_mask = get_player().body.collision_mask
 	get_player().body.collision_mask = 0
 
+
 func process_physics(_delta: float) -> BaseState:
 	frames += 1
 	get_player().body.global_position = target_position
@@ -23,8 +28,10 @@ func process_physics(_delta: float) -> BaseState:
 		travel_finished.emit()
 	return null
 
+
 func commit_transfer() -> void:
 	committed = true
+
 
 func exit() -> void:
 	get_player().body.collision_mask = original_mask

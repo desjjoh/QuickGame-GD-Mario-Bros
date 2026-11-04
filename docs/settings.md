@@ -309,3 +309,7 @@ Within the approved status/UI milestone, new-game defaults are Small form, score
 ## Palette source-path migration - 2026-11-04
 
 User authorized relocating assets/Overworld (Palette 1) to assets/palettes/overworld and assets/Underground (Palette 2) to assets/palettes/underground, including all reference updates. Existing import UIDs and semantic parameters were preserved; source_file/cache paths changed for the relocation and Godot rebuilt its generated cache. No Project Settings or Input Map changes were made. The bitmap-font importer automatically marked its PNG page to skip import; the existing texture import configuration was restored. Existing unrelated settings/artwork edits were preserved.
+
+## Game-over lifecycle defaults - 2026-11-04
+
+User approved NES reserve semantics (stored default/reset 2, displayed +1; terminal -1) and explicit game-over cleanup. Reserve clamp is -1..98 so display fits 0..99. Added game_over transition: 12 initial hidden frames, 378-frame HUD-visible card, 12 hidden outro. New optional TransitionStage wait_for_presentation=false and completion_timeout_frames=600 preserve existing stage behavior; the game-over card opts in and uses a ten-second audio watchdog. New smb_gameover.wav mix trim=-5 dB plus existing master=-3 dB. These are script/resource defaults within the authorized feature, not Project Settings/Input Map/import changes. No black overlay or clear-color override was added.

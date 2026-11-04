@@ -1,12 +1,14 @@
-[gd_resource type="Resource" script_class="SoundEffectMix" format=3]
-[ext_resource type="Script" path="res://scripts/audio/sound_effect_mix.gd" id="1"]
+[gd_resource type="Resource" script_class="SoundEffectMix" format=3 uid="uid://bcfvnso821tiv"]
+
+[ext_resource type="Script" uid="uid://coopdqakkyu4g" path="res://scripts/audio/sound_effect_mix.gd" id="1"]
+
 [resource]
 script = ExtResource("1")
-master_volume_db = -3.0
 stream_volume_db = Dictionary[String, float]({
-"res://assets/sfx/smb_jump-small.wav": 0.0,
-"res://assets/sfx/smb_bump.wav": -4.0,
-"res://assets/sfx/smb_pipe.wav": -1.5,
 "res://assets/sfx/smb-skid.mp3": 2.5,
+"res://assets/sfx/smb_bump.wav": -4.0,
+"res://assets/sfx/smb_jump-small.wav": 0.0,
+"res://assets/sfx/smb_pipe.wav": -1.5,
+"res://assets/soundtrack/smb_gameover.wav": -5.0,
 "res://assets/soundtrack/smb_mariodie.wav": -5.0
 })

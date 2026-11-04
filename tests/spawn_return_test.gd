@@ -1,9 +1,11 @@
 extends Node
 
+
 func ticks(count: int) -> void:
 	for frame in range(count):
 		await get_tree().physics_frame
 		await get_tree().process_frame
+
 
 func _ready() -> void:
 	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
@@ -21,7 +23,7 @@ func _ready() -> void:
 	var pipe := lower.find_transport_entity(&"secret_return") as PipeEntrance
 	assert(pipe.get_destination().target_id == &"player_spawn")
 	var player := level.player
-	player.body.global_position = pipe.to_global(Vector2(-14,32))
+	player.body.global_position = pipe.to_global(Vector2(-14, 32))
 	player.body.velocity = Vector2.ZERO
 	player.body.reset_physics_interpolation()
 	await ticks(5)
@@ -43,5 +45,7 @@ func _ready() -> void:
 	assert(GameHandler.get_session_value(&"current_target_id") == &"player_spawn")
 	game.free()
 	await ticks(6)
-	print("PASS: secret pipe returns to the actual moved PlayerSpawn, restoring camera/control without an exit pipe or emergence.")
+	print(
+		"PASS: secret pipe returns to the actual moved PlayerSpawn, restoring camera/control without an exit pipe or emergence."
+	)
 	get_tree().quit()

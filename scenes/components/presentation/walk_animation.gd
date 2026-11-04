@@ -22,4 +22,3 @@ func get_frame_ticks(horizontal_velocity: float) -> int:
 func apply(animation_player: AnimationPlayer, horizontal_velocity: float) -> void:
 	if animation_player != null:
 		animation_player.speed_scale = 7.0 / float(get_frame_ticks(horizontal_velocity))
-

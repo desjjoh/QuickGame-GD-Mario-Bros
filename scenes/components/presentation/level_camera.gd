@@ -8,10 +8,12 @@ extends Camera2D
 	set(value):
 		world_left = value
 		queue_redraw()
+
 @export var world_right: float = 768.0:
 	set(value):
 		world_right = value
 		queue_redraw()
+
 @export var scroll_start: float = 80.0
 @export var full_speed_start: float = 112.0
 ## Mario's body origin is 8 pixels right of the NES sprite's top-left origin.
@@ -41,7 +43,10 @@ func _notification(what: int) -> void:
 func _draw() -> void:
 	if not Engine.is_editor_hint() or not draw_world_bounds:
 		return
-	var height := float(ProjectSettings.get_setting("display/window/size/viewport_height", 240)) / maxf(zoom.y, 0.001)
+	var height := (
+		float(ProjectSettings.get_setting("display/window/size/viewport_height", 240))
+		/ maxf(zoom.y, 0.001)
+	)
 	var top := global_position.y - height / 2.0
 	var bottom := global_position.y + height / 2.0
 	var font := ThemeDB.fallback_font
@@ -54,7 +59,9 @@ func _draw() -> void:
 		var label := "World %s: %s" % ["Left" if index == 0 else "Right", edges[index]]
 		var text_width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
 		var text_offset := Vector2(4.0 if index == 0 else -text_width - 4.0, 12.0)
-		draw_string(font, start + text_offset, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, colors[index])
+		draw_string(
+			font, start + text_offset, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, colors[index]
+		)
 
 
 func reset_target(target: CharacterBody2D) -> void:
@@ -97,7 +104,10 @@ func snap_to_arrival(target: CharacterBody2D) -> void:
 	# Arrival at another endpoint explicitly resets right-only camera history.
 	if follow_enabled:
 		var width := get_viewport_rect().size.x / zoom.x
-		var left := clampf(target.global_position.x - target_origin_offset - full_speed_start,
-			world_left, maxf(world_left, world_right - width))
+		var left := clampf(
+			target.global_position.x - target_origin_offset - full_speed_start,
+			world_left,
+			maxf(world_left, world_right - width)
+		)
 		global_position.x = left + width / 2.0
 	reset_target(target)

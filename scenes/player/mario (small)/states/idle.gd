@@ -17,4 +17,3 @@ func process_physics(delta: float) -> BaseState:
 	player.gravity_component.apply(player.motion_values, delta)
 	player.move_body()
 	return null
-

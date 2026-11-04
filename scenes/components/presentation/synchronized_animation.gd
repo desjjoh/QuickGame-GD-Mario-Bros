@@ -13,6 +13,7 @@ var enabled: bool = false
 var activity_suspended: bool = false
 var _entity: BaseEntity
 
+
 func _ready() -> void:
 	var ancestor := get_parent()
 	while ancestor != null and not ancestor is BaseEntity:
@@ -20,8 +21,10 @@ func _ready() -> void:
 	_entity = ancestor as BaseEntity
 	set_enabled(start_enabled)
 
+
 func set_enabled(value: bool) -> void:
-	if enabled == value: return
+	if enabled == value:
+		return
 	if value and (not is_inside_tree() or (is_instance_valid(_entity) and _entity.is_shutdown)):
 		return
 	enabled = value
@@ -37,6 +40,7 @@ func set_enabled(value: bool) -> void:
 	if not activity_suspended:
 		GameHandler.animation_clock.subscribe(self, cycle, phase_offset_ticks)
 
+
 func set_activity_suspended(value: bool) -> void:
 	activity_suspended = value
 	if value:
@@ -44,12 +48,15 @@ func set_activity_suspended(value: bool) -> void:
 	elif enabled:
 		GameHandler.animation_clock.subscribe(self, cycle, phase_offset_ticks)
 
+
 func apply_phase(phase: int) -> void:
-	if not enabled or activity_suspended: return
+	if not enabled or activity_suspended:
+		return
 	if animation_player != null:
 		animation_player.seek(cycle.phase_time(phase), true)
 	if animated_sprite != null:
 		animated_sprite.frame = phase
+
 
 func _exit_tree() -> void:
 	set_enabled(false)

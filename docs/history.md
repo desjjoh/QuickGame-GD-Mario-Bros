@@ -650,3 +650,23 @@ Added GameHandler-owned PlayerStatus for score, coins, lives and Small/Super/Fir
 ## 2026-11-04 - Palette assets grouped under assets/palettes
 
 Moved the complete Overworld (Palette 1) and Underground (Palette 2) folders to assets/palettes/overworld and assets/palettes/underground. Updated scenes, TileSets, animation resources, theme override keys/values, script constants/build paths, tests, current guides and font/import paths. Preserved current artwork byte-for-byte (including uncommitted Underground edits), existing import UIDs and semantic parameters; refreshed path-dependent import caches. Shared assets/themes and assets/tileset resources remain in place. Historical path descriptions above are retained as history. Verification results are recorded in verification.md.
+
+## 2026-11-04 - GDScript readability cleanup and HUD theme subscription
+
+Reviewed runtime lifecycle/input/status/theme code and applied safety-checked gdformat formatting across all 111 scripts; 94 files changed. Expanded compact branches, normalized indentation/operator spacing and line wrapping, separated methods/declaration groups and property blocks. Added .editorconfig GDScript defaults, gdformatrc and a development-only gdtoolkit pin, with commands in code-style.md. Syntax-tree/comment checks confirm 106 format-only scripts preserve their pre-cleanup behavior; HUD, GameHandler and their two UI tests additionally contain the targeted lifecycle fixes; transition_test extracts two equivalent callbacks into a named helper to avoid a gdformat/Godot indentation incompatibility.
+
+Reproduced a stale HUD coin after live area-theme changes by removing the test's manual refresh calls. Fixed the missing theme-signal binding and added old-area disconnection assertions. Default lint findings fell from 416 to 135; remaining declaration-order, long diagnostic lines, repeated test loads and coordinator complexity are documented as follow-up, without suppressing rules. Existing standalone F6 death restart and native-shutdown backlog items remain open. Final regression results are recorded in verification.md. Existing user artwork/scene edits were preserved; no Project Settings, Input Map or import parameters changed.
+
+The cleanup run also exposed a stale title assertion after the sandbox gained painted blocks. Title gameplay suspension now includes all existing background entities, preserving cosmetic animations; the regression checks suspended behavior rather than forcing the authored layout empty. No painted scene data was changed.
+
+## 2026-11-04 - Group playable levels by world
+
+User requested worlds > world 1 > 1-1. Moved the stage unchanged to scenes/levels/worlds/world 1/1-1.tscn, preserving its scene UID, paint data and byte-for-byte content. Updated Game, stage-derived fixtures, test load/path assertions and current documentation. Shared base/area scenes and the title sandbox stay in their existing locations. Historical old-path descriptions are retained. No gameplay or Project Settings changes were made.
+
+## 2026-11-04 - Death reduces shared lives
+
+Connected accepted BaseLevel.on_death to GameHandler.set_lives(current - 1), with duplicate/reentrant protection and a post-signal ownership/shutdown guard. The existing loading-intro subscription displays the new counter. Expanded death coverage for both progress policies, invalid/duplicate requests, zero-life respawn, live intro values and synchronous replacement from a lives observer. No life deduction occurs in restart itself; game over remains deferred and new-game defaults stay unchanged. Updated current death/status/transition guides and README; executed results are recorded in verification.md.
+
+## 2026-11-04 - Game over and single-level progress ownership
+
+Added GAME_OVER flow, a timed game_over definition/card and one-shot supplied jingle, optional bounded presentation completion, explicit shutdown-before-clear and safe title return. Reserve lives now start at 2 and display 3, with zero still playable and -1 ending the run. GameHandler stores only the selected level's area snapshots; different levels clear after old shutdown, same-level death/areas retain, and stale instances cannot overwrite a later visit. Added a Start release gate and corrected external transition-cancellation flags. Added game_over_test and level_progress_test, updated status/death assertions, and documented current ownership/limits. No new autoload, Project Settings, Input Map, background override or source-audio/import changes were introduced. Final checks are recorded in verification.md.

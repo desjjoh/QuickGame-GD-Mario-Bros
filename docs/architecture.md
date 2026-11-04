@@ -131,7 +131,7 @@ GameHandler loads its TransitionCoordinator child during _ready through the scri
 
 BaseEntity effects and BaseLevel death audio share an editable [SFX mix](audio.md). Per-source gain lookup preserves identity across private loop-disabled copies, with no additional autoload or project audio-bus configuration.
 
-Transitions now use named TransitionDefinition/TransitionStage resources and a generic Control presentation host. The current intro is a separate scene; the coordinator has no Card-node dependency or type-name branches for presentation/replacement policy. Removing Cover uses existing visibility/suspension, leaving the viewport background unchanged. Future game-over flow remains unimplemented. See [transitions](transitions.md).
+Transitions now use named TransitionDefinition/TransitionStage resources and a generic Control presentation host. The current intro is a separate scene; the coordinator has no Card-node dependency or type-name branches for presentation/replacement policy. Removing Cover uses existing visibility/suspension, leaving the viewport background unchanged. Game-over flow is implemented through its own definition and presentation, with GameHandler owning cleanup and title return. See [transitions](transitions.md).
 
 Level inheritance now has two sibling scenes under BaseLevel: 1-1 (the existing connected two-area stage) and TestLevel (an independent one-area, one-screen sandbox). Game uses TestLevel for its title background and 1-1 as the first gameplay target; gameplay regression fixtures retain direct 1-1 startup.
 
@@ -144,3 +144,7 @@ BaseLevelArea now owns buffered camera activity for its resident non-player enti
 ## Typed player/session status
 
 GameHandler owns one PlayerStatus Resource for form, score, coins and lives. It forwards validated changes through session_value_changed; existing generic session APIs route reserved keys to the same record. HUD/title/intro initialize from current values and subscribe to changes. Top score is separate from new-game resets, with no automatic promotion or disk saving. BaseLevel supplies stage display defaults; area travel retains them. See [player status](player-status.md).
+
+Playable stages are grouped under scenes/levels/worlds/<world>/, starting with worlds/world 1/1-1.tscn. Shared base and area scenes remain under levels/base and levels/areas, and the reusable menu/test sandbox stays levels/test_level.tscn.
+
+GameHandler now owns a single logical level's area progress instead of a multi-level cache, and GameFlow includes GAME_OVER. Negative reserves select the named game-over presentation after death completion; explicit shutdown/clear precedes title return. PlayerStatus stores two reserves and the intro displays three attempts. See [game over](game-over.md).

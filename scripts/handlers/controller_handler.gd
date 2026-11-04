@@ -30,6 +30,7 @@ var input_secondary: bool = false
 var input_start: bool = false
 var input_start_just_pressed: bool = false
 var _primary_requires_release: bool = false
+var _start_requires_release: bool = false
 var input_select: bool = false
 
 
@@ -42,6 +43,8 @@ func _physics_process(_delta: float) -> void:
 	# Track release even while transitions suppress gameplay intent.
 	if _primary_requires_release and not Input.is_action_pressed(primary_action):
 		_primary_requires_release = false
+	if _start_requires_release and not _is_action_pressed(start_action):
+		_start_requires_release = false
 	if not enabled:
 		return
 	input_left = Input.get_action_strength(left_action)
@@ -56,7 +59,12 @@ func _physics_process(_delta: float) -> void:
 		input_primary_just_pressed = Input.is_action_just_pressed(primary_action)
 	input_secondary = _is_action_pressed(secondary_action)
 	input_start = _is_action_pressed(start_action)
-	input_start_just_pressed = start_action != &"" and InputMap.has_action(start_action) and Input.is_action_just_pressed(start_action)
+	input_start_just_pressed = (
+		not _start_requires_release
+		and start_action != &""
+		and InputMap.has_action(start_action)
+		and Input.is_action_just_pressed(start_action)
+	)
 	input_select = _is_action_pressed(select_action)
 
 
@@ -75,9 +83,11 @@ func _is_action_pressed(action: StringName) -> bool:
 
 func consume_menu_confirmation() -> void:
 	_primary_requires_release = Input.is_action_pressed(primary_action)
+	_start_requires_release = _is_action_pressed(start_action)
 	input_primary = false
 	input_primary_just_pressed = false
 	input_start_just_pressed = false
+
 
 func _clear_input() -> void:
 	input_left = 0.0

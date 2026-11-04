@@ -11,6 +11,7 @@ The shared playback mix lives in `assets/audio/sound_effect_mix.tres`. Open that
 | Pipe | -1.5 dB | -4.5 dB |
 | Repeated skid | +2.5 dB | -0.5 dB |
 | Death jingle | -5 dB | -8 dB |
+| Game-over jingle | -5 dB | -8 dB |
 
 Unknown effects receive the shared master gain without a per-stream trim. Negative dB values reduce level; zero trim keeps the source relative to master. Master changes all these paths together. Area soundtrack playback remains disabled/deferred; this profile does not normalize the unused music files.
 
@@ -31,3 +32,5 @@ Starting another entity SFX still cancels its previous SFX. Slide exits still st
 sound_mix_test checks actual playback gains for all active sources and nested copies, original durations, one-shot loops, pitch, cancellation, repeated skid requests, the pipe state's private copy and BaseLevel death audio. Existing jump, slide, pipe and death regressions exercise their gameplay paths. Automated checks establish gain application, not subjective sound quality.
 
 Local previews are `.godot/validation/sfx-original-preview.wav` and `sfx-balanced-preview.wav`. Both play jump, bump, pipe, six 100ms skid bursts, then death, with equal pauses. These previews predate the skid-only 6 dB increase and do not represent its current gain. They use decoded recordings and playback gain equivalents, not spatial attenuation or the complete gameplay mix. Previews are ignored validation artifacts, not shipping assets.
+
+GameOver presentation owns the non-positional smb_gameover.wav one-shot independently of the departing level. It uses the shared mix and stops on cancellation/removal. Stage completion waits for its finished state, with minimum presentation frames and bounded fallback. This trim follows the death-jingle policy and has not been subjectively normalized through speaker audition.

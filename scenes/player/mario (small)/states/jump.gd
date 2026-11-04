@@ -7,7 +7,11 @@ extends PlayerState
 
 func enter() -> void:
 	var player := get_player()
-	player.air_movement.begin(player.motion_values, -1.0 if player.sprite != null and player.sprite.flip_h else 1.0, player.run_action.running_history)
+	player.air_movement.begin(
+		player.motion_values,
+		-1.0 if player.sprite != null and player.sprite.flip_h else 1.0,
+		player.run_action.running_history
+	)
 
 
 func exit() -> void:
@@ -19,10 +23,16 @@ func exit() -> void:
 func process_physics(delta: float) -> BaseState:
 	var player := get_player()
 	var direction := get_movement_axis().x
-	player.jump_action.update(player.motion_values, controller_controls_available() and ControllerHandler.input_primary)
+	player.jump_action.update(
+		player.motion_values, controller_controls_available() and ControllerHandler.input_primary
+	)
 	player.air_movement.apply(player.motion_values, direction, delta)
 	player.gravity_component.apply(player.motion_values, delta)
 	player.move_body()
 	if player.body.is_on_floor():
-		return move_state if not is_zero_approx(direction) or not is_zero_approx(player.body.velocity.x) else idle_state
+		return (
+			move_state
+			if not is_zero_approx(direction) or not is_zero_approx(player.body.velocity.x)
+			else idle_state
+		)
 	return null

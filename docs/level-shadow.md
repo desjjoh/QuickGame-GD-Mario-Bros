@@ -23,3 +23,9 @@ The shader blurs only combined alpha with a weighted 13x13 kernel and preserves 
 ## Verification
 
 shared_shadow_test renders deliberately overlapping world, HUD and player shapes. Pixel assertions check player-over-HUD ordering, undarkened opaque foreground and an actual HUD-cast shadow. hud_scroll_test samples every foreground glyph pixel across physics-driven acceleration/braking, excluding the animated coin; world art remains visible through transparent gaps. Rendered checks at several frame-rate caps exercise the separate physics/render cadences. Fractional camera motion keeps HUD pixels fixed. The same test checks pipe-mode routing, unchanged logical player ownership and level replacement. hud_test renders actual gameplay and transition previews; pipe and camera regressions cover their existing behavior. Headless tests cannot establish image correctness, so the rendered overlap check is required for this contract.
+
+## Diagnostic toggle on Game
+
+Select Game in scenes/main/game.tscn and uncheck Presentation / Shadow Shader Enabled before F5 to compare frame pacing. It defaults true. The same property works on the running Game in the Remote Inspector. It applies to the persistent world/HUD/player composition, including title/transition UI, and remains selected across level replacement.
+
+Disabled removes the shader material and disables the shared CanvasGroup compositor pass through RenderingServer; camera/UI routing and draw order still run normally. Merely clearing the material would leave CanvasGroup's default compositing work, so this bypass also removes that pass. Re-enabling restores the active level's authored material without changing shader parameters or shared resources. No VSync, interpolation, camera, Project Settings or import values change. This supports A/B testing; it does not establish the cause of reported frame drops.

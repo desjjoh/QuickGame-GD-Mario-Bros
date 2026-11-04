@@ -28,7 +28,12 @@ func _physics_process(delta: float) -> void:
 
 
 func can_start_entry(player: BasePlayer) -> bool:
-	if not entrance_enabled or not can_read_controller_input() or not is_instance_valid(player) or player.is_shutdown:
+	if (
+		not entrance_enabled
+		or not can_read_controller_input()
+		or not is_instance_valid(player)
+		or player.is_shutdown
+	):
 		return false
 	# Check each direction independently: opposing buttons must not cancel
 	# into a neutral axis and accidentally allow pipe entry.
@@ -39,7 +44,12 @@ func can_start_entry(player: BasePlayer) -> bool:
 		return false
 	var feet := to_local(player.body.global_position)
 	if sideways:
-		return ControllerHandler.input_right > 0.5 and ControllerHandler.input_left <= 0.0 and absf(feet.x + 6.0) <= 1.5 and absf(feet.y - 32.0) <= alignment_tolerance
+		return (
+			ControllerHandler.input_right > 0.5
+			and ControllerHandler.input_left <= 0.0
+			and absf(feet.x + 6.0) <= 1.5
+			and absf(feet.y - 32.0) <= alignment_tolerance
+		)
 	return absf(feet.x - 16.0) <= alignment_tolerance and absf(feet.y) <= 1.0
 
 
