@@ -4,9 +4,16 @@ This guide records deferred work, not implemented features.
 
 ## Next session - 2026-11-04
 
+Requested next priorities:
+
+1. Add collectible coins, reusing the shared animation clock and area themes. Define collection, GameHandler-owned coin totals/HUD updates, and progress persistence using the existing death-reset policy.
+2. Add our first enemy using the existing BaseEntity/state machine and area-owned EnemySpawner. Agree on the enemy and its initial behavior, then verify camera-buffer spawning/disposal, return/death behavior and player interactions against the reference.
+
+Start with coins, then the first enemy. These are planned tasks; implementation has not started.
+
 Update 2026-11-03: pit death, shared gameplay suspension, cleanup, death event audio and PlayerSpawn restart are now implemented. The agreed global reset_progress_on_death=false replaces the per-level default-true proposal below. See [death lifecycle](death.md). Remaining work: visible hit-death presentation and general off-camera entity policies.
 
-Next work: general off-camera entity activity. Start from the [remaining plan](death-and-entity-activity-plan.md#second-milestone-off-camera-entity-activity). Define camera margins and reversible suspension versus terminal disposal/deferred activation. Shared suspension now exists, but automatic visibility tracking and enemy respawn/persistence policies do not. Enemies remain unimplemented. Work in small checkpoints with a test entity; visible hit-death presentation is also still deferred.
+Update: [BaseArea camera activity and enemy spawner foundation](entity-activity.md) are implemented with resident-object sleep and reentry-based disposable actors. Remaining: actual enemy scenes/AI, enemy-specific respawn and defeat persistence, state-driven callback scheduling inside the activity region, and profiling with hundreds of objects before considering spatial indexing. Visible hit-death presentation remains deferred.
 
 ## P2: Standalone level death cannot restart
 

@@ -136,3 +136,7 @@ Transitions now use named TransitionDefinition/TransitionStage resources and a g
 Level inheritance now has two sibling scenes under BaseLevel: 1-1 (the existing connected two-area stage) and TestLevel (an independent one-area, one-screen sandbox). Game uses TestLevel for its title background and 1-1 as the first gameplay target; gameplay regression fixtures retain direct 1-1 startup.
 
 GameHandler owns TitleScreen creation and GameFlow (DETACHED/TITLE/STARTING/PLAYING). The title loads TestLevel immediately, suspends only its player and leaves global menu input active. Start emits a menu request, resets session state and uses the existing level transition into 1-1. Presentation lives under persistent UI; game-flow decisions remain in GameHandler. See [title screen](title-screen.md).
+
+BaseEntity controller access now defaults off. BasePlayer and interactive pipes opt in through their scene properties; live changes and reversible suspension synchronize signal subscriptions, and direct polling uses the same availability checks. BaseArea now owns buffered off-camera activity; state-driven scheduling inside the activity region remains deferred. See [entity activity](entity-activity.md).
+
+BaseLevelArea now owns buffered camera activity for its resident non-player entities and EnemySpawner nodes. Placed objects sleep in place; only spawner-owned actors are disposable. Activity and gameplay suspension are independent. See [entity activity](entity-activity.md) for current behavior; this supersedes the earlier planned off-camera description.

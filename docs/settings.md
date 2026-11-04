@@ -293,3 +293,11 @@ User authorized renaming the existing test stage to 1-1 and creating an unconnec
 ## Title startup and Start bindings - 2026-11-03
 
 User authorized creating the single-player title and binding controls. Added Input Map start (deadzone 0.5) with Enter, keypad Enter and gamepad Start/Menu (JOY_BUTTON_START=6, any device). ControllerHandler.start_action changed from empty to start; Select remains empty. Existing primary/secondary and directional mappings were preserved. Added Game.start_with_title=true as normal startup policy; initial_level remains 1-1. TitleScreen.background_level references TestLevel. Gameplay fixtures explicitly opt out with start_with_title=false. No display, renderer, physics or import settings changed. This supersedes the previous instruction to leave TestLevel unconnected, following the user's subsequent request to use it behind the title.
+
+## Entity controller capability - 2026-11-03
+
+User requested controller input opt-in as the first entity activity change. New BaseEntity.controller_input_enabled defaults to false. BasePlayer and PipeEntrance scenes explicitly set it true; derived Mario and sideways pipe scenes inherit it. These are scene/script capability defaults within the requested scope, with no Input Map, Project Settings or import changes. Existing state Controls Enabled remains a separate gate. See [entity activity](entity-activity.md).
+
+## Area camera activity defaults - 2026-11-03
+
+Within the authorized activity/spawner work, BaseLevelArea adds Camera Activity / Activation Buffer=64 pixels and Deactivation Buffer=96 pixels, clamped at runtime to at least the activation margin. These are new exported script defaults, not changes to camera scrolling, Project Settings, Input Map or import settings. EnemySpawner adds Enabled=true and Respawn On Reentry=true; Enemy Scene is unassigned by default. No spawner instances were added to levels. See [entity activity](entity-activity.md).

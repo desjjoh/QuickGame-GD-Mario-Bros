@@ -11,7 +11,7 @@ extends TransportEntity
 
 func _physics_process(delta: float) -> void:
 	super(delta)
-	if is_shutdown or not is_instance_valid(_level) or _level.is_shutdown:
+	if not can_read_controller_input() or not is_instance_valid(_level) or _level.is_shutdown:
 		return
 	if not _level.can_transport():
 		return
@@ -28,7 +28,7 @@ func _physics_process(delta: float) -> void:
 
 
 func can_start_entry(player: BasePlayer) -> bool:
-	if not entrance_enabled or is_shutdown or not is_instance_valid(player) or player.is_shutdown:
+	if not entrance_enabled or not can_read_controller_input() or not is_instance_valid(player) or player.is_shutdown:
 		return false
 	# Check each direction independently: opposing buttons must not cancel
 	# into a neutral axis and accidentally allow pipe entry.

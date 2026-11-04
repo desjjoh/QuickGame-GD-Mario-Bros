@@ -10,6 +10,7 @@ extends Node
 @export var start_enabled: bool = false
 
 var enabled: bool = false
+var activity_suspended: bool = false
 var _entity: BaseEntity
 
 func _ready() -> void:
@@ -33,10 +34,18 @@ func set_enabled(value: bool) -> void:
 	if animated_sprite != null:
 		animated_sprite.play(animation_name)
 		animated_sprite.pause()
-	GameHandler.animation_clock.subscribe(self, cycle, phase_offset_ticks)
+	if not activity_suspended:
+		GameHandler.animation_clock.subscribe(self, cycle, phase_offset_ticks)
+
+func set_activity_suspended(value: bool) -> void:
+	activity_suspended = value
+	if value:
+		GameHandler.animation_clock.unsubscribe(self)
+	elif enabled:
+		GameHandler.animation_clock.subscribe(self, cycle, phase_offset_ticks)
 
 func apply_phase(phase: int) -> void:
-	if not enabled: return
+	if not enabled or activity_suspended: return
 	if animation_player != null:
 		animation_player.seek(cycle.phase_time(phase), true)
 	if animated_sprite != null:

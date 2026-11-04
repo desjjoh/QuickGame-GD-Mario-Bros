@@ -330,3 +330,11 @@ Rename the existing stage to 1-1, retaining both areas, painted data, scene UID 
 ## GameHandler-owned title without a demo - 2026-11-03
 
 Create TitleScreen and its TestLevel background through GameHandler, with explicit TITLE/STARTING/PLAYING flow and no transition on application boot. Suspend title Mario without disabling ControllerHandler; F6 testing of the background retains normal controls. Use the white HUD font for 1 PLAYER GAME, the supplied cursor, and no demo, second-player option or additional title text. Keep alphabet-alt for later copyright display. Start uses existing level presentation into 1-1 and initializes a fresh session. Consume confirmation input, reject repeated requests and defer failed/cancelled recovery using weak Game ownership to avoid rebuilding UI during tree removal. Menu presentation emits intent; session and loading decisions remain in GameHandler.
+
+## Explicit entity controller capability - 2026-11-03
+
+Default BaseEntity controller access to false; opt player and interactive pipe scenes in explicitly. Synchronize actual global signal connections on initialization, property changes, suspension and shutdown rather than dispatching events into every static block. Gate player/pipe direct polling through the same capability, and prevent dead players reconnecting. Keep per-state input controls separate from entity eligibility. This first step does not change frame/physics scheduling, free placed objects or implement enemy spawners. No measured memory/performance claim is made beyond removing unnecessary input subscriptions/dispatch.
+
+## Buffered activity belongs to BaseArea - 2026-11-03
+
+User specified area ownership because unoccupied area runtimes already unload. Use the area camera and two editable margins (64-pixel activation, 96-pixel deactivation), centralized weak registrations and geometry bounds rather than a global manager or notifier on every object. Preserve placed-object instances/collision/progress; independently gate activity and gameplay suspension. EnemySpawner alone owns disposable actors, with reentry rearming to avoid repeated respawning near one spawn point. This adapts reference offscreen policies rather than claiming exact NES thresholds. Initial implementation scans registered objects; optimize further only with measurements.

@@ -34,3 +34,15 @@ Death checks should cover both area cameras, one-time triggers, control/camera l
 Entity activity checks should cover margins, stable pause/resume, callback gating, retained solid collision, once-only disposal, authored-object persistence and coexistence with whole-area unloading. Avoid adding per-frame work to static entities solely to disable callbacks they never had.
 
 Update current guides and verification when these features are implemented. Death and shared suspension now have regression coverage; see the current guide. General off-camera activation/disposal features remain unimplemented and unqualified.
+
+## Activity planning clarification and first implementation - 2026-11-03
+
+The user clarified that placed world objects remain instantiated and suspend selected work outside a future buffered camera region. Enemy creation/disposal will be handled by spawners later. The earlier broad lifetime-policy table is planning context, not an instruction to dispose of blocks. Controller input opt-in is now implemented; BaseEntity defaults off, with explicit player/pipe scene opt-in and lifecycle-safe subscriptions/polling. Tick scheduling, buffered visibility and multi-reason suspension remain planned. See [current entity activity](entity-activity.md).
+
+## Camera activity milestone implemented - 2026-11-03
+
+BaseArea now owns buffered entity activity and reusable enemy spawners. Resident blocks/pipes retain instances and collision; offscreen callback/input/cosmetic work sleeps. Camera wake cannot clear death/transition suspension. Spawner actors can be disposed and recreated after the spawn point leaves/reenters the region; no actual enemies or persistent defeat records exist yet. This supersedes the earlier manager/spawning proposals where they differ. Current contract: [entity activity](entity-activity.md). State-driven scheduling inside the region and enemy-specific policies remain deferred.
+
+## Camera activity milestone implemented - 2026-11-03
+
+BaseArea now owns buffered entity activity and reusable enemy spawners. Resident blocks/pipes retain instances and collision; offscreen callback/input/cosmetic work sleeps. Camera wake cannot clear death/transition suspension. Spawner actors can be disposed and recreated after the spawn point leaves/reenters the region; no actual enemies or persistent defeat records exist yet. This supersedes earlier manager/spawning proposals where they differ. Current contract: [entity activity](entity-activity.md). State-driven scheduling inside the region and enemy-specific policies remain deferred.

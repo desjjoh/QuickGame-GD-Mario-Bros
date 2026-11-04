@@ -4,6 +4,13 @@ extends Node2D
 signal area_theme_changed(theme: AreaTheme)
 ## Owns area layouts, entities, camera, theme, and entry/exit lifecycle.
 
+@export_group("Camera Activity")
+## Modern hysteresis buffers; not exact NES enemy-specific thresholds.
+@export_range(0.0, 512.0, 16.0) var activation_buffer: float = 64.0
+@export_range(0.0, 512.0, 16.0) var deactivation_buffer: float = 96.0
+var _activity_entities: Dictionary[int, WeakRef] = {}
+var _enemy_spawners: Dictionary[int, WeakRef] = {}
+
 var _runtime_templates: Dictionary[StringName, PackedScene] = {}
 var runtime_loaded: bool = true
 var is_active: bool = false
@@ -22,16 +29,24 @@ var _transport_cells: Dictionary[Vector2i, StringName] = {}
 
 func _ready() -> void:
 	apply_theme()
+	process_physics_priority = 110
+	set_physics_process(false)
 
 
 func enter_area() -> void:
 	if Engine.is_editor_hint() or is_active or not runtime_loaded or not is_inside_tree():
 		return
 	is_active = true
+	set_physics_process(true)
+	update_camera_activity()
 
 
 func exit_area() -> void:
 	is_active = false
+	set_physics_process(false)
+	for reference: WeakRef in _activity_entities.values():
+		var entity := reference.get_ref() as BaseEntity
+		if is_instance_valid(entity): entity.set_activity_suspended(true)
 
 
 func _exit_tree() -> void:
@@ -195,6 +210,8 @@ func unload_runtime() -> void:
 		var branch := get_node_or_null(NodePath(branch_name))
 		if branch != null:
 			branch.free()
+	_activity_entities.clear()
+	_enemy_spawners.clear()
 	runtime_loaded = false
 	process_mode = Node.PROCESS_MODE_DISABLED
 	hide()
@@ -205,3 +222,50 @@ func _shutdown_branch(parent: Node) -> void:
 		if child is BaseEntity:
 			child.shutdown()
 		_shutdown_branch(child)
+
+
+func register_activity_entity(entity: BaseEntity) -> void:
+	# Players belong to the level, even if a custom scene nests one in an area.
+	if entity is BasePlayer: return
+	_activity_entities[entity.get_instance_id()] = weakref(entity)
+	if is_active:
+		entity.set_activity_suspended(not get_activity_region(false).intersects(entity.get_activity_rect()))
+
+
+func register_enemy_spawner(spawner: Node2D) -> void:
+	_enemy_spawners[spawner.get_instance_id()] = weakref(spawner)
+
+
+func get_activity_region(sleep_region: bool) -> Rect2:
+	var camera := get_node_or_null("Camera2D") as Camera2D
+	if camera == null: return Rect2()
+	var size := get_viewport_rect().size / camera.zoom
+	var margin := maxf(activation_buffer, deactivation_buffer) if sleep_region else activation_buffer
+	return Rect2(camera.global_position - size / 2.0, size).grow(margin)
+
+
+func _physics_process(_delta: float) -> void:
+	update_camera_activity()
+
+
+func update_camera_activity() -> void:
+	if Engine.is_editor_hint() or not is_active or not runtime_loaded: return
+	var wake_region := get_activity_region(false)
+	var sleep_region := get_activity_region(true)
+	for id: int in _activity_entities.keys():
+		var entity := _activity_entities[id].get_ref() as BaseEntity
+		if not is_instance_valid(entity) or entity.is_shutdown:
+			_activity_entities.erase(id)
+			continue
+		var region := wake_region if entity.activity_suspended else sleep_region
+		entity.set_activity_suspended(not region.intersects(entity.get_activity_rect()))
+	# Existing actors retain their independent death/transition suspension.
+	# Do not create fresh actors while the parent level is frozen (including title).
+	var level := get_parent().get_parent() as BaseLevel
+	if level != null and (level.is_shutdown or level.death_in_progress or level.transition_in_progress or not level.is_physics_processing()): return
+	for id: int in _enemy_spawners.keys():
+		var spawner := _enemy_spawners[id].get_ref() as Node2D
+		if not is_instance_valid(spawner):
+			_enemy_spawners.erase(id)
+			continue
+		spawner.update_activity(wake_region, sleep_region, theme)

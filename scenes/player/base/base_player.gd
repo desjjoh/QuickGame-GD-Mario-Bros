@@ -115,3 +115,7 @@ func death_envelope_top() -> float:
 	if rectangle != null:
 		return collision_shape.to_global(Vector2(0, -rectangle.size.y / 2.0)).y
 	return body.global_position.y
+
+
+func can_read_controller_input() -> bool:
+	return not is_dead and super.can_read_controller_input()
