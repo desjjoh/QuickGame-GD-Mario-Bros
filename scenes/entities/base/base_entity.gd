@@ -1,5 +1,6 @@
 class_name BaseEntity
 extends Node2D
+
 const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
 ## Shared scene root for characters, pickups, and world objects.
 ## Specialized entities own their physics bodies as child nodes.
@@ -141,11 +142,11 @@ func _apply_visual_theme() -> void:
 
 
 func capture_area_state() -> Dictionary:
-	return {} # Specialized entities opt in to logical progress persistence.
+	return {}  # Specialized entities opt in to logical progress persistence.
 
 
 func restore_area_state(_data: Dictionary) -> void:
-	pass # Called before entering the tree, before the initial state starts.
+	pass  # Called before entering the tree, before the initial state starts.
 
 
 func set_gameplay_suspended(value: bool) -> void:
@@ -162,17 +163,22 @@ func set_activity_suspended(value: bool) -> void:
 	if value:
 		_suspend_frame_branch(self)
 		for child in find_children("*", "Node", true, false):
-			if not child is AnimationPlayer and not child is AnimatedSprite2D: continue
-			_paused_animations[child.get_instance_id()] = {"node": weakref(child), "speed": child.speed_scale}
+			if not child is AnimationPlayer and not child is AnimatedSprite2D:
+				continue
+			_paused_animations[child.get_instance_id()] = {
+				"node": weakref(child), "speed": child.speed_scale
+			}
 			child.speed_scale = 0.0
 	else:
 		for record: Dictionary in _suspended_frames.values():
 			var node := (record.node as WeakRef).get_ref() as Node
-			if is_instance_valid(node): node.set_process(record.enabled)
+			if is_instance_valid(node):
+				node.set_process(record.enabled)
 		_suspended_frames.clear()
 		for record: Dictionary in _paused_animations.values():
 			var node := (record.node as WeakRef).get_ref() as Node
-			if is_instance_valid(node): node.set("speed_scale", record.speed)
+			if is_instance_valid(node):
+				node.set("speed_scale", record.speed)
 		_paused_animations.clear()
 	for synchronized in find_children("*", "SynchronizedAnimation", true, false):
 		synchronized.set_activity_suspended(value)
@@ -189,13 +195,16 @@ func _sync_suspension() -> void:
 		else:
 			for record: Dictionary in _suspended_physics.values():
 				var node := (record.node as WeakRef).get_ref() as Node
-				if is_instance_valid(node): node.set_physics_process(record.enabled)
+				if is_instance_valid(node):
+					node.set_physics_process(record.enabled)
 			_suspended_physics.clear()
 	_sync_controller_input()
 
 
 func _suspend_frame_branch(node: Node) -> void:
-	_suspended_frames[node.get_instance_id()] = {"node": weakref(node), "enabled": node.is_processing()}
+	_suspended_frames[node.get_instance_id()] = {
+		"node": weakref(node), "enabled": node.is_processing()
+	}
 	node.set_process(false)
 	for child in node.get_children():
 		_suspend_frame_branch(child)
@@ -215,7 +224,8 @@ func get_activity_rect() -> Rect2:
 	var found := false
 	for reference: WeakRef in _activity_geometry:
 		var child := reference.get_ref() as Node2D
-		if not is_instance_valid(child): continue
+		if not is_instance_valid(child):
+			continue
 		var local_rect: Rect2
 		if child is CollisionShape2D and child.shape != null:
 			local_rect = child.shape.get_rect()
@@ -230,21 +240,31 @@ func get_activity_rect() -> Rect2:
 
 
 func _suspend_physics_branch(node: Node) -> void:
-	_suspended_physics[node.get_instance_id()] = {"node":weakref(node), "enabled":node.is_physics_processing()}
+	_suspended_physics[node.get_instance_id()] = {
+		"node": weakref(node), "enabled": node.is_physics_processing()
+	}
 	node.set_physics_process(false)
 	for child in node.get_children():
 		_suspend_physics_branch(child)
 
 
 func can_read_controller_input() -> bool:
-	return _controller_input_ready and controller_input_enabled and not is_shutdown and not gameplay_suspended and not activity_suspended
+	return (
+		_controller_input_ready
+		and controller_input_enabled
+		and not is_shutdown
+		and not gameplay_suspended
+		and not activity_suspended
+	)
 
 
 func _sync_controller_input() -> void:
-	if not is_instance_valid(state_machine): return
+	if not is_instance_valid(state_machine):
+		return
 	var callback := state_machine.process_input
 	var connected := ControllerHandler.input_received.is_connected(callback)
 	if can_read_controller_input():
-		if not connected: ControllerHandler.input_received.connect(callback)
+		if not connected:
+			ControllerHandler.input_received.connect(callback)
 	elif connected:
 		ControllerHandler.input_received.disconnect(callback)

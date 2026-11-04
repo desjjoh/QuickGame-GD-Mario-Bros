@@ -1,5 +1,6 @@
 class_name MarioSlideState
 extends PlayerState
+
 const AudioMix = preload("res://scripts/audio/sound_effect_mix.gd")
 ## Faces opposite momentum while the Slide action brakes the physical body.
 
@@ -19,7 +20,11 @@ func enter() -> void:
 	var player := get_player()
 	player.slide_action.begin(player.motion_values)
 	player.face_direction(get_movement_axis().x)
-	if slide_sound != null and player.body.is_on_floor() and not is_zero_approx(player.body.velocity.x):
+	if (
+		slide_sound != null
+		and player.body.is_on_floor()
+		and not is_zero_approx(player.body.velocity.x)
+	):
 		# Retrigger short bursts rather than looping the full recording.
 		_skid_stream = AudioMix.one_shot_copy(slide_sound) as AudioStreamMP3
 		_slide_audio = player.play_sound_effect(_skid_stream)
@@ -54,7 +59,10 @@ func process_physics(delta: float) -> BaseState:
 			_slide_audio = player.play_sound_effect(_skid_stream)
 	# Neutral input preserves the skid and facing until braking completes.
 	# Only actively resuming the momentum direction cancels the reversal.
-	if not is_zero_approx(direction) and not player.slide_action.is_opposing(player.body, direction):
+	if (
+		not is_zero_approx(direction)
+		and not player.slide_action.is_opposing(player.body, direction)
+	):
 		return continue_physics(move_state, delta)
 	player.face_direction(direction)
 	var stopped := player.slide_action.apply(player.motion_values, delta)
@@ -65,4 +73,3 @@ func process_physics(delta: float) -> BaseState:
 	if stopped or is_zero_approx(player.body.velocity.x):
 		return move_state if not is_zero_approx(direction) else idle_state
 	return null
-

@@ -5,18 +5,18 @@ func _ready() -> void:
 	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	# Keep the containment fixture independent of the user's room painting.
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
-	fixture.get_node("Areas/LowerArea").position = Vector2(0,512)
-	fixture.get_node("Areas/LowerArea/Camera2D").position = Vector2(128,120)
-	fixture.get_node("Areas/LowerArea/Arrival").position = Vector2(48,208)
+	fixture.get_node("Areas/LowerArea").position = Vector2(0, 512)
+	fixture.get_node("Areas/LowerArea/Camera2D").position = Vector2(128, 120)
+	fixture.get_node("Areas/LowerArea/Arrival").position = Vector2(48, 208)
 	var floor := fixture.get_node("Areas/LowerArea/Layouts/GroundLayout") as TileMapLayer
 	floor.clear()
 	fixture.get_node("Areas/LowerArea/Layouts/EntityLayout").clear()
 	for x in range(16):
-		for y in [0,13,14]:
-			floor.set_cell(Vector2i(x,y),0,Vector2i.ZERO)
-	for y in range(1,13):
-		for x in [0,15]:
-			floor.set_cell(Vector2i(x,y),0,Vector2i.ZERO)
+		for y in [0, 13, 14]:
+			floor.set_cell(Vector2i(x, y), 0, Vector2i.ZERO)
+	for y in range(1, 13):
+		for x in [0, 15]:
+			floor.set_cell(Vector2i(x, y), 0, Vector2i.ZERO)
 	var packed := PackedScene.new()
 	for area in fixture.get_node("Areas").get_children():
 		fixture.set_editable_instance(area, true)
@@ -35,11 +35,11 @@ func _ready() -> void:
 	assert(camera.enabled and not camera.follow_enabled)
 	var ground := level.get_node("Areas/LowerArea/Layouts/GroundLayout") as TileMapLayer
 	for x in range(16):
-		assert(ground.get_cell_source_id(Vector2i(x,0)) == 0)
-		assert(ground.get_cell_source_id(Vector2i(x,13)) == 0)
-	for y in range(1,13):
-		assert(ground.get_cell_source_id(Vector2i(0,y)) == 0)
-		assert(ground.get_cell_source_id(Vector2i(15,y)) == 0)
+		assert(ground.get_cell_source_id(Vector2i(x, 0)) == 0)
+		assert(ground.get_cell_source_id(Vector2i(x, 13)) == 0)
+	for y in range(1, 13):
+		assert(ground.get_cell_source_id(Vector2i(0, y)) == 0)
+		assert(ground.get_cell_source_id(Vector2i(15, y)) == 0)
 	# Continue motion trials in the newly loaded destination area.
 	camera.enabled = true
 	camera.make_current()
@@ -54,10 +54,14 @@ func _ready() -> void:
 			await get_tree().physics_frame
 			await get_tree().process_frame
 			assert(player.body.global_position.x >= 16.0 and player.body.global_position.x <= 240.0)
-			assert(player.body.global_position.y >= 528.0 and player.body.global_position.y <= 720.1)
+			assert(
+				player.body.global_position.y >= 528.0 and player.body.global_position.y <= 720.1
+			)
 			assert(camera.global_position == center)
 		Input.action_release(direction)
 	assert(player.body.is_on_floor())
 	game.free()
-	print("PASS: enclosed lower room, inactive dedicated camera, fixed view and contained player after simulated arrival.")
+	print(
+		"PASS: enclosed lower room, inactive dedicated camera, fixed view and contained player after simulated arrival."
+	)
 	get_tree().quit()

@@ -1,5 +1,6 @@
 class_name BasePlayer
 extends BaseEntity
+
 const AudioMix = preload("res://scripts/audio/sound_effect_mix.gd")
 ## Player foundation. States coordinate motion, actions, and presentation.
 ## Use body.global_position for the moving player's world position.
@@ -52,7 +53,9 @@ func _on_jump_started() -> void:
 func move_body() -> void:
 	var rising := body.velocity.y < 0.0
 	var horizontal_speed := body.velocity.x
-	var corrected_landing := corner_correction.prepare(body, collision_shape, get_physics_process_delta_time())
+	var corrected_landing := corner_correction.prepare(
+		body, collision_shape, get_physics_process_delta_time()
+	)
 	if corrected_landing:
 		# The correction already consumed this tick's horizontal displacement.
 		body.velocity.x = 0.0
@@ -76,7 +79,6 @@ func face_direction(direction: float) -> void:
 	sprite.flip_h = direction < 0.0
 	if state_machine.current_state != null:
 		state_machine.current_state.apply_sprite_offset()
-
 
 
 func begin_death(present: bool = false) -> void:

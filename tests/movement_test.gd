@@ -103,6 +103,7 @@ func run_checks() -> void:
 	fast.free()
 	action.free()
 	game.free()
-	print("PASS: walk/run, static Idle, bindings, reversal/braking, control gates, shared motion modifiers, body velocity proxy, isolation, and timestep independence.")
+	print(
+		"PASS: walk/run, static Idle, bindings, reversal/braking, control gates, shared motion modifiers, body velocity proxy, isolation, and timestep independence."
+	)
 	get_tree().quit()
-

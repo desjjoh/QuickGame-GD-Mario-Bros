@@ -15,7 +15,7 @@ func enter() -> void:
 	var mario := get_player() as Mario
 	_previous_animation_speed = mario.animation_player.speed_scale
 	_update_walk_animation(mario)
-	
+
 	# Apply the initial texture now rather than waiting for another animation tick.
 	mario.animation_player.advance(0.0)
 
@@ -35,31 +35,35 @@ func process_physics(delta: float) -> BaseState:
 		return continue_physics(next, delta)
 	if not player.body.is_on_floor():
 		return _process_falling(player, direction, delta)
-	
+
 	if player.slide_action.can_start(player.body, direction):
 		return continue_physics(slide_state, delta)
-	
+
 	# Low-speed reversal finishes immediately instead of entering a visible skid.
 	if player.slide_action.is_opposing(player.body, direction):
 		player.body.velocity.x = 0.0
-	
+
 	player.horizontal_movement.apply(player.body, player.motion_values, direction, delta)
 	player.face_direction(direction)
 	player.gravity_component.apply(player.motion_values, delta)
 	player.move_body()
-	
+
 	var mario := player as Mario
 	_update_walk_animation(mario)
-	
+
 	if is_zero_approx(direction) and is_zero_approx(player.body.velocity.x):
 		return idle_state
-	
+
 	return null
 
 
 func _process_falling(player: BasePlayer, direction: float, delta: float) -> BaseState:
 	if not _falling:
-		player.air_movement.begin(player.motion_values, -1.0 if player.sprite != null and player.sprite.flip_h else 1.0, player.run_action.running_history)
+		player.air_movement.begin(
+			player.motion_values,
+			-1.0 if player.sprite != null and player.sprite.flip_h else 1.0,
+			player.run_action.running_history
+		)
 		_falling = true
 	player.air_movement.apply(player.motion_values, direction, delta)
 	player.gravity_component.apply(player.motion_values, delta)

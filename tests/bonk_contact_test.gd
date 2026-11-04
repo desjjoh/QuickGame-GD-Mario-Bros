@@ -3,6 +3,7 @@ extends Node
 signal sweep_finished
 var pending_sweep: Callable
 
+
 func _physics_process(_delta: float) -> void:
 	if pending_sweep.is_valid():
 		var sweep := pending_sweep
@@ -13,8 +14,16 @@ func _physics_process(_delta: float) -> void:
 
 func _ready() -> void:
 	# Real character sweeps at both edges, a seam, and an escapable corner.
-	for trial in [[63.0, false, true], [72.0, false, true], [81.0, false, true],
-		[79.5, true, true], [80.0, true, true], [80.5, true, true], [62.0, false, false], [80.5, true, false, true]]:
+	for trial in [
+		[63.0, false, true],
+		[72.0, false, true],
+		[81.0, false, true],
+		[79.5, true, true],
+		[80.0, true, true],
+		[80.5, true, true],
+		[62.0, false, false],
+		[80.5, true, false, true]
+	]:
 		var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 		var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 		var layout := fixture.get_node("Areas/MainArea/Layouts/EntityLayout") as TileMapLayer
@@ -48,11 +57,20 @@ func _ready() -> void:
 			for block in level.world_objects.get_children():
 				if block.state_machine.current_state.name == &"Bouncing":
 					reactions += 1
-			assert(reactions == (1 if trial[2] else 0), "Bonk edge/seam trial failed at X=%s" % trial[0])
+			assert(
+				reactions == (1 if trial[2] else 0),
+				"Bonk edge/seam trial failed at X=%s" % trial[0]
+			)
 			assert(player.body.is_on_ceiling() == (trial[2] or trial.size() > 3))
 			if trial[1] and trial[2]:
 				var expected := "brick_4_9" if trial[0] < 80.0 else "brick_5_9"
-				assert(level.world_objects.get_node(expected).state_machine.current_state.name == &"Bouncing", "Wrong seam target at X=%s" % trial[0])
+				assert(
+					(
+						level.world_objects.get_node(expected).state_machine.current_state.name
+						== &"Bouncing"
+					),
+					"Wrong seam target at X=%s" % trial[0]
+				)
 			# Horizontal side contacts are never offensive ceiling contacts.
 			player.body.global_position = Vector2(57, 157)
 			player.body.velocity = Vector2(180, 0)
@@ -62,5 +80,7 @@ func _ready() -> void:
 		game.free()
 		await get_tree().physics_frame
 		await get_tree().process_frame
-	print("PASS: Bonk accepts real ceiling edge hits, selects one seam target, and ignores escaped corners and side hits.")
+	print(
+		"PASS: Bonk accepts real ceiling edge hits, selects one seam target, and ignores escaped corners and side hits."
+	)
 	get_tree().quit()

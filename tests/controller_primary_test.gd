@@ -33,8 +33,10 @@ func run_checks() -> void:
 		await tick(5)
 		assert(mario.body.is_on_floor())
 		var jump_sound := mario.jump_action.sound_effect as AudioStreamWAV
-		assert(jump_sound.loop_mode == AudioStreamWAV.LOOP_DISABLED,
-			"One-shot jump audio must not inherit the WAV's invalid embedded loop.")
+		assert(
+			jump_sound.loop_mode == AudioStreamWAV.LOOP_DISABLED,
+			"One-shot jump audio must not inherit the WAV's invalid embedded loop."
+		)
 		var playback := jump_sound.instantiate_playback()
 		playback.start(0.0)
 		var decoded := playback.mix_audio(1.0, 30000)
@@ -42,14 +44,17 @@ func run_checks() -> void:
 		for sample in decoded:
 			peak = maxf(peak, maxf(absf(sample.x), absf(sample.y)))
 		playback.stop()
-		assert(peak > 0.05, "Jump audio must decode actual audible samples, not just create a node.")
+		assert(
+			peak > 0.05, "Jump audio must decode actual audible samples, not just create a node."
+		)
 		playback = null
 		jump_sound = null
 		var jumps: Array[int] = []
 		var sounds: Array[AudioStream] = []
-		mario.body.child_entered_tree.connect(func(child: Node):
-			if child is AudioStreamPlayer2D:
-				sounds.append(child.stream)
+		mario.body.child_entered_tree.connect(
+			func(child: Node):
+				if child is AudioStreamPlayer2D:
+					sounds.append(child.stream)
 		)
 		mario.jump_action.jumped.connect(func(): jumps.append(1))
 		var event := button(device, true)
@@ -72,5 +77,7 @@ func run_checks() -> void:
 		game.free()
 		sounds.clear()
 		await tick(2)
-	print("PASS: preserved keyboard bindings and Xbox A raw-event jumps/releases on device IDs 0, 1, and 2.")
+	print(
+		"PASS: preserved keyboard bindings and Xbox A raw-event jumps/releases on device IDs 0, 1, and 2."
+	)
 	get_tree().quit()

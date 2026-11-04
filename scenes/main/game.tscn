@@ -1,22 +1,22 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3 uid="uid://cqy8p2w3ebugg"]
 
-[ext_resource type="Script" path="res://scenes/main/game.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://scenes/levels/1-1.tscn" id="2_level"]
-
+[ext_resource type="Script" uid="uid://36rfkvfhxeae" path="res://scenes/main/game.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://dhytccbi1u2jb" path="res://scenes/levels/worlds/world 1/1-1.tscn" id="2_level"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ui.tscn" id="3_ui"]
+[ext_resource type="Script" uid="uid://bxsgrgah547n1" path="res://scenes/ui/shared_shadow_composer.gd" id="4_composer"]
 
-[ext_resource type="Script" path="res://scenes/ui/shared_shadow_composer.gd" id="4_composer"]
-
-[node name="Game" type="CanvasLayer"]
+[node name="Game" type="CanvasLayer" unique_id=445540570]
 layer = 0
 script = ExtResource("1_script")
 initial_level = ExtResource("2_level")
 
-[node name="LevelContainer" type="Node2D" parent="."]
+[node name="LevelContainer" type="Node2D" parent="." unique_id=1996731603]
 
-[node name="UI" parent="." instance=ExtResource("3_ui")]
+[node name="UI" parent="." unique_id=1508061020 instance=ExtResource("3_ui")]
+layout_mode = 3
+anchors_preset = 0
 
-[node name="SharedShadow" type="CanvasGroup" parent="."]
+[node name="SharedShadow" type="CanvasGroup" parent="." unique_id=1798374583]
 physics_interpolation_mode = 2
 fit_margin = 12.0
 clear_margin = 12.0

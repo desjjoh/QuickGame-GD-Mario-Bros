@@ -29,9 +29,14 @@ func prepare(body: CharacterBody2D, shape: CollisionShape2D, delta: float) -> bo
 	return false
 
 
-func _correct_head(body: CharacterBody2D, shape: CollisionShape2D, half: Vector2, motion: Vector2) -> void:
+func _correct_head(
+	body: CharacterBody2D, shape: CollisionShape2D, half: Vector2, motion: Vector2
+) -> void:
 	var collision := KinematicCollision2D.new()
-	if not body.test_move(body.global_transform, motion, collision) or collision.get_normal().y < 0.7:
+	if (
+		not body.test_move(body.global_transform, motion, collision)
+		or collision.get_normal().y < 0.7
+	):
 		return
 	var head := Vector2(body.global_position.x, shape.global_position.y - half.y)
 	var projected_head := head + Vector2(motion.x, 0)
@@ -51,15 +56,23 @@ func _correct_head(body: CharacterBody2D, shape: CollisionShape2D, half: Vector2
 				return
 
 
-func _correct_landing(body: CharacterBody2D, shape: CollisionShape2D, half: Vector2, motion: Vector2) -> bool:
+func _correct_landing(
+	body: CharacterBody2D, shape: CollisionShape2D, half: Vector2, motion: Vector2
+) -> bool:
 	var feet_y := shape.global_position.y + half.y
 	# Try the reference foot insets first, then the physical envelope edges.
 	# Godot's full-height side sweep can reach the ledge one pixel before
 	# the inset feet; shallow, real body overlap must get the same recovery.
-	for foot_x in [shape.global_position.x - half.x + 1.0, shape.global_position.x + half.x - 1.0,
-		shape.global_position.x - half.x + 0.01, shape.global_position.x + half.x - 0.01]:
+	for foot_x in [
+		shape.global_position.x - half.x + 1.0,
+		shape.global_position.x + half.x - 1.0,
+		shape.global_position.x - half.x + 0.01,
+		shape.global_position.x + half.x - 0.01
+	]:
 		var x: float = foot_x + motion.x
-		var hit := _ray(body, Vector2(x, feet_y - landing_tolerance - 0.1), Vector2(x, feet_y + motion.y + 0.1))
+		var hit := _ray(
+			body, Vector2(x, feet_y - landing_tolerance - 0.1), Vector2(x, feet_y + motion.y + 0.1)
+		)
 		if hit.is_empty() or (hit.normal as Vector2).y > -0.7:
 			continue
 		var penetration: float = feet_y - (hit.position as Vector2).y

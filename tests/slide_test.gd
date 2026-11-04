@@ -66,7 +66,12 @@ func run_checks() -> void:
 	Input.action_press(ControllerHandler.left_action)
 	await tick(2)
 	assert(player.state_machine.current_state is MarioSlideState)
-	assert(player.sprite.texture.resource_path == "res://assets/player/mario (small)/mario-small-slide.png")
+	assert(
+		(
+			player.sprite.texture.resource_path
+			== "res://assets/player/mario (small)/mario-small-slide.png"
+		)
+	)
 	assert(player.body.velocity.x > 0.0 and player.body.velocity.x < 150.0)
 	assert(player.sprite.flip_h)
 	assert(is_equal_approx(player.motion_values.acceleration, 182.8125))
@@ -75,7 +80,9 @@ func run_checks() -> void:
 	Input.action_press(ControllerHandler.right_action)
 	await tick(2)
 	assert(player.state_machine.current_state is MarioMoveState)
-	assert(player.animation_player.current_animation == "walk" and player.animation_player.is_playing())
+	assert(
+		player.animation_player.current_animation == "walk" and player.animation_player.is_playing()
+	)
 	assert(is_equal_approx(player.motion_values.acceleration, player.run_action.acceleration))
 	await tick(20)
 	Input.action_release(ControllerHandler.right_action)
@@ -90,7 +97,12 @@ func run_checks() -> void:
 	Input.action_release(ControllerHandler.secondary_action)
 	await tick(90)
 	assert(player.state_machine.current_state is MarioIdleState)
-	assert(player.sprite.texture.resource_path == "res://assets/player/mario (small)/mario-small-idle.png")
+	assert(
+		(
+			player.sprite.texture.resource_path
+			== "res://assets/player/mario (small)/mario-small-idle.png"
+		)
+	)
 	assert(player.motion_values.acceleration == player.run_action.history_acceleration)
 	# Releasing direction, with or without Run held, must retain the skid pose
 	# and modifier until stopping, in both travel directions and speed modes.
@@ -100,8 +112,16 @@ func run_checks() -> void:
 				# Keep each case on the flat test surface; do not re-enter a tile
 				# side from offscreen while testing a horizontal-only controller.
 				player.body.global_position = Vector2(128, 208)
-				var forward: StringName = ControllerHandler.right_action if travel_direction > 0.0 else ControllerHandler.left_action
-				var backward: StringName = ControllerHandler.left_action if travel_direction > 0.0 else ControllerHandler.right_action
+				var forward: StringName = (
+					ControllerHandler.right_action
+					if travel_direction > 0.0
+					else ControllerHandler.left_action
+				)
+				var backward: StringName = (
+					ControllerHandler.left_action
+					if travel_direction > 0.0
+					else ControllerHandler.right_action
+				)
 				Input.action_press(forward)
 				if running:
 					Input.action_press(ControllerHandler.secondary_action)
@@ -117,23 +137,44 @@ func run_checks() -> void:
 					Input.action_release(ControllerHandler.secondary_action)
 				await tick(2)
 				assert(player.state_machine.current_state is MarioSlideState)
-				assert(player.sprite.texture.resource_path == "res://assets/player/mario (small)/mario-small-slide.png")
+				assert(
+					(
+						player.sprite.texture.resource_path
+						== "res://assets/player/mario (small)/mario-small-slide.png"
+					)
+				)
 				assert(player.sprite.flip_h == skid_facing)
 				assert(absf(player.body.velocity.x) < previous_speed)
 				while not is_zero_approx(player.body.velocity.x):
 					assert(player.state_machine.current_state is MarioSlideState)
 					await tick(1)
 				assert(player.state_machine.current_state is MarioIdleState)
-				assert(player.sprite.texture.resource_path == "res://assets/player/mario (small)/mario-small-idle.png")
+				assert(
+					(
+						player.sprite.texture.resource_path
+						== "res://assets/player/mario (small)/mario-small-idle.png"
+					)
+				)
 				assert(not player.motion_values._modifiers.has(&"slide"))
 				# The exit tick retains the pre-stop facing-mismatch profile;
 				# Idle selects the stationary neutral profile on its next tick.
 				await tick(2)
-				assert(player.motion_values.acceleration == (player.run_action.history_acceleration if player.run_action.running_history else player.run_action.neutral_acceleration))
+				assert(
+					(
+						player.motion_values.acceleration
+						== (
+							player.run_action.history_acceleration
+							if player.run_action.running_history
+							else player.run_action.neutral_acceleration
+						)
+					)
+				)
 				Input.action_release(ControllerHandler.secondary_action)
 				await tick(2)
 	game.free()
 	# Let queued sound deletions and the audio-server cleanup finish before quit.
 	await tick(6)
-	print("PASS: skid rates, cancellation, release-to-stop skid retention in both directions and speed modes, sprite/facing retention, and modifier cleanup.")
+	print(
+		"PASS: skid rates, cancellation, release-to-stop skid retention in both directions and speed modes, sprite/facing retention, and modifier cleanup."
+	)
 	get_tree().quit()

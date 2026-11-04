@@ -22,7 +22,9 @@ func _ready() -> void:
 			player.body.global_position.x = (84.0 if direction > 0 else 124.0) + direction * phase
 			for frame in range(5):
 				await tick()
-			var action: StringName = ControllerHandler.right_action if direction > 0 else ControllerHandler.left_action
+			var action: StringName = (
+				ControllerHandler.right_action if direction > 0 else ControllerHandler.left_action
+			)
 			Input.action_press(action)
 			Input.action_press(ControllerHandler.secondary_action)
 			player.body.velocity.x = direction * 150.0
@@ -30,11 +32,27 @@ func _ready() -> void:
 			player.state_machine.change_state(player.state_machine.get_state(&"Move"))
 			for frame in range(25):
 				await tick()
-				assert(player.body.global_position.y < 212.0, "Run must recover shallow one-tile gaps.")
-				assert(player.state_machine.current_state is MarioMoveState,
-					"Passive gap crossing must remain in Move, with no Jump pose flash.")
+				assert(
+					player.body.global_position.y < 212.0, "Run must recover shallow one-tile gaps."
+				)
+				assert(
+					player.state_machine.current_state is MarioMoveState,
+					"Passive gap crossing must remain in Move, with no Jump pose flash."
+				)
 				assert(player.animation_player.current_animation == "walk")
-				assert(absf(player.body.velocity.x) > 140.0, "Gap contact must preserve run momentum: direction=%s phase=%s frame=%s pos=%s velocity=%s" % [direction, phase, frame, player.body.global_position, player.body.velocity])
+				assert(
+					absf(player.body.velocity.x) > 140.0,
+					(
+						"Gap contact must preserve run momentum: direction=%s phase=%s frame=%s pos=%s velocity=%s"
+						% [
+							direction,
+							phase,
+							frame,
+							player.body.global_position,
+							player.body.velocity
+						]
+					)
+				)
 			assert(player.body.is_on_floor())
 			Input.action_release(action)
 			Input.action_release(ControllerHandler.secondary_action)
@@ -66,5 +84,7 @@ func _ready() -> void:
 	Input.action_release(ControllerHandler.right_action)
 	Input.action_release(ControllerHandler.secondary_action)
 	wide_game.free()
-	print("PASS: one-tile gap runs in both directions at five subpixel phases; wider gaps still cause falling.")
+	print(
+		"PASS: one-tile gap runs in both directions at five subpixel phases; wider gaps still cause falling."
+	)
 	get_tree().quit()

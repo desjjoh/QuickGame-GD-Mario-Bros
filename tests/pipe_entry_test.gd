@@ -5,10 +5,12 @@ func _ready() -> void:
 	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	fixture.get_node("Areas/MainArea/Layouts/EntityLayout").clear()
-	fixture.get_node("Areas/MainArea/Layouts/EntityLayout").set_cell(Vector2i(6,11),3,Vector2i.ZERO)
-	fixture.get_node("Players/PlayerSpawn").position = Vector2(112,176)
+	fixture.get_node("Areas/MainArea/Layouts/EntityLayout").set_cell(
+		Vector2i(6, 11), 3, Vector2i.ZERO
+	)
+	fixture.get_node("Players/PlayerSpawn").position = Vector2(112, 176)
 	for area in fixture.get_node("Areas").get_children():
-		fixture.set_editable_instance(area,true)
+		fixture.set_editable_instance(area, true)
 	var packed := PackedScene.new()
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
@@ -36,9 +38,11 @@ func _ready() -> void:
 	level.get_node("Areas/LowerArea/Endpoints").add_child(transient)
 	pipe.destination_endpoint_id = &"temporary"
 	var sounds: Array[AudioStreamPlayer2D] = []
-	player.body.child_entered_tree.connect(func(child: Node):
-		if child is AudioStreamPlayer2D:
-			sounds.append(child))
+	player.body.child_entered_tree.connect(
+		func(child: Node):
+			if child is AudioStreamPlayer2D:
+				sounds.append(child)
+	)
 	assert(level.request_pipe_entry(pipe))
 	assert(level.players.get_index() < level.get_node("Areas").get_index())
 	# Entry aligns feet to the mouth; floor contact may retain a safe-margin offset.
@@ -50,9 +54,9 @@ func _ready() -> void:
 	ControllerHandler.input_right = 1
 	ControllerHandler.input_secondary = true
 	for frame in range(12):
-		player.state_machine.process_physics(1.0/60.0)
-		level._physics_process(1.0/60.0)
-	assert(is_equal_approx(player.body.global_position.y-entry_origin.y,12.0))
+		player.state_machine.process_physics(1.0 / 60.0)
+		level._physics_process(1.0 / 60.0)
+	assert(is_equal_approx(player.body.global_position.y - entry_origin.y, 12.0))
 	assert(player.body.global_position.x == origin.x)
 	assert(player.sprite.flip_h, "Vertical entry must preserve left facing.")
 	assert(player.body.velocity == Vector2.ZERO)
@@ -60,7 +64,7 @@ func _ready() -> void:
 	assert(player.state_machine.current_state == player.pipe_enter_state)
 	assert(sounds.size() == 1)
 	transient.free()
-	level._physics_process(1.0/60.0)
+	level._physics_process(1.0 / 60.0)
 	assert(player.body.global_position == origin)
 	assert(level.players.get_index() > level.get_node("Areas").get_index())
 	assert(player.body.collision_layer == layer and player.body.collision_mask == mask)
@@ -72,7 +76,7 @@ func _ready() -> void:
 	ControllerHandler.input_primary = false
 	ControllerHandler.input_right = 0
 	ControllerHandler.input_secondary = false
-	level._physics_process(1.0/60.0)
+	level._physics_process(1.0 / 60.0)
 	assert(level.can_enter_pipe())
 	pipe.destination_endpoint_id = &"arrival"
 	player.body.global_position.x = 114
@@ -91,5 +95,7 @@ func _ready() -> void:
 	game.free()
 	for frame in range(2):
 		await get_tree().process_frame
-	print("PASS: PipeEnter ignores controls, moves at reference speed, freezes camera, plays once, cancels invalid targets and restores state/collision on shutdown.")
+	print(
+		"PASS: PipeEnter ignores controls, moves at reference speed, freezes camera, plays once, cancels invalid targets and restores state/collision on shutdown."
+	)
 	get_tree().quit()

@@ -1,6 +1,7 @@
 @tool
 class_name BaseLevelArea
 extends Node2D
+
 signal area_theme_changed(theme: AreaTheme)
 ## Owns area layouts, entities, camera, theme, and entry/exit lifecycle.
 
@@ -46,7 +47,8 @@ func exit_area() -> void:
 	set_physics_process(false)
 	for reference: WeakRef in _activity_entities.values():
 		var entity := reference.get_ref() as BaseEntity
-		if is_instance_valid(entity): entity.set_activity_suspended(true)
+		if is_instance_valid(entity):
+			entity.set_activity_suspended(true)
 
 
 func _exit_tree() -> void:
@@ -56,7 +58,11 @@ func _exit_tree() -> void:
 func apply_theme() -> void:
 	if theme == null or not has_node("Layouts"):
 		return
-	var assignments := {"GroundLayout": theme.terrain, "DecorationLayout": theme.decorations, "EntityLayout": theme.entity_markers}
+	var assignments := {
+		"GroundLayout": theme.terrain,
+		"DecorationLayout": theme.decorations,
+		"EntityLayout": theme.entity_markers
+	}
 	for layer_name: String in assignments:
 		var layer := get_node("Layouts/" + layer_name) as TileMapLayer
 		if assignments[layer_name] != null:
@@ -71,7 +77,7 @@ func resolve_endpoint(id: StringName) -> AreaEndpoint:
 	for candidate in candidates:
 		if candidate is AreaEndpoint and candidate.get_endpoint_id() == id:
 			if result != null:
-				return null # Duplicate IDs are ambiguous, never first-match wins.
+				return null  # Duplicate IDs are ambiguous, never first-match wins.
 			result = candidate
 	return result
 
@@ -129,7 +135,10 @@ func resolve_transport_target(id: StringName) -> Object:
 	candidates.append($Arrival)
 	candidates.append_array($Endpoints.get_children())
 	for candidate in candidates:
-		var matches: bool = (candidate is TransportPlacement and candidate.target_id == id) or (candidate is AreaEndpoint and candidate.get_endpoint_id() == id)
+		var matches: bool = (
+			(candidate is TransportPlacement and candidate.target_id == id)
+			or (candidate is AreaEndpoint and candidate.get_endpoint_id() == id)
+		)
 		if matches:
 			if selected != null:
 				return null
@@ -226,10 +235,13 @@ func _shutdown_branch(parent: Node) -> void:
 
 func register_activity_entity(entity: BaseEntity) -> void:
 	# Players belong to the level, even if a custom scene nests one in an area.
-	if entity is BasePlayer: return
+	if entity is BasePlayer:
+		return
 	_activity_entities[entity.get_instance_id()] = weakref(entity)
 	if is_active:
-		entity.set_activity_suspended(not get_activity_region(false).intersects(entity.get_activity_rect()))
+		entity.set_activity_suspended(
+			not get_activity_region(false).intersects(entity.get_activity_rect())
+		)
 
 
 func register_enemy_spawner(spawner: Node2D) -> void:
@@ -238,9 +250,12 @@ func register_enemy_spawner(spawner: Node2D) -> void:
 
 func get_activity_region(sleep_region: bool) -> Rect2:
 	var camera := get_node_or_null("Camera2D") as Camera2D
-	if camera == null: return Rect2()
+	if camera == null:
+		return Rect2()
 	var size := get_viewport_rect().size / camera.zoom
-	var margin := maxf(activation_buffer, deactivation_buffer) if sleep_region else activation_buffer
+	var margin := (
+		maxf(activation_buffer, deactivation_buffer) if sleep_region else activation_buffer
+	)
 	return Rect2(camera.global_position - size / 2.0, size).grow(margin)
 
 
@@ -249,7 +264,8 @@ func _physics_process(_delta: float) -> void:
 
 
 func update_camera_activity() -> void:
-	if Engine.is_editor_hint() or not is_active or not runtime_loaded: return
+	if Engine.is_editor_hint() or not is_active or not runtime_loaded:
+		return
 	var wake_region := get_activity_region(false)
 	var sleep_region := get_activity_region(true)
 	for id: int in _activity_entities.keys():
@@ -262,7 +278,16 @@ func update_camera_activity() -> void:
 	# Existing actors retain their independent death/transition suspension.
 	# Do not create fresh actors while the parent level is frozen (including title).
 	var level := get_parent().get_parent() as BaseLevel
-	if level != null and (level.is_shutdown or level.death_in_progress or level.transition_in_progress or not level.is_physics_processing()): return
+	if (
+		level != null
+		and (
+			level.is_shutdown
+			or level.death_in_progress
+			or level.transition_in_progress
+			or not level.is_physics_processing()
+		)
+	):
+		return
 	for id: int in _enemy_spawners.keys():
 		var spawner := _enemy_spawners[id].get_ref() as Node2D
 		if not is_instance_valid(spawner):

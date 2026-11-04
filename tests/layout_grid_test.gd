@@ -24,7 +24,10 @@ func _ready() -> void:
 		assert(layer.transform == Transform2D.IDENTITY)
 		assert(layer.tile_set.tile_size == Vector2i(16, 16))
 		assert(layer.tile_set.tile_shape == TileSet.TILE_SHAPE_SQUARE)
-		assert(layer.tile_map_data == painted[layer.name], "Grid enforcement must preserve painted cells.")
+		assert(
+			layer.tile_map_data == painted[layer.name],
+			"Grid enforcement must preserve painted cells."
+		)
 		assert(layer.to_global(layer.map_to_local(Vector2i(2, 3))) == Vector2(72, 104))
 	for entity in level.world_objects.get_children():
 		assert(entity.position.x == snappedf(entity.position.x, 16))

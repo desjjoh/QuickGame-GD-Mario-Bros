@@ -20,7 +20,7 @@ Pipe artwork remains a child of its entity and is freed naturally when its area 
 
 ## Progress ownership
 
-The user selected preserving progress on return. GameHandler owns area snapshots through store_area_progress/get_area_progress, keyed by level scene identity and area_id. Data is copied at the API boundary and stays in memory; no disk save system is implemented.
+The user selected preserving progress on return. GameHandler owns area snapshots through store_area_progress/get_area_progress, with one selected level scene identity and a dictionary keyed by area_id. Loading another logical level replaces that store. Data is copied at the API boundary and stays in memory; no disk save system is implemented.
 
 Current snapshots retain:
 
@@ -32,7 +32,7 @@ A Bouncing block saves its logical destination state, not the temporary bounce. 
 
 BaseEntity.capture_area_state and restore_area_state are extension hooks for future entity types. Restore is called before the entity enters the tree. These hooks should return plain progress data rather than Node references. Future enemies/items must define their own persistence rules; arbitrary actor velocities, animation phases, and manually authored entity state are not automatically preserved.
 
-Named registered level scenes retain snapshots across replacing the level instance in the same game session. Anonymous fixtures and standalone levels use instance-scoped keys discarded on terminal shutdown. GameHandler.clear_session clears cached progress; rebuilding an already loaded world's contents is a separate operation.
+Named registered level scenes retain snapshots across same-level instance recreation. Loading a different level discards the old visit; returning later starts fresh. Anonymous fixtures and standalone levels use instance-scoped keys discarded on terminal shutdown. GameHandler.clear_session clears cached progress; rebuilding an already loaded world's contents is a separate operation.
 
 ## Loading limits
 
@@ -45,3 +45,5 @@ area_streaming_test verifies inactive physics has no floor collision, inactive n
 ## Inherited scene identity
 
 BaseArea's authored nodes retain Godot-generated unique scene IDs. The playable level keeps Endpoints empty. Routing and scene-hierarchy tests create their own near_start/near_end fixtures under MainArea/Endpoints, with level ownership so native saves retain them. Do not strip unique_id, parent_id_path or editable-instance metadata when editing scene files. scene_hierarchy_test performs three native editor-state save/reload cycles and checks endpoint parents and every painted layout byte array. If Godot already has the older malformed scene open, reload it before saving; in-memory editor state must pick up the repaired hierarchy. Keep the required Layouts, WorldObjects and Endpoints container names; the project uses these paths directly. Stable IDs are serialization metadata, not permission to rename/reparent these inherited containers arbitrarily. The regression verifies native serialization, not every possible editor reparent/undo workflow.
+
+Game over always clears the level store after the old level's final shutdown snapshot. Area travel preserves it. This supersedes the former multi-level cache; see [game over and progress](game-over.md).

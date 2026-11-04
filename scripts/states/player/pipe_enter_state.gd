@@ -1,5 +1,6 @@
 class_name PlayerPipeEnterState
 extends PlayerTransportState
+
 const AudioMix = preload("res://scripts/audio/sound_effect_mix.gd")
 ## Directional pipe entry and emergence; normal movement and collisions are suspended.
 
@@ -36,7 +37,12 @@ func _ready() -> void:
 		enter_sound_effect = AudioMix.one_shot_copy(enter_sound_effect)
 
 
-func configure(opening: Vector2, direction: Vector2 = Vector2.DOWN, emerging: bool = false, distance: float = 0.0) -> void:
+func configure(
+	opening: Vector2,
+	direction: Vector2 = Vector2.DOWN,
+	emerging: bool = false,
+	distance: float = 0.0
+) -> void:
 	_opening = opening
 	_direction = direction
 	_emerging = emerging
@@ -77,7 +83,9 @@ func enter() -> void:
 	player.body.reset_physics_interpolation()
 	if player.sprite != null:
 		_sprite_visible = player.sprite.visible
-		_hidden_depth = maxf(1.0, -(player.sprite.position.y + player.sprite.get_rect().position.y) + 1.0)
+		_hidden_depth = maxf(
+			1.0, -(player.sprite.position.y + player.sprite.get_rect().position.y) + 1.0
+		)
 	if _direction.x != 0.0:
 		# Body origin is sprite center; a left-edge grid boundary is center +8.
 		_hidden_depth = 14.0
@@ -120,10 +128,15 @@ func process_physics(delta: float) -> BaseState:
 			_walking = false
 			apply_presentation()
 	var player := get_player()
-	player.body.global_position = _opening + _direction * (depth - _travel_distance if _emerging else depth)
+	player.body.global_position = (
+		_opening + _direction * (depth - _travel_distance if _emerging else depth)
+	)
 	player.body.velocity = Vector2.ZERO
 	if player.sprite != null:
-		player.sprite.visible = _sprite_visible and (_travel_distance - depth < _hidden_depth if _emerging else depth < _hidden_depth)
+		player.sprite.visible = (
+			_sprite_visible
+			and (_travel_distance - depth < _hidden_depth if _emerging else depth < _hidden_depth)
+		)
 	if _elapsed >= _duration:
 		_finished = true
 		travel_finished.emit()

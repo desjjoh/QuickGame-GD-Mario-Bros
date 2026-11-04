@@ -1,12 +1,12 @@
 # Player death lifecycle
 
-BaseLevel coordinates death for all stages. The implemented trigger is falling fully below the active camera viewport. Lives, game over, checkpoints, collectible coins and Mario's visible hit-death animation remain unimplemented. No life or session-counter deduction occurs.
+BaseLevel coordinates death for all stages. The implemented trigger is falling fully below the active camera viewport. Accepted death deducts one shared life. Negative reserves now trigger [game over](game-over.md). Checkpoints, collectible coins and Mario's visible hit-death animation remain unimplemented.
 
 ## Detection and ownership
 
 After player movement and camera/bounds processing, BaseLevel compares BasePlayer.death_envelope_top() with the active viewport bottom plus Fall Death Margin (default 34 pixels). The envelope uses the authored rectangular collision shape, independent of animation frames; small Mario's top is 14 pixels above his feet. Partially visible players do not die. With a viewport bottom at Y=240, small Mario triggers after his feet pass Y=288, 32 pixels deeper than the former Y=256 cutoff. This approximates the reference's vertical-page threshold after translating its 32px player drawing envelope to our feet-based origin. Cleanup still happens immediately at that cutoff rather than simulating the remaining invisible fall. Camera zoom and the occupied area's world position are included. Fall Death Enabled defaults to true. There is no bottom clamp.
 
-BaseLevel.on_death(player, present=false) accepts the current player once and rejects duplicate death, shutdown and active transport. It freezes camera following/bounds handling and refuses new transport until restart. The death_started signal is notification, not ownership of the sequence. BaseLevel's physics callback continues only to coordinate death timing.
+BaseLevel.on_death(player, present=false) accepts the current player once and rejects duplicate death, shutdown and active transport. After setting death_in_progress, it calls GameHandler.set_lives(player_status.lives - 1); the shared setter permits -1 reserves and notifies UI. Invalid/repeated requests do not deduct. It freezes camera following/bounds handling and refuses new transport until restart. The death_started signal is notification, not ownership of the sequence. BaseLevel's physics callback continues only to coordinate death timing.
 
 All other BaseEntity descendants are reversibly gameplay-suspended. Their FSM frame, physics, input, animation-finished callbacks and ordinary transitions are gated; entity/component physics callbacks are disabled with their previous enable states retained. Independent AnimationPlayer playback and the global cosmetic clock remain active. Clock-sampled question blocks and HUD coins keep their shared phase even though their native playback is paused. BaseBlock rejects new hits while suspended. This is gameplay suspension, not SceneTree pause or terminal shutdown.
 
@@ -38,8 +38,16 @@ Reload restores the original MainArea camera and the actual Players/PlayerSpawn 
 
 The reference's PlayerHole/HoleDie separates off-screen fall handling from visible PlayerDeath presentation and uses death-event music before PlayerLoseLife. TimerControl also gates enemy movement and some enemy animation. Our independent audio completion, optional presentation and continuing cosmetic animation are deliberate adaptations, not cycle-accurate parity. See the [disassembly](https://gist.github.com/1wErt3r/4048722).
 
-The death regression covers threshold visibility, duplicate/transport rejection, player state/input cleanup and freeing, reversible suspension with continuing animation, the optional presentation contract, real one-shot sound decoding/playback, restart at PlayerSpawn, both global progress policies across active/inactive areas, unchanged lives and stale restart ownership. See [verification](verification.md) for executed checks and limitations.
+The death regression covers threshold visibility, duplicate/transport rejection, player state/input cleanup and freeing, reversible suspension with continuing animation, the optional presentation contract, real one-shot sound decoding/playback, restart at PlayerSpawn, both global progress policies across active/inactive areas, exactly-once life loss, zero-life restart, live intro updates and stale/reentrant ownership. See [verification](verification.md) for executed checks and limitations.
 
 ## Presented restart
 
-After the existing death wait/jingle, GameHandler restarts through the global level transition: quick black, load, splash with HUD, quick black, gameplay. Progress-reset configuration and no-lives-deduction behavior remain unchanged. Standalone restart limitations still apply. See [transitions](transitions.md).
+After the existing death wait/jingle, GameHandler restarts through the global level transition: quick black, load, splash with HUD, quick black, gameplay. The life already deducted at death acceptance survives this restart; loading the level does not deduct again. Progress-reset configuration remains independent. Standalone restart limitations still apply. See [transitions](transitions.md).
+
+## Life deduction boundary
+
+Deduct at the accepted BaseLevel.on_death call, before presentation/audio, rather than in BasePlayer.begin_death or GameHandler.restart_after_death. This applies whether presentation is requested or the player is offscreen. Set the duplicate guard before publishing the lives signal so reentrant requests cannot charge twice. If a status listener synchronously replaces/shuts down the old level, on_death returns after the charge without starting stale cleanup/audio.
+
+The intro's existing GameHandler binding displays the reduced reserve count plus one automatically. A death from 1 to 0 reserves respawns with one displayed attempt; 0 to -1 produces game over after death completion. Restart alone preserves the current count. New game initializes two reserves, displayed as three lives. Score/coin totals, top score and the world-progress reset policy are unchanged. This counter update happens at acceptance; it is not a claim of exact original-game jingle/decrement timing.
+
+GameHandler now retains only the current logical level's area snapshots. Leaving for another level or returning to title clears world progress; ordinary same-level respawn still honors reset_progress_on_death. Game over explicitly clears after final shutdown, independent of that override. See [game over](game-over.md).

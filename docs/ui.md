@@ -28,7 +28,7 @@ assets/ui/fonts/hud.fnt is a BMFont definition referencing the existing assets/u
 
 The default coin uses assets/palettes/overworld/ui/hud-coin.png, a 24x8 atlas. SpriteFrames uses three AtlasTexture regions, retaining the atlas untouched. Its animation sequence is bright, medium, dark, medium, with relative durations 3,1,1,1 at 7.5 steps/second: 24,8,8,8 ticks at 60Hz, total 0.8 seconds. This reproduces the supplied colors using frames instead of NES palette writes. Runtime playback samples the [shared cosmetic clock](animation-clock.md), matching active question blocks and ready for future world coins. Native autoplay is disabled; synchronization selects the phase and continues through death/world suspension.
 
-HUD coin artwork follows the active area's AreaTheme texture_overrides. Underground maps the canonical Overworld 24x8 coin atlas to its Underground 24x8 atlas. HUD owns a private SpriteFrames/AtlasTexture copy and changes only the atlas references, preserving 8x8 regions, 24/8/8/8 durations and the shared clock phase. Missing overrides fall back to Overworld. Area entry and level replacement refresh the mapping; theme changes during covered transport occur while HUD is hidden. BaseEntity remapping is not used for UI. Score, coins, stage label and time now bind to GameHandler; additional themed HUD assets remain deferred. See [player status](player-status.md).
+HUD coin artwork follows the active area's AreaTheme texture_overrides. Underground maps the canonical Overworld 24x8 coin atlas to its Underground 24x8 atlas. HUD owns a private SpriteFrames/AtlasTexture copy and changes only the atlas references, preserving 8x8 regions, 24/8/8/8 durations and the shared clock phase. Missing overrides fall back to Overworld. Area entry, level replacement and the active area's area_theme_changed signal refresh the mapping; theme changes during covered transport occur while HUD is hidden. BaseEntity remapping is not used for UI. Score, coins, stage label and time now bind to GameHandler; additional themed HUD assets remain deferred. See [player status](player-status.md).
 
 ## Reference and verification
 
@@ -47,3 +47,5 @@ The level-intro presentation binds its stage label and lives to GameHandler. Val
 The title copyright line uses the supplied alternate alphabet as an 8x8 bitmap font, with a dedicated © glyph. AreaTheme.title_accent_font can select future themed versions; other title and HUD text retain the white font. See [title flow](title-screen.md).
 
 TitleScreen includes the supplied 192x96 title card at native size above the copyright line. Its PNG follows AreaTheme.texture_overrides alongside the cursor; both palette Aseprite originals are retained as editable sources.
+
+HUD binds the current area theme signal and releases the old connection on area/level replacement and tree exit. Live theme edits refresh the coin without private helper calls, changing atlas references while preserving the global animation phase.

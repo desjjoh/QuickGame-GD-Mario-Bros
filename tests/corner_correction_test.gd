@@ -34,16 +34,19 @@ func _ready() -> void:
 		assert(mario.body.global_position.x < 60 if side < 0 else mario.body.global_position.x > 84)
 		await get_tree().physics_frame
 	# Feet can start above the ledge and cross its top during this one step.
-	for side in [-1.0,1.0]:
-		mario.body.global_position = Vector2(30,120)
-		mario.body.velocity = Vector2(0,-60)
+	for side in [-1.0, 1.0]:
+		mario.body.global_position = Vector2(30, 120)
+		mario.body.velocity = Vector2(0, -60)
 		mario.body.move_and_slide()
-		mario.body.global_position = Vector2(58 if side < 0 else 87,78.5)
-		mario.body.velocity = Vector2(-side*120,180)
+		mario.body.global_position = Vector2(58 if side < 0 else 87, 78.5)
+		mario.body.velocity = Vector2(-side * 120, 180)
 		mario.move_body()
 		assert(mario.body.is_on_floor(), "A descending top crossing must land on the current tick.")
 		assert(mario.body.global_position.y <= 80.1)
-		assert(is_equal_approx(mario.body.velocity.x,-side*120), "A top crossing must preserve horizontal momentum.")
+		assert(
+			is_equal_approx(mario.body.velocity.x, -side * 120),
+			"A top crossing must preserve horizontal momentum."
+		)
 	mario.body.global_position = Vector2(72, 110.2)
 	mario.body.velocity = Vector2(0, -240)
 	mario.move_body()
@@ -68,9 +71,14 @@ func _ready() -> void:
 	mario.body.global_position = Vector2(59, 82)
 	mario.body.velocity = Vector2(120, 60)
 	mario.move_body()
-	assert(mario.body.global_position.y >= 82, "Landing assistance must reject a space below a low ceiling.")
+	assert(
+		mario.body.global_position.y >= 82,
+		"Landing assistance must reject a space below a low ceiling."
+	)
 	mario.free()
 	platform.free()
 	ceiling.free()
-	print("PASS: two-sided shallow landings, preserved momentum, two-sided head corner escape, centered bump, deep-wall rejection, and misses.")
+	print(
+		"PASS: two-sided shallow landings, preserved momentum, two-sided head corner escape, centered bump, deep-wall rejection, and misses."
+	)
 	get_tree().quit()

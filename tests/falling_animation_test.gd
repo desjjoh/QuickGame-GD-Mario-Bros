@@ -35,5 +35,7 @@ func _ready() -> void:
 	assert(player.animation_player.current_animation_position != phase)
 	Input.action_release(ControllerHandler.right_action)
 	game.free()
-	print("PASS: passive falling freezes the current walk pose and phase; landing resumes playback.")
+	print(
+		"PASS: passive falling freezes the current walk pose and phase; landing resumes playback."
+	)
 	get_tree().quit()

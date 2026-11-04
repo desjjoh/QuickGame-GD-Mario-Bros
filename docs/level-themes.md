@@ -13,7 +13,7 @@ AreaTheme groups terrain, decoration, and entity-marker TileSets, explicit sourc
 
 ## Supplied Underground art and fallback
 
-Underground maps all 21 supplied PNG counterparts under assets/palettes/underground: ground, solid block, both bricks, all four question-block frames (including used), and all ten pipe sections, plus the HUD coin atlas, title cursor and title card. Both upright and sideways pipe entities use the replacements, as do terrain pipe tiles. Decorations have no supplied Underground counterparts and retain Overworld artwork. Mario remains independent of the area theme. Mario is not assigned the area's visual theme.
+Underground texture_overrides maps 21 supplied entity/terrain/UI PNG counterparts under assets/palettes/underground: ground, solid block, both bricks, all four question-block frames (including used), and all ten pipe sections, plus the HUD coin atlas, title cursor and title card. Both upright and sideways pipe entities use the replacements, as do terrain pipe tiles. All 15 decoration counterparts now use assets/tileset/underground/decorations.tres: three bush pieces, six hill pieces and six cloud pieces. The theme assigns this TileSet directly, with matching source IDs 0..14, atlas coordinates and alternative IDs; existing painted decoration cells select the Underground artwork automatically. Mario remains independent of the area theme. Mario is not assigned the area's visual theme.
 
 Underground terrain and marker TileSets are under assets/tileset/underground/. They preserve source IDs, atlas coordinates, alternative IDs, entity_id custom data, and collision definitions from the Overworld counterparts. Thus an area's painted cells do not change when selecting the matching theme. Marker textures preview themed bricks and question blocks; Underground-specific 32x32 pipe previews preserve whole-pipe painting. Rebuild both themes' previews with scripts/build_pipe_marker.gd after changing pipe artwork. Existing terrain IDs 0-10 are unchanged; source 11 exposes the matching solid block in both themes with square collision. No painted cells were added or moved.
 
@@ -32,7 +32,7 @@ Main-area content stays at its original world positions. LowerArea currently sit
 
 ## Verification
 
-area_theme_test checks all 20 texture mappings and dimensions, all 12 terrain sources and retained collisions, both pipe entity variants, marker previews, Underground question animation and used art, decoration fallback, themed brick bounce, source-resource isolation, and descendant shutdown. Migration validation compares every saved painted cell's world coordinate and identifiers before/after. Both areas were rendered and visually inspected. Theme resources configure appearance; pipe travel is coordinated separately by BaseLevel.
+area_theme_test checks all 21 texture mappings and dimensions, all 12 terrain sources and retained collisions, both pipe entity variants, marker previews, Underground question animation and used art, all 15 themed decoration sources and retained tile IDs, themed brick bounce, source-resource isolation, and descendant shutdown. Migration validation compares every saved painted cell's world coordinate and identifiers before/after. Both areas were rendered and visually inspected. Theme resources configure appearance; pipe travel is coordinated separately by BaseLevel.
 
 ## Editing nested areas safely
 

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="TransitionDefinition" format=3 uid="uid://b1ylxkvukl5uu"]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/transitions/game_over.tscn" id="card_scene"]
+[ext_resource type="Script" uid="uid://cm41v4cer25q5" path="res://scripts/transitions/transition_definition.gd" id="definition"]
+[ext_resource type="Script" uid="uid://db57j20136cop" path="res://scripts/transitions/transition_stage.gd" id="stage"]
+
+[sub_resource type="Resource" id="card"]
+script = ExtResource("stage")
+phase = &"game_over"
+scene = ExtResource("card_scene")
+minimum_frames = 378
+show_hud = true
+wait_for_presentation = true
+
+[sub_resource type="Resource" id="outro"]
+script = ExtResource("stage")
+phase = &"outro"
+minimum_frames = 12
+
+[resource]
+script = ExtResource("definition")
+id = &"game_over"
+stages = Array[ExtResource("stage")]([SubResource("card"), SubResource("outro")])

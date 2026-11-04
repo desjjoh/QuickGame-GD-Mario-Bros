@@ -21,18 +21,29 @@ func can_start(body: CharacterBody2D, direction: float) -> bool:
 
 
 func begin(values: MotionValues) -> void:
-	var friction := fast_friction if absf(values.velocity.x) >= fast_speed_threshold else normal_friction
-	values.set_modifier(&"slide", {
-		&"max_speed": max_speed,
-		&"acceleration": friction,
-		&"deceleration": friction,
-		&"reversal_multiplier": reversal_multiplier,
-	}, modifier_priority)
+	var friction := (
+		fast_friction if absf(values.velocity.x) >= fast_speed_threshold else normal_friction
+	)
+	(
+		values
+		. set_modifier(
+			&"slide",
+			{
+				&"max_speed": max_speed,
+				&"acceleration": friction,
+				&"deceleration": friction,
+				&"reversal_multiplier": reversal_multiplier,
+			},
+			modifier_priority
+		)
+	)
 
 
 func apply(values: MotionValues, delta: float) -> bool:
 	var velocity := values.velocity
-	velocity.x = move_toward(velocity.x, 0.0, values.acceleration * values.reversal_multiplier * delta)
+	velocity.x = move_toward(
+		velocity.x, 0.0, values.acceleration * values.reversal_multiplier * delta
+	)
 	if absf(velocity.x) < stop_speed:
 		velocity.x = 0.0
 	values.velocity = velocity

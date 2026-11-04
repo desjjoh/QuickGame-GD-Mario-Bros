@@ -1,9 +1,11 @@
 extends Node
 
+
 func ticks(count: int = 3) -> void:
 	for frame in range(count):
 		await get_tree().physics_frame
 		await get_tree().process_frame
+
 
 func _ready() -> void:
 	var area := load("res://scenes/levels/areas/base_area.tscn").instantiate() as BaseLevelArea
@@ -11,15 +13,19 @@ func _ready() -> void:
 	add_child(area)
 	var camera := area.get_node("Camera2D") as Camera2D
 	area.enter_area()
-	var block := load("res://scenes/entities/blocks/question/question_block.tscn").instantiate() as BaseBlock
+	var block := (
+		load("res://scenes/entities/blocks/question/question_block.tscn").instantiate() as BaseBlock
+	)
 	block.position = Vector2(600, 120)
 	area.get_node("WorldObjects").add_child(block)
 	var block_id := block.get_instance_id()
 	var original_state := block.state_machine.current_state
-	assert(block.activity_suspended and not block.is_physics_processing() and not block.is_processing())
+	assert(
+		block.activity_suspended and not block.is_physics_processing() and not block.is_processing()
+	)
 	assert(not block.body.get_node("CollisionShape2D").disabled)
 	area.enter_area()
-	area.set_physics_process(false) # Drive exact boundary cases deterministically below.
+	area.set_physics_process(false)  # Drive exact boundary cases deterministically below.
 	camera.position.x = 420
 	area.update_camera_activity()
 	assert(not block.activity_suspended and block.is_physics_processing())
@@ -36,10 +42,18 @@ func _ready() -> void:
 	block.set_gameplay_suspended(true)
 	camera.position.x = 500
 	area.update_camera_activity()
-	assert(not block.activity_suspended and block.gameplay_suspended and not block.is_physics_processing())
+	assert(
+		(
+			not block.activity_suspended
+			and block.gameplay_suspended
+			and not block.is_physics_processing()
+		)
+	)
 	block.set_gameplay_suspended(false)
 	assert(block.is_physics_processing())
-	assert(block.get_instance_id() == block_id and block.state_machine.current_state == original_state)
+	assert(
+		block.get_instance_id() == block_id and block.state_machine.current_state == original_state
+	)
 	# Reversing suspension order must also preserve the original callbacks.
 	camera.position.x = 128
 	area.update_camera_activity()
@@ -49,17 +63,31 @@ func _ready() -> void:
 	camera.position.x = 500
 	area.update_camera_activity()
 	assert(block.is_physics_processing())
-	var sync := block.find_children("*", "SynchronizedAnimation", true, false)[0] as SynchronizedAnimation
+	var sync := (
+		block.find_children("*", "SynchronizedAnimation", true, false)[0] as SynchronizedAnimation
+	)
 	assert(sync.enabled and not sync.activity_suspended)
 	camera.position.x = 128
 	area.update_camera_activity()
 	assert(sync.enabled and sync.activity_suspended)
 	await ticks(35)
 	var query := PhysicsRayQueryParameters2D.create(Vector2(608, 118), Vector2(608, 140), 1)
-	assert(not get_viewport().world_2d.direct_space_state.intersect_ray(query).is_empty(), "Sleeping blocks remain solid.")
+	assert(
+		not get_viewport().world_2d.direct_space_state.intersect_ray(query).is_empty(),
+		"Sleeping blocks remain solid."
+	)
 	camera.position.x = 500
 	area.update_camera_activity()
-	assert(is_equal_approx(sync.animation_player.current_animation_position, sync.cycle.phase_time(sync.cycle.phase_at(GameHandler.animation_clock.tick_count + sync.phase_offset_ticks))))
+	assert(
+		is_equal_approx(
+			sync.animation_player.current_animation_position,
+			sync.cycle.phase_time(
+				sync.cycle.phase_at(
+					GameHandler.animation_clock.tick_count + sync.phase_offset_ticks
+				)
+			)
+		)
+	)
 	assert(sync.enabled and not sync.activity_suspended)
 	# Enemy scene with a moving child body: root position alone must not drive disposal.
 	var template := load("res://scenes/entities/base/base_entity.tscn").instantiate() as BaseEntity
@@ -85,13 +113,21 @@ func _ready() -> void:
 	camera.position.x = 1100
 	area.update_camera_activity()
 	await ticks()
-	assert(resident.physics_ticks > 0 and resident.frame_ticks > 0 and resident.can_read_controller_input())
+	assert(
+		(
+			resident.physics_ticks > 0
+			and resident.frame_ticks > 0
+			and resident.can_read_controller_input()
+		)
+	)
 	camera.position.x = 500
 	area.update_camera_activity()
 	var old_ticks: int = resident.physics_ticks
 	await ticks()
 	assert(resident.physics_ticks == old_ticks and not resident.can_read_controller_input())
-	var spawner := load("res://scenes/entities/spawners/enemy_spawner.tscn").instantiate() as EnemySpawner
+	var spawner := (
+		load("res://scenes/entities/spawners/enemy_spawner.tscn").instantiate() as EnemySpawner
+	)
 	spawner.enemy_scene = packed
 	spawner.position = Vector2(600, 120)
 	area.get_node("WorldObjects").add_child(spawner)
@@ -123,7 +159,9 @@ func _ready() -> void:
 	assert(area._activity_entities.is_empty() and area._enemy_spawners.is_empty())
 	area.free()
 	# Authored residents must retain their default processing flags across templates.
-	var authored_area := load("res://scenes/levels/areas/base_area.tscn").instantiate() as BaseLevelArea
+	var authored_area := (
+		load("res://scenes/levels/areas/base_area.tscn").instantiate() as BaseLevelArea
+	)
 	authored_area.get_node("Camera2D").position = Vector2(128, 120)
 	var authored := packed.instantiate() as BaseEntity
 	authored.name = "Resident"
@@ -137,14 +175,22 @@ func _ready() -> void:
 	authored_area.get_node("Camera2D").position = Vector2(500, 120)
 	authored_area.enter_area()
 	var restored := authored_area.get_node("WorldObjects/Resident") as BaseEntity
-	assert(not restored.activity_suspended and restored.is_physics_processing() and restored.is_processing())
+	assert(
+		(
+			not restored.activity_suspended
+			and restored.is_physics_processing()
+			and restored.is_processing()
+		)
+	)
 	authored_area.free()
 	# No fresh enemy instances during title, death, or transitions.
 	var level := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	add_child(level)
 	level.set_physics_process(false)
 	level.player.set_physics_process(false)
-	var gated_spawner := load("res://scenes/entities/spawners/enemy_spawner.tscn").instantiate() as EnemySpawner
+	var gated_spawner := (
+		load("res://scenes/entities/spawners/enemy_spawner.tscn").instantiate() as EnemySpawner
+	)
 	gated_spawner.enemy_scene = packed
 	gated_spawner.position = Vector2(120, 120)
 	level.active_area.get_node("WorldObjects").add_child(gated_spawner)
@@ -164,5 +210,7 @@ func _ready() -> void:
 	level.shutdown()
 	level.free()
 	await ticks()
-	print("PASS: area-owned activity, hysteresis, resident identity/collision, suspension ownership, cosmetic sleep, enemy disposal/reentry and unload cleanup")
+	print(
+		"PASS: area-owned activity, hysteresis, resident identity/collision, suspension ownership, cosmetic sleep, enemy disposal/reentry and unload cleanup"
+	)
 	get_tree().quit()

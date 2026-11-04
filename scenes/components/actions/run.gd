@@ -20,11 +20,18 @@ var running_history: bool = false
 
 func apply(values: MotionValues, pressed: bool) -> void:
 	if pressed:
-		values.set_modifier(&"run", {
-			&"max_speed": max_speed,
-			&"acceleration": acceleration,
-			&"deceleration": deceleration,
-		}, modifier_priority)
+		(
+			values
+			. set_modifier(
+				&"run",
+				{
+					&"max_speed": max_speed,
+					&"acceleration": acceleration,
+					&"deceleration": deceleration,
+				},
+				modifier_priority
+			)
+		)
 	else:
 		values.remove_modifier(&"run")
 
@@ -34,9 +41,13 @@ func advance_timer() -> void:
 	remaining_ticks = maxi(remaining_ticks - 1, 0)
 
 
-func prepare_ground_profile(values: MotionValues, pressed: bool, direction: float, grounded: bool, facing: float) -> void:
+func prepare_ground_profile(
+	values: MotionValues, pressed: bool, direction: float, grounded: bool, facing: float
+) -> void:
 	values.remove_modifier(&"ground_neutral")
-	var moving_direction := signf(values.velocity.x) if not is_zero_approx(values.velocity.x) else facing
+	var moving_direction := (
+		signf(values.velocity.x) if not is_zero_approx(values.velocity.x) else facing
+	)
 	var continuing_direction := not is_zero_approx(direction) and direction * moving_direction > 0.0
 	if grounded and continuing_direction:
 		if pressed:
@@ -49,10 +60,16 @@ func prepare_ground_profile(values: MotionValues, pressed: bool, direction: floa
 	var speed := absf(values.velocity.x)
 	if is_zero_approx(direction):
 		# ChkRFast selects friction independently of B when no direction is held.
-		var rate := history_acceleration if running_history or speed >= neutral_fast_threshold else neutral_acceleration
+		var rate := (
+			history_acceleration
+			if running_history or speed >= neutral_fast_threshold
+			else neutral_acceleration
+		)
 		if not is_zero_approx(values.velocity.x) and moving_direction != facing:
 			rate *= 2.0
-		values.set_modifier(&"ground_neutral", {&"acceleration": rate, &"deceleration": rate}, modifier_priority + 1)
+		values.set_modifier(
+			&"ground_neutral", {&"acceleration": rate, &"deceleration": rate}, modifier_priority + 1
+		)
 		# GetPlayerAnimSpeed follows profile selection. B alone takes ProcSkid
 		# and clears very low speed; fully released input preserves the latch.
 		if speed >= history_speed_threshold:

@@ -15,9 +15,11 @@ extends Node
 var gravity: float:
 	get:
 		return _resolve(&"gravity", base_gravity)
+
 var weight: float:
 	get:
 		return _resolve(&"weight", base_weight)
+
 var max_fall_speed: float:
 	get:
 		return _resolve(&"max_fall_speed", base_max_fall_speed)
@@ -47,9 +49,22 @@ var reversal_multiplier: float:
 		return _resolve(&"reversal_multiplier", base_reversal_multiplier)
 
 
-func set_modifier(source: StringName, values: Dictionary[StringName, float], priority: int = 0) -> void:
+func set_modifier(
+	source: StringName, values: Dictionary[StringName, float], priority: int = 0
+) -> void:
 	for key: StringName in values:
-		if key not in [&"max_speed", &"acceleration", &"deceleration", &"reversal_multiplier", &"gravity", &"weight", &"max_fall_speed"]:
+		if (
+			key
+			not in [
+				&"max_speed",
+				&"acceleration",
+				&"deceleration",
+				&"reversal_multiplier",
+				&"gravity",
+				&"weight",
+				&"max_fall_speed"
+			]
+		):
 			push_error("Unknown motion value: %s" % key)
 			return
 		if not is_finite(values[key]) or values[key] < 0.0:

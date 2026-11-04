@@ -346,3 +346,11 @@ User approved typed GameHandler-owned player status, existing HUD value bindings
 ## Consolidate themed asset folders - 2026-11-04
 
 User requested assets/palettes/<theme> to reduce root clutter. Use lowercase theme folders, starting with overworld and underground, retaining their existing decorations/interactibles/tileset/ui substructure. Theme display names remain Overworld/Underground; palette numbers are no longer encoded in source paths. Relink canonical texture keys as well as replacement values, keep resource UIDs and artwork, and preserve historical path descriptions. Shared theme selectors and TileSet resources remain outside this sprite grouping.
+
+## Charge lives at accepted death - 2026-11-04
+
+User authorized connecting BaseLevel.on_death to existing GameHandler lives methods. Deduct once immediately after setting the death guard, using set_lives and the existing validated record/signal; do not charge in presentation completion or restart. Preserve zero-clamping, current respawn and progress policy. Recheck the old victim/level after signal emission so observers cannot cause stale cleanup following replacement. Game-over policy remains deferred. This supersedes the earlier no-life-deduction milestone.
+
+## One-level progress and NES-style game over - 2026-11-04
+
+User approved GameHandler ownership of one logical level's progress without another handler, preservation across areas/death, automatic reset on a different level and explicit defensive cleanup on game over. Shutdown precedes discard; source-instance checks reject stale writes on later visits. Keep reset_progress_on_death as its existing explicit override. Use reserve lives initialized to 2, display +1 and trigger only below zero. GameHandler selects a named coordinator-managed game-over card after death completion; card audio/completion is presentation-owned, title/session decisions remain handler-owned. Timed-only stages remain unchanged, background overrides remain absent and Start-to-skip is deferred. This supersedes multi-level progress caching and raw three-life/zero-clamping descriptions.

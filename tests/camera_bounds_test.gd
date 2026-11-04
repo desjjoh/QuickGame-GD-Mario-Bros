@@ -60,5 +60,7 @@ func _ready() -> void:
 	level.clamp_player_to_camera()
 	assert(body.global_position.x == -1000.0)
 	game.free()
-	print("PASS: camera bounds at both zooms, both edges, inward/outward/neutral input, horizontal speed reset, preserved vertical motion, and opt-out.")
+	print(
+		"PASS: camera bounds at both zooms, both edges, inward/outward/neutral input, horizontal speed reset, preserved vertical motion, and opt-out."
+	)
 	get_tree().quit()

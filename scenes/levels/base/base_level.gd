@@ -1,5 +1,6 @@
 class_name BaseLevel
 extends CanvasGroup
+
 const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
 ## Shared foundation for playable levels.
 
@@ -27,6 +28,7 @@ var _death_restart_queued: bool = false
 @export_group("Spawning")
 @export var player_scene: PackedScene
 @export var entity_scenes: Dictionary[StringName, PackedScene] = {}
+
 @export_group("Screen Bounds")
 @export var keep_player_on_screen: bool = true
 @export_range(0.0, 64.0, 1.0) var horizontal_screen_inset: float = 7.0
@@ -53,6 +55,7 @@ var _transport_completion_callback: Callable
 var entity_layout: TileMapLayer:
 	get:
 		return get_node_or_null("Areas/MainArea/Layouts/EntityLayout") as TileMapLayer
+
 var world_objects: Node2D:
 	get:
 		return get_node_or_null("Areas/MainArea/WorldObjects") as Node2D
@@ -67,6 +70,8 @@ func _ready() -> void:
 	# All level children are ready before the level's _ready() runs.
 	_persistent_progress = GameHandler.current_level == self and not scene_file_path.is_empty()
 	_progress_key = scene_file_path if _persistent_progress else "runtime:%s" % get_instance_id()
+	if GameHandler.current_level == self or not is_instance_valid(GameHandler.current_level):
+		GameHandler.select_level_progress(_progress_key)
 	active_area = $Areas/MainArea
 	for area in $Areas.get_children():
 		if area is BaseLevelArea:
@@ -144,8 +149,13 @@ func _physics_process(_delta: float) -> void:
 	if _transport_state != null:
 		if not _transport_trip_valid() or player.state_machine.current_state != _transport_state:
 			_abort_transport(true)
-		return # Freeze camera/bounds during controlled transport.
-	if ControllerHandler.input_down <= 0.5 and ControllerHandler.input_up <= 0.5 and ControllerHandler.input_left <= 0.5 and ControllerHandler.input_right <= 0.5:
+		return  # Freeze camera/bounds during controlled transport.
+	if (
+		ControllerHandler.input_down <= 0.5
+		and ControllerHandler.input_up <= 0.5
+		and ControllerHandler.input_left <= 0.5
+		and ControllerHandler.input_right <= 0.5
+	):
 		_transport_input_locked = false
 	var camera := get_viewport().get_camera_2d() as LevelCamera
 	if camera != null and is_instance_valid(player) and not player.is_shutdown:
@@ -155,12 +165,19 @@ func _physics_process(_delta: float) -> void:
 
 
 func clamp_player_to_camera() -> void:
-	if is_shutdown or not keep_player_on_screen or not is_instance_valid(player) or not is_instance_valid(player.body):
+	if (
+		is_shutdown
+		or not keep_player_on_screen
+		or not is_instance_valid(player)
+		or not is_instance_valid(player.body)
+	):
 		return
 	var camera := get_viewport().get_camera_2d()
 	if camera == null:
 		return
-	var center := camera.global_position.x if camera is LevelCamera else camera.get_screen_center_position().x
+	var center := (
+		camera.global_position.x if camera is LevelCamera else camera.get_screen_center_position().x
+	)
 	var half_width := get_viewport_rect().size.x / camera.zoom.x / 2.0
 	var inset := minf(horizontal_screen_inset, half_width)
 	var player_position := player.body.global_position
@@ -168,9 +185,14 @@ func clamp_player_to_camera() -> void:
 	var right_edge := center + half_width - inset
 	# Resolve the boundary like a wall: cancel motion into it, even if input
 	# has already reversed. Preserve motion away from it and vertical speed.
-	if (player_position.x <= left_edge and player.body.velocity.x < 0.0) or (player_position.x >= right_edge and player.body.velocity.x > 0.0):
+	if (
+		(player_position.x <= left_edge and player.body.velocity.x < 0.0)
+		or (player_position.x >= right_edge and player.body.velocity.x > 0.0)
+	):
 		player.body.velocity.x = 0.0
-	player_position.x = clampf(player_position.x, center - half_width + inset, center + half_width - inset)
+	player_position.x = clampf(
+		player_position.x, center - half_width + inset, center + half_width - inset
+	)
 	player.body.global_position = player_position
 
 
@@ -232,15 +254,25 @@ func _shutdown_entities(parent: Node) -> void:
 		_shutdown_entities(child)
 
 
-func transport(traveler: BasePlayer, destination: TransportDestination, source: TransportEntity = null) -> bool:
+func transport(
+	traveler: BasePlayer, destination: TransportDestination, source: TransportEntity = null
+) -> bool:
 	return _begin_transport(traveler, destination, source, true)
 
 
-func request_area_transfer(destination_id: StringName, endpoint_id: StringName = &"arrival") -> bool:
+func request_area_transfer(
+	destination_id: StringName, endpoint_id: StringName = &"arrival"
+) -> bool:
 	# Compatibility: scripted placement keeps its immediate-arrival behavior.
-	if is_instance_valid(active_area) and destination_id == active_area.area_id and endpoint_id == &"arrival":
+	if (
+		is_instance_valid(active_area)
+		and destination_id == active_area.area_id
+		and endpoint_id == &"arrival"
+	):
 		return false
-	return _begin_transport(player, TransportDestination.create(destination_id, endpoint_id), null, false)
+	return _begin_transport(
+		player, TransportDestination.create(destination_id, endpoint_id), null, false
+	)
 
 
 func request_pipe_entry(pipe: PipeEntrance) -> bool:
@@ -269,14 +301,30 @@ func _resolve_target(area: BaseLevelArea, id: StringName) -> Object:
 				return null
 		else:
 			var progress := GameHandler.get_area_progress(_progress_key, area.area_id)
-			var entity_state: Dictionary = progress.get("entities", {}).get(area.transport_entity_name(definition), {})
+			var entity_state: Dictionary = progress.get("entities", {}).get(
+				area.transport_entity_name(definition), {}
+			)
 			if entity_state.get("removed", false):
 				return null
 	return definition
 
 
-func _begin_transport(traveler: BasePlayer, destination: TransportDestination, source: TransportEntity, animate_arrival: bool) -> bool:
-	if is_shutdown or transition_in_progress or death_in_progress or _transfer_pending or not is_instance_valid(traveler) or traveler != player or traveler.is_shutdown or destination == null:
+func _begin_transport(
+	traveler: BasePlayer,
+	destination: TransportDestination,
+	source: TransportEntity,
+	animate_arrival: bool
+) -> bool:
+	if (
+		is_shutdown
+		or transition_in_progress
+		or death_in_progress
+		or _transfer_pending
+		or not is_instance_valid(traveler)
+		or traveler != player
+		or traveler.is_shutdown
+		or destination == null
+	):
 		return false
 	if destination.area_id == &"" or destination.target_id == &"":
 		return false
@@ -288,15 +336,24 @@ func _begin_transport(traveler: BasePlayer, destination: TransportDestination, s
 		return false
 	var state: PlayerTransportState = null
 	if source != null:
-		if not is_instance_valid(source) or not source.is_inside_tree() or not can_transport() or source.get_parent().get_parent() != active_area or not source.can_start_transport(traveler):
+		if (
+			not is_instance_valid(source)
+			or not source.is_inside_tree()
+			or not can_transport()
+			or source.get_parent().get_parent() != active_area
+			or not source.can_start_transport(traveler)
+		):
 			return false
 		state = source.get_transport_state(traveler)
 		if state == null:
 			return false
 	_transport_trip = {
-		"area": weakref(area), "definition": weakref(definition),
-		"area_id": destination.area_id, "target_id": destination.target_id,
-		"source": weakref(source) if source != null else null, "animate": animate_arrival
+		"area": weakref(area),
+		"definition": weakref(definition),
+		"area_id": destination.area_id,
+		"target_id": destination.target_id,
+		"source": weakref(source) if source != null else null,
+		"animate": animate_arrival
 	}
 	_transfer_pending = true
 	_transport_phase += 1
@@ -329,7 +386,12 @@ func _transport_trip_valid() -> bool:
 		return false
 	var area := (_transport_trip["area"] as WeakRef).get_ref() as BaseLevelArea
 	var definition: Object = (_transport_trip["definition"] as WeakRef).get_ref()
-	if not is_instance_valid(area) or not is_instance_valid(definition) or _resolve_area(_transport_trip["area_id"]) != area or _resolve_target(area, _transport_trip["target_id"]) != definition:
+	if (
+		not is_instance_valid(area)
+		or not is_instance_valid(definition)
+		or _resolve_area(_transport_trip["area_id"]) != area
+		or _resolve_target(area, _transport_trip["target_id"]) != definition
+	):
 		return false
 	if not _transport_exiting and _transport_trip["source"] != null:
 		var source := (_transport_trip["source"] as WeakRef).get_ref() as TransportEntity
@@ -340,7 +402,13 @@ func _transport_trip_valid() -> bool:
 func _arrival_data(area: BaseLevelArea, target_id: StringName, animate: bool) -> Dictionary:
 	var definition := _resolve_target(area, target_id)
 	if definition == player_spawn:
-		return {"position": player_spawn.global_position, "direction": Vector2.ZERO, "distance": 0.0, "state": null, "endpoint": null}
+		return {
+			"position": player_spawn.global_position,
+			"direction": Vector2.ZERO,
+			"distance": 0.0,
+			"state": null,
+			"endpoint": null
+		}
 	if definition is TransportPlacement:
 		var target := area.find_transport_entity(target_id)
 		if target == null:
@@ -348,10 +416,22 @@ func _arrival_data(area: BaseLevelArea, target_id: StringName, animate: bool) ->
 		var state := target.get_transport_state(player)
 		if animate and state == null:
 			return {}
-		return {"position": target.exit_position(), "direction": target.exit_direction(), "distance": target.exit_distance, "state": state if animate else null, "endpoint": null}
+		return {
+			"position": target.exit_position(),
+			"direction": target.exit_direction(),
+			"distance": target.exit_distance,
+			"state": state if animate else null,
+			"endpoint": null
+		}
 	if definition is AreaEndpoint:
 		# Existing standalone spawns remain valid; animated legacy markers adapt to pipe presentation.
-		return {"position": definition.global_position, "direction": definition.get_exit_vector(), "distance": definition.exit_distance, "state": player.pipe_enter_state if animate and definition.animate_exit else null, "endpoint": definition}
+		return {
+			"position": definition.global_position,
+			"direction": definition.get_exit_vector(),
+			"distance": definition.exit_distance,
+			"state": player.pipe_enter_state if animate and definition.animate_exit else null,
+			"endpoint": definition
+		}
 	return {}
 
 
@@ -360,27 +440,44 @@ func _on_transport_finished(phase: int) -> void:
 
 
 func _finish_transport(phase: int) -> void:
-	if phase != _transport_phase or is_shutdown or not _transfer_pending: return
+	if phase != _transport_phase or is_shutdown or not _transfer_pending:
+		return
 	if not _transport_exiting and GameHandler.transitions.available():
-		if GameHandler.transitions.begin(self, _commit_transport_under_cover.bind(phase), &"area", _area_transition_complete, _area_transition_valid) == 0:
+		if (
+			GameHandler.transitions.begin(
+				self,
+				_commit_transport_under_cover.bind(phase),
+				&"area",
+				_area_transition_complete,
+				_area_transition_valid
+			)
+			== 0
+		):
 			_abort_transport(true)
 		return
 	_commit_transport(phase)
 
 
 func _commit_transport_under_cover(phase: int) -> bool:
-	if phase != _transport_phase or is_shutdown or GameHandler.current_level != self: return false
-	if not _transport_trip_valid(): return false
+	if phase != _transport_phase or is_shutdown or GameHandler.current_level != self:
+		return false
+	if not _transport_trip_valid():
+		return false
 	_commit_transport(phase)
 	return not is_shutdown and GameHandler.current_level == self
 
 
 func _area_transition_valid() -> bool:
-	return not is_shutdown and GameHandler.current_level == self and (not _transfer_pending or _transport_trip_valid())
+	return (
+		not is_shutdown
+		and GameHandler.current_level == self
+		and (not _transfer_pending or _transport_trip_valid())
+	)
 
 
 func _area_transition_complete(success: bool) -> void:
-	if not success and not is_shutdown: _abort_transport(true)
+	if not success and not is_shutdown:
+		_abort_transport(true)
 
 
 func _start_player_state() -> void:
@@ -393,7 +490,10 @@ func _start_player_state() -> void:
 func _commit_transport(phase: int) -> void:
 	if phase != _transport_phase or is_shutdown or not _transfer_pending:
 		return
-	if not _transport_trip_valid() or (_transport_state != null and player.state_machine.current_state != _transport_state):
+	if (
+		not _transport_trip_valid()
+		or (_transport_state != null and player.state_machine.current_state != _transport_state)
+	):
 		_abort_transport(true)
 		return
 	if _transport_exiting:
@@ -443,7 +543,9 @@ func _commit_transport(phase: int) -> void:
 		_transport_trip = trip
 		_transport_trip["source"] = null
 		_transport_exiting = true
-		arrival_state.configure(arrival["position"], arrival["direction"], true, arrival["distance"])
+		arrival_state.configure(
+			arrival["position"], arrival["direction"], true, arrival["distance"]
+		)
 		_start_transport_state(arrival_state)
 	else:
 		_transfer_pending = false
@@ -467,7 +569,13 @@ func can_enter_pipe() -> bool:
 
 
 func can_transport() -> bool:
-	return not is_shutdown and not transition_in_progress and not death_in_progress and not _transfer_pending and not _transport_input_locked
+	return (
+		not is_shutdown
+		and not transition_in_progress
+		and not death_in_progress
+		and not _transfer_pending
+		and not _transport_input_locked
+	)
 
 
 func _disconnect_transport_state() -> void:
@@ -477,7 +585,10 @@ func _disconnect_transport_state() -> void:
 	if is_instance_valid(_transport_state):
 		if _transport_state.exited.is_connected(_restore_player_draw_order):
 			_transport_state.exited.disconnect(_restore_player_draw_order)
-		if _transport_completion_callback.is_valid() and _transport_state.travel_finished.is_connected(_transport_completion_callback):
+		if (
+			_transport_completion_callback.is_valid()
+			and _transport_state.travel_finished.is_connected(_transport_completion_callback)
+		):
 			_transport_state.travel_finished.disconnect(_transport_completion_callback)
 	_transport_state = null
 	_transport_completion_callback = Callable()
@@ -523,8 +634,13 @@ func _save_area(area: BaseLevelArea) -> void:
 		var id := StringName(str(data.get_custom_data("entity_id")))
 		var entity_name := "%s_%s_%s" % [id, cell.x, cell.y]
 		var entity := objects.get_node_or_null(NodePath(entity_name)) as BaseEntity
-		entities[entity_name] = {"removed": entity == null, "state": entity.capture_area_state() if entity != null else {}}
-	GameHandler.store_area_progress(_progress_key, area.area_id, {"layouts": layouts, "entities": entities})
+		entities[entity_name] = {
+			"removed": entity == null,
+			"state": entity.capture_area_state() if entity != null else {}
+		}
+	GameHandler.store_area_progress(
+		_progress_key, area.area_id, {"layouts": layouts, "entities": entities}, self
+	)
 
 
 func _unload_area(area: BaseLevelArea) -> void:
@@ -548,21 +664,42 @@ func _restore_player_draw_order() -> void:
 
 
 func _check_fall_death() -> void:
-	if not fall_death_enabled or death_in_progress or _transfer_pending or not is_instance_valid(player) or player.is_shutdown:
+	if (
+		not fall_death_enabled
+		or death_in_progress
+		or _transfer_pending
+		or not is_instance_valid(player)
+		or player.is_shutdown
+	):
 		return
 	var camera := get_viewport().get_camera_2d()
 	if camera == null:
 		return
-	var center_y := camera.global_position.y if camera is LevelCamera else camera.get_screen_center_position().y
+	var center_y := (
+		camera.global_position.y if camera is LevelCamera else camera.get_screen_center_position().y
+	)
 	var bottom := center_y + get_viewport_rect().size.y / camera.zoom.y / 2.0
 	if player.death_envelope_top() > bottom + fall_death_margin:
 		on_death(player, false)
 
 
 func on_death(victim: BasePlayer, present: bool = false) -> bool:
-	if is_shutdown or transition_in_progress or death_in_progress or _transfer_pending or not is_instance_valid(victim) or victim != player or victim.is_shutdown:
+	if (
+		is_shutdown
+		or transition_in_progress
+		or death_in_progress
+		or _transfer_pending
+		or not is_instance_valid(victim)
+		or victim != player
+		or victim.is_shutdown
+	):
 		return false
 	death_in_progress = true
+	GameHandler.set_lives(GameHandler.player_status.lives - 1)
+	# Status observers can synchronously replace/shut down this level.
+	# The accepted death is charged once; never continue old-world cleanup afterward.
+	if is_shutdown or not is_instance_valid(victim) or victim != player or victim.is_shutdown:
+		return true
 	_death_elapsed = 0.0
 	# Suspend gameplay callbacks and physics without pausing AnimationPlayers.
 	for entity in find_children("*", "BaseEntity", true, false):
@@ -609,13 +746,20 @@ func _start_death_audio() -> void:
 
 func _update_death(delta: float) -> void:
 	_death_elapsed += delta
-	var audio_limit := maxf(death_fallback_delay, death_sound.get_length() + 1.0 if death_sound != null else death_fallback_delay)
+	var audio_limit := maxf(
+		death_fallback_delay,
+		death_sound.get_length() + 1.0 if death_sound != null else death_fallback_delay
+	)
 	if _death_elapsed >= maxf(death_presentation_timeout, audio_limit):
 		_on_death_player_finished()
 		_death_audio_done = true
 	if not _death_player_done and not is_instance_valid(player):
 		_death_player_done = true
-	if _death_player_done and (_death_audio_done or _death_elapsed >= audio_limit) and (death_sound != null or _death_elapsed >= death_fallback_delay):
+	if (
+		_death_player_done
+		and (_death_audio_done or _death_elapsed >= audio_limit)
+		and (death_sound != null or _death_elapsed >= death_fallback_delay)
+	):
 		if not _death_restart_queued:
 			_death_restart_queued = true
 			_restart_after_death.call_deferred()

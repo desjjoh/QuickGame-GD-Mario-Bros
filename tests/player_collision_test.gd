@@ -22,8 +22,10 @@ func _ready() -> void:
 	solid(Vector2(8, 208), Vector2(16, 16))
 	await get_tree().physics_frame
 	mario.body.global_position = Vector2(56, 40)
-	assert(not mario.body.test_move(mario.body.global_transform, Vector2(0, 100)),
-		"Mario must fit inside a one-tile vertical gap.")
+	assert(
+		not mario.body.test_move(mario.body.global_transform, Vector2(0, 100)),
+		"Mario must fit inside a one-tile vertical gap."
+	)
 	# Sprite still overlaps the ledge at x=23, but the narrower body does not.
 	mario.body.global_position = Vector2(20, 200)
 	for frame in range(3):
