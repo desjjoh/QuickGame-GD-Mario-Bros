@@ -2,15 +2,15 @@
 
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/brick/brick_block.tscn" id="4_brick"]
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/question_block.tscn" id="6_question"]
+[ext_resource type="Resource" uid="uid://chfcnww7r30v7" path="res://assets/themes/underground.tres" id="8_jmx14"]
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/brick/alternate_brick_block.tscn" id="9_alternate"]
+[ext_resource type="TileSet" uid="uid://4mdqmclyqcmk" path="res://assets/tileset/underground/decorations.tres" id="9_jmx14"]
+[ext_resource type="TileSet" uid="uid://g7pmg7w6xn86" path="res://assets/tileset/underground/terrain.tres" id="10_eaa0b"]
+[ext_resource type="TileSet" uid="uid://cs6ppr1ph7fpm" path="res://assets/tileset/underground/entity_layout.tres" id="11_a5rnb"]
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/pipe_entrance.tscn" id="13_pipe"]
 [ext_resource type="PackedScene" uid="uid://wlp13xllihs5" path="res://scenes/levels/base/base_level.tscn" id="base"]
-[ext_resource type="TileSet" uid="uid://58ym0wu30sv7" path="res://assets/tileset/decorations.tres" id="decorations"]
-[ext_resource type="TileSet" uid="uid://css6al2yclqkl" path="res://assets/tileset/entity_layout.tres" id="entities"]
-[ext_resource type="TileSet" uid="uid://dy01p3ioyfiqi" path="res://assets/tileset/terrain.tres" id="ground"]
 [ext_resource type="PackedScene" uid="uid://b5m1vkcrml3t2" path="res://scenes/player/mario (small)/mario.tscn" id="player"]
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/sideways_pipe_entrance.tscn" id="side_pipe"]
-[ext_resource type="Resource" uid="uid://f1lw5jaxr5tn" path="res://assets/themes/overworld.tres" id="theme"]
 
 [node name="TestLevel" unique_id=422508678 instance=ExtResource("base")]
 texture_filter = 1
@@ -25,21 +25,21 @@ entity_scenes = Dictionary[StringName, PackedScene]({
 
 [node name="MainArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="0" unique_id=250103957]
 process_physics_priority = 110
-theme = ExtResource("theme")
+theme = ExtResource("8_jmx14")
 
 [node name="DecorationLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="0" unique_id=1428866671]
-tile_map_data = PackedByteArray("AAAAAAwABQAAAAAAAAABAAsABQAAAAAAAAADAAsABgAAAAAAAAAEAAwABgAAAAAAAAACAAoABAAAAAAAAAACAAsABwAAAAAAAAABAAwABwAAAAAAAAADAAwACAAAAAAAAAACAAwAAwAAAAAAAAAPAAwAAgAAAAAAAAAOAAwAAQAAAAAAAAANAAwAAQAAAAAAAAAMAAwAAQAAAAAAAAALAAwAAAAAAAAAAAAJAAMACgAAAAAAAAAKAAMACwAAAAAAAAAIAAMACQAAAAAAAAAJAAQADQAAAAAAAAAIAAQADAAAAAAAAAAKAAQADgAAAAAAAAA=")
-tile_set = ExtResource("decorations")
+tile_set = ExtResource("9_jmx14")
 
 [node name="GroundLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="1" unique_id=1683492195]
-tile_map_data = PackedByteArray("AAAAAA0AAAAAAAAAAAAAAA4AAAAAAAAAAAABAA0AAAAAAAAAAAABAA4AAAAAAAAAAAACAA0AAAAAAAAAAAACAA4AAAAAAAAAAAADAA0AAAAAAAAAAAADAA4AAAAAAAAAAAAEAA0AAAAAAAAAAAAEAA4AAAAAAAAAAAAFAA0AAAAAAAAAAAAFAA4AAAAAAAAAAAAGAA0AAAAAAAAAAAAGAA4AAAAAAAAAAAAHAA0AAAAAAAAAAAAHAA4AAAAAAAAAAAAIAA0AAAAAAAAAAAAIAA4AAAAAAAAAAAAJAA0AAAAAAAAAAAAJAA4AAAAAAAAAAAAKAA0AAAAAAAAAAAAKAA4AAAAAAAAAAAALAA0AAAAAAAAAAAALAA4AAAAAAAAAAAAMAA0AAAAAAAAAAAAMAA4AAAAAAAAAAAANAA0AAAAAAAAAAAANAA4AAAAAAAAAAAAOAA0AAAAAAAAAAAAOAA4AAAAAAAAAAAAPAA0AAAAAAAAAAAAPAA4AAAAAAAAAAAA=")
-tile_set = ExtResource("ground")
+tile_map_data = PackedByteArray("AAAAAA0AAAAAAAAAAAAAAA4AAAAAAAAAAAABAA0AAAAAAAAAAAABAA4AAAAAAAAAAAACAA0AAAAAAAAAAAACAA4AAAAAAAAAAAADAA0AAAAAAAAAAAADAA4AAAAAAAAAAAAEAA0AAAAAAAAAAAAEAA4AAAAAAAAAAAAFAA0AAAAAAAAAAAAFAA4AAAAAAAAAAAAGAA0AAAAAAAAAAAAGAA4AAAAAAAAAAAAHAA0AAAAAAAAAAAAHAA4AAAAAAAAAAAAIAA0AAAAAAAAAAAAIAA4AAAAAAAAAAAAJAA0AAAAAAAAAAAAJAA4AAAAAAAAAAAAKAA0AAAAAAAAAAAAKAA4AAAAAAAAAAAALAA0AAAAAAAAAAAALAA4AAAAAAAAAAAAMAA0AAAAAAAAAAAAMAA4AAAAAAAAAAAANAA0AAAAAAAAAAAANAA4AAAAAAAAAAAAOAA0AAAAAAAAAAAAOAA4AAAAAAAAAAAAPAA0AAAAAAAAAAAAPAA4AAAAAAAAAAAAPAAsABQAAAAAAAAAPAAwABgAAAAAAAAANAAsABwAAAAAAAAANAAwACAAAAAAAAAAOAAsACQAAAAAAAAAOAAwACgAAAAAAAAAPAAIAAwAAAAAAAAAPAAMAAwAAAAAAAAAPAAQAAwAAAAAAAAAPAAUAAwAAAAAAAAAPAAYAAwAAAAAAAAAPAAcAAwAAAAAAAAAPAAgAAwAAAAAAAAAPAAkAAwAAAAAAAAAPAAoAAwAAAAAAAAA=")
+tile_set = ExtResource("10_eaa0b")
 
 [node name="EntityLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="2" unique_id=257943121]
-tile_set = ExtResource("entities")
+tile_map_data = PackedByteArray("AAAAAAIAAAAAAAAAAAAAAAMAAgAAAAAAAAAAAAQAAgAAAAAAAAAAAAUAAgAAAAAAAAAAAAYAAgAAAAAAAAAAAAcAAgAAAAAAAAAAAAgAAgAAAAAAAAAAAAkAAgAAAAAAAAAAAAoAAgAAAAAAAAAAAAsAAgAAAAAAAAAAAAwAAgAAAAAAAAA=")
+tile_set = ExtResource("11_a5rnb")
 
 [node name="Arrival" parent="Areas/MainArea" index="2" unique_id=1254188347]
-position = Vector2(48, 208)
+position = Vector2(32, 208)
 
 [node name="Camera2D" parent="Areas/MainArea" index="3" unique_id=254826152]
 position = Vector2(128, 120)
@@ -48,6 +48,6 @@ world_left = 0.0
 world_right = 256.0
 
 [node name="PlayerSpawn" parent="Players" parent_id_path=PackedInt32Array(1625753015) index="0" unique_id=321075723]
-position = Vector2(48, 208)
+position = Vector2(32, 208)
 
 [editable path="Areas/MainArea"]

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cskir81ip20rf" path="res://scripts/themes/area_theme.gd" id="1"]
 [ext_resource type="TileSet" uid="uid://g7pmg7w6xn86" path="res://assets/tileset/underground/terrain.tres" id="2"]
-[ext_resource type="TileSet" uid="uid://58ym0wu30sv7" path="res://assets/tileset/decorations.tres" id="3"]
+[ext_resource type="TileSet" path="res://assets/tileset/underground/decorations.tres" id="3"]
 [ext_resource type="TileSet" uid="uid://cs6ppr1ph7fpm" path="res://assets/tileset/underground/entity_layout.tres" id="4"]
 [ext_resource type="Texture2D" uid="uid://e53t4gbes427" path="res://assets/palettes/underground/interactibles/blocks/brick-alternate.png" id="art_0"]
 [ext_resource type="Texture2D" uid="uid://u8v7p2v8ep1r" path="res://assets/palettes/underground/interactibles/blocks/brick.png" id="art_1"]

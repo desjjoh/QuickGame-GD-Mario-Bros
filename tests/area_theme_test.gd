@@ -39,10 +39,23 @@ func _ready() -> void:
 	for source_id in range(12):
 		var source := lower_ground.tile_set.get_source(source_id) as TileSetAtlasSource
 		assert(source.get_tile_data(Vector2i.ZERO,0).get_collision_polygons_count(0) == 1)
-	# All terrain variants use Underground art; absent decorations still fall back.
+	# All terrain and decoration variants use Underground art with matching tile IDs.
 	for source_id in range(12):
 		assert((lower_ground.tile_set.get_source(source_id) as TileSetAtlasSource).texture.resource_path.contains("/palettes/underground/"))
-	assert(main_decorations == lower.get_node("Layouts/DecorationLayout").tile_set)
+	var lower_decorations := (lower.get_node("Layouts/DecorationLayout") as TileMapLayer).tile_set
+	assert(main_decorations != lower_decorations and lower_decorations == lower.theme.decorations)
+	assert(lower_decorations.tile_size == Vector2i(16,16) and lower_decorations.get_physics_layers_count() == 0)
+	assert(main_decorations.get_source_count() == 15 and lower_decorations.get_source_count() == 15)
+	for index in range(main_decorations.get_source_count()):
+		var id := main_decorations.get_source_id(index)
+		assert(lower_decorations.has_source(id))
+		var original := main_decorations.get_source(id) as TileSetAtlasSource
+		var themed := lower_decorations.get_source(id) as TileSetAtlasSource
+		assert(themed.texture.resource_path == original.texture.resource_path.replace("/overworld/", "/underground/"))
+		assert(themed.texture.get_size() == original.texture.get_size())
+		assert(themed.get_tiles_count() == original.get_tiles_count())
+		assert(themed.has_tile(Vector2i.ZERO) and themed.has_alternative_tile(Vector2i.ZERO,0))
+		assert(original.texture.resource_path.contains("/palettes/overworld/"))
 	var originals := load("res://scenes/entities/blocks/brick/brick_block.tscn").instantiate() as BaseBlock
 	var original_texture: Texture2D = originals.get_node("Sprite2D").texture
 	originals.free()
@@ -98,5 +111,5 @@ func _ready() -> void:
 	for block in lower.get_node("WorldObjects").get_children():
 		assert(block.is_shutdown)
 	level.free()
-	print("PASS: independent area themes, Underground terrain/pipes/question frames, artwork fallback, inherited bounce, resource isolation, and shutdown.")
+	print("PASS: independent area themes, Underground terrain/decorations/pipes/question frames, artwork fallback, inherited bounce, resource isolation, and shutdown.")
 	get_tree().quit()
