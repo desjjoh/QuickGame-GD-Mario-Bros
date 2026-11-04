@@ -34,14 +34,14 @@ func _ready() -> void:
 	assert(lower.runtime_loaded and not main.runtime_loaded)
 	var lower_ground := lower.get_node("Layouts/GroundLayout") as TileMapLayer
 	assert(main_terrain != lower_ground.tile_set)
-	assert((main_terrain.get_source(0) as TileSetAtlasSource).texture.resource_path.contains("Overworld"))
-	assert((lower_ground.tile_set.get_source(0) as TileSetAtlasSource).texture.resource_path.contains("Underground"))
+	assert((main_terrain.get_source(0) as TileSetAtlasSource).texture.resource_path.contains("/palettes/overworld/"))
+	assert((lower_ground.tile_set.get_source(0) as TileSetAtlasSource).texture.resource_path.contains("/palettes/underground/"))
 	for source_id in range(12):
 		var source := lower_ground.tile_set.get_source(source_id) as TileSetAtlasSource
 		assert(source.get_tile_data(Vector2i.ZERO,0).get_collision_polygons_count(0) == 1)
 	# All terrain variants use Underground art; absent decorations still fall back.
 	for source_id in range(12):
-		assert((lower_ground.tile_set.get_source(source_id) as TileSetAtlasSource).texture.resource_path.contains("Underground"))
+		assert((lower_ground.tile_set.get_source(source_id) as TileSetAtlasSource).texture.resource_path.contains("/palettes/underground/"))
 	assert(main_decorations == lower.get_node("Layouts/DecorationLayout").tile_set)
 	var originals := load("res://scenes/entities/blocks/brick/brick_block.tscn").instantiate() as BaseBlock
 	var original_texture: Texture2D = originals.get_node("Sprite2D").texture
@@ -51,47 +51,47 @@ func _ready() -> void:
 		assert(block.visual_theme == lower.theme)
 		if block.sprite.texture.resource_path.contains("brick"):
 			underground_count += 1
-			assert(block.sprite.texture.resource_path.contains("Underground"))
+			assert(block.sprite.texture.resource_path.contains("/palettes/underground/"))
 			var texture: Texture2D = block.sprite.texture
 			assert(block.receive_hit(EntityHit.new(null,&"bonk",Vector2.UP)))
 			for frame in range(30):
 				block.state_machine.process_physics(1.0/60.0)
 			assert(block.sprite.texture == texture and block.state_machine.current_state.name == &"Active")
 	assert(underground_count > 0)
-	assert(original_texture.resource_path.contains("Overworld"))
+	assert(original_texture.resource_path.contains("/palettes/overworld/"))
 	# Same painted IDs, different tile textures, and no shared resource mutation.
-	assert(lower.theme.resolve_texture(original_texture).resource_path.contains("Underground"))
+	assert(lower.theme.resolve_texture(original_texture).resource_path.contains("/palettes/underground/"))
 	assert(main.theme.resolve_texture(original_texture) == original_texture)
 	# Every supplied counterpart is mapped, including all question animation frames.
-	assert(lower.theme.texture_overrides.size() == 20)
+	assert(lower.theme.texture_overrides.size() == 21)
 	for source_path: String in lower.theme.texture_overrides:
 		var replacement := lower.theme.resolve_texture(load(source_path))
-		assert(replacement.resource_path == source_path.replace("Overworld (Palette 1)", "Underground (Palette 2)"))
+		assert(replacement.resource_path == source_path.replace("palettes/overworld", "palettes/underground"))
 		assert(replacement.get_size() == (load(source_path) as Texture2D).get_size())
 	for scene_path in ["res://scenes/entities/pipes/pipe_entrance.tscn", "res://scenes/entities/pipes/sideways_pipe_entrance.tscn"]:
 		var pipe := load(scene_path).instantiate() as PipeEntrance
 		pipe.visual_theme = lower.theme
 		lower.get_node("WorldObjects").add_child(pipe)
 		for visual in pipe.get_node("Visuals").get_children():
-			assert(visual.texture.resource_path.contains("Underground"))
+			assert(visual.texture.resource_path.contains("/palettes/underground/"))
 	for source_id in range(5):
 		var marker := lower.theme.entity_markers.get_source(source_id) as TileSetAtlasSource
-		assert(marker.texture.resource_path.contains("Underground") or marker.texture.resource_path.contains("underground/previews"))
+		assert(marker.texture.resource_path.contains("/palettes/underground/") or marker.texture.resource_path.contains("underground/previews"))
 	var question := load("res://scenes/entities/blocks/question/question_block.tscn").instantiate() as BaseBlock
 	question.visual_theme = lower.theme
 	lower.get_node("WorldObjects").add_child(question)
 	for sample in [[0.0,"question-block.png"],[0.41,"question-block-2.png"],[0.55,"question-block-3.png"]]:
 		question.animation_player.seek(sample[0],true)
-		assert(question.sprite.texture.resource_path == "res://assets/Underground (Palette 2)/interactibles/blocks/" + sample[1])
+		assert(question.sprite.texture.resource_path == "res://assets/palettes/underground/interactibles/blocks/" + sample[1])
 	assert(question.receive_hit(EntityHit.new(null,&"bonk",Vector2.UP)))
 	for frame in range(30):
 		question.state_machine.process_physics(1.0/60.0)
 	assert(question.state_machine.current_state.name == &"Inactive")
-	assert(question.sprite.texture.resource_path.ends_with("Underground (Palette 2)/interactibles/blocks/question-block-4.png"))
+	assert(question.sprite.texture.resource_path.ends_with("palettes/underground/interactibles/blocks/question-block-4.png"))
 	var original_question := load("res://scenes/entities/blocks/question/question_block.tscn").instantiate() as BaseBlock
 	add_child(original_question)
 	original_question.animation_player.seek(0.55,true)
-	assert(original_question.sprite.texture.resource_path.contains("Overworld"))
+	assert(original_question.sprite.texture.resource_path.contains("/palettes/overworld/"))
 	original_question.free()
 	assert(lower.get_node("Camera2D").enabled)
 	level.shutdown()

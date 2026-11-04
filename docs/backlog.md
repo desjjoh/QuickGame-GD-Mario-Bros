@@ -4,6 +4,8 @@ This guide records deferred work, not implemented features.
 
 ## Next session - 2026-11-04
 
+Update 2026-11-04: shared player status and live HUD/title/intro bindings are implemented first. See [player status](player-status.md). Top-score promotion/saving, coin rollover/rewards, timer countdown, life deduction/game over and form-based scene selection remain deferred.
+
 Requested next priorities:
 
 1. Add collectible coins, reusing the shared animation clock and area themes. Define collection, GameHandler-owned coin totals/HUD updates, and progress persistence using the existing death-reset policy.

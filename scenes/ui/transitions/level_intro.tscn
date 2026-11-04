@@ -3,7 +3,10 @@
 [ext_resource type="Texture2D" uid="uid://7nfwfahjj5q1" path="res://assets/player/mario (small)/mario-small-idle.png" id="portrait"]
 [ext_resource type="Theme" path="res://scenes/ui/hud/hud_theme.tres" id="theme"]
 
+[ext_resource type="Script" path="res://scenes/ui/transitions/level_intro.gd" id="script"]
+
 [node name="LevelIntro" type="Control" unique_id=2089567449]
+script = ExtResource("script")
 theme = ExtResource("theme")
 layout_mode = 1
 anchors_preset = 15
@@ -30,6 +33,6 @@ centered = false
 layout_mode = 0
 offset_left = 120.0
 offset_top = 112.0
-offset_right = 144.0
+offset_right = 152.0
 offset_bottom = 120.0
 text = "× 3"

@@ -10,7 +10,7 @@ func _ready() -> void:
   "res://assets/sfx/smb_jump-small.wav":-3.0,
   "res://assets/sfx/smb_bump.wav":-7.0,
   "res://assets/sfx/smb_pipe.wav":-4.5,
-  "res://assets/sfx/smb-skid.mp3":-6.5,
+  "res://assets/sfx/smb-skid.mp3":-0.5,
  }
  var previous: AudioStreamPlayer2D
  for path: String in streams:
@@ -44,7 +44,7 @@ func _ready() -> void:
  var skid := AudioMix.one_shot_copy(slide.slide_sound)
  for burst in range(3):
   var audio := player.play_sound_effect(skid)
-  assert(is_equal_approx(audio.volume_db,-6.5))
+  assert(is_equal_approx(audio.volume_db,-0.5))
   await get_tree().physics_frame
   await get_tree().process_frame
  var unknown := AudioStreamWAV.new()

@@ -15,6 +15,25 @@ var current_game: Node
 var current_level: BaseLevel
 var current_player: BasePlayer
 var _level_container: Node2D
+var player_status := PlayerStatus.new()
+# App-session record: intentionally survives clear_session(), with no disk saving.
+var top_score: int = 0:
+	set(value):
+		value = clampi(value, 0, 999999)
+		if top_score == value: return
+		top_score = value
+		session_value_changed.emit(&"top_score", top_score)
+var stage_label: String = "1-1":
+	set(value):
+		if stage_label == value: return
+		stage_label = value
+		session_value_changed.emit(&"stage_label", stage_label)
+var time_remaining: int = 400:
+	set(value):
+		value = clampi(value, 0, 999)
+		if time_remaining == value: return
+		time_remaining = value
+		session_value_changed.emit(&"time_remaining", time_remaining)
 var _session: Dictionary[StringName, Variant] = {}
 var _area_progress: Dictionary = {}
 var _loading: bool = false
@@ -29,6 +48,7 @@ var _current_level_scene: PackedScene
 
 
 func _ready() -> void:
+	player_status.changed_value.connect(_on_player_status_changed)
 	transitions = load("res://scripts/handlers/transition_coordinator.gd").new()
 	animation_clock.name = "AnimationClock"
 	add_child(animation_clock)
@@ -77,6 +97,8 @@ func load_level(scene: PackedScene) -> bool:
 		previous_level.queue_free()
 	_current_level_scene = scene
 	current_level = instance as BaseLevel
+	stage_label = current_level.stage_label
+	time_remaining = current_level.starting_time
 	current_player = null
 	_level_container.add_child(current_level)
 	current_player = current_level.player
@@ -85,18 +107,71 @@ func load_level(scene: PackedScene) -> bool:
 	return true
 
 
+## Compatibility for existing session consumers; reserved values have one owner.
 func set_session_value(key: StringName, value: Variant) -> void:
-	_session[key] = value
-	session_value_changed.emit(key, value)
+	match key:
+		&"score": set_score(int(value))
+		&"coins": set_coins(int(value))
+		&"lives": set_lives(int(value))
+		&"powerup_form": set_player_form(int(value))
+		&"top_score": set_top_score(int(value))
+		&"stage_label": stage_label = str(value)
+		&"time_remaining": time_remaining = int(value)
+		_:
+			_session[key] = value
+			session_value_changed.emit(key, value)
 
 
 func get_session_value(key: StringName, fallback: Variant = null) -> Variant:
+	match key:
+		&"score": return player_status.score
+		&"coins": return player_status.coins
+		&"lives": return player_status.lives
+		&"powerup_form": return player_status.powerup_form
+		&"top_score": return top_score
+		&"stage_label": return stage_label
+		&"time_remaining": return time_remaining
 	return _session.get(key, fallback)
+
+
+func _on_player_status_changed(key: StringName, value: int) -> void:
+	session_value_changed.emit(key, value)
+
+
+func set_score(value: int) -> void:
+	player_status.score = value
+
+
+func add_score(amount: int) -> void:
+	set_score(player_status.score + amount)
+
+
+func set_coins(value: int) -> void:
+	player_status.coins = value
+
+
+func add_coins(amount: int) -> void:
+	set_coins(player_status.coins + amount)
+
+
+func set_lives(value: int) -> void:
+	player_status.lives = value
+
+
+func set_player_form(value: PlayerStatus.PowerupForm) -> void:
+	player_status.powerup_form = value
+
+
+func set_top_score(value: int) -> void:
+	top_score = value
 
 
 func clear_session() -> void:
 	_session.clear()
 	_area_progress.clear()
+	player_status.reset()
+	stage_label = "1-1"
+	time_remaining = 400
 
 
 func store_area_progress(level_key: String, area_id: StringName, data: Dictionary) -> void:

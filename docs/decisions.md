@@ -338,3 +338,11 @@ Default BaseEntity controller access to false; opt player and interactive pipe s
 ## Buffered activity belongs to BaseArea - 2026-11-03
 
 User specified area ownership because unoccupied area runtimes already unload. Use the area camera and two editable margins (64-pixel activation, 96-pixel deactivation), centralized weak registrations and geometry bounds rather than a global manager or notifier on every object. Preserve placed-object instances/collision/progress; independently gate activity and gameplay suspension. EnemySpawner alone owns disposable actors, with reentry rearming to avoid repeated respawning near one spawn point. This adapts reference offscreen policies rather than claiming exact NES thresholds. Initial implementation scans registered objects; optimize further only with measurements.
+
+## Shared player status before rewards - 2026-11-04
+
+User approved typed GameHandler-owned player status, existing HUD value bindings and a title top-score display before collectibles, life deductions or new player forms. Keep one runtime PlayerStatus Resource for score/coins/lives/form; retain top score across new games in memory and defer automatic promotion/saving. Reuse session_value_changed and route legacy reserved keys to typed storage. Stage label/time belong to the level attempt; area themes do not reset them. Add intro lives/stage bindings so presentations read the same owner. This supersedes static placeholder-value documentation.
+
+## Consolidate themed asset folders - 2026-11-04
+
+User requested assets/palettes/<theme> to reduce root clutter. Use lowercase theme folders, starting with overworld and underground, retaining their existing decorations/interactibles/tileset/ui substructure. Theme display names remain Overworld/Underground; palette numbers are no longer encoded in source paths. Relink canonical texture keys as well as replacement values, keep resource UIDs and artwork, and preserve historical path descriptions. Shared theme selectors and TileSet resources remain outside this sprite grouping.
