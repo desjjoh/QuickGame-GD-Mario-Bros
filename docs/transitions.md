@@ -1,50 +1,65 @@
 # Global transitions
 
-GameHandler owns TransitionCoordinator as a child, using the persistent Game UI/ScreenContainer/TransitionScreen for presentation. This is not another autoload. GameHandler creates the coordinator by runtime script loading in _ready to avoid a static dependency cycle back through GameHandler/BaseLevel. Game enables transitions by default. Standalone scenes and timing-focused regression fixtures can use the immediate loading path instead.
+GameHandler owns TransitionCoordinator as a child; persistent Game owns UI/ScreenContainer/TransitionScreen, a generic presentation host. No additional autoload is used. GameHandler loads the coordinator at runtime to avoid a static dependency cycle through GameHandler/BaseLevel. Current named types are area and level. Game over and other future screens are not implemented.
 
-## Presentation and lifecycle
+## Existing behavior
 
-Area/pipe transfer: hide world, player and HUD; present full black; perform the destination transfer under cover; submit the destination camera/render state; hold the minimum duration; restore visibility and input. Pipe emergence proceeds after the cover is removed. HUD/theme changes therefore happen while hidden. No splash card appears for area travel.
+Area/pipe transfer: hide world, player and HUD; present a frame with the existing viewport background; perform destination work; submit destination camera/theme state while hidden; honor the minimum hold; restore visibility and input. Pipe emergence proceeds after reveal. Area travel has no splash card.
 
-Initial level loading and death restart: quick full black, load the level, loading splash with HUD, quick full black again, gameplay. The splash currently contains static WORLD 1-1, Mario portrait and × 3 placeholders. These do not bind to session values or deduct lives. Death still waits for its existing jingle lifecycle before requesting restart.
+Starting a game from the title and death restart: quick hidden phase, load, level-intro presentation with HUD, quick hidden phase, gameplay. The existing intro now lives in scenes/ui/transitions/level_intro.tscn. Its WORLD 1-1, portrait and × 3 remain static placeholders; no life deduction or value binding was added. Death still waits for its existing jingle lifecycle before requesting restart.
 
-A rendered frame acknowledges the cover before work starts. Headless validation uses a process-frame acknowledgement instead. Physics-frame minima do not shorten when work is slow: loading must finish and destination state must be submitted before reveal. Async callables are supported; current scene creation remains synchronous, with no threaded disk loader added.
+A rendered frame acknowledges blanking before work starts. Headless checks use a process-frame acknowledgement. The initial minimum includes time spent loading; slow work cannot be revealed before completion and destination render submission. Each later stage holds its own minimum physics ticks after its first submitted frame. Async callables are supported, but current level creation remains synchronous; no threaded disk loader was added.
 
-Entity gameplay and controller input are suspended while covered; presentation animations and the shared cosmetic clock can continue. Existing visibility, input enablement and gameplay suspension are restored. Controlled state initialization can run under suspension without granting a gameplay tick. Weak references allow old scene nodes and temporary audio nodes to be freed safely.
+Entity gameplay and controller input are suspended. Presentation animation and the global cosmetic clock can continue. Completion/cancellation restores prior visibility and suspension. Controlled state initialization can run under suspension without granting a gameplay tick. Weak snapshots tolerate freed old-level/audio nodes.
 
 ## Black screen: original and Godot implementation
 
-The original disables background and sprite output through `DisableScreenFlag` and `PPU_CTRL_REG2` while updating screen data. This is hardware display blanking, not an extra black sprite or rectangle drawn over a running level. The intermediate world/lives card is a separate visible presentation between blanking phases. See `NonMaskableInterrupt`, `DisplayIntermediate` and `AreaParserTaskControl` in the [disassembly](https://gist.github.com/1wErt3r/4048722).
+The original uses DisableScreenFlag and PPU_CTRL_REG2 to disable background/sprite output during screen updates, rather than drawing a black overlay. Its intermediate world/lives card is visible between blanking tasks. See NonMaskableInterrupt, DisplayIntermediate and AreaParserTaskControl in the [disassembly](https://gist.github.com/1wErt3r/4048722).
 
-Our implementation uses both visibility and a black background. `TransitionCoordinator` hides `Game/LevelContainer`, each affected level's `Players`, and `Game/UI/HUD`. Hiding Players explicitly also covers their separate foreground render routing. `TransitionScreen/Cover` is an opaque full-viewport `ColorRect` with `Color(0, 0, 0, 1)`. It supplies a consistent black image regardless of the current area's background color. It is not a change to the project's default clear color or an area's painted background.
+There is no Cover node, replacement fullscreen rectangle, or renderer clear-color override. The coordinator hides LevelContainer, the separately routed Players and HUD, leaving the existing viewport background visible. It does not change its color. During a presentation, its Control scene and optionally HUD render over that existing background. Scene and area artwork remains authored as before.
 
-The cover remains visible during the loading card; its Card child and the persistent HUD become visible over black. Before revealing gameplay, Card and HUD are hidden again for the final quick phase. Existing visibility is restored when the transaction finishes or is cancelled. The black screen does not itself free a level or area: loading and area streaming own that work.
-
-| Concern | Original game | This project |
+| Concern | Original | Godot adaptation |
 | --- | --- | --- |
-| Hide gameplay | Disable PPU background/sprite rendering | Hide world, player and HUD; show an opaque black Control |
-| Protect visual updates | Update screen data while display is disabled | Commit area, camera and theme changes while hidden, then submit a covered destination frame |
-| Quick area travel | Alternate entrance skips the intermediate card | One quick black phase; no card or HUD |
-| Startup/respawn | Screen tasks alternate blanking and intermediate presentation | Quick black, splash with HUD, quick black, gameplay |
-| Timing | Hardware frames, task execution and interval timers | Configurable minimum physics ticks plus work/render acknowledgement |
-| Gameplay suspension | Original mode/task-specific execution | Explicit reversible entity gameplay suspension and controller gating |
+| Hide gameplay | Disable PPU background/sprite output | Hide world/player/HUD; leave the viewport background unchanged |
+| Protect visual changes | Update screen data while disabled | Load/swap theme and camera while hidden; acknowledge destination render state |
+| Quick area travel | Alternate entry skips intermediate card | area definition has no presentation stages |
+| Startup/respawn | Blanking and intermediate screen tasks | level definition selects intro and blank outro stages |
+| Timing | Hardware frames and interval timers | Physics-tick minima plus work/render acknowledgement |
+| Completion | Mode/task-specific execution | Shared cancellation/restoration and caller completion callback |
 
-These are corresponding presentation goals, not identical rendering implementations. Quick black hides HUD artwork changes when themes change; the Underground HUD coin now uses the active area theme, while other HUD variants remain future work. Normal gameplay keeps the existing shared world/HUD/player shadow composition and player-over-HUD ordering. Transition black is opaque and gameplay is hidden, so world shadows cannot show through it. No fade, crossfade or shader-based darkening is applied.
+Quick phases conceal HUD coin theme swaps. The shared world/HUD/player shadow composition remains; hiding the world prevents its shadows from contributing during transitions. No fade or shader darkening was added. The black screen does not itself unload areas; normal streaming/loading owns that work.
+
+## Definitions and presentation scenes
+
+TransitionDefinition is a Resource with:
+
+- id: the StringName supplied to begin, such as area or level.
+- minimum_frames: initial hidden hold.
+- allow_level_replacement: permit one expected replacement during operation execution.
+- stages: ordered TransitionStage resources shown after successful work.
+
+Each stage supplies a phase name, optional PackedScene, minimum_frames and show_hud. A null scene means a blank stage. Presentation roots must inherit Control. The host hides and queues the previous presentation for deletion; it never assumes a child named Card or a particular screen layout. Presentation initialization may cancel safely.
+
+Defaults are assets/transitions/area.tres and level.tres. The coordinator registers private runtime copies on readiness. get_definition(id) exposes the runtime configuration; register_definition(resource) adds another valid, unique ID while idle. Registration rejects duplicates, invalid definitions and changes during active/restoring transactions. begin rejects unknown IDs. Active requests deep-copy their configuration so later edits cannot alter a running sequence. Never mutate loaded shared source assets to configure a particular request.
+
+To add a future type: create a Control presentation scene, create its definition/stages, register the definition (or include it in the coordinator's exported definitions), then request its ID. Loading behavior remains the supplied operation, not something inferred from the type name. The current public GameHandler level/death calls and BaseLevel pipe calls still request level or area.
+
+This milestone adds timed presentation extensibility, not game-over logic, menus, lives handling, interactive waiting, audio cues or a generic game-flow framework. Completion still restores the saved gameplay state. GameHandler must own the eventual next destination/session decision for game over; transition artwork must not independently reset lives or load levels from its cleanup callback.
 
 ## Timing reference
 
-Defaults are 12 physics ticks for each quick black phase (0.2 seconds at 60Hz), and 147 ticks for the loading card (2.45 seconds). These are configurable coordinator properties, not Project Settings changes. They are frame minima, not wall-clock timers.
+area uses a twelve-tick initial blank minimum. level uses twelve initial ticks, a 147-tick intro with HUD and a twelve-tick blank outro. At 60Hz these correspond to 0.2 and 2.45 seconds. Timings now live in definition/stage resources; former area_minimum_frames and level_minimum_frames coordinator properties were removed.
 
-The [SMB disassembly](https://gist.github.com/1wErt3r/4048722) initializes ColumnSets to $0b, giving twelve area-parser column sets. Our quick minimum adapts that count; it does not claim the original complete pipe blackout lasts exactly twelve frames. ResetScreenTimer loads seven interval ticks and the interval divider counts twenty-one frames; countdown phase gives roughly 127–147 frames. The card uses a consistent 147-frame minimum. Pipe travel skips the intermediate card in the reference. Full fixed-point/NMI/PPU timing parity is not claimed.
+The reference initializes ColumnSets to $0b (twelve parser column sets). Twelve quick ticks adapt that count; this is not a claim that the entire original pipe blackout lasts exactly twelve frames. ResetScreenTimer loads seven intervals with a twenty-one-frame divider, giving roughly 127–147 frames depending on phase; the intro uses a consistent 147-tick minimum. Exact PPU/NMI timing parity is not claimed.
 
 ## API and cancellation
 
-Use GameHandler.transition_to_level(scene) for presented level loading. GameHandler.load_level(scene) remains the immediate low-level compatibility API. BaseLevel routes completed pipe entry through the coordinator before committing area transport, and death restart uses the level transition lifecycle.
+GameHandler.transition_to_level(scene) presents a level load. load_level(scene) remains the immediate compatibility API. TransitionCoordinator.begin(owner, operation, kind, completion, validator) returns a transaction ID or zero when rejected. Operation returns success and may await. Owner must be the attached Game/current level. Signals started, covered, loaded and finished and phase/frame counters expose progress. The historical covered signal means a blank frame has been submitted; it no longer implies an overlay object.
 
-TransitionCoordinator.begin(owner, operation, kind, completion, validator) returns an accepted transaction ID, or zero if unavailable/busy/invalid. Operation returns true on success and may await work. The owner must be the attached Game or current level. Signals started, covered, loaded and finished expose the lifecycle; phase and frame counters expose progress. Successful level operations include the splash; area operations only use quick black. Failed operations restore presentation without a success card.
-
-Only one transaction runs at once. Cancellation, owner removal, unexpected level replacement and Game detach invalidate pending continuations. The expected single level replacement during a level operation is allowed. Callers of asynchronous operations must also guard their own side effects after cancellation; the coordinator can reject stale completion, not undo arbitrary external work. Input edges buffered during cover are discarded.
+Only one transaction is active. Invalid owners, unexpected level replacement, detach and cancellation invalidate pending continuations. Replacement permission is a definition property, independent of ID. A failed operation skips success presentations; invalid presentation roots restore state and report failure. Async callers must guard their own later side effects because the coordinator cannot undo arbitrary external work. Buffered input edges are discarded. New requests are rejected during restoration, but completion callbacks may request the next transition after cleanup.
 
 ## Verification
 
-transition_test covers startup and death cards, real pipe transfer, black cover before work, HUD visibility, slow work, minimum holds, overlapping requests, cancellation/stale completion, level replacement and visibility/input restoration. Its rendered branch checks black-screen pixels and captures quick and splash previews. Existing timing-focused fixtures explicitly disable transitions; this test exercises the enabled production path. Headless assertions do not establish subjective pacing or audible output.
+transition_test exercises existing startup/respawn and actual pipe transfer, render-before-work sequencing, unchanged background pixels with no Cover node or clear-color override, custom named presentation/HUD/timing, resource isolation and active snapshots, unknown/duplicate/invalid rejection, scripted initialization cancellation, generic replacement permission, slow work and stale/cancelled transactions. Rendered checks capture quick/intro images. Headless checks cannot qualify physical monitor pacing or subjective presentation. The separately tracked intermittent native engine shutdown issue is not resolved by this feature.
+
+Normal application startup now opens the [title](title-screen.md) through immediate background loading, with no transition. Confirming Start invokes the level definition into 1-1. Direct gameplay fixtures may opt out of title startup to isolate existing behavior.

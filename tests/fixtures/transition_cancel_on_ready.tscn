@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://tests/fixtures/transition_cancel_on_ready.gd" id="1"]
+[node name="CancelOnReady" type="Control"]
+script = ExtResource("1")

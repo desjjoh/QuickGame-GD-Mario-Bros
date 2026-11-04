@@ -2,7 +2,7 @@
 
 Game owns scenes/ui/ui.tscn as a sibling of LevelContainer. UI is a screen-space Control, visually routed into Game/SharedShadow alongside the world and player. It shares one shadow composite while remaining independent of entity gameplay suspension. Game supplies a fixed screen-space canvas. UI stays at identity; only world/player render transforms receive the final camera matrix, with additional proxy interpolation disabled. The UI root also disables interpolation. Level replacement (including death restart) leaves UI alive. Keep future transition screens inside this persistent Game shell rather than replacing the root scene. See [shared composition](level-shadow.md) for render routing and constraints.
 
-UI/ScreenContainer owns TransitionScreen. HUD is its later sibling and draws above the loading splash card. Quick black transitions explicitly hide HUD and the player, covering theme swaps. Startup and respawn show quick black, then the splash with HUD, then quick black again before gameplay. The player normally draws above HUD outside transitions. See [transitions](transitions.md).
+UI/ScreenContainer owns TransitionScreen, a host for definition-selected Control presentation scenes. HUD is its later sibling and draws above the loading splash card. Quick black transitions explicitly hide HUD and the player, covering theme swaps. Startup and respawn show quick black, then the splash with HUD, then quick black again before gameplay. The player normally draws above HUD outside transitions. See [transitions](transitions.md).
 
 ## 8x8 layout
 
@@ -38,4 +38,6 @@ hud_test checks exact 8px font advances and grid positions, mouse pass-through, 
 
 ## Black transition background
 
-Quick transitions hide HUD explicitly; they do not depend on drawing a rectangle above it. TransitionScreen/Cover supplies opaque black while world and player visibility are also disabled. During the loading splash the same black background remains, with Card and HUD visible above it. This conceals future themed HUD swaps. See the [original-versus-Godot comparison](transitions.md#black-screen-original-and-godot-implementation) for rendering, timing and lifecycle differences.
+Quick transitions hide HUD explicitly; they do not depend on drawing a rectangle above it. The Cover node has been removed. World, player and HUD are hidden, leaving the existing viewport background visible. During the loading splash, the level-intro presentation and HUD draw above it. Transitions do not override the background color. This conceals future themed HUD swaps. See the [original-versus-Godot comparison](transitions.md#black-screen-original-and-godot-implementation) for rendering, timing and lifecycle differences.
+
+TitleScreen is a persistent screen-space Control under ScreenContainer, separate from TransitionScreen. It uses the existing white HUD Theme for 1 PLAYER GAME and the supplied 8x8 cursor resolved through the title background area theme. alphabet-alt is reserved for future copyright text. GameHandler owns creating/hiding/disposing the menu and transitioning into gameplay; see [title flow](title-screen.md).

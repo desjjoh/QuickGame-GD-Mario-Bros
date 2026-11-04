@@ -1,6 +1,7 @@
 @tool
 class_name BaseLevelArea
 extends Node2D
+signal area_theme_changed(theme: AreaTheme)
 ## Owns area layouts, entities, camera, theme, and entry/exit lifecycle.
 
 var _runtime_templates: Dictionary[StringName, PackedScene] = {}
@@ -16,6 +17,7 @@ var _transport_cells: Dictionary[Vector2i, StringName] = {}
 		theme = value
 		if is_inside_tree():
 			apply_theme()
+			area_theme_changed.emit(theme)
 
 
 func _ready() -> void:

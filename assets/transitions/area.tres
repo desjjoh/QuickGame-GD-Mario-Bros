@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="TransitionDefinition" format=3]
+[ext_resource type="Script" path="res://scripts/transitions/transition_definition.gd" id="definition"]
+[resource]
+script = ExtResource("definition")
+id = &"area"
+minimum_frames = 12

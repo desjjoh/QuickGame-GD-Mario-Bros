@@ -1,7 +1,9 @@
 extends Node
 ## Persistent game entry point. Level instances live inside LevelContainer.
 
+## First gameplay level after Start; the title scene owns its background.
 @export var initial_level: PackedScene
+@export var start_with_title: bool = true
 @export var transitions_enabled: bool = true
 
 @onready var level_container: Node2D = $LevelContainer
@@ -16,7 +18,8 @@ func _ready() -> void:
 		push_error("Game needs an initial level assigned in the Inspector.")
 		return
 
-	GameHandler.transition_to_level(initial_level)
+	if not GameHandler.start_game_flow(initial_level,start_with_title):
+		push_error("Game startup could not create its initial screen.")
 
 
 func _exit_tree() -> void:

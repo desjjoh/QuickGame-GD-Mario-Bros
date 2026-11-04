@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scenes/main/game.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://scenes/levels/test_level.tscn" id="2_level"]
+[ext_resource type="PackedScene" path="res://scenes/levels/1-1.tscn" id="2_level"]
 
 [ext_resource type="PackedScene" path="res://scenes/ui/ui.tscn" id="3_ui"]
 

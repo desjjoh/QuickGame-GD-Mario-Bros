@@ -12,7 +12,7 @@ Next work: general off-camera entity activity. Start from the [remaining plan](d
 
 Status: open; reproduced during PR review on 2026-11-03 and deferred to the backlog at the user's request.
 
-Reproduction: open scenes/levels/test_level.tscn, run the current scene with F6, and fall into a pit. Mario is shut down/removed and world gameplay is suspended. When death finishes, BaseLevel._restart_after_death rejects the restart because GameHandler.current_level does not own this standalone level. The restart has already been marked queued, leaving the scene frozen without a player.
+Reproduction: open scenes/levels/1-1.tscn, run the current scene with F6, and fall into a pit. Mario is shut down/removed and world gameplay is suspended. When death finishes, BaseLevel._restart_after_death rejects the restart because GameHandler.current_level does not own this standalone level. The restart has already been marked queued, leaving the scene frozen without a player.
 
 Affected code: [BaseLevel](../scenes/levels/base/base_level.gd), especially on_death, _update_death and _restart_after_death. The normal Game-owned F5 restart path has passing regression coverage; the missing path is standalone execution.
 
@@ -72,3 +72,9 @@ Completion requires suitable files and audible validation; the previous decode/l
 ## Intermittent camera hitch at 240 Hz
 
 Open: capture the reported occasional hitch during normal play with [the opt-in frame pacing scene](frame-pacing.md). Automated 240 FPS traversal did not reproduce a delayed frame or interpolation mismatch. Correlate a visible hitch with frame intervals, camera progress and engine timing before changing VSync, physics, viewport, interpolation or renderer settings. Host render completion is not display scanout evidence.
+
+## Native engine shutdown failures after PASS
+
+Open after the SFX balance milestone (2026-11-03): the 41-scene run had scene_hierarchy_test print PASS but exit -1073741819 (Windows access violation). Its unchanged focused rerun exited zero. The earlier runtime coordinator loading change passed a 100-launch probe and a full suite, but subsequent evidence shows native shutdown is not fully resolved. Do not equate a PASS line with a successful process exit, or classify the full run as clean after a rerun. Runner exit/error checks remain strict.
+
+Investigate engine/resource shutdown lifetime with a reduced scene save/reload reproducer and native crash evidence. Establish whether a supported engine fix or a specific project lifetime correction is necessary; discuss any engine/project-setting changes before applying them. Retain all regression assertions and avoid retries that mask crashes. This issue is separate from the intermittent user-visible camera hitch and from SFX gain application.

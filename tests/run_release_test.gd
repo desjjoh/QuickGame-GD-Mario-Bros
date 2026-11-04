@@ -22,8 +22,9 @@ func step_player(player: BasePlayer, direction: float, run: bool, jump: bool = f
 
 func make_game() -> Node:
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	game.start_with_title = false
 	game.transitions_enabled = false
-	var fixture := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var fixture := load("res://scenes/levels/1-1.tscn").instantiate() as BaseLevel
 	fixture.keep_player_on_screen = false
 	fixture.fall_death_enabled = false
 	fixture.get_node("Areas/MainArea/Camera2D").follow_enabled = false

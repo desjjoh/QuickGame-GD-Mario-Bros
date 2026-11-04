@@ -4,3 +4,4 @@
 [node name="Game" instance=ExtResource("1")]
 initial_level = ExtResource("2")
 transitions_enabled = false
+start_with_title = false

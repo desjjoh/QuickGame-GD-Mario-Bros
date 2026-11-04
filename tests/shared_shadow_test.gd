@@ -11,6 +11,7 @@ func box(parent: Node, at: Vector2, dimensions: Vector2, color: Color) -> ColorR
 
 func _ready() -> void:
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	game.start_with_title = false
 	game.transitions_enabled = false
 	add_child(game)
 	var level := GameHandler.current_level

@@ -2,7 +2,7 @@ extends Node
 
 
 func _ready() -> void:
-	var packed := load("res://scenes/levels/test_level.tscn") as PackedScene
+	var packed := load("res://scenes/levels/1-1.tscn") as PackedScene
 	var expected_layouts: Dictionary = {}
 	for cycle in range(3):
 		var level := packed.instantiate(PackedScene.GEN_EDIT_STATE_MAIN) as BaseLevel

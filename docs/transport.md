@@ -17,7 +17,7 @@ The level owns validation, phase coordination, loading/restoring destination con
 
 ## Configuring painted entities
 
-Select the source area in TestLevel and expand **Transport Points**. Add a TransportPlacement resource for each painted transport anchor you need to configure:
+Select the source area in 1-1 and expand **Transport Points**. Add a TransportPlacement resource for each painted transport anchor you need to configure:
 
 | Property | Purpose |
 | --- | --- |

@@ -1,8 +1,8 @@
 # Painting level entities
 
-Open TestLevel and select Areas/MainArea/Layouts/EntityLayout, then paint the brick tile from its TileMap palette. Erase a marker to remove that entity from the next run. Save the level and press F5. Markers are visible in the editor; runtime hides this layer and creates actual entities under WorldObjects before spawning Mario.
+Open 1-1 and select Areas/MainArea/Layouts/EntityLayout, then paint the brick tile from its TileMap palette. Erase a marker to remove that entity from the next run. Save the level and press F5. Markers are visible in the editor; runtime hides this layer and creates actual entities under WorldObjects before spawning Mario.
 
-For example, cell (4, 9) places an entity at top-left position (64, 144). TestLevel is a freely editable layout; the automated block test creates its own fixed four-cell fixture. Each BaseLevelArea owns Layouts/DecorationLayout, Layouts/GroundLayout, and Layouts/EntityLayout. The Layouts tool script enforces a shared origin, zero rotation, unit scale, and 16-by-16 square TileSet cells in the editor and runtime. Independent layout transforms are reset; move the level root to relocate the stage. Position conversion still accounts for the level and WorldObjects transforms. Entity origins are the top-left of the marker cell.
+For example, cell (4, 9) places an entity at top-left position (64, 144). 1-1 is a freely editable layout; the automated block test creates its own fixed four-cell fixture. Each BaseLevelArea owns Layouts/DecorationLayout, Layouts/GroundLayout, and Layouts/EntityLayout. The Layouts tool script enforces a shared origin, zero rotation, unit scale, and 16-by-16 square TileSet cells in the editor and runtime. Independent layout transforms are reset; move the level root to relocate the stage. Position conversion still accounts for the level and WorldObjects transforms. Entity origins are the top-left of the marker cell.
 
 The dedicated assets/tileset/entity_layout.tres TileSet has no physics layers. BaseLevel also disables collision/navigation on its EntityLayout. Each marker carries string custom data named entity_id; the brick marker uses `brick`. The level's Entity Scenes dictionary maps that ID to BrickBlock's PackedScene. To support another entity, add its marker/custom-data ID to the palette and map the ID to a scene inheriting BaseEntity. Collision, detection areas, presentation, and behavior belong to that scene. Non-solid decorations and vines do not need solid bodies.
 
@@ -10,7 +10,7 @@ BaseLevel.spawn_layout_entities() generates the active area before spawn_player(
 
 The block regression covers count, duplicate prevention, marker collision/visibility, solid block contact, non-solid entity spawning, translated and negative cell coordinates, and shutdown.
 
-The palette also includes Question block entity (source 1, entity_id question_block). TestLevel maps it to the animated QuestionBlock scene. See [question block](question-block.md) for timing and scene details.
+The palette also includes Question block entity (source 1, entity_id question_block). 1-1 maps it to the animated QuestionBlock scene. See [question block](question-block.md) for timing and scene details.
 
 
 ## Planned: per-cell entity properties
@@ -23,7 +23,7 @@ Select Areas/MainArea/Layouts/GroundLayout and use the terrain TileSet sources P
 
 ## Alternate brick
 
-EntityLayout source 2, Alternate brick entity, uses entity_id brick_alternate. TestLevel maps it to scenes/entities/blocks/brick/alternate_brick_block.tscn. This scene inherits BrickBlock and overrides only Sprite2D.texture with brick-alternate.png. Collision, hit acceptance, Active/Bouncing recovery, sound ownership, and shutdown remain inherited. Select Areas/MainArea/Layouts/EntityLayout and the alternate marker to paint it; no existing painted cells were changed.
+EntityLayout source 2, Alternate brick entity, uses entity_id brick_alternate. 1-1 maps it to scenes/entities/blocks/brick/alternate_brick_block.tscn. This scene inherits BrickBlock and overrides only Sprite2D.texture with brick-alternate.png. Collision, hit acceptance, Active/Bouncing recovery, sound ownership, and shutdown remain inherited. Select Areas/MainArea/Layouts/EntityLayout and the alternate marker to paint it; no existing painted cells were changed.
 
 Both areas have their own layers and WorldObjects; choose Areas/LowerArea/Layouts to paint Underground content. See [area themes](level-themes.md) for artwork fallback and matching tile IDs.
 
