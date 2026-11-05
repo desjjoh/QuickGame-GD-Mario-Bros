@@ -23,6 +23,7 @@ func enter() -> void:
 func exit() -> void:
 	if _falling:
 		get_player().air_movement.end(get_player().motion_values)
+		get_player().motion_values.remove_modifier(&"passive_fall")
 		_falling = false
 	get_player().animation_player.speed_scale = _previous_animation_speed
 
@@ -65,13 +66,16 @@ func _process_falling(player: BasePlayer, direction: float, delta: float) -> Bas
 			player.run_action.running_history
 		)
 		_falling = true
+		player.motion_values.set_modifier(
+			&"passive_fall", {&"gravity": player.jump_action.falling_gravity}, 250
+		)
 	player.air_movement.apply(player.motion_values, direction, delta)
-	player.gravity_component.apply(player.motion_values, delta)
-	player.move_body()
+	player.move_body(true)
 	var mario := player as Mario
 	_update_walk_animation(mario)
 	if player.body.is_on_floor():
 		player.air_movement.end(player.motion_values)
+		player.motion_values.remove_modifier(&"passive_fall")
 		_falling = false
 		if is_zero_approx(direction) and is_zero_approx(player.body.velocity.x):
 			return idle_state

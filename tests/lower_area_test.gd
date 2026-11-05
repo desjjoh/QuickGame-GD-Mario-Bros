@@ -31,8 +31,12 @@ func _ready() -> void:
 	assert(get_viewport().get_camera_2d() == level.get_node("Areas/MainArea/Camera2D"))
 	level.player.face_direction(-1.0)
 	assert(level.player.sprite.flip_h)
+	level.player.jump_action.falling_gravity = 2025.0
+	assert(not level.request_area_transfer(&"missing"))
+	assert(level.player.jump_action.falling_gravity == 2025.0)
 	assert(level.request_area_transfer(&"lower"))
 	await get_tree().process_frame
+	assert(level.player.jump_action.falling_gravity == 562.5)
 	assert(not level.player.sprite.flip_h, "Area arrival must reset facing right.")
 	var camera := room.get_node("Camera2D") as LevelCamera
 	assert(camera.enabled and not camera.follow_enabled)
