@@ -77,3 +77,23 @@ Move freezes its current walk texture and animation phase whenever the body is u
 ## Continuous takeoff tick
 
 Idle, Move, and Slide refresh Run and select a grounded jump, then use PlayerState.continue_jump_physics to enter Jump and process its physics immediately. The outgoing state has not moved yet, so Jump consumes exactly one movement step on the takeoff tick. This removes a one-tick horizontal/vertical pause that also stopped the scrolling camera briefly. State exit removes old modifiers before Jump enters; normal FSM return handling still owns any subsequent requested transition. Jump speeds, gravity profiles, and air-control values are unchanged. The air-movement regression verifies immediate horizontal/upward displacement and exactly one horizontal step for takeoff from all three states with both Run contexts.
+
+## Airborne integration and landing acceptance
+
+Jump and passive falling integrate position using the current vertical speed, then prepare gravity for the next tick. GravityComponent supplies the next-speed calculation; BasePlayer.move_body(true) installs it before final floor/ceiling response, preserving landing zero velocity and the ceiling bump's 3.75 px/s downward speed. Grounded floor contact keeps its existing integration path. A passive fall starting at zero vertical speed prepares downward velocity without inventing first-tick downward travel.
+
+Existing launch speeds, gravity profiles, weight and terminal speed are unchanged. At nominal 60 Hz, an unobstructed full-speed held jump rises about 82.5 pixels instead of 77.5. This follows the disassembly's ImposeGravity position-before-force ordering; floating-point trajectories remain an approximation of byte/fraction arithmetic and have not been matched against a captured Mesen trace.
+
+Corner correction measures its four-pixel landing tolerance using projected feet Y after this tick's downward travel, together with projected X. It rejects a contact whose projected depth exceeds the tolerance even when the previous feet position was shallow enough. Inset foot probes remain first; physical collision-edge fallback probes remain to prevent Godot side sweeps snagging one-tile gap crossings. That fallback and the continuous four-pixel tolerance are deliberate Godot approximations, not exact NES integer foot sampling.
+
+jump_benchmark_test builds isolated copies of the two supplied layouts. At 150 px/s with Jump held, an early pipe takeoff misses the 80-pixel-higher staircase step while near-edge takeoffs land; the longer jump to the 64-pixel-higher question block fails at all three tested takeoff positions. It also checks full launch displacement and peak height. These fixtures establish the requested example behavior, not complete original-game fidelity.
+
+## Retained gravity for walking off ledges
+
+JumpAction retains its selected falling_gravity after the jump modifier is removed. A new jump replaces it from falling_gravities using takeoff speed: 1575 px/s² below 60 px/s, 1350 from 60 to below 93.75, and 2025 from 93.75 upward. Landing, stopping and releasing Run do not reset the selection. Releasing Jump and starting descent use the same stored value for the active jump.
+
+Actions/Jump's entrance_falling_gravity defaults to 562.5 px/s², corresponding to Entrance_GameTimerSetup's VerticalForceDown=$28 at nominal 60 Hz. BasePlayer initialization and committed level transport arrival reset the retained selection to that entrance value. Failed transport requests leave it untouched. Fresh players created for respawn also initialize it. This is runtime player motion state, separate from GameHandler's persistent powerup/session state.
+
+MarioMoveState installs a priority-250 passive_fall gravity modifier when support is lost, using the retained selection. Landing or leaving Move removes that modifier, preserving the selection for the next ledge. The grounded base_gravity remains 1575; weight and higher-priority effects continue to apply normally. Passive falls retain their Move animation behavior and air steering. The full-speed jump trajectory is unchanged; subsequent ledge falls now use 2025 instead of reverting to 1575.
+
+This follows the reference's two explicit VerticalForceDown writes (entrance setup and jump selection), FallingSub's reuse, and landing cleanup that clears speed/fraction without clearing the stored force. Godot's contact flags, floor-contact gravity and continuous integration remain approximations; exact Mesen frame equivalence is not claimed.

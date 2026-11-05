@@ -10,11 +10,13 @@ signal jumped
 @export var rising_gravities := PackedFloat32Array([450, 450, 421.875, 562.5, 562.5])
 @export var falling_gravities := PackedFloat32Array([1575, 1575, 1350, 2025, 2025])
 @export var minimum_release_height: float = 1.0
+## Entrance_GameTimerSetup initializes VerticalForceDown to $28.
+@export var entrance_falling_gravity: float = 562.5
 
 var active: bool = false
 var _origin_y: float
 var _rise: float
-var _fall: float
+var falling_gravity: float = 562.5
 var _released: bool = false
 
 
@@ -34,7 +36,7 @@ func begin(values: MotionValues) -> bool:
 			profile += 1
 	_origin_y = values.body.global_position.y
 	_rise = rising_gravities[profile]
-	_fall = falling_gravities[profile]
+	falling_gravity = falling_gravities[profile]
 	_released = false
 	active = true
 	var velocity := values.velocity
@@ -51,10 +53,16 @@ func update(values: MotionValues, held: bool) -> void:
 	if not held and _origin_y - values.body.global_position.y >= minimum_release_height:
 		_released = true
 	values.set_modifier(
-		&"jump", {&"gravity": _fall if _released or values.velocity.y >= 0.0 else _rise}, 250
+		&"jump",
+		{&"gravity": falling_gravity if _released or values.velocity.y >= 0.0 else _rise},
+		250
 	)
 
 
 func end(values: MotionValues) -> void:
 	active = false
 	values.remove_modifier(&"jump")
+
+
+func reset_falling_gravity() -> void:
+	falling_gravity = entrance_falling_gravity

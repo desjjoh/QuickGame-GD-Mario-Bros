@@ -37,6 +37,7 @@ func trial(hold_ticks: int, weight: float) -> float:
 	assert(player.body.is_on_floor())
 	assert(player.state_machine.current_state is MarioIdleState)
 	assert(not player.jump_action.active)
+	assert(player.jump_action.falling_gravity == 1575.0)
 	assert(player.motion_values.gravity == player.motion_values.base_gravity)
 	Input.action_release(ControllerHandler.primary_action)
 	game.free()

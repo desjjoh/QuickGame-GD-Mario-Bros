@@ -371,3 +371,7 @@ At the user's request, sound_effect_mix.tres adds per-stream flagpole=-2 dB and 
 ## Flagpole upper grab geometry (2026-11-05)
 
 Within the requested top-grab fix, Flagpole overrides ClimbTop from local (24,24) to (24,8). Its detection rectangle grows from (32,152) centered at (24,88) to (32,164) centered at (24,82), covering the full ball tile. Motion/Climbing exposes Capture Probe Offset Y=-8 for flagpole side contact; generic climbables retain their body-envelope default. Marker footprint, art, solid base, player collider and jump/movement settings are unchanged. No Project Settings, bindings or imports changed.
+
+## Retained falling gravity - 2026-11-05
+
+Authorized after reviewing the reference's gravity lifetime: JumpAction adds an editable entrance_falling_gravity default of 562.5 px/s² ($28 at nominal 60 Hz). New players and committed transport arrivals initialize this value; successful jumps select 1575/1350/2025 from the existing speed-profile table and retain it across landing. Passive Move falls apply that selection through a temporary priority-250 modifier. Grounded MotionValues.base_gravity remains 1575; jump speeds, existing gravity arrays, weight, terminal speed, Project Settings, Input Map and imports are unchanged.

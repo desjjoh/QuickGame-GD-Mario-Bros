@@ -39,6 +39,7 @@ func get_effects_parent() -> Node2D:
 
 
 func _ready() -> void:
+	jump_action.reset_falling_gravity()
 	jump_action.jumped.connect(_on_jump_started)
 	super()
 
@@ -73,7 +74,12 @@ func _on_jump_started() -> void:
 	play_sound_effect(jump_action.sound_effect)
 
 
-func move_body() -> void:
+func move_body(gravity_after_motion: bool = false) -> void:
+	var next_vertical_speed := body.velocity.y
+	if gravity_after_motion:
+		next_vertical_speed = gravity_component.vertical_speed_after(
+			motion_values, get_physics_process_delta_time()
+		)
 	var rising := body.velocity.y < 0.0
 	var horizontal_speed := body.velocity.x
 	var corrected_landing := corner_correction.prepare(
@@ -83,6 +89,10 @@ func move_body() -> void:
 		# The correction already consumed this tick's horizontal displacement.
 		body.velocity.x = 0.0
 	body.move_and_slide()
+	if gravity_after_motion:
+		# Position uses the current speed; gravity prepares the following tick.
+		# Landing and ceiling response retain authority over the resulting speed.
+		body.velocity.y = 0.0 if body.is_on_floor() else next_vertical_speed
 	if corrected_landing:
 		body.velocity.x = horizontal_speed
 	# ImpedePlayerMove stops momentum into solid sides. Godot can retain

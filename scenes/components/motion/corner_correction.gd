@@ -60,9 +60,8 @@ func _correct_landing(
 	body: CharacterBody2D, shape: CollisionShape2D, half: Vector2, motion: Vector2
 ) -> bool:
 	var feet_y := shape.global_position.y + half.y
-	# Try the reference foot insets first, then the physical envelope edges.
-	# Godot's full-height side sweep can reach the ledge one pixel before
-	# the inset feet; shallow, real body overlap must get the same recovery.
+	# Check inset feet first. Physical-edge fallbacks prevent Godot side sweeps
+	# from snagging shallow gap crossings before an inset probe reaches terrain.
 	for foot_x in [
 		shape.global_position.x - half.x + 1.0,
 		shape.global_position.x + half.x - 1.0,
@@ -76,9 +75,9 @@ func _correct_landing(
 		if hit.is_empty() or (hit.normal as Vector2).y > -0.7:
 			continue
 		var penetration: float = feet_y - (hit.position as Vector2).y
-		# Also handle this tick crossing the top from above. Waiting until the
-		# feet are already below it lets the diagonal side sweep kill speed.
-		if penetration > landing_tolerance or penetration + motion.y <= 0.0:
+		# Mixing old Y with projected X can rescue a landing already too deep.
+		var projected_penetration := penetration + motion.y
+		if projected_penetration > landing_tolerance + 0.0001 or projected_penetration <= 0.0:
 			continue
 		var lift := maxf(penetration + 0.1, 0.0)
 		var raised := body.global_position - Vector2(0, lift)

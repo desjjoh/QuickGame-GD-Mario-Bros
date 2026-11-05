@@ -120,7 +120,7 @@ position = Vector2(48, 208)
 flagpole_cell = Vector2i(196, 2)
 endpoint = NodePath("EndingEndpoint")
 
-[node name="EndingEndpoint" type="Marker2D" parent="FlagpoleEnding" index="3" unique_id=1657370770]
+[node name="EndingEndpoint" type="Marker2D" parent="FlagpoleEnding" index="2" unique_id=1657370770]
 position = Vector2(3255, 208)
 
 [editable path="Areas/MainArea"]

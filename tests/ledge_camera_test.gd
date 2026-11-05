@@ -76,7 +76,14 @@ func _ready() -> void:
 								"width=%s speed=%s dir=%s phase=%s penetration=%s"
 								% [width, speed, direction, phase, penetration]
 							)
-							if absf(displacement - expected) > 0.1 or not player.body.is_on_floor():
+							var should_land: bool = penetration + 180.0 / 60.0 <= 4.0
+							if (
+								should_land
+								and (
+									absf(displacement - expected) > 0.1
+									or not player.body.is_on_floor()
+								)
+							):
 								(
 									failures
 									. append(
@@ -93,6 +100,16 @@ func _ready() -> void:
 										)
 									)
 								)
+							if (
+								not should_land
+								and (
+									player.body.is_on_floor()
+									or player.body.global_position.y < 160.0 + penetration
+								)
+							):
+								failures.append(
+									label + " must reject excessive post-motion penetration"
+								)
 							var camera_expected := displacement if direction > 0 else 0.0
 							if (
 								absf(camera.global_position.x - camera_before - camera_expected)
@@ -107,6 +124,6 @@ func _ready() -> void:
 		get_tree().quit(1)
 		return
 	print(
-		"PASS: 72 jump-state ledge landings on block/pipe-width surfaces preserve one horizontal step and matching right-only camera motion."
+		"PASS: 48 accepted jump-state ledge landings preserve one horizontal step; 24 over-depth contacts reject rescue; all 72 retain matching right-only camera motion."
 	)
 	get_tree().quit()

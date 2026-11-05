@@ -136,8 +136,11 @@ func run_checks() -> void:
 						)
 					if not trial.ground and not trial.get("land", false):
 						check(
-							displacement.y > 0.0,
-							label + " must apply gravity on the falling handoff tick"
+							displacement.y >= 0.0 and player.body.velocity.y > 0.0,
+							(
+								label
+								+ " must prepare falling gravity without inventing initial displacement"
+							)
 						)
 					camera.follow_target(player.body)
 					check(

@@ -61,6 +61,18 @@ func _ready() -> void:
 	mario.body.velocity = Vector2(0, 60)
 	mario.move_body()
 	assert(mario.body.global_position.y > 82, "A complete miss must remain a fall.")
+	# A four-pixel fall cannot borrow this tick's previous, shallower depth.
+	mario.body.global_position = Vector2(30, 120)
+	mario.body.velocity = Vector2(0, -60)
+	mario.body.move_and_slide()
+	mario.body.global_position = Vector2(59, 81.2)
+	mario.body.velocity = Vector2(120, 240)
+	mario.move_body()
+	assert(
+		not mario.body.is_on_floor(),
+		"Projected depth beyond four pixels must reject landing rescue."
+	)
+	assert(mario.body.global_position.y > 84.0)
 	var ceiling := StaticBody2D.new()
 	var ceiling_shape := CollisionShape2D.new()
 	ceiling_shape.shape = box

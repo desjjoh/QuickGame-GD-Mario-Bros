@@ -27,8 +27,7 @@ func process_physics(delta: float) -> BaseState:
 		player.motion_values, controller_controls_available() and ControllerHandler.input_primary
 	)
 	player.air_movement.apply(player.motion_values, direction, delta)
-	player.gravity_component.apply(player.motion_values, delta)
-	player.move_body()
+	player.move_body(true)
 	if player.body.is_on_floor():
 		return (
 			move_state

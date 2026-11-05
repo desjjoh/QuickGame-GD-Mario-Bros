@@ -605,6 +605,7 @@ func _commit_transport(phase: int) -> void:
 	_disconnect_transport_state()
 	player.state_machine.stop(false)
 	player.body.velocity = Vector2.ZERO
+	player.jump_action.reset_falling_gravity()
 	player.body.global_position = arrival["position"]
 	player.face_direction(1.0)
 	player.body.reset_physics_interpolation()
