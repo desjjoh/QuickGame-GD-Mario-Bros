@@ -400,6 +400,8 @@ func _show_title_now(first_level: PackedScene) -> bool:
 	# reset so shutdown cannot repopulate the cleared progress store.
 	if is_instance_valid(current_level):
 		current_level.shutdown()
+	# Promote the completed run before cleanup resets its score.
+	set_top_score(maxi(top_score, player_status.score))
 	clear_session()
 	if not load_level(screen.background_level):
 		_clear_title()

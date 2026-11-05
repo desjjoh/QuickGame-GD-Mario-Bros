@@ -1,6 +1,7 @@
 [gd_scene format=3]
 [ext_resource type="Script" path="res://scripts/levels/endings/flagpole_ending.gd" id="script"]
 [ext_resource type="Script" path="res://scripts/levels/endings/ending_step.gd" id="step"]
+[ext_resource type="Script" path="res://scripts/levels/endings/time_score_step.gd" id="time_score"]
 [ext_resource type="AudioStream" path="res://assets/soundtrack/smb_stage_clear.wav" id="music"]
 [ext_resource type="AudioStream" path="res://assets/sfx/smb_flagpole.wav" id="flag_sound"]
 [node name="FlagpoleEnding" type="Node"]
@@ -8,6 +9,6 @@ script = ExtResource("script")
 flag_sound = ExtResource("flag_sound")
 music = ExtResource("music")
 [node name="Score" type="Node" parent="."]
-script = ExtResource("step")
+script = ExtResource("time_score")
 [node name="Fireworks" type="Node" parent="."]
 script = ExtResource("step")

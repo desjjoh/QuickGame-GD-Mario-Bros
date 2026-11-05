@@ -4,7 +4,7 @@
 
 1-1 has one stage in Game.Stages. Its configured flagpole now starts the reusable level-owned ending presentation: scripted Mario/flag descent, 24-tick dismount hold, automatic rightward walk, player retirement at the independent castle endpoint, score/fireworks completion hooks, music/final hold, then the normal final-stage return to title. The castle remains painted DecorationLayout art with no special collision.
 
-Score and Fireworks are deliberately no-op EndingStep nodes: no height score, timer-to-score conversion, castle flag or fireworks are awarded/drawn yet. They still participate in the real asynchronous completion contract, so future implementations can delay progression. No top-score promotion is introduced.
+Score uses TimeScoreStep to convert remaining time into score without counting audio. Fireworks remains a no-op EndingStep. Flagpole height score, castle flag and fireworks are not awarded/drawn yet. Both steps participate in the asynchronous completion contract. Top-score promotion belongs to common title entry after the final run score is known, before run cleanup.
 
 ## Authoring
 
@@ -22,7 +22,7 @@ The presentation installs Mario's owned FlagpoleEnding state after the contact-s
 
 At the endpoint, the presentation calls player.shutdown(), clears matching BaseLevel.player and GameHandler.current_player references and queues the entity for deletion. The ending owns audio and hooks, so it continues after Mario is gone. No hidden stopping block or background-priority hiding is used. Handler-owned player/session status survives until normal next-stage/title policy runs.
 
-BaseLevel.finish_ending only accepts its completed presentation. GameHandler then chooses the next stage through the existing stage list, or uses common title entry after the last stage. It does not require a surviving player. Final title entry retains top score and performs the existing full run/progress cleanup.
+BaseLevel.finish_ending only accepts its completed presentation. GameHandler then chooses the next stage through the existing stage list, or uses common title entry after the last stage. It does not require a surviving player. Final title entry promotes a higher final run score to top score, then performs the existing full run/progress cleanup.
 
 Cancellation stops owned audio, invalidates hook tickets, releases the camera lock, resets the flag and restores controls. If cancellation occurs after retirement, the level recreates its player at PlayerSpawn and snaps the camera back. External level replacement restores normal PLAYING flow for the replacement. Source loss cancels the sequence rather than leaving a scripted player stuck. Level shutdown cancels outstanding presentation work; stale hook completion cannot advance a later run.
 
@@ -35,17 +35,23 @@ The source routines are recorded in [the reference investigation](flagpole-endin
 - Mario stops near two pixels above the base, unless contact began lower. The flag sprite uses a fractional-byte accumulator (normally a one-pixel first step followed by two-pixel steps) and checks its stop threshold before movement, matching the reference ordering. Its center threshold is base-top minus 14 pixels, corresponding to reference flag top $aa at base top $c0; the last step can overshoot it by one pixel. Descent advances when the flag reaches its threshold or Mario passes the fallback threshold, not an unconditional wait-for-both duration.
 - Dismount places Mario on the other side facing inward, holds 24 ticks, then nudges four pixels outward and starts ordinary walk-profile motion. There is no invented jump impulse.
 - When his feet reach base-top plus 14 pixels during the walk, release scroll lock and play smb_stage_clear.wav. Locked displacement is not caught up afterwards. A very close custom endpoint starts music/unlocks defensively at retirement if that threshold has not been reached.
-- After the score and fireworks hooks finish and stage-clear playback ends, run a full 126-physics-tick hold (about 2.1 seconds). The reference reloads six 21-frame interval ticks and concurrently waits for event music, producing a phase-dependent roughly 105–126-frame timer. Our hold deliberately starts after music as well: the no-op reward/firework hooks otherwise let its timer expire during the music, leaving no visible pause afterward. Revisit that ordering when those hooks have their real reference-duration presentation. Audio is bounded by stream length plus one second if completion fails.
+- After the score and fireworks hooks finish and stage-clear playback ends, run a full 126-physics-tick hold (about 2.1 seconds). The reference reloads six 21-frame interval ticks and concurrently waits for event music, producing a phase-dependent roughly 105–126-frame timer. Our hold deliberately starts after music as well, preserving the requested visible pause even when timer conversion is short or skipped. This existing ordering is retained with time conversion; it differs from the reference's overlapping waits. Audio is bounded by stream length plus one second if completion fails.
 
 The two sounds use runtime non-looping copies and the shared mix gain; existing asset import semantics are untouched. The presentation replaces earlier player SFX at contact and replaces flag audio with stage-clear music at the walk cue, avoiding layered player/presentation noise.
 
-The accepted differences are the marker instead of hidden collision, actual player removal instead of drawing behind the castle, and temporarily empty score/firework hooks. Continuous floating-point movement, current climb animation cadence and renderer scheduling are not byte/cycle-accurate qualification; exact original-hardware parity is not claimed.
+The accepted differences are the marker instead of hidden collision, actual player removal instead of drawing behind the castle, silent time conversion and the temporarily empty fireworks hook. Continuous floating-point movement, current climb animation cadence and renderer scheduling are not byte/cycle-accurate qualification; exact original-hardware parity is not claimed.
 
-## Future score and fireworks steps
+## Score conversion and fireworks completion
 
 EndingStep.begin increments a ticket and calls _begin(ticket). The default immediately calls complete(ticket). Override _begin in a derived script to perform future work, then call complete with that original ticket. Only the current active ticket emits finished, once. cancel invalidates it. The presentation retains grab_height above the base and remaining_time_at_contact for later reward logic, independent of player lifetime. Score runs before Fireworks; progression waits for both in that order, the final delay and music.
 
-These hooks own completion notification only. Use GameHandler APIs for actual future rewards rather than changing player-owned counters. Do not call stage progression from an individual hook.
+TimeScoreStep begins when Mario reaches the independent castle endpoint and is retired. It subtracts one GameHandler.time_remaining unit and calls GameHandler.add_score(50) per physics tick, beginning on the following tick. At 60 Hz, 300 units award 15,000 points over about five seconds. HUD values update through their existing signals; the original remaining_time_at_contact stays unchanged for future fireworks selection. Conversion does not wait for stage-clear music to end. After the final decrement reaches zero, the following tick completes Score and starts Fireworks, matching the reference task check order. No extra Score-phase delay is introduced.
+
+Timer-disabled stages and already-zero counters skip conversion immediately, without points or timer mutation. The step uses a weak reference to its owning BaseLevel, checks current-level/completion ownership and its ticket, and disables physics callbacks on completion/cancellation. It checks ownership again after timer notifications so a synchronous level replacement cannot credit the new session. Partially awarded points remain if the ending is cancelled; future units stop. Existing score clamping remains in GameHandler/PlayerStatus.
+
+The counting SFX is deliberately absent. The reference uses Sfx_TimerTick/PlayTimerTick on square channel 2 (six-frame effect, requested during four of every eight global frames). Acquisition, gain normalization and cadence integration remain backlog work; stage-clear and flag audio are unchanged.
+
+Hooks notify completion and use GameHandler for rewards rather than player-owned counters. An individual hook does not dispatch stage progression.
 
 ## Return transition
 
@@ -53,4 +59,4 @@ The finish definition keeps gameplay and HUD hidden for the existing minimum 12 
 
 ## Verification
 
-flagpole_ending_test covers descent and flag motion, ignored controls/stopped timer, locked camera without unlock catch-up, timed dismount, a real walk to the independent endpoint, player lifecycle removal, independently delayed/stale score/firework hooks, real music after player retirement, covered title return, cancellation recovery, external replacement and source loss. Existing level_completion_test retains direct/Warp/next-stage and ownership coverage. See [verification](verification.md) for actual run outcomes.
+flagpole_ending_test covers descent and flag motion, ignored controls/stopped timer, locked camera without unlock catch-up, timed dismount, a real walk to the independent endpoint, player lifecycle removal, independently delayed/stale score/firework hooks, real music after player retirement, covered title return, cancellation recovery, external replacement and source loss. time_score_test covers conversion cadence, HUD values, original timer preservation, disabled/zero timers, exactly-once completion, cancellation/stale callbacks, reentrant replacement and score saturation. Existing level_completion_test retains direct/Warp/next-stage and ownership coverage. See [verification](verification.md) for actual run outcomes.

@@ -1,6 +1,6 @@
 # Flagpole ending presentation plan
 
-Status: reference investigation retained from 2026-11-05. The presentation foundation, scroll lock, descent/dismount/walk, endpoint cleanup and audio are now implemented; score/firework effects remain deferred behind no-op completion hooks. See [current implementation](flagpole-ending.md) for ownership, configuration and explicit timing limits. Proposed milestones below record the original plan.
+Status: reference investigation retained from 2026-11-05. The presentation foundation, scroll lock, descent/dismount/walk, endpoint cleanup and audio are now implemented; silent timer-to-score conversion is implemented; height rewards and fireworks remain deferred behind the presentation contracts. See [current implementation](flagpole-ending.md) for ownership, configuration and explicit timing limits. Proposed milestones below record the original plan.
 
 ## Ownership and agreed differences
 
