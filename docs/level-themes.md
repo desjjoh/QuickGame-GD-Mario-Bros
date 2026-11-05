@@ -32,7 +32,7 @@ Main-area content stays at its original world positions. LowerArea currently sit
 
 ## Verification
 
-area_theme_test checks all 21 texture mappings and dimensions, all 12 terrain sources and retained collisions, both pipe entity variants, marker previews, Underground question animation and used art, all 15 themed decoration sources and retained tile IDs, themed brick bounce, source-resource isolation, and descendant shutdown. Migration validation compares every saved painted cell's world coordinate and identifiers before/after. Both areas were rendered and visually inspected. Theme resources configure appearance; pipe travel is coordinated separately by BaseLevel.
+area_theme_test checks all 21 texture mappings and dimensions, all 12 terrain sources and retained collisions, both pipe entity variants, marker previews, Underground question animation and used art, all 16 themed decoration sources and retained tile IDs, themed brick bounce, source-resource isolation, and descendant shutdown. Migration validation compares every saved painted cell's world coordinate and identifiers before/after. Both areas were rendered and visually inspected. Theme resources configure appearance; pipe travel is coordinated separately by BaseLevel.
 
 ## Editing nested areas safely
 
@@ -49,3 +49,7 @@ TitleScreen also resolves its canonical start cursor through the active backgrou
 Themed artwork lives under assets/palettes/overworld and assets/palettes/underground, retaining decorations, interactibles, tileset and ui subfolders where present. Future themes should follow assets/palettes/<theme>. Display names remain Overworld/Underground. Shared TileSet resources remain under assets/tileset and AreaTheme selectors under assets/themes. All canonical texture-override keys and values use the new paths; fonts retain relative atlas filenames within their ui folder. Adding artwork alone still does not create a theme mapping or a font binding.
 
 Underground.title_accent_font selects its own ui/alphabet-alt.fnt for the title copyright. The font uses the supplied Underground atlas; white HUD/menu/top-score text remains unchanged. Missing/null font assignments still fall back to Overworld.
+
+## Castle decoration atlas
+
+Both palettes expose Castle parts as decoration source 15. Each supplied 64x32 atlas uses 16x16 cells: seven tiles are available, with empty (0,0) deliberately omitted. Matching source IDs/atlas coordinates allow normal area-theme swapping. Existing sources 0–14 and authored painting are unchanged. Paint parts on DecorationLayout; there is no castle collision or ending trigger in this TileSet.

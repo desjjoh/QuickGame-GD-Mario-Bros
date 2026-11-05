@@ -110,7 +110,9 @@ func _ready() -> void:
 	assert(director.elapsed_frames >= 402)
 	assert(GameHandler.current_level.scene_file_path == "res://scenes/levels/test_level.tscn")
 	assert(GameHandler.get_area_progress(key, &"probe").is_empty())
-	assert(GameHandler.player_status.lives == -1 and GameHandler.top_score == 456789)
+	assert(GameHandler.player_status.lives == 2 and GameHandler.top_score == 456789)
+	assert(GameHandler.player_status.score == 0 and GameHandler.player_status.coins == 0)
+	assert(GameHandler.player_status.powerup_form == PlayerStatus.PowerupForm.SMALL)
 	await ticks(3)
 	assert(
 		GameHandler.flow == GameHandler.GameFlow.TITLE,

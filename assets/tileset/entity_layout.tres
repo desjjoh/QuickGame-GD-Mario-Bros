@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://de0xqmdl5jj4c" path="res://assets/palettes/overworld/interactibles/blocks/question-block.png" id="2_question"]
 [ext_resource type="Texture2D" uid="uid://mtafpx0sg1e1" path="res://assets/palettes/overworld/interactibles/blocks/brick-alternate.png" id="3_alternate"]
 [ext_resource type="Texture2D" uid="uid://w03qimtoa0fp" path="res://assets/tileset/previews/pipe_entrance.png" id="4_pipe"]
+[ext_resource type="Texture2D" uid="uid://ck8w2kxc4e3gx" path="res://assets/tileset/previews/flagpole.png" id="flagpole"]
 [ext_resource type="Texture2D" uid="uid://b87hu6kqi013q" path="res://assets/tileset/previews/sideways_pipe_entrance.png" id="side"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_brick"]
@@ -40,6 +41,14 @@ texture = ExtResource("side")
 0:0/0/texture_origin = Vector2i(-8, -8)
 0:0/0/custom_data_0 = "sideways_pipe_entrance"
 
+[sub_resource type="TileSetAtlasSource" id="flagpole"]
+resource_name = "Flagpole (2x11)"
+texture = ExtResource("flagpole")
+0:0/size_in_atlas = Vector2i(2, 11)
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(-8, -80)
+0:0/0/custom_data_0 = "flagpole"
+
 [resource]
 custom_data_layer_0/name = "entity_id"
 custom_data_layer_0/type = 4
@@ -48,3 +57,4 @@ sources/1 = SubResource("TileSetAtlasSource_question")
 sources/2 = SubResource("TileSetAtlasSource_alternate")
 sources/3 = SubResource("TileSetAtlasSource_pipe")
 sources/4 = SubResource("Side")
+sources/5 = SubResource("flagpole")

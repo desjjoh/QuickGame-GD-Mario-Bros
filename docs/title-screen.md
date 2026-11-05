@@ -6,7 +6,7 @@ GameHandler owns title creation and game-flow decisions. Normal F5 startup shows
 
 Persistent Game owns LevelContainer and screen-space UI. GameHandler creates scenes/ui/title/title_screen.tscn under UI/ScreenContainer and loads its exported background_level into LevelContainer through the existing immediate loading lifecycle. The title Control contains the 1 PLAYER GAME label, themed start-cursor sprite, TOP- six-digit score label and ©1985 NINTENDO copyright line. All use the 8x8 UI grid. Menu and top-score text use the existing white HUD font; copyright uses the Overworld alternate alphabet through alphabet-alt.fnt, including its supplied © glyph. No second-player option is introduced; TitleCard displays the supplied logo artwork. Existing HUD remains present with bound session values. Top score reads GameHandler.top_score initially and updates through session_value_changed; no automatic record promotion or disk persistence is implemented.
 
-The menu emits start_requested with an optional target scene; it does not directly replace levels or initialize session data. GameHandler's GameFlow is DETACHED, TITLE, STARTING, PLAYING or GAME_OVER. The active flow is available globally and flow_changed reports changes. Game.start_with_title defaults to true; initial_level remains the first gameplay target (1-1), rather than the title background. Direct gameplay fixtures explicitly use start_with_title=false. TestLevel's scene controls remain normal when run directly with F6; only GameHandler's title usage suspends its player.
+The menu emits start_requested with an optional target scene; it does not directly replace levels or initialize session data. GameHandler's GameFlow is DETACHED, TITLE, STARTING, PLAYING, COMPLETING or GAME_OVER. The active flow is available globally and flow_changed reports changes. Game.start_with_title defaults to true; the first Game.stages entry is the initial gameplay target (1-1), rather than the title background. Direct gameplay fixtures explicitly use start_with_title=false. TestLevel's scene controls remain normal when run directly with F6; only GameHandler's title usage suspends its player.
 
 ## Starting and cleanup
 
@@ -57,13 +57,15 @@ Both PNGs are batch exports of the supplied start-title.aseprite sources using t
 
 Title tests allow authored block scenery in the shared sandbox and verify that every existing background entity is gameplay-suspended. Static/cosmetic background animation is still allowed; no entity movement or demo playback is introduced.
 
-Game over explicitly shuts down/removes the departed stage and clears its progress before returning here. Holding Start through the game-over card requires release before a new title Start edge. Returning preserves the earned score/coin totals and top score until normal new-game initialization resets player/session values. See [game over](game-over.md).
+Game over shuts down/removes the departed stage; the shared title-entry callback then performs the full run reset. Holding Start through the game-over card requires release before a new title Start edge. Returning resets score/coins, Small form, reserve lives, custom session values, pending startup target, stage index and level progress through clear_session. Top score alone remains in app memory until a hard restart. The title background rebuilds its own current-area/stage display metadata. See [game over](game-over.md).
 
 
 ## Alternate stage launch
 
 The visible menu contains only 1 PLAYER GAME, with the themed cursor fixed at (72,144). The temporary 1 PLAYER TEST entry and its title-specific configuration are removed. Select bindings remain available; no Input Map settings changed during removal.
 
-GameHandler.start_new_game(destination: PackedScene = null) still accepts an optional stage. Call it while the title is active to launch that scene through the existing new-session reset and intro transition; omit the argument to use Game.initial_level. The override does not replace the normal first-level reference. TestLevel remains the title background and a directly runnable scene. Common title entry owns progress cleanup after outgoing shutdown.
+GameHandler.start_new_game(destination: PackedScene = null) still accepts an optional stage. Call it while the title is active to launch that scene through the existing new-session reset and intro transition; omit the argument to use the first Game.stages entry. The override does not replace the normal first-level reference. TestLevel remains the title background and a directly runnable scene. Common title entry owns progress cleanup after outgoing shutdown.
 
 The title regression checks keyboard and controller Start into 1-1, an inert Select press with one visible option, explicit TestLevel launch through the handler, preserved default destination, cancellation, fresh gameplay controls and cleanup.
+
+A title created during an active transition remains hidden until coordinator completion, so menu artwork and background appear together. Final-stage completion uses the finish transition with a 12-tick minimum hidden operation and 12-tick quick outro; ordinary startup remains immediate.

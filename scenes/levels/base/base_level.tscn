@@ -6,6 +6,8 @@
 
 [ext_resource type="AudioStream" path="res://assets/soundtrack/smb_mariodie.wav" id="death_sound"]
 
+[ext_resource type="PackedScene" path="res://scenes/entities/climbables/flagpole/flagpole.tscn" id="flagpole"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_shadow"]
 shader = ExtResource("2_shadow")
 shader_parameter/shadow_offset = Vector2(2, 2)
@@ -19,6 +21,7 @@ fit_margin = 12.0
 clear_margin = 12.0
 script = ExtResource("1_script")
 death_sound = ExtResource("death_sound")
+entity_scenes = Dictionary[StringName, PackedScene]({&"flagpole": ExtResource("flagpole")})
 
 [node name="Areas" type="Node2D" parent="." unique_id=638828059]
 

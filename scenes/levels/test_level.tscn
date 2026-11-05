@@ -9,15 +9,18 @@
 [ext_resource type="TileSet" uid="uid://cs6ppr1ph7fpm" path="res://assets/tileset/underground/entity_layout.tres" id="11_a5rnb"]
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/pipe_entrance.tscn" id="13_pipe"]
 [ext_resource type="PackedScene" uid="uid://wlp13xllihs5" path="res://scenes/levels/base/base_level.tscn" id="base"]
+[ext_resource type="PackedScene" path="res://scenes/entities/climbables/flagpole/flagpole.tscn" id="flagpole"]
 [ext_resource type="PackedScene" uid="uid://b5m1vkcrml3t2" path="res://scenes/player/mario (small)/mario.tscn" id="player"]
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/sideways_pipe_entrance.tscn" id="side_pipe"]
 
 [node name="TestLevel" unique_id=422508678 instance=ExtResource("base")]
+timer_enabled = false
 texture_filter = 1
 player_scene = ExtResource("player")
 entity_scenes = Dictionary[StringName, PackedScene]({
 &"brick": ExtResource("4_brick"),
 &"brick_alternate": ExtResource("9_alternate"),
+&"flagpole": ExtResource("flagpole"),
 &"pipe_entrance": ExtResource("13_pipe"),
 &"question_block": ExtResource("6_question"),
 &"sideways_pipe_entrance": ExtResource("side_pipe")

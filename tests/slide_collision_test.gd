@@ -15,7 +15,6 @@ func _ready() -> void:
 	level.set_physics_process(false)
 	player = level.player
 	player.set_physics_process(false)
-	player.state_machine.get_state(&"Slide").slide_sound = null
 	wall = StaticBody2D.new()
 	var collision := CollisionShape2D.new()
 	var shape := RectangleShape2D.new()

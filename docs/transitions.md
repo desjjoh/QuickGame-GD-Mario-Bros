@@ -65,3 +65,13 @@ transition_test exercises existing startup/respawn and actual pipe transfer, ren
 Normal application startup now opens the [title](title-screen.md) through immediate background loading, with no transition. Confirming Start invokes the level definition into 1-1. Direct gameplay fixtures may opt out of title startup to isolate existing behavior.
 
 Game over adds a game_over definition (12 hidden / 378 card with HUD / 12 hidden). Its card waits for one-shot audio completion with bounded fallback, and its GameHandler completion returns to title after explicit old-level progress cleanup. No background override is introduced. See [game over](game-over.md).
+
+Level completion uses the existing level definition for advancement and Warp destinations, including the destination intro. A finish definition supplies a 12-frame hidden minimum with level replacement allowed and no presentation scene for final-stage title return. Warp skips future completion fanfare, not the destination intro. See [level completion](level-completion.md).
+
+## TIME UP
+
+The time_up definition holds its HUD-visible card for 147 physics frames, followed by a 12-frame quick outro. It validates the existing dead level without replacing it, preserving HUD TIME 000. Its completion callback selects the existing lives intro or game-over sequence. See [level timer](level-timer.md).
+
+## Ending return to title
+
+finish uses a 12-tick minimum hidden operation and a 12-tick quick outro. Title UI created inside that operation stays hidden until the coordinator finishes, matching its hidden background/HUD. No black cover or clear-color override is added. Flagpole audio and score/firework hooks finish before this transition begins.

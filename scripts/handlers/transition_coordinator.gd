@@ -15,6 +15,8 @@ signal frame_advanced
 	preload("res://assets/transitions/area.tres"),
 	preload("res://assets/transitions/level.tres"),
 	preload("res://assets/transitions/game_over.tres"),
+	preload("res://assets/transitions/finish.tres"),
+	preload("res://assets/transitions/time_up.tres"),
 ]
 var _definitions: Dictionary[StringName, Definition] = {}
 var _definition: Definition

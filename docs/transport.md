@@ -49,6 +49,8 @@ The destination area is authoritative for its target's position. Generic transpo
 
 The former pipe_return marker and temporary start return pipe are removed. The near_start/near_end example markers are also removed from the playable stage; tests create their own standalone endpoints when needed. Return uses the existing main area and camera. The source area unloads after handoff and previous block/tile progress is restored on return.
 
+Mario faces right when placed at a transport destination and when exit presentation finishes. A sideways exit still faces its travel direction during the animation; vertical entry preserves the incoming facing until destination placement.
+
 ## Compatibility
 
 Existing `request_pipe_entry(pipe)` delegates to transport. Existing PipeRoute resources and destination_area_id/destination_endpoint_id scene overrides remain supported when no explicit TransportDestination is assigned. Prefer Transport Points and destination Resources for new authoring; their settings take precedence.

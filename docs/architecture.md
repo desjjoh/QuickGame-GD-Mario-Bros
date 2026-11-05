@@ -148,3 +148,13 @@ GameHandler owns one PlayerStatus Resource for form, score, coins and lives. It 
 Playable stages are grouped under scenes/levels/worlds/<world>/, starting with worlds/world 1/1-1.tscn. Shared base and area scenes remain under levels/base and levels/areas, and the reusable menu/test sandbox stays levels/test_level.tscn.
 
 GameHandler now owns a single logical level's area progress instead of a multi-level cache, and GameFlow includes GAME_OVER. Negative reserves select the named game-over presentation after death completion; level retirement preserves the final snapshot during the card, and common title entry clears the cache after shutdown. PlayerStatus stores two reserves and the intro displays three attempts. See [game over](game-over.md).
+
+Game now exports an ordered Stages list. BaseLevel.on_complete requests normal or explicit-destination Warp completion; GameHandler owns the stage index, carried player status, next-stage selection and final title return through the coordinator. The timer and configured flagpole ending trigger are implemented; reward conversion/firework effects remain deferred. See [level completion](level-completion.md).
+
+## Climbing ownership
+
+BaseClimbable owns surface geometry and accepted-attachment signals, with no input subscription or polling callbacks. BasePlayer owns Motion/Climbing and a script-based PlayerClimbState contract; Mario owns its concrete Climb state node and two-frame animation. The paintable Flagpole inherits that surface and adds a normal solid palette block base. Unconfigured poles retain manual climbing. The configured 1-1 pole is coordinated by a separate level-owned ending presentation. See [climbing](climbing.md).
+
+## Ending presentation lifetime
+
+BaseLevel/GameHandler accept completion before choreography and finish stage progression after it. LevelEndingPresentation is the shared contract; FlagpoleEndingPresentation owns its phase machine, audio, camera lock and ticketed Score/Fireworks steps. The concrete player owns its scripted ending state. EndingEndpoint and castle decoration remain independent. Removing Mario at the endpoint leaves the level presentation alive to finish hooks/music, then existing next-stage/title cleanup runs. See [flagpole ending](flagpole-ending.md).

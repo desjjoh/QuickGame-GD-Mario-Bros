@@ -23,7 +23,7 @@ func _on_level_changed(_level: BaseLevel) -> void:
 func _on_session_value_changed(key: StringName, _value: Variant) -> void:
 	if key == &"current_area_id":
 		_bind_area_theme()
-	if key in [&"score", &"coins", &"stage_label", &"time_remaining"]:
+	if key in [&"score", &"coins", &"stage_label", &"time_remaining", &"timer_enabled"]:
 		_refresh_values()
 
 
@@ -32,6 +32,7 @@ func _refresh_values() -> void:
 	$CoinCount.text = "%02d" % GameHandler.player_status.coins
 	$WorldValue.text = GameHandler.stage_label.left(3)
 	$TimeValue.text = "%03d" % GameHandler.time_remaining
+	$TimeValue.visible = GameHandler.timer_enabled
 
 
 func _bind_area_theme() -> void:

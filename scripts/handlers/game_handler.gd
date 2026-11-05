@@ -1,13 +1,15 @@
 extends Node
 ## Global game ownership and in-memory session data. No disk persistence yet.
 
-enum GameFlow { DETACHED, TITLE, STARTING, PLAYING, GAME_OVER }
+enum GameFlow { DETACHED, TITLE, STARTING, PLAYING, GAME_OVER, COMPLETING }
 
 signal flow_changed(value: GameFlow)
 var flow: GameFlow = GameFlow.DETACHED
 var _title_screen: Control
 var _first_level: PackedScene
 var _start_level: PackedScene
+var _stages: Array[PackedScene] = []
+var current_stage_index: int = -1
 var _detaching: bool = false
 
 signal level_changed(level: BaseLevel)
@@ -42,6 +44,13 @@ var time_remaining: int = 400:
 		time_remaining = value
 		session_value_changed.emit(&"time_remaining", time_remaining)
 
+var timer_enabled: bool = true:
+	set(value):
+		if timer_enabled == value:
+			return
+		timer_enabled = value
+		session_value_changed.emit(&"timer_enabled", value)
+
 var _session: Dictionary[StringName, Variant] = {}
 var _progress_level_key: String = ""
 var _area_progress: Dictionary = {}
@@ -63,6 +72,7 @@ func _ready() -> void:
 	add_child(animation_clock)
 	transitions.name = "Transitions"
 	add_child(transitions)
+	transitions.finished.connect(_on_transition_finished)
 
 
 func attach_game(game: Node, level_container: Node2D) -> void:
@@ -80,6 +90,8 @@ func detach_game(game: Node) -> void:
 	_clear_title()
 	_first_level = null
 	_start_level = null
+	_stages.clear()
+	current_stage_index = -1
 	if is_instance_valid(current_level):
 		current_level.shutdown()
 	_current_level_scene = null
@@ -90,7 +102,9 @@ func detach_game(game: Node) -> void:
 	_set_flow(GameFlow.DETACHED)
 
 
-func load_level(scene: PackedScene) -> bool:
+func load_level(
+	scene: PackedScene, reset_progress: bool = false, stage_index_override: int = -2
+) -> bool:
 	if _loading or scene == null or not is_instance_valid(_level_container):
 		return false
 	var instance := scene.instantiate()
@@ -107,17 +121,23 @@ func load_level(scene: PackedScene) -> bool:
 		previous_level.queue_free()
 	_current_level_scene = scene
 	current_level = instance as BaseLevel
+	if flow != GameFlow.TITLE:
+		current_stage_index = (
+			_stage_index(scene) if stage_index_override == -2 else stage_index_override
+		)
 	var level_key := current_level.scene_file_path
 	if level_key.is_empty():
 		level_key = "runtime:%s" % current_level.get_instance_id()
-	select_level_progress(level_key)
+	select_level_progress(level_key, reset_progress)
 	stage_label = current_level.stage_label
+	timer_enabled = current_level.timer_enabled
 	time_remaining = current_level.starting_time
 	current_player = null
 	_level_container.add_child(current_level)
 	current_player = current_level.player
 	_loading = false
 	level_changed.emit(current_level)
+	_start_current_level_if_ready()
 	return true
 
 
@@ -138,6 +158,11 @@ func set_session_value(key: StringName, value: Variant) -> void:
 			stage_label = str(value)
 		&"time_remaining":
 			time_remaining = int(value)
+		&"timer_enabled":
+			if is_instance_valid(current_level):
+				current_level.timer_enabled = bool(value)
+			else:
+				timer_enabled = bool(value)
 		_:
 			_session[key] = value
 			session_value_changed.emit(key, value)
@@ -159,6 +184,8 @@ func get_session_value(key: StringName, fallback: Variant = null) -> Variant:
 			return stage_label
 		&"time_remaining":
 			return time_remaining
+		&"timer_enabled":
+			return timer_enabled
 	return _session.get(key, fallback)
 
 
@@ -194,12 +221,16 @@ func set_top_score(value: int) -> void:
 	top_score = value
 
 
+## Reset the run; app-session top score and authored configuration survive.
 func clear_session() -> void:
+	current_stage_index = -1
+	_start_level = null
 	_session.clear()
 	clear_level_progress()
 	player_status.reset()
 	stage_label = "1-1"
 	time_remaining = 400
+	timer_enabled = true
 
 
 ## Select one logical level. Same-level scene recreation preserves its areas.
@@ -238,11 +269,51 @@ func forget_area_progress(level_key: String) -> void:
 func restart_after_death(level: BaseLevel, progress_key: String) -> bool:
 	if current_level != level or _current_level_scene == null or _loading:
 		return false
+	if level.death_reason == BaseLevel.DeathReason.TIMEOUT and not level.time_up_shown:
+		return _begin_time_up(level, progress_key)
 	if player_status.lives < 0:
 		return _begin_game_over(level)
 	if transitions.available():
 		return transitions.begin(level, _restart_death_now.bind(level, progress_key), &"level") > 0
 	return _restart_death_now(level, progress_key)
+
+
+func _begin_time_up(level: BaseLevel, progress_key: String) -> bool:
+	if not transitions.available():
+		level.time_up_shown = true
+		return restart_after_death(level, progress_key)
+	var source: WeakRef = weakref(level)
+	var expected_game: WeakRef = weakref(current_game)
+	return (
+		transitions.begin(
+			current_game,
+			_time_up_source_valid.bind(source),
+			&"time_up",
+			_time_up_finished.bind(expected_game, source, progress_key)
+		)
+		> 0
+	)
+
+
+func _time_up_source_valid(source: WeakRef) -> bool:
+	var level := source.get_ref() as BaseLevel
+	return (
+		level != null
+		and current_level == level
+		and not level.is_shutdown
+		and level.death_in_progress
+	)
+
+
+func _time_up_finished(
+	_success: bool, expected_game: WeakRef, source: WeakRef, progress_key: String
+) -> void:
+	if _detaching or expected_game.get_ref() != current_game or not _time_up_source_valid(source):
+		return
+	var level := source.get_ref() as BaseLevel
+	# A cancelled notice still resolves the accepted death; never charge again.
+	level.time_up_shown = true
+	restart_after_death(level, progress_key)
 
 
 func _restart_death_now(level: BaseLevel, progress_key: String) -> bool:
@@ -274,6 +345,23 @@ func _set_flow(value: GameFlow) -> void:
 		return
 	flow = value
 	flow_changed.emit(value)
+	_start_current_level_if_ready()
+
+
+func _on_transition_finished(_id: int, _success: bool) -> void:
+	if flow == GameFlow.TITLE and is_instance_valid(_title_screen):
+		_title_screen.show()
+	_start_current_level_if_ready()
+
+
+func _start_current_level_if_ready() -> void:
+	if (
+		flow == GameFlow.PLAYING
+		and not transitions.busy
+		and is_instance_valid(current_level)
+		and not current_level.is_shutdown
+	):
+		current_level.on_level_start()
 
 
 func _clear_title() -> void:
@@ -284,6 +372,7 @@ func _clear_title() -> void:
 
 
 func start_game_flow(first_level: PackedScene, with_title: bool = true) -> bool:
+	_stages.assign(current_game.stages)
 	_first_level = first_level
 	if with_title:
 		return show_title(first_level)
@@ -294,6 +383,11 @@ func start_game_flow(first_level: PackedScene, with_title: bool = true) -> bool:
 func show_title(first_level: PackedScene) -> bool:
 	if _detaching or first_level == null or not is_instance_valid(current_game) or transitions.busy:
 		return false
+	return _show_title_now(first_level)
+
+
+func _show_title_now(first_level: PackedScene) -> bool:
+	current_stage_index = -1
 	_clear_title()
 	_first_level = first_level
 	# Runtime loading keeps UI/level dependencies out of autoload construction.
@@ -302,22 +396,28 @@ func show_title(first_level: PackedScene) -> bool:
 		return false
 	_title_screen = screen
 	_set_flow(GameFlow.TITLE)
-	# Returning to the menu owns cache disposal. Shutdown must save its final
-	# snapshot before clearing, including a same-scene TestLevel return.
+	# Title entry owns full run cleanup. Save the outgoing snapshot before
+	# reset so shutdown cannot repopulate the cleared progress store.
 	if is_instance_valid(current_level):
 		current_level.shutdown()
-	clear_level_progress()
+	clear_session()
 	if not load_level(screen.background_level):
 		_clear_title()
 		return false
+	_suspend_title_background()
+	screen.connect(&"start_requested", start_new_game)
+	if transitions.busy:
+		screen.hide()
+	current_game.get_node("UI/ScreenContainer").add_child(screen)
+	return true
+
+
+func _suspend_title_background() -> void:
 	# The editable title background may contain painted world objects.
 	# Freeze their gameplay as well as Mario, while cosmetics remain active.
 	for entity in current_level.find_children("*", "BaseEntity", true, false):
 		(entity as BaseEntity).set_gameplay_suspended(true)
 	current_level.set_physics_process(false)
-	screen.connect(&"start_requested", start_new_game)
-	current_game.get_node("UI/ScreenContainer").add_child(screen)
-	return true
 
 
 func start_new_game(destination: PackedScene = null) -> bool:
@@ -352,8 +452,9 @@ func _load_first_level() -> bool:
 	# Shutdown saves old progress before the new session deliberately clears it.
 	if is_instance_valid(current_level):
 		current_level.shutdown()
+	var destination := _start_level
 	clear_session()
-	return load_level(_start_level)
+	return load_level(destination)
 
 
 func _start_finished(success: bool) -> void:
@@ -379,6 +480,123 @@ func _restore_title(expected_game: WeakRef, first_level: PackedScene) -> void:
 	):
 		return
 	show_title(first_level)
+
+
+func _stage_index(scene: PackedScene) -> int:
+	for index in range(_stages.size()):
+		if _stages[index] == scene:
+			return index
+		if (
+			not scene.resource_path.is_empty()
+			and _stages[index].resource_path == scene.resource_path
+		):
+			return index
+	return -1
+
+
+func claim_completion(level: BaseLevel) -> bool:
+	if (
+		flow != GameFlow.PLAYING
+		or current_level != level
+		or _detaching
+		or transitions.busy
+		or not is_instance_valid(level)
+		or not level.completion_in_progress
+	):
+		return false
+	var expected_game: WeakRef = weakref(current_game)
+	var source: WeakRef = weakref(level)
+	_set_flow(GameFlow.COMPLETING)
+	if not is_instance_valid(level) or current_level != level or level.is_shutdown or _detaching:
+		_completion_finished(false, expected_game, source)
+		return false
+	level.notify_completion_started()
+	if not is_instance_valid(level) or current_level != level or level.is_shutdown or _detaching:
+		_completion_finished(false, expected_game, source)
+		return false
+	return true
+
+
+func cancel_completion(level: BaseLevel) -> void:
+	if current_level == level and flow == GameFlow.COMPLETING and not _detaching:
+		_set_flow(GameFlow.PLAYING)
+
+
+func complete_level(level: BaseLevel, override: PackedScene = null) -> bool:
+	if (
+		current_level != level
+		or _detaching
+		or transitions.busy
+		or not is_instance_valid(level)
+		or level.is_shutdown
+		or not level.completion_in_progress
+		or level.completion_dispatched
+	):
+		return false
+	if flow == GameFlow.PLAYING:
+		if not claim_completion(level):
+			return false
+	elif flow != GameFlow.COMPLETING or not level.ending_in_progress:
+		return false
+	level.completion_dispatched = true
+	var expected_game: WeakRef = weakref(current_game)
+	var source: WeakRef = weakref(level)
+	var destination: PackedScene = override
+	var destination_index := _stage_index(override) if override != null else -1
+	if (
+		destination == null
+		and current_stage_index >= 0
+		and current_stage_index + 1 < _stages.size()
+	):
+		destination_index = current_stage_index + 1
+		destination = _stages[destination_index]
+	var operation := _complete_level_now.bind(source, destination, destination_index)
+	var finished := _completion_finished.bind(expected_game, source)
+	if transitions.available():
+		var ticket: int = transitions.begin(
+			current_game, operation, &"level" if destination != null else &"finish", finished
+		)
+		if ticket == 0:
+			_completion_finished(false, expected_game, source)
+		return ticket > 0
+	var success: bool = operation.call()
+	_completion_finished(success, expected_game, source)
+	return success
+
+
+func _complete_level_now(source: WeakRef, destination: PackedScene, destination_index: int) -> bool:
+	var level := source.get_ref() as BaseLevel
+	if (
+		_detaching
+		or flow != GameFlow.COMPLETING
+		or level == null
+		or current_level != level
+		or level.is_shutdown
+	):
+		return false
+	if destination == null:
+		return _show_title_now(_first_level)
+	return load_level(destination, true, destination_index)
+
+
+func _completion_finished(_success: bool, expected_game: WeakRef, source: WeakRef) -> void:
+	if _detaching or expected_game.get_ref() != current_game:
+		return
+	if flow == GameFlow.TITLE and is_instance_valid(_title_screen):
+		# The coordinator restores its pre-hold entity snapshots first. Title
+		# entry has since established a different, persistent gameplay policy.
+		_suspend_title_background()
+		return
+	if flow != GameFlow.COMPLETING:
+		return
+	var level := source.get_ref() as BaseLevel
+	if is_instance_valid(level) and current_level == level and not level.is_shutdown:
+		if level.ending_in_progress:
+			level.cancel_ending()
+		else:
+			level.completion_in_progress = false
+			level.completion_dispatched = false
+	_set_flow(GameFlow.PLAYING)
 
 
 func _begin_game_over(level: BaseLevel) -> bool:

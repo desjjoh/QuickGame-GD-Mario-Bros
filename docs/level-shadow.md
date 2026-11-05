@@ -31,3 +31,7 @@ No VSync, physics, interpolation, Project Settings or import parameters change. 
 ## Verification
 
 shared_shadow_test renders overlapping world, HUD and player shapes, checks foreground order and a HUD-cast shadow, compares nonzero-radius blur against a CPU evaluation of the original 2D Gaussian, and checks same-frame moving/color-changing foreground output. It also covers camera fractions, pipe routing, buffer dimensions, disabled updates/startup, restoration and level replacement. hud_scroll_test compares foreground glyph pixels while camera speed changes. Headless checks do not establish image correctness; current rendered results and performance limits are recorded in [verification](verification.md).
+
+## Draw-order maintenance
+
+The compositor reasserts world (0), screen UI (1), and foreground players (2) draw indices on each render synchronization. Godot can refresh canvas indices after scene-tree changes even though render-only parents were assigned manually. Reparenting remains cached; this correction does not reparent every frame or modify artwork. Pipe transport remains the sole intentional behind-world route, selected from the level Players/Areas sibling order. Flag contact and ending descent use ordinary foreground player routing.

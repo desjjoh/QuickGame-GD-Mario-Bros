@@ -144,6 +144,9 @@ func sync_rendering() -> void:
 	# Game owns a screen-space canvas: HUD never cancels a moving camera.
 	# Only world render transforms receive the final interpolated camera matrix.
 	_sync_passes()
+	# Scene-tree changes can refresh engine draw indices after manual routing.
+	RenderingServer.canvas_item_set_draw_index(world_root.get_canvas_item(), 0)
+	RenderingServer.canvas_item_set_draw_index(screen_root.get_canvas_item(), 1)
 	var camera_transform := get_viewport().canvas_transform
 	# A transparent border retains offscreen silhouettes that cast into the visible image.
 	var padding := Vector2.ONE * SHADOW_PADDING if _shadow_enabled else Vector2.ZERO
@@ -167,9 +170,9 @@ func sync_rendering() -> void:
 		_players_behind_world = behind_world
 		var render_parent := _level.get_canvas_item() if behind_world else _foreground_parent()
 		RenderingServer.canvas_item_set_parent(players.get_canvas_item(), render_parent)
-		RenderingServer.canvas_item_set_draw_index(
-			players.get_canvas_item(), players.get_index() if behind_world else 2
-		)
+	RenderingServer.canvas_item_set_draw_index(
+		players.get_canvas_item(), players.get_index() if behind_world else 2
+	)
 	var render_transform := (
 		players.transform
 		if behind_world
