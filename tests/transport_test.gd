@@ -96,6 +96,7 @@ func _ready() -> void:
 	target.position.x += 16
 	var expected := target.exit_position()
 	GameHandler.set_session_value(&"coins", 17)
+	player.face_direction(-1.0)
 	assert(level.transport(player, destination, source))
 	assert(player.state_machine.current_state.name == &"TestTravel")
 	assert(not level.transport(player, destination, source))
@@ -107,6 +108,7 @@ func _ready() -> void:
 	)
 	assert(player.state_machine.current_state != player.pipe_enter_state)
 	assert(player.state_machine.current_state != player.state_machine.get_state(&"TestTravel"))
+	assert(not player.sprite.flip_h, "Completed transport must restore right-facing control.")
 	assert(player.body.collision_mask != 0)
 	assert(GameHandler.get_session_value(&"coins") == 17)
 	await ticks(1)

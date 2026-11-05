@@ -1,0 +1,56 @@
+# Flagpole ending presentation
+
+## Current behavior
+
+1-1 has one stage in Game.Stages. Its configured flagpole now starts the reusable level-owned ending presentation: scripted Mario/flag descent, 24-tick dismount hold, automatic rightward walk, player retirement at the independent castle endpoint, score/fireworks completion hooks, music/final hold, then the normal final-stage return to title. The castle remains painted DecorationLayout art with no special collision.
+
+Score and Fireworks are deliberately no-op EndingStep nodes: no height score, timer-to-score conversion, castle flag or fireworks are awarded/drawn yet. They still participate in the real asynchronous completion contract, so future implementations can delay progression. No top-score promotion is introduced.
+
+## Authoring
+
+The level root exports Ending Presentation. 1-1 points it to its FlagpoleEnding child, an instance of scenes/levels/endings/flagpole_ending.tscn. That presentation matches area_id=main and flagpole_cell=(196,2); other poles remain ordinary climbables unless configured. Binding uses the painted cell identity, never the closest pole.
+
+The presentation's Endpoint points to the independently editable EndingEndpoint Marker2D under the level root. Its initial position is (3272,208), the center/bottom of the supplied castle doorway. Move this marker to choose the stopping point for a different castle/exit; castle art, pole placement and endpoint remain independent. Use level-relative coordinates for the marker; the player state receives its global position.
+
+Levels without an Ending Presentation retain manual climbing. Castle-ending presentations can implement the same LevelEndingPresentation contract later. Keep the configured pole and exit in the same active area for this first sequence; cross-area ending choreography is not implemented.
+
+## Lifecycle and progression
+
+BaseLevel.begin_ending accepts the configured presentation, current live player and source once. It gates normal timeout/death/transport/completion requests. GameHandler.claim_completion changes flow to COMPLETING and emits completion_started once without immediately replacing the level. Ordinary on_complete and Warp callers keep their previous direct progression behavior.
+
+The presentation installs Mario's owned FlagpoleEnding state after the contact-state transition finishes. PlayerFlagpoleEndingState reuses climbing, horizontal movement, gravity and walk cadence while ignoring controller input. Scripted physics remains active; the presentation does not pause the FSM it needs to animate.
+
+At the endpoint, the presentation calls player.shutdown(), clears matching BaseLevel.player and GameHandler.current_player references and queues the entity for deletion. The ending owns audio and hooks, so it continues after Mario is gone. No hidden stopping block or background-priority hiding is used. Handler-owned player/session status survives until normal next-stage/title policy runs.
+
+BaseLevel.finish_ending only accepts its completed presentation. GameHandler then chooses the next stage through the existing stage list, or uses common title entry after the last stage. It does not require a surviving player. Final title entry retains top score and performs the existing full run/progress cleanup.
+
+Cancellation stops owned audio, invalidates hook tickets, releases the camera lock, resets the flag and restores controls. If cancellation occurs after retirement, the level recreates its player at PlayerSpawn and snaps the camera back. External level replacement restores normal PLAYING flow for the replacement. Source loss cancels the sequence rather than leaving a scripted player stuck. Level shutdown cancels outstanding presentation work; stale hook completion cannot advance a later run.
+
+## Reference choreography
+
+The source routines are recorded in [the reference investigation](flagpole-ending-plan.md). This implementation uses the following translated rules:
+
+- Consume legitimate approach movement before acquiring a runtime camera lock. Attachment/side snaps do not count as forward camera travel. The lock is owned by the presentation, separate from authored Follow Enabled, and consumes tracking history while held.
+- On contact, play smb_flagpole.wav once and start lowering the flag. Mario is forced onto the left side, facing right. Nominal downward speed is 1+$ff/256 pixels per tick, using our shared floating-point component.
+- Mario stops near two pixels above the base, unless contact began lower. The flag sprite uses a fractional-byte accumulator (normally a one-pixel first step followed by two-pixel steps) and checks its stop threshold before movement, matching the reference ordering. Its center threshold is base-top minus 14 pixels, corresponding to reference flag top $aa at base top $c0; the last step can overshoot it by one pixel. Descent advances when the flag reaches its threshold or Mario passes the fallback threshold, not an unconditional wait-for-both duration.
+- Dismount places Mario on the other side facing inward, holds 24 ticks, then nudges four pixels outward and starts ordinary walk-profile motion. There is no invented jump impulse.
+- When his feet reach base-top plus 14 pixels during the walk, release scroll lock and play smb_stage_clear.wav. Locked displacement is not caught up afterwards. A very close custom endpoint starts music/unlocks defensively at retirement if that threshold has not been reached.
+- After the score and fireworks hooks finish and stage-clear playback ends, run a full 126-physics-tick hold (about 2.1 seconds). The reference reloads six 21-frame interval ticks and concurrently waits for event music, producing a phase-dependent roughly 105–126-frame timer. Our hold deliberately starts after music as well: the no-op reward/firework hooks otherwise let its timer expire during the music, leaving no visible pause afterward. Revisit that ordering when those hooks have their real reference-duration presentation. Audio is bounded by stream length plus one second if completion fails.
+
+The two sounds use runtime non-looping copies and the shared mix gain; existing asset import semantics are untouched. The presentation replaces earlier player SFX at contact and replaces flag audio with stage-clear music at the walk cue, avoiding layered player/presentation noise.
+
+The accepted differences are the marker instead of hidden collision, actual player removal instead of drawing behind the castle, and temporarily empty score/firework hooks. Continuous floating-point movement, current climb animation cadence and renderer scheduling are not byte/cycle-accurate qualification; exact original-hardware parity is not claimed.
+
+## Future score and fireworks steps
+
+EndingStep.begin increments a ticket and calls _begin(ticket). The default immediately calls complete(ticket). Override _begin in a derived script to perform future work, then call complete with that original ticket. Only the current active ticket emits finished, once. cancel invalidates it. The presentation retains grab_height above the base and remaining_time_at_contact for later reward logic, independent of player lifetime. Score runs before Fireworks; progression waits for both in that order, the final delay and music.
+
+These hooks own completion notification only. Use GameHandler APIs for actual future rewards rather than changing player-owned counters. Do not call stage progression from an individual hook.
+
+## Return transition
+
+The finish definition keeps gameplay and HUD hidden for the existing minimum 12 ticks while loading the title, followed by a 12-tick quick outro. A title created during a transition stays hidden until the coordinator finishes, so its UI and background appear together. No black cover or background override is added, and startup still opens directly on the title.
+
+## Verification
+
+flagpole_ending_test covers descent and flag motion, ignored controls/stopped timer, locked camera without unlock catch-up, timed dismount, a real walk to the independent endpoint, player lifecycle removal, independently delayed/stale score/firework hooks, real music after player retirement, covered title return, cancellation recovery, external replacement and source loss. Existing level_completion_test retains direct/Warp/next-stage and ownership coverage. See [verification](verification.md) for actual run outcomes.

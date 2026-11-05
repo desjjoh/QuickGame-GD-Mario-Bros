@@ -292,7 +292,7 @@ func check_life_loss_boundaries() -> void:
 		await ticks(1)
 		if GameHandler.current_level != level:
 			break
-	assert(GameHandler.current_level != level and GameHandler.player_status.lives == -1)
+	assert(GameHandler.current_level != level and GameHandler.player_status.lives == 2)
 	assert(GameHandler.flow == GameHandler.GameFlow.TITLE)
 	game.free()
 	await get_tree().process_frame

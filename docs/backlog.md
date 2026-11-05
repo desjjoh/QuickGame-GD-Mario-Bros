@@ -4,7 +4,9 @@ This guide records deferred work, not implemented features.
 
 ## Next session - 2026-11-04
 
-Update 2026-11-04: shared player status and live HUD/title/intro bindings are implemented first. See [player status](player-status.md). Top-score promotion/saving, coin rollover/rewards, timer countdown and form-based scene selection remain deferred. Game over and the NES reserve/display model are now implemented; see [game over](game-over.md).
+Update 2026-11-04: shared player status and live HUD/title/intro bindings are implemented first. See [player status](player-status.md). Top-score promotion/saving, coin rollover/rewards and form-based scene selection remain deferred. Game over and the NES reserve/display model are now implemented; see [game over](game-over.md).
+
+Current priority: stage completion foundation and the level timer are implemented. Timer expiry now uses animated death and TIME UP; see [level timer](level-timer.md). The fixed flagpole and manual climbing foundation are implemented; see [climbing](climbing.md). The configured 1-1 flagpole now runs its ending presentation; score/time rewards, fireworks and castle-specific endings remain deferred. Warp bypasses this presentation. See [level completion](level-completion.md).
 
 Requested next priorities:
 
@@ -13,9 +15,9 @@ Requested next priorities:
 
 Start with coins, then the first enemy. These are planned tasks; implementation has not started.
 
-Update 2026-11-03: pit death, shared gameplay suspension, cleanup, death event audio and PlayerSpawn restart are now implemented. The agreed global reset_progress_on_death=false replaces the per-level default-true proposal below. See [death lifecycle](death.md). Remaining work: visible hit-death presentation and general off-camera entity policies.
+Update 2026-11-03: pit death, shared gameplay suspension, cleanup, death event audio and PlayerSpawn restart are now implemented. The agreed global reset_progress_on_death=false replaces the per-level default-true proposal below. See [death lifecycle](death.md). Update 2026-11-04: visible Mario Dead presentation is now implemented; gameplay callers/hazards remain deferred. General off-camera entity policies are described below.
 
-Update: [BaseArea camera activity and enemy spawner foundation](entity-activity.md) are implemented with resident-object sleep and reentry-based disposable actors. Remaining: actual enemy scenes/AI, enemy-specific respawn and defeat persistence, state-driven callback scheduling inside the activity region, and profiling with hundreds of objects before considering spatial indexing. Visible hit-death presentation remains deferred.
+Update: [BaseArea camera activity and enemy spawner foundation](entity-activity.md) are implemented with resident-object sleep and reentry-based disposable actors. Remaining: actual enemy scenes/AI, enemy-specific respawn and defeat persistence, state-driven callback scheduling inside the activity region, and profiling with hundreds of objects before considering spatial indexing. Visible Mario Dead presentation is implemented; enemies/hazards that request it remain deferred.
 
 ## P2: Standalone level death cannot restart
 
@@ -95,3 +97,25 @@ Formatting is now consistent and repeatable; default gdtoolkit lint still report
 Fixed during this review: HUD live area-theme changes now refresh its coin automatically, with old-area subscriptions released on rebind/removal. The previous test's manual refresh workaround has been removed. Existing F6 standalone death and native-shutdown issues above remain open.
 
 Also fixed during cleanup: title background gameplay suspension now includes painted world entities. The title test accepts authored blocks and verifies their suspended callbacks instead of requiring an empty sandbox.
+
+
+## Game-over audio teardown warning - 2026-11-04
+
+Open: the full 47-scene run during shadow work had passing game_over_test assertions/exit zero but leaked AudioStreamWAV and AudioStreamPlaybackWAV. The same warning reproduced with the committed pre-blur renderer, identifying an existing audio teardown path rather than proving a shadow regression. Explicitly clearing the card's stream did not resolve it and was reverted. Reduce the rapid game-over cancellation/free scenario and verify playback lifetime without arbitrary waits or warning exemptions. Keep the runner strict; this is separate from the native access-violation backlog and the user-visible frame drops.
+
+
+## Intermittent Run loss after landing - 2026-11-04
+
+Open: user reports Run feels dropped mainly after jump/landing and re-press restores it. Continuous held-input regression passed 16 keyboard/simulated-controller jump/landing cycles in both directions, with correct grounded caps and no stale air modifier. Capture a hardware occurrence with [Run input diagnostics](run-input.md) before changing polling, buffering or physics. The opt-in readout separates per-device X, mapped action, handler, input gate and movement modifiers; normal gameplay behavior is unchanged.
+
+## Climbing follow-up
+
+Implement actual vines and their top-of-screen transport. The flagpole descent, flag movement, dismount, castle walk and completion audio are now implemented; score/time conversion, castle flag and fireworks remain deferred. Two eventual completion fanfare types remain deferred. Configured flagpole contact now starts the level-owned ending and completion audio; score/firework hooks currently complete without effects.
+
+## Flagpole ending presentation planning - 2026-11-05
+
+See [flagpole ending plan](flagpole-ending-plan.md) for reference choreography, level/presentation ownership and the requested endpoint/player-removal differences. Completion acceptance must outlive Mario before presentation finish can advance stages. The foundation is now implemented; see [current flagpole ending](flagpole-ending.md). Reward/firework callbacks remain no-ops until those features are implemented.
+
+## Skid audio and final ending hold - 2026-11-05
+
+Skid audio is disabled and its runtime repeat code/scene/mix references removed because the current Lost Levels-style sample pops. Keep the source MP3 unused for possible future reconsideration. When implementing real score/fireworks presentation, review the current post-music 126-tick hold against the reference's overlapping interval/music waits; the present ordering guarantees the requested visible pause while those hooks are no-ops.

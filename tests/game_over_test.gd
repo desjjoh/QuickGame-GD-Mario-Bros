@@ -88,7 +88,8 @@ func _ready() -> void:
 	assert(card.get_node("Message").text == "GAME OVER" and not card.has_node("Lives"))
 	assert(card.audio.playing and card.audio.volume_db == -8.0)
 	assert(not (card.audio.stream as AudioStreamWAV).loop_mode)
-	assert(GameHandler.current_level == null and GameHandler._area_progress.is_empty())
+	assert(GameHandler.current_level == null)
+	assert(GameHandler.get_area_progress(key, &"probe").collected_coins.size() == 1)
 	assert(not ControllerHandler.enabled and not game.get_node("LevelContainer").visible)
 	assert(game.get_node("UI/HUD").visible and game.get_node("UI/HUD/CoinCount").text == "08")
 	if DisplayServer.get_name() != "headless":
@@ -109,7 +110,9 @@ func _ready() -> void:
 	assert(director.elapsed_frames >= 402)
 	assert(GameHandler.current_level.scene_file_path == "res://scenes/levels/test_level.tscn")
 	assert(GameHandler.get_area_progress(key, &"probe").is_empty())
-	assert(GameHandler.player_status.lives == -1 and GameHandler.top_score == 456789)
+	assert(GameHandler.player_status.lives == 2 and GameHandler.top_score == 456789)
+	assert(GameHandler.player_status.score == 0 and GameHandler.player_status.coins == 0)
+	assert(GameHandler.player_status.powerup_form == PlayerStatus.PowerupForm.SMALL)
 	await ticks(3)
 	assert(
 		GameHandler.flow == GameHandler.GameFlow.TITLE,
@@ -172,8 +175,8 @@ func _ready() -> void:
 	game.free()
 	await ticks(3)
 	assert(GameHandler.current_game == null and GameHandler.flow == GameHandler.GameFlow.DETACHED)
-	assert(not director.busy and GameHandler._area_progress.is_empty())
+	assert(not director.busy and not GameHandler._area_progress.is_empty())
 	print(
-		"PASS: three attempts, negative-only game over, reference hold, sound completion/fallback, explicit progress cleanup, title/input reset and stale/cancelled ownership"
+		"PASS: three attempts, negative-only game over, reference hold, sound completion/fallback, title-owned progress cleanup, title/input reset and stale/cancelled ownership"
 	)
 	get_tree().quit()

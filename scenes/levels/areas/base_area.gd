@@ -283,6 +283,7 @@ func update_camera_activity() -> void:
 		and (
 			level.is_shutdown
 			or level.death_in_progress
+			or level.completion_in_progress
 			or level.transition_in_progress
 			or not level.is_physics_processing()
 		)

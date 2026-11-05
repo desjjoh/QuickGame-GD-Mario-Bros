@@ -354,3 +354,25 @@ User authorized connecting BaseLevel.on_death to existing GameHandler lives meth
 ## One-level progress and NES-style game over - 2026-11-04
 
 User approved GameHandler ownership of one logical level's progress without another handler, preservation across areas/death, automatic reset on a different level and explicit defensive cleanup on game over. Shutdown precedes discard; source-instance checks reject stale writes on later visits. Keep reset_progress_on_death as its existing explicit override. Use reserve lives initialized to 2, display +1 and trigger only below zero. GameHandler selects a named coordinator-managed game-over card after death completion; card audio/completion is presentation-owned, title/session decisions remain handler-owned. Timed-only stages remain unchanged, background overrides remain absent and Start-to-skip is deferred. This supersedes multi-level progress caching and raw three-life/zero-clamping descriptions.
+
+
+## 2026-11-04 - Separable shadow in the persistent Game compositor
+
+Accepted: replace Game's 169-tap blur with 13-tap horizontal and vertical passes over one captured foreground. Retain sharp foreground, combined world/HUD/player silhouette, pipe ordering, authored level parameters and the full bypass toggle. Use logical-resolution buffers with transparent padding and render-only routing so gameplay scene ownership remains unchanged. Extra render targets/passes trade CPU work and memory for fewer GPU texture samples. Keep the standalone CanvasGroup shader as the editor/F6 reference; the optimized path is Game-owned. Measure viewport CPU/GPU time and compilation counts in the opt-in probe, not normal gameplay. This supersedes the single CanvasGroup implementation for Game; reduced local GPU time does not establish resolution of the user's intermittent hitch.
+
+
+## 2026-11-04 - Title entry owns progress-cache disposal
+
+Accepted: game-over retirement may shut down/free the level, but retains its final progress snapshot during the card. show_title owns cache disposal after outgoing shutdown and before loading the background, covering every menu-entry reason and same-scene TestLevel returns. Different-level selection and new-session reset keep their existing responsibilities; Game detach preserves the final snapshot; it is not a title-entry callback. Remove game-over-specific cache clearing/forced resets while preserving stale completion/source ownership guards. This supersedes the earlier explicit game-over cleanup ownership without changing the final clean menu/new-game result.
+
+## 2026-11-04 - Timer ownership and animation phase
+
+Implemented: stage load initializes the timer value once; BaseLevel.on_level_start only arms countdown phase after the intro. Keep the existing shared animation clock so world objects match the HUD. Use reference 24-tick countdown and 000 dwell, with a full first interval rather than entrance-time immediate subtraction. Timer-disabled stages retain TIME but hide the digits. See [level timer](level-timer.md).
+
+## 2026-11-04 - Shared climbing, separate flagpole ending
+
+Implemented: keep surface geometry/signals on BaseClimbable and controller-driven movement/presentation on the player component/state. The fixed flagpole uses manual climbing for this milestone; later completion can listen to accepted attachment and request forced descent separately. Use one whole-object marker and normal solid palette-block base; do not make the shaft solid or subscribe every climbable to global input. See [climbing](climbing.md).
+
+## 2026-11-05 - Ending presentation owns choreography
+
+Implemented: BaseLevel/GameHandler claim a single completion transaction before presentation and finish it independently of player existence. A reusable level-owned presentation controls flag capability, player states, camera lock, audio and ticketed hooks; the pole only reports contact and exposes its visual movement. Castle art and endpoint are independent level authoring. Replace original hidden collision/background priority with explicit endpoint and lifecycle removal. Score/firework effects remain deferred but their completion dependencies are active. See [flagpole ending](flagpole-ending.md).

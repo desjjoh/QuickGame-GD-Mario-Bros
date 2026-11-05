@@ -29,8 +29,11 @@ func _ready() -> void:
 	assert(not (room as BaseLevelArea).runtime_loaded)
 	assert(not room.has_node("Camera2D"))
 	assert(get_viewport().get_camera_2d() == level.get_node("Areas/MainArea/Camera2D"))
+	level.player.face_direction(-1.0)
+	assert(level.player.sprite.flip_h)
 	assert(level.request_area_transfer(&"lower"))
 	await get_tree().process_frame
+	assert(not level.player.sprite.flip_h, "Area arrival must reset facing right.")
 	var camera := room.get_node("Camera2D") as LevelCamera
 	assert(camera.enabled and not camera.follow_enabled)
 	var ground := level.get_node("Areas/LowerArea/Layouts/GroundLayout") as TileMapLayer

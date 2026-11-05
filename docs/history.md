@@ -670,3 +670,79 @@ Connected accepted BaseLevel.on_death to GameHandler.set_lives(current - 1), wit
 ## 2026-11-04 - Game over and single-level progress ownership
 
 Added GAME_OVER flow, a timed game_over definition/card and one-shot supplied jingle, optional bounded presentation completion, explicit shutdown-before-clear and safe title return. Reserve lives now start at 2 and display 3, with zero still playable and -1 ending the run. GameHandler stores only the selected level's area snapshots; different levels clear after old shutdown, same-level death/areas retain, and stale instances cannot overwrite a later visit. Added a Start release gate and corrected external transition-cancellation flags. Added game_over_test and level_progress_test, updated status/death assertions, and documented current ownership/limits. No new autoload, Project Settings, Input Map, background override or source-audio/import changes were introduced. Final checks are recorded in verification.md.
+
+
+## 2026-11-04 - Two-pass shared shadow experiment
+
+After the user reported no drops with the effect disabled, replaced Game's CanvasGroup blur with a transparent foreground capture, horizontal alpha pass and vertical/composite pass. Retained the original Gaussian weights, sharp foreground, shadow tuning, input/physics scene ownership and diagnostic toggle. Added padded logical-resolution buffers, same-frame/numerical image checks and opt-in legacy/two-pass/off profiling with viewport timings/compilation counts. Standalone/editor levels retain the original reference shader. Updated shadow, frame-pacing, architecture and settings guides. Local rendered comparisons show lower GPU time with extra CPU cost; the reported hitch was not reproduced automatically and needs user playtesting. Full regression and pre-change audio-warning comparison are recorded in verification.md.
+
+
+## 2026-11-04 - Reference edge skids and title-owned progress cleanup
+
+Restored KeepOnscr's inward-input exception so clamped screen-edge reversal skids retain momentum. Solid-wall contact explicitly stops velocity into the surface, while Slide preserves its collision-frame pose and resolves the stop on the next tick. Added live collision/edge coverage and updated boundary expectations. Moved cache disposal out of game-over retirement and flow-specific loading into common show_title after outgoing shutdown; the card retains the final snapshot, including before a same-scene TestLevel-to-title return. Game detach preserves the final snapshot rather than applying game-over-specific cleanup. Updated lifecycle/camera guides and progress/game-over regressions. Settings, bindings, physics rate and renderer configuration were unchanged by this milestone.
+
+
+## 2026-11-04 - Remove duplicate 1-1 scene
+
+User approved removing scenes/levels/1-1.tscn after duplicate scene paths caused editor boundary changes to differ from Game's loaded stage. Verified serialized paint data matches the canonical scenes/levels/worlds/world 1/1-1.tscn and preserved the removed file in ignored validation storage before deleting it. The world-folder scene retains its UID, corrected secret_exit route, World Right=2624 and existing unsmoothed camera configuration. No runtime references point to the removed path. Close any old editor tab without saving it again; future edits use the canonical scene.
+
+
+## 2026-11-04 - Stage completion foundation and Warp mode
+
+Added Game's ordered Stages list, GameHandler stage index/COMPLETING flow and BaseLevel.on_complete lifecycle. Stage progression retains player/session status, resets the departed visit after final shutdown, and uses existing destination intros; the last or an unlisted stage returns through common title entry and a short finish transition. Added explicit-destination Warp mode with the requested destination intro retained, and no completion fanfare implemented yet. Reused coordinator suspension/cancellation/ownership and preserved title background freeze after restoration. Added completion integration coverage, migrated Game/fixture scene configuration, and retained the non-exported initial_level compatibility API. No triggers or timer countdown were added; timer work is next before ending triggers. Executed checks are recorded in verification.md.
+
+
+## 2026-11-04 - Full run reset on common title entry
+
+User requested that the shared back-to-title callback clear all run state, retaining only in-memory top score. _show_title_now now calls the existing clear_session after outgoing shutdown instead of clearing only level progress. clear_session also resets pending startup target and stage index. Startup captures its requested scene locally before reset so alternate-stage launches still work. Player status, custom session and progress reset on both final-stage and game-over returns; top score and authored stage/configuration data survive. Updated current guides and return-path regressions. No bindings, imports or Project Settings changed.
+
+
+## 2026-11-04 - Mario Dead state and visible death motion
+
+Wired the supplied 16x16 mario-dead.png and MarioDeadState into the existing present=true death lifecycle. The state holds 16 ticks, launches with nominal reference death velocity/gravity, ignores controls/collision and finishes after its full sprite passes the active camera bottom. BaseLevel retains jingle, world suspension, exactly-once life loss, cleanup and respawn/game-over ownership. Added main/lower area and final-attempt presentation coverage; updated the older death-test title-lives assertion to the already accepted full title reset. No gameplay trigger or input binding was added. Test scene preview instructions and current ownership/limitations are in death.md; executed outcomes are in verification.md.
+
+## 2026-11-04 - Level timer and timeout lifecycle
+
+Added idempotent BaseLevel.on_level_start after intros, a 24-active-tick countdown, a complete interval at 000, and timeout routing through animated death then TIME UP before lives/game over. GameHandler.load_level remains the sole starting-value initializer. Added per-level Timer Enabled and disabled TestLevel digits while retaining TIME. Preserved the shared world/HUD animation clock without resetting its phase. Added timer regression coverage; outcomes are recorded in verification.md. No settings/bindings/import changes or ending triggers.
+
+## 2026-11-04 - Fixed flagpole and reusable manual climbing
+
+Added BaseClimbable, player Motion/Climbing and script-based PlayerClimbState with a concrete Mario-owned Climb state and supplied two-frame animation. Added one 2x11 paint marker and a fixed assembly with normal solid collision on the palette tileset block base. Reused area theme/activity and shutdown behavior; the surface detects contacts through signals with no controller subscription or frame/physics polling. Nominal speeds and side timing follow the disassembly; manual flagpole control intentionally tests the vine-style foundation before future forced descent/completion. No authored stage painting, ending trigger, score/fanfare, bindings or Project Settings changes. See climbing.md and verification.md.
+
+## 2026-11-04 - Retain flagpole attachment at the base
+
+Replaced the temporary automatic bottom release with a motion clamp that preserves Climb and its attachment. A later ending controller must explicitly change state; death/transport/removal still clean up normally. Updated climbing regression and current guide. Reference investigation distinguishes forced flagpole descent from vine top-of-screen autoclimb/area transport; no upper-bound or vine transport behavior was changed. This supersedes the bottom-release behavior in the initial climbing milestone.
+
+## 2026-11-04 - Climbing horizontal input and presentation
+
+Clarified the requested controls: inward input switches sides, outward input releases to Move/passive falling, and a held switch direction cannot eject Mario on the next tick. Side swaps reset interpolation without leaving Climb; neutral/blocked movement freezes the current climb pose instead of repeatedly seeking the first frame. Release integrates normal motion on the same tick. Added physics/render-frame and state-transition assertions through middle/top/base side switches and both outward release directions. No settings or bindings changed.
+
+## 2026-11-04 - Reliable shaft capture and initial idle pose
+
+User reversed manual ejection: horizontal input no longer releases climbing. Stopped/blocked climbing again selects its first pose. Replaced feet-only capture with a thin shaft/body-envelope sweep before/after actual player movement, using queryable Area2D layer 8 and no solid shaft collision or entity polling. This catches base-block crossing and landing-edge contact without relying on delayed overlap notifications, and clears suppression on actual separation. Added dedicated capture regressions. This supersedes outward release and last-pose freeze from the previous climbing input milestone. No Project Settings or bindings changed.
+
+## 2026-11-05 - Castle decorative parts and ending reference plan
+
+Added Castle parts source 15 to Overworld and Underground decoration TileSets using the supplied 64x32 atlases, omitting empty (0,0) and preserving old source IDs. No level painting or collision was added. Updated existing theme regression for 16 sources and multi-cell atlas coordinate compatibility. Recorded proposed reference ending phases and explicit endpoint/player-removal exceptions; no ending sequence, scroll lock, fanfare or progression behavior was implemented.
+
+## 2026-11-05 - Level-owned flagpole ending and covered title return
+
+Implemented reusable ending presentation and scripted Mario state, common completion claim/finish lifecycle, owner-scoped camera lock, coordinated flag/Mario descent, timed dismount, normal-profile automatic walk, and player shutdown/removal at the independently configured castle endpoint. Added ticketed Score/Fireworks hooks that complete immediately by default and block progression while overridden work is pending. Wired supplied flagpole SFX and stage-clear music outside the player lifetime. Added final delay/music gate and retained existing stage-list/title cleanup. finish now has a quick outro and hides newly created title UI until its background is revealed; no black cover added. Expanded integration coverage for callbacks, cancellation, source loss, external replacement and title concealment. Actual reward conversion/firework visuals remain deferred. Run outcomes are in verification.md.
+
+## 2026-11-05 - Silent sliding and visible post-presentation pause
+
+Removed Mario Slide's Lost Levels-style SFX export, repeat/cleanup code, scene binding and unused mix trim; retained the MP3 asset for possible later use. Movement and skid pose logic are unchanged. Reference inspection confirmed six 21-frame interval ticks and concurrent event-music gating. The existing 126-tick timer elapsed during the music because score/fireworks hooks currently finish immediately. Per the requested visible delay, its count now starts only after both hooks and music complete, giving a full roughly 2.1 seconds before the finish transition. Documented this deliberate ordering difference and updated focused regressions. No settings, bindings or imports changed.
+
+## 2026-11-05 - Balance ending audio with the shared mix
+
+Measured the new flagpole and stage-clear WAVs against existing jump/death recordings, then added their previously missing stream trims to the shared mix: -2 and -3 dB respectively. The unchanged master makes effective gains -5 and -6 dB. Extended the existing mix regression to cover source/copy identity and actual non-positional ending players. No sample processing, timing or import changes.
+
+## 2026-11-05 - Preserve high flagpole grabs
+
+Found that flagpole attachment clamped feet to 24 pixels below the top tile and that discovery omitted the top 12 pixels of the tile. Flagpole-specific upper bound is now eight pixels below tile origin, discovery covers the full ball metatile, and vertical contact uses the reference small-Mario side-probe height. The shared sweep remains for base/landing/fast-crossing reliability. Added high-ball/above-ball and real running-jump checks and exercised a highest-position grab through the ending handoff. No jump physics, artwork or authored stage placement changed.
+
+## 2026-11-05 - Flag contact rendering
+
+Corrected flagpole horizontal capture to the reference X bands while retaining continuous swept contact and the high-ball bound. Reproduced foreground loss in a rendered flag-contact overlap fixture with pipe ordering false: the old compositor showed none of Mario's 139 opaque sprite pixels, while reasserting render draw indices preserved all 139. Render parents remain cached and the pipe-specific behind-world route is retained. No sprite pixels or palette resources were edited.
+
+An experimental position-before-gravity airborne update increased the full-speed apex from 77.5 to 82.5 pixels. The user found the height excessive during playtesting and requested reverting it; previous jump and passive-fall integration was restored. The rendering correction remains. No Project Settings, bindings or import settings changed.

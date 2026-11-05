@@ -1,0 +1,18 @@
+[gd_scene format=3]
+[ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/climbables/base/base_climbable.gd" id="script"]
+[sub_resource type="RectangleShape2D" id="detection"]
+size = Vector2(32, 152)
+[node name="BaseClimbable" instance=ExtResource("base")]
+script = ExtResource("script")
+[node name="ClimbTop" type="Marker2D" parent="."]
+position = Vector2(24, 24)
+[node name="ClimbBottom" type="Marker2D" parent="."]
+position = Vector2(24, 160)
+[node name="Detection" type="Area2D" parent="."]
+collision_layer = 128
+collision_mask = 1
+monitorable = true
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Detection"]
+position = Vector2(24, 88)
+shape = SubResource("detection")

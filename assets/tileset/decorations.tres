@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://dhy767qc2hb4m" path="res://assets/palettes/overworld/decorations/hill-right.png" id="7_hill_right"]
 [ext_resource type="Texture2D" uid="uid://bn3av6sl27ao5" path="res://assets/palettes/overworld/decorations/hill-1.png" id="8_hill_1"]
 [ext_resource type="Texture2D" uid="uid://b2slt4pqu7er3" path="res://assets/palettes/overworld/decorations/hill-2.png" id="9_hill_2"]
+[ext_resource type="Texture2D" uid="uid://rqh0vwd8cw04" path="res://assets/palettes/overworld/decorations/castle.png" id="castle"]
 [ext_resource type="Texture2D" uid="uid://llb41udg6cf0" path="res://assets/palettes/overworld/decorations/cloud-left.png" id="cloud_9"]
 [ext_resource type="Texture2D" uid="uid://ca2m2dlhk3orr" path="res://assets/palettes/overworld/decorations/cloud.png" id="cloud_10"]
 [ext_resource type="Texture2D" uid="uid://ddeefoxhme2e4" path="res://assets/palettes/overworld/decorations/cloud-right.png" id="cloud_11"]
@@ -50,6 +51,17 @@ texture = ExtResource("cloud_13")
 resource_name = "Cloud bottom right"
 texture = ExtResource("cloud_14")
 0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="Castle"]
+resource_name = "Castle parts"
+texture = ExtResource("castle")
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_right"]
 resource_name = "Bush right"
@@ -107,3 +119,4 @@ sources/11 = SubResource("TileSetAtlasSource_cloud_11")
 sources/12 = SubResource("TileSetAtlasSource_cloud_12")
 sources/13 = SubResource("TileSetAtlasSource_cloud_13")
 sources/14 = SubResource("TileSetAtlasSource_cloud_14")
+sources/15 = SubResource("Castle")

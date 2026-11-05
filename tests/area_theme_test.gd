@@ -83,7 +83,7 @@ func _ready() -> void:
 			and lower_decorations.get_physics_layers_count() == 0
 		)
 	)
-	assert(main_decorations.get_source_count() == 15 and lower_decorations.get_source_count() == 15)
+	assert(main_decorations.get_source_count() == 16 and lower_decorations.get_source_count() == 16)
 	for index in range(main_decorations.get_source_count()):
 		var id := main_decorations.get_source_id(index)
 		assert(lower_decorations.has_source(id))
@@ -97,7 +97,12 @@ func _ready() -> void:
 		)
 		assert(themed.texture.get_size() == original.texture.get_size())
 		assert(themed.get_tiles_count() == original.get_tiles_count())
-		assert(themed.has_tile(Vector2i.ZERO) and themed.has_alternative_tile(Vector2i.ZERO, 0))
+		if id == 15:
+			assert(themed.get_tiles_count() == 7 and not themed.has_tile(Vector2i.ZERO))
+			assert(not original.has_tile(Vector2i.ZERO))
+		for tile_index in range(original.get_tiles_count()):
+			var coords := original.get_tile_id(tile_index)
+			assert(themed.has_tile(coords) and themed.has_alternative_tile(coords, 0))
 		assert(original.texture.resource_path.contains("/palettes/overworld/"))
 	var originals := (
 		load("res://scenes/entities/blocks/brick/brick_block.tscn").instantiate() as BaseBlock

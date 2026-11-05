@@ -10,9 +10,9 @@ signal input_received(event: InputEvent)
 @export var down_action: StringName = &"ui_down"
 @export var primary_action: StringName = &"primary"
 @export var secondary_action: StringName = &"secondary"
-## Title Start is bound; Select remains available for a future menu option.
+## Title Start confirms; Select cycles the menu.
 @export var start_action: StringName = &"start"
-@export var select_action: StringName = &""
+@export var select_action: StringName = &"select"
 
 var enabled: bool = true:
 	set(value):
@@ -32,6 +32,7 @@ var input_start_just_pressed: bool = false
 var _primary_requires_release: bool = false
 var _start_requires_release: bool = false
 var input_select: bool = false
+var input_select_just_pressed: bool = false
 
 
 func _ready() -> void:
@@ -66,6 +67,11 @@ func _physics_process(_delta: float) -> void:
 		and Input.is_action_just_pressed(start_action)
 	)
 	input_select = _is_action_pressed(select_action)
+	input_select_just_pressed = (
+		select_action != &""
+		and InputMap.has_action(select_action)
+		and Input.is_action_just_pressed(select_action)
+	)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -100,3 +106,4 @@ func _clear_input() -> void:
 	input_start = false
 	input_start_just_pressed = false
 	input_select = false
+	input_select_just_pressed = false

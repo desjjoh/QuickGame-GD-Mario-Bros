@@ -49,6 +49,11 @@ func _ready() -> void:
 
 func run_checks() -> void:
 	assert(ControllerHandler.start_action == &"start")
+	assert(ControllerHandler.select_action == &"select")
+	var select_key := InputEventKey.new()
+	select_key.physical_keycode = KEY_TAB
+	select_key.pressed = true
+	assert(select_key.is_action_pressed(&"select"))
 	for key in [KEY_ENTER, KEY_KP_ENTER]:
 		var event := InputEventKey.new()
 		event.physical_keycode = key
@@ -269,6 +274,13 @@ func run_checks() -> void:
 		assert(GameHandler.flow == GameHandler.GameFlow.TITLE and not director.busy)
 		assert(GameHandler.current_player.gameplay_suspended and ControllerHandler.enabled)
 		starts.clear()
+		title = GameHandler._title_screen
+		assert(not title.has_node("PlayerTest"))
+		Input.action_press(ControllerHandler.select_action)
+		await tick(4)
+		Input.action_release(ControllerHandler.select_action)
+		await tick(2)
+		assert(title.cursor.position == Vector2(72, 144))
 		GameHandler.set_session_value(&"score", 999)
 		if keyboard:
 			enter_key(true)
@@ -286,6 +298,8 @@ func run_checks() -> void:
 				== "res://scenes/levels/worlds/world 1/1-1.tscn"
 			)
 		)
+		assert(GameHandler._first_level == game.initial_level)
+		assert(GameHandler.current_level != background)
 		assert(background.is_shutdown if is_instance_valid(background) else true)
 		assert(GameHandler.current_player.body.is_on_floor())
 		assert(not GameHandler.current_player.gameplay_suspended)
@@ -311,6 +325,16 @@ func run_checks() -> void:
 		assert(
 			GameHandler.flow == GameHandler.GameFlow.DETACHED and GameHandler._title_screen == null
 		)
+	# Alternate destinations remain available independently of visible menu entries.
+	var alternate: Node = load("res://scenes/main/game.tscn").instantiate()
+	add_child(alternate)
+	assert(GameHandler.start_new_game(load("res://scenes/levels/test_level.tscn")))
+	await wait_for_play()
+	assert(GameHandler.current_level.scene_file_path == "res://scenes/levels/test_level.tscn")
+	assert(GameHandler._first_level == alternate.initial_level)
+	assert(not GameHandler.current_player.gameplay_suspended)
+	alternate.free()
+	await tick(2)
 	# Detaching during Start must not recreate the title over a freed Game.
 	var closing: Node = load("res://scenes/main/game.tscn").instantiate()
 	add_child(closing)
@@ -325,6 +349,6 @@ func run_checks() -> void:
 	definition.stages[1].minimum_frames = 12
 	director.started.disconnect(record_start)
 	print(
-		"PASS: immediate title/no demo, suspended background Mario, white HUD font/cursor, Enter/gamepad Start, once-only transitioned 1-1 load, confirmation consumption, cancellation, session reset and detach cleanup."
+		"PASS: immediate title/no demo, suspended background Mario, white HUD font/cursor, Enter/gamepad Start, single visible option, once-only 1-1 load and retained alternate-stage launch, confirmation consumption, cancellation, session reset and detach cleanup."
 	)
 	get_tree().quit()

@@ -66,6 +66,7 @@ func run_checks() -> void:
 	Input.action_press(ControllerHandler.left_action)
 	await tick(2)
 	assert(player.state_machine.current_state is MarioSlideState)
+	assert(player._active_sound_effect == null, "Sliding must not start a sound effect.")
 	assert(
 		(
 			player.sprite.texture.resource_path

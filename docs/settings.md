@@ -313,3 +313,61 @@ User authorized relocating assets/Overworld (Palette 1) to assets/palettes/overw
 ## Game-over lifecycle defaults - 2026-11-04
 
 User approved NES reserve semantics (stored default/reset 2, displayed +1; terminal -1) and explicit game-over cleanup. Reserve clamp is -1..98 so display fits 0..99. Added game_over transition: 12 initial hidden frames, 378-frame HUD-visible card, 12 hidden outro. New optional TransitionStage wait_for_presentation=false and completion_timeout_frames=600 preserve existing stage behavior; the game-over card opts in and uses a ten-second audio watchdog. New smb_gameover.wav mix trim=-5 dB plus existing master=-3 dB. These are script/resource defaults within the authorized feature, not Project Settings/Input Map/import changes. No black overlay or clear-color override was added.
+
+
+## Separable Game shadow - 2026-11-04
+
+User authorized trying a two-pass blur after reporting no drops with the shared shader disabled. Game/SharedShadow changes from CanvasGroup to Node2D and owns two runtime SubViewports sized to the logical view plus 12px padding per edge. Default offset/blur/opacity and Shadow Shader Enabled=true are unchanged. Disabled bypasses capture and stops both buffer updates. BaseLevel's standalone/editor reference shader remains unchanged. These are scene/render implementation changes; no Project Settings, Input Map or import parameters changed. This supersedes the earlier Game/SharedShadow CanvasGroup implementation above.
+
+
+## Title-menu Select - 2026-11-04
+
+User requested Select-based menu navigation and approved a dedicated select Input Map action: Tab (physical key) plus gamepad View/Back (JOY_BUTTON_BACK, button 4, any device), deadzone 0.5. Previously Select was unbound and ControllerHandler.select_action was empty; it now defaults to select and publishes a just-pressed edge. Select cycles 1 PLAYER GAME / 1 PLAYER TEST; Start confirms. No other bindings or settings changed.
+
+
+## Main-area right boundary reconciliation - 2026-11-04
+
+User set World Right=2624 in the open scenes/levels/1-1.tscn scene, but Game loaded scenes/levels/worlds/world 1/1-1.tscn with 2688. Rendered diagnostics confirmed the loaded path/value and a right edge at 2688, 64px past the intended guide. Matched the active MainArea Camera2D.world_right to 2624. Artwork, pipe routes, camera code and Project Settings were unchanged. Both source copies still exist; future stage edits should use the active worlds/world 1 scene until the duplicate is consolidated.
+
+
+## Small Mario sprite baseline - 2026-11-04
+
+User approved matching the reference's one-pixel lower sprite presentation. In scenes/player/mario (small)/mario.tscn, Body/Sprite2D.position changes from (0,-8) to (0,-7). The baseline applies across states; per-state Sprite2D.offset remains additive. The 11x14 collision shape at (-0.5,-7), body origin, physics, animation frames and pipe transport coordinates are unchanged. This is a concrete Mario scene property, not a Project Settings/import change.
+
+
+## Ordered stages and completion - 2026-11-04
+
+User approved a stage-list completion lifecycle without physical triggers, plus explicit Warp destinations that skip completion fanfare but retain the level intro. Game's exported initial_level becomes Stages, currently [1-1]; programmatic initial_level remains a single-stage compatibility alias. Added finish transition: 12 hidden frames, replacement allowed, no card. NORMAL/WARP modes use the existing level transition for destination intros. No Project Settings, bindings, imports, timer countdown or audio configuration changed.
+
+
+## Small Mario visible death presentation - 2026-11-04
+
+User approved adding the concrete Dead state and supplied mario-dead.png, without a gameplay trigger. Mario.death_state now points to StateMachine/Dead. State defaults: Hold Frames=16, Launch Velocity=-240 px/s, Death Gravity=562.5 px/s squared, Maximum Fall Speed=240 px/s. Static death sprite, stop-animation-on-enter, controls/input/frame callbacks disabled, physics enabled. The existing (0,-7) sprite baseline, collision shape, normal movement coefficients, jingle/life/progress policies and pit trigger are unchanged. No Project Settings/Input Map or existing asset import parameters changed; Godot generated the new PNG's import sidecar.
+
+## Level timer scene properties (2026-11-04)
+
+Approved timer implementation adds BaseLevel.Timer Enabled (default true); TestLevel sets it false. Starting Time remains the single load-time value source. Disabled timers hide HUD digits but retain TIME. TIME UP is a coordinator definition with a 147-frame hold and existing quick transition phases. No Project Settings, Input Map or import settings changed.
+
+## Climbing scene configuration (2026-11-04)
+
+Approved fixed flagpole adds a 2x11 marker to entity palettes, maps flagpole in BaseLevel and existing level overrides, and gives Mario a Climb state/animation plus Motion/Climbing. Default component values: up 52.5 px/s, down 119.765625 px/s, side offset 7 px, side cooldown 24 ticks. Solid base is a normal 16x16 StaticBody2D using the palette block texture. No Project Settings, input bindings or existing import semantics changed.
+
+## Climb capture refinement (2026-11-04)
+
+Within the requested flagpole attachment fix, BaseClimbable Detection changes collision_layer 0 to 128 (layer 8) and monitorable false to true for player-driven area queries; its mask stays 1. The shaft remains non-solid. Attachment Tolerance changes from an 8-pixel feet-distance test to a 2-pixel half-width shaft band tested against Mario's collision envelope and actual swept motion. These are scene/script properties, not Project Settings or Input Map changes.
+
+## Flagpole ending configuration (2026-11-05)
+
+Approved level-ending implementation assigns 1-1 Ending Presentation to FlagpoleEnding, matching main/(196,2), and adds independent EndingEndpoint at (3272,208). The presentation references smb_flagpole.wav and smb_stage_clear.wav through non-looping runtime copies, with post-delay 126 ticks. finish retains its 12-tick minimum and adds a 12-tick outro for the requested title-return transition. The camera gains a runtime owner-scoped lock; authored Follow Enabled is unchanged. New supplied sound assets were imported with defaults; no existing import semantics, Project Settings or bindings changed.
+
+## Skid audio removal and ending hold ordering (2026-11-05)
+
+Removed the Slide scene's smb-skid.mp3 reference and the shared mix entry (+2.5 dB); other sound gains and the source/import files remain unchanged. Ending Post Delay Frames stays 126; only its runtime start changes to after score/fireworks and music completion, ensuring the requested visible pause before the existing finish transition. No Project Settings or bindings changed.
+
+## Ending sound gain trims (2026-11-05)
+
+At the user's request, sound_effect_mix.tres adds per-stream flagpole=-2 dB and stage_clear=-3 dB (previously no entry/0 dB trim). With the unchanged -3 dB master, effective playback gains are -5 dB and -6 dB. Both presentation playback and runtime copies use this shared mix. No Project Settings, source recordings, imports, timing or other stream gains changed.
+
+## Flagpole upper grab geometry (2026-11-05)
+
+Within the requested top-grab fix, Flagpole overrides ClimbTop from local (24,24) to (24,8). Its detection rectangle grows from (32,152) centered at (24,88) to (32,164) centered at (24,82), covering the full ball tile. Motion/Climbing exposes Capture Probe Offset Y=-8 for flagpole side contact; generic climbables retain their body-envelope default. Marker footprint, art, solid base, player collider and jump/movement settings are unchanged. No Project Settings, bindings or imports changed.

@@ -4,11 +4,35 @@ extends CanvasGroup
 const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
 ## Shared foundation for playable levels.
 
+enum CompletionMode { NORMAL, WARP }
+
+signal completion_started
+var completion_in_progress: bool = false
+var ending_in_progress: bool = false
+var completion_dispatched: bool = false
+@export var ending_presentation: LevelEndingPresentation
+var completion_mode: CompletionMode = CompletionMode.NORMAL
+
+enum DeathReason { NORMAL, TIMEOUT }
+
+signal level_started
+var has_started: bool = false
+var timer_expired: bool = false
+var time_up_shown: bool = false
+var death_reason: DeathReason = DeathReason.NORMAL
+var _timer_ticks_remaining: int = 24
+var _last_timer_tick: int = -1
+
 signal death_started
 
 @export_group("Stage Display")
 @export var stage_label: String = "1-1"
 @export_range(0, 999) var starting_time: int = 400
+@export var timer_enabled: bool = true:
+	set(value):
+		timer_enabled = value
+		if GameHandler.current_level == self:
+			GameHandler.timer_enabled = value
 
 @export_group("Death")
 @export var fall_death_enabled: bool = true
@@ -136,12 +160,14 @@ func _spawn_area_entities(area: BaseLevelArea, saved_entities: Dictionary) -> vo
 		var local_origin := layout.map_to_local(cell) - Vector2(layout.tile_set.tile_size) / 2.0
 		instance.position = objects.to_local(layout.to_global(local_origin))
 		objects.add_child(instance)
+		if ending_presentation != null:
+			ending_presentation.bind_entity(instance, cell, area)
 
 
 func _physics_process(_delta: float) -> void:
 	if is_shutdown:
 		return
-	if transition_in_progress:
+	if transition_in_progress or completion_in_progress:
 		return
 	if death_in_progress:
 		_update_death(_delta)
@@ -162,6 +188,60 @@ func _physics_process(_delta: float) -> void:
 		camera.follow_target(player.body)
 	clamp_player_to_camera()
 	_check_fall_death()
+	_update_level_timer()
+
+
+func on_level_start() -> bool:
+	if (
+		has_started
+		or is_shutdown
+		or death_in_progress
+		or completion_in_progress
+		or transition_in_progress
+	):
+		return false
+	if GameHandler.current_level != self or GameHandler.flow != GameHandler.GameFlow.PLAYING:
+		return false
+	# load_level initialized the value once. Start only the local countdown phase.
+	has_started = true
+	_timer_ticks_remaining = 24
+	_last_timer_tick = GameHandler.animation_clock.tick_count
+	level_started.emit()
+	return true
+
+
+func _update_level_timer() -> void:
+	if (
+		not has_started
+		or not timer_enabled
+		or timer_expired
+		or is_shutdown
+		or death_in_progress
+		or completion_in_progress
+		or transition_in_progress
+		or _transfer_pending
+	):
+		return
+	if (
+		GameHandler.current_level != self
+		or GameHandler.flow != GameHandler.GameFlow.PLAYING
+		or not is_instance_valid(player)
+		or player.is_dead
+	):
+		return
+	var tick: int = GameHandler.animation_clock.tick_count
+	if tick == _last_timer_tick:
+		return
+	_last_timer_tick = tick
+	_timer_ticks_remaining -= 1
+	if _timer_ticks_remaining > 0:
+		return
+	_timer_ticks_remaining = 24
+	if GameHandler.time_remaining == 0:
+		timer_expired = true
+		on_death(player, true, DeathReason.TIMEOUT)
+	else:
+		GameHandler.time_remaining -= 1
 
 
 func clamp_player_to_camera() -> void:
@@ -183,11 +263,12 @@ func clamp_player_to_camera() -> void:
 	var player_position := player.body.global_position
 	var left_edge := center - half_width + inset
 	var right_edge := center + half_width - inset
-	# Resolve the boundary like a wall: cancel motion into it, even if input
-	# has already reversed. Preserve motion away from it and vertical speed.
+	# KeepOnscr clamps position but retains outward momentum while input
+	# points back into the screen, allowing reversal friction to finish the skid.
+	var direction := ControllerHandler.get_axis().x if player.can_read_controller_input() else 0.0
 	if (
-		(player_position.x <= left_edge and player.body.velocity.x < 0.0)
-		or (player_position.x >= right_edge and player.body.velocity.x > 0.0)
+		(player_position.x <= left_edge and player.body.velocity.x < 0.0 and direction <= 0.0)
+		or (player_position.x >= right_edge and player.body.velocity.x > 0.0 and direction >= 0.0)
 	):
 		player.body.velocity.x = 0.0
 	player_position.x = clampf(
@@ -230,6 +311,10 @@ func shutdown() -> void:
 	if is_shutdown:
 		return
 	is_shutdown = true
+	if ending_presentation != null:
+		ending_presentation.cancel()
+	if ending_in_progress and not completion_dispatched:
+		GameHandler.cancel_completion(self)
 	GameHandler.transitions.cancel_for_level(self)
 	if is_instance_valid(_death_audio):
 		_death_audio.stop()
@@ -319,6 +404,7 @@ func _begin_transport(
 		is_shutdown
 		or transition_in_progress
 		or death_in_progress
+		or completion_in_progress
 		or _transfer_pending
 		or not is_instance_valid(traveler)
 		or traveler != player
@@ -501,6 +587,7 @@ func _commit_transport(phase: int) -> void:
 		_disconnect_transport_state()
 		_transfer_pending = false
 		player.state_machine.stop(false)
+		player.face_direction(1.0)
 		_start_player_state()
 		return
 	var trip := _transport_trip.duplicate()
@@ -519,6 +606,7 @@ func _commit_transport(phase: int) -> void:
 	player.state_machine.stop(false)
 	player.body.velocity = Vector2.ZERO
 	player.body.global_position = arrival["position"]
+	player.face_direction(1.0)
 	player.body.reset_physics_interpolation()
 	for candidate in $Areas.get_children():
 		if candidate is BaseLevelArea and candidate.runtime_loaded:
@@ -573,6 +661,7 @@ func can_transport() -> bool:
 		not is_shutdown
 		and not transition_in_progress
 		and not death_in_progress
+		and not completion_in_progress
 		and not _transfer_pending
 		and not _transport_input_locked
 	)
@@ -683,18 +772,119 @@ func _check_fall_death() -> void:
 		on_death(player, false)
 
 
-func on_death(victim: BasePlayer, present: bool = false) -> bool:
+func on_complete(
+	destination: PackedScene = null, mode: CompletionMode = CompletionMode.NORMAL
+) -> bool:
+	if (
+		is_shutdown
+		or death_in_progress
+		or completion_in_progress
+		or transition_in_progress
+		or _transfer_pending
+		or _transport_state != null
+		or not is_instance_valid(player)
+		or player.is_dead
+		or player.is_shutdown
+	):
+		return false
+	if GameHandler.current_level != self or GameHandler.flow != GameHandler.GameFlow.PLAYING:
+		return false
+	if mode == CompletionMode.WARP and destination == null:
+		return false
+	completion_mode = mode
+	completion_in_progress = true
+	var accepted := GameHandler.complete_level(self, destination)
+	if not accepted and not is_shutdown:
+		completion_in_progress = false
+	return accepted
+
+
+func begin_ending(
+	presentation: LevelEndingPresentation, traveler: BasePlayer, source: BaseEntity
+) -> bool:
+	if (
+		presentation != ending_presentation
+		or presentation == null
+		or traveler != player
+		or not is_instance_valid(player)
+		or player.is_dead
+		or player.is_shutdown
+		or is_shutdown
+		or death_in_progress
+		or completion_in_progress
+		or transition_in_progress
+		or _transfer_pending
+		or _transport_state != null
+	):
+		return false
+	completion_in_progress = true
+	ending_in_progress = true
+	completion_mode = CompletionMode.NORMAL
+	if not GameHandler.claim_completion(self):
+		completion_in_progress = false
+		ending_in_progress = false
+		return false
+	if is_shutdown or GameHandler.current_level != self:
+		return false
+	if not presentation.start(self, player, source):
+		cancel_ending()
+		return false
+	return true
+
+
+func finish_ending(presentation: LevelEndingPresentation) -> bool:
+	if (
+		presentation != ending_presentation
+		or not ending_in_progress
+		or is_shutdown
+		or not presentation.is_finished()
+	):
+		return false
+	return GameHandler.complete_level(self)
+
+
+func cancel_ending() -> void:
+	if ending_presentation != null:
+		ending_presentation.cancel()
+	completion_in_progress = false
+	ending_in_progress = false
+	completion_dispatched = false
+	if not is_shutdown and GameHandler.current_level == self:
+		var respawned := not is_instance_valid(player)
+		if respawned:
+			spawn_player()
+		var camera := get_viewport().get_camera_2d() as LevelCamera
+		if camera != null and is_instance_valid(player):
+			if respawned:
+				camera.snap_to_arrival(player.body)
+			else:
+				camera.reset_target(player.body)
+		GameHandler.cancel_completion(self)
+
+
+func notify_completion_started() -> void:
+	# GameHandler calls this after claiming completion and before transitioning.
+	completion_started.emit()
+
+
+func on_death(
+	victim: BasePlayer, present: bool = false, reason: DeathReason = DeathReason.NORMAL
+) -> bool:
 	if (
 		is_shutdown
 		or transition_in_progress
 		or death_in_progress
+		or completion_in_progress
 		or _transfer_pending
 		or not is_instance_valid(victim)
 		or victim != player
 		or victim.is_shutdown
 	):
 		return false
+	death_reason = reason
 	death_in_progress = true
+	if reason == DeathReason.TIMEOUT:
+		GameHandler.set_player_form(PlayerStatus.PowerupForm.SMALL)
 	GameHandler.set_lives(GameHandler.player_status.lives - 1)
 	# Status observers can synchronously replace/shut down this level.
 	# The accepted death is charged once; never continue old-world cleanup afterward.

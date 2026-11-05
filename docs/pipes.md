@@ -26,7 +26,7 @@ PipeEntrance inherits TransportEntity and calls `level.transport(player, get_des
 
 The destination pipe supplies its opening and exit direction; no separate arrival marker is required. Upright pipes emerge upward with final feet at local (16,0); left-facing pipes emerge left with final feet at local (-8,32). Exit Distance defaults to 96 pixels and is editable per placement. These directions follow the supplied artwork. Standalone Arrival markers remain valid for destinations with no pipe.
 
-The secret return targets main/player_spawn, which resolves to the existing Players/PlayerSpawn marker. Mario resumes normal play at spawn after entry completes, without an exit pipe or emergence animation. The temporary start return pipe and the old adjacent marker are removed. See [transport](transport.md) for the full API, native Inspector workflow, explicit test routes, lifecycle and compatibility wrappers. Vines and a custom per-cell editor remain future work.
+The secret return targets main/secret_exit, the painted exit-only pipe at MainArea cell (162,11), near X 2624. Mario emerges upward from that pipe before normal collision/control resumes. The original entrance at (57,9) retains its route to the secret area. PlayerSpawn remains supported as an open-space destination and has independent fixture coverage. The temporary start return pipe and the old adjacent marker are removed. See [transport](transport.md) for the full API, native Inspector workflow, explicit test routes, lifecycle and compatibility wrappers. Vines and a custom per-cell editor remain future work.
 
 ## Verification
 

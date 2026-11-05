@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="1_base"]
 [ext_resource type="Script" path="res://scenes/player/base/base_player.gd" id="2_script"]
@@ -12,6 +12,8 @@
 [ext_resource type="Script" path="res://scenes/components/motion/corner_correction.gd" id="10_corners"]
 
 [ext_resource type="Script" path="res://scenes/components/actions/bonk.gd" id="11_bonk"]
+
+[ext_resource type="Script" path="res://scenes/components/motion/climbing.gd" id="climbing"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
 size = Vector2(16, 16)
@@ -55,3 +57,6 @@ script = ExtResource("8_jump")
 
 [node name="Bonk" type="Node" parent="Actions"]
 script = ExtResource("11_bonk")
+
+[node name="Climbing" type="Node" parent="Motion"]
+script = ExtResource("climbing")

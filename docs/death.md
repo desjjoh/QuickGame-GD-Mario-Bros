@@ -1,6 +1,6 @@
 # Player death lifecycle
 
-BaseLevel coordinates death for all stages. The implemented trigger is falling fully below the active camera viewport. Accepted death deducts one shared life. Negative reserves now trigger [game over](game-over.md). Checkpoints, collectible coins and Mario's visible hit-death animation remain unimplemented.
+BaseLevel coordinates death for all stages. The implemented trigger is falling fully below the active camera viewport. Accepted death deducts one shared life. Negative reserves now trigger [game over](game-over.md). Mario now has optional visible death presentation; no gameplay hazard/enemy caller is added yet. Checkpoints and collectible coins remain unimplemented.
 
 ## Detection and ownership
 
@@ -18,7 +18,11 @@ BasePlayer.begin_death exits the current state without exit presentation, discon
 
 For pit deaths, presentation is false: finish_death notifies the level immediately. The level performs terminal player shutdown, hides/queues the entity for removal, clears current_player and its own player reference. The level owns the remaining audio/timer, so removing Mario does not interrupt death completion.
 
-Future visible deaths can assign a concrete player-owned Death State and request present=true. Controls/input are disabled for that state; it may perform its own death-only motion and calls finish_death when finished. This presentation contract is tested with a fixture; Mario has no visible Death State or hit-death artwork assigned yet. Missing presentation completes immediately. A watchdog prevents an unfinished presentation from trapping the level.
+Visible death uses on_death(player, true). Small Mario assigns StateMachine/Dead (MarioDeadState) through BasePlayer.death_state, displaying assets/player/mario (small)/mario-dead.png as a static pose. Controls, event input and frame updates are disabled for the state; its physics ticks remain active. Mario retains facing and his existing one-pixel-lower sprite baseline. No gameplay trigger or debug input binding calls it yet.
+
+Dead holds position for 16 physics ticks, launches at -240 px/s, applies death-only gravity of 562.5 px/s squared and caps downward speed at 240 px/s. These are nominal 60Hz conversions of the reference's $fc launch and $28 gravity, with the initial TimerControl pause represented explicitly. Position integrates before gravity. The state bypasses normal JumpAction, horizontal movement, corner recovery and ceiling bonks; collision layer/mask are already zero from begin_death. It neither plays the jump SFX nor owns the death jingle.
+
+While descending, Dead calls finish_death only after the actual sprite top is below the active camera's viewport bottom, including zoom and area world position. This prevents its final visible row disappearing early. BaseLevel then performs the existing terminal entity cleanup and independently waits for audio/fallback timing before respawn or game over. Missing presentation completes immediately; the existing watchdog still bounds a missing camera or unfinished presentation. The generic presentation contract remains tested with a separate fixture.
 
 ## Sound and completion
 
@@ -50,4 +54,13 @@ Deduct at the accepted BaseLevel.on_death call, before presentation/audio, rathe
 
 The intro's existing GameHandler binding displays the reduced reserve count plus one automatically. A death from 1 to 0 reserves respawns with one displayed attempt; 0 to -1 produces game over after death completion. Restart alone preserves the current count. New game initializes two reserves, displayed as three lives. Score/coin totals, top score and the world-progress reset policy are unchanged. This counter update happens at acceptance; it is not a claim of exact original-game jingle/decrement timing.
 
-GameHandler now retains only the current logical level's area snapshots. Leaving for another level or returning to title clears world progress; ordinary same-level respawn still honors reset_progress_on_death. Game over explicitly clears after final shutdown, independent of that override. See [game over](game-over.md).
+GameHandler now retains only the current logical level's area snapshots. Leaving for another level or returning to title clears world progress; ordinary same-level respawn still honors reset_progress_on_death. The common show_title callback owns clearing after final shutdown, independent of that override; the game-over card itself retains the cache until title entry. See [game over](game-over.md).
+
+
+## Preview and verification
+
+Open tests/dead_state_test.tscn and run it with F6 to watch the automated visible-death cases in the main and lower areas. This regression scene calls the lifecycle directly; normal F5 gameplay gains no new death trigger. It checks the exact hold, first -4px launch step at 60Hz, gravity/cap, facing/texture, blocked input, camera freeze, world suspension, full offscreen removal, one life charge, respawn and final-attempt title reset. The non-presented pit path remains immediate. This is a continuous-motion adaptation of the reference, not a fixed-point/cycle-accurate emulator. Executed outcomes are recorded in verification.md.
+
+## Timer expiry
+
+BaseLevel DeathReason.TIMEOUT uses the presented death path and queues TIME UP before the lives/game-over sequence. Normal pit deaths remain unpresented. See [level timer](level-timer.md).

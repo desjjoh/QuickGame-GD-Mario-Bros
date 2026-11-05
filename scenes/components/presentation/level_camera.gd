@@ -27,6 +27,7 @@ extends Camera2D
 
 var _target_x: float
 var _has_target: bool = false
+var _scroll_lock: WeakRef
 
 
 func _ready() -> void:
@@ -71,11 +72,35 @@ func reset_target(target: CharacterBody2D) -> void:
 	force_update_scroll()
 
 
+func acquire_scroll_lock(lock_owner: Node) -> bool:
+	if (
+		_scroll_lock != null
+		and is_instance_valid(_scroll_lock.get_ref())
+		and _scroll_lock.get_ref() != lock_owner
+	):
+		return false
+	_scroll_lock = weakref(lock_owner)
+	return true
+
+
+func release_scroll_lock(lock_owner: Node) -> void:
+	if _scroll_lock != null and _scroll_lock.get_ref() == lock_owner:
+		_scroll_lock = null
+
+
+func is_scroll_locked() -> bool:
+	return _scroll_lock != null and is_instance_valid(_scroll_lock.get_ref())
+
+
 func follow_target(target: CharacterBody2D) -> void:
+	follow_position(target.global_position.x)
+
+
+func follow_position(current_x: float) -> void:
 	if not _has_target:
-		reset_target(target)
-	var current_x := target.global_position.x
-	if not follow_enabled:
+		_target_x = current_x
+		_has_target = true
+	if not follow_enabled or is_scroll_locked():
 		_target_x = current_x
 		return
 	# Count new rightward territory once. Collision recovery can oscillate

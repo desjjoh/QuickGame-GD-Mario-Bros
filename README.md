@@ -53,10 +53,18 @@ Only the occupied area keeps runtime layouts, entities, collisions, and camera l
 
 Area music is deferred pending suitable sound files; see the [music restoration backlog](docs/backlog.md#restore-area-music-when-suitable-sound-files-are-available). Area entry/exit hooks remain available; entity SFX are unchanged.
 
-Game owns a persistent 8x8-grid HUD above world content and below Mario. World, HUD and player share one soft-shadow composite. Score, coin, stage and time displays read GameHandler values through signals; the animated coin follows the active area theme. The timer does not count down yet. See [UI and HUD](docs/ui.md).
+Game owns a persistent 8x8-grid HUD above world content and below Mario. World, HUD and player share one soft-shadow composite. Score, coin, stage and time displays read GameHandler values through signals; the animated coin follows the active area theme. The level timer counts active gameplay ticks and routes timeout through animated death and TIME UP. See [level timer](docs/level-timer.md). See [UI and HUD](docs/ui.md).
 
 HUD coin and active question blocks sample a global 48-tick cosmetic cycle, so newly loaded objects stay synchronized. Walking and action animations retain their local timing.
 
 Global [transitions](docs/transitions.md) cover area/theme swaps with full black including HUD, and bracket the initial/respawn splash with quick black phases.
 
 `scenes/levels/worlds/world 1/1-1.tscn` is the existing connected stage. `scenes/levels/test_level.tscn` is the one-screen sandbox and title background: one Overworld area and fixed 256x240 camera. F6 permits normal isolated testing; title use suspends Mario. The menu uses the white HUD font and a single-player cursor. Press Enter or controller Start/Menu to enter 1-1. See [title flow](docs/title-screen.md).
+
+Game exposes an ordered stage list and BaseLevel provides normal/Warp completion lifecycle entry points, with destination intros and final-stage title return. Ending triggers remain deferred. See [level completion](docs/level-completion.md).
+
+Small Mario includes a Dead state for optional visible death: brief pose hold, upward launch and fall through terrain. It reuses the level-owned death lifecycle; gameplay callers are deferred. See [death lifecycle](docs/death.md).
+
+Paintable fixed flagpoles now share a reusable climbing surface/component and Mario Climb state. The base uses normal terrain collision; unconfigured poles support manual climbing, while 1-1 runs a level-owned ending through castle entry and title return. See [climbing](docs/climbing.md).
+
+The [flagpole ending](docs/flagpole-ending.md) coordinates scrolling, scripted descent/dismount/walking, independent endpoint cleanup and audio. Score/firework hooks currently complete without changing values.

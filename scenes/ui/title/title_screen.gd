@@ -9,7 +9,7 @@ var _theme_area: BaseLevelArea
 @onready var title_card: Sprite2D = $TitleCard
 @onready var cursor: Sprite2D = $Cursor
 
-signal start_requested
+signal start_requested(level: PackedScene)
 @export var background_level: PackedScene
 
 
@@ -22,12 +22,10 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if (
-		is_visible_in_tree()
-		and ControllerHandler.enabled
-		and ControllerHandler.input_start_just_pressed
-	):
-		start_requested.emit()
+	if not is_visible_in_tree() or not ControllerHandler.enabled:
+		return
+	if ControllerHandler.input_start_just_pressed:
+		start_requested.emit(null)
 
 
 func _on_level_changed(_level: BaseLevel) -> void:

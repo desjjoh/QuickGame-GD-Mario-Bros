@@ -34,3 +34,7 @@ EntityLayout source 3, Pipe entrance (2x2), uses entity_id pipe_entrance. Paint 
 Painted pipes use per-cell TransportPlacement resources under their area's Transport Points array. Set the top-left Cell, Target Id, Destination and entrance/exit permissions. The exact target pipe supplies emergence geometry, so no separate arrival marker is required. Legacy Pipe Routes resources remain compatible. See [transport authoring](transport.md#configuring-painted-entities); the visual cell-selection editor remains planned.
 
 GroundLayout also offers Pipe junction - top (source 5, pipe-3.png) and Pipe junction - bottom (source 6, pipe-4.png). Both are solid 16x16 terrain tiles in Overworld and Underground; Underground uses the available Overworld artwork. Existing tile IDs and painted cells are unchanged.
+
+## Flagpole
+
+The Flagpole (2x11) source paints the complete fixed-height climbable and solid palette-block base in one placement. Its entity_id is flagpole (source 5). See [climbing and flagpole](climbing.md) for anchor/height, controls and current manual test behavior.

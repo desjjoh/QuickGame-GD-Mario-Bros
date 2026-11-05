@@ -2,6 +2,6 @@
 [ext_resource type="PackedScene" path="res://scenes/main/game.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://tests/fixtures/silent_level.tscn" id="2"]
 [node name="Game" instance=ExtResource("1")]
-initial_level = ExtResource("2")
+stages = Array[PackedScene]([ExtResource("2")])
 transitions_enabled = false
 start_with_title = false

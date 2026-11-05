@@ -8,7 +8,7 @@
 [node name="Game" type="CanvasLayer" unique_id=445540570]
 layer = 0
 script = ExtResource("1_script")
-initial_level = ExtResource("2_level")
+stages = Array[PackedScene]([ExtResource("2_level")])
 
 [node name="LevelContainer" type="Node2D" parent="." unique_id=1996731603]
 
@@ -16,8 +16,6 @@ initial_level = ExtResource("2_level")
 layout_mode = 3
 anchors_preset = 0
 
-[node name="SharedShadow" type="CanvasGroup" parent="." unique_id=1798374583]
+[node name="SharedShadow" type="Node2D" parent="." unique_id=1798374583]
 physics_interpolation_mode = 2
-fit_margin = 12.0
-clear_margin = 12.0
 script = ExtResource("4_composer")

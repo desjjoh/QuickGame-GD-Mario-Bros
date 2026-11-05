@@ -11,6 +11,10 @@ var _samples: Array[PackedFloat64Array] = []
 var _saved: bool = false
 var _player: BasePlayer
 var _previous_body: Vector2
+var _shadow_mode: String = "current"
+var _composer: SharedShadowComposer
+var _legacy_group: CanvasGroup
+var _timed_viewports: Array[Viewport] = []
 var _body_step: Vector2
 
 
@@ -45,6 +49,8 @@ func _ready() -> void:
 		return
 	process_physics_priority = 1000
 	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--pacing-shadow="):
+			_shadow_mode = argument.get_slice("=", 1)
 		if argument == "--pacing-auto":
 			_automatic = true
 		if argument.begins_with("--pacing-seconds="):
@@ -56,6 +62,7 @@ func _ready() -> void:
 	else:
 		_game = load("res://scenes/main/game.tscn").instantiate()
 	add_child(_game)
+	_configure_shadow_capture()
 	if _automatic:
 		var camera := get_viewport().get_camera_2d() as LevelCamera
 		camera.world_right = 8000.0
@@ -119,7 +126,10 @@ func _ready() -> void:
 					native_step.x,
 					native_step.y,
 					float(floor_contact),
-					float(state_code)
+					float(state_code),
+					_render_time(false),
+					_render_time(true),
+					Performance.get_monitor(Performance.PIPELINE_COMPILATIONS_CANVAS)
 				]
 			)
 		)
@@ -130,7 +140,58 @@ func _ready() -> void:
 		Input.action_release(ControllerHandler.right_action)
 		Input.action_release(ControllerHandler.secondary_action)
 		Input.action_release(ControllerHandler.primary_action)
+	_game.free()
 	get_tree().quit()
+
+
+func _configure_shadow_capture() -> void:
+	_composer = _game.get_node("SharedShadow") as SharedShadowComposer
+	if _shadow_mode == "off" or _shadow_mode == "legacy":
+		_game.shadow_shader_enabled = false
+	elif _shadow_mode == "two-pass":
+		_game.shadow_shader_enabled = true
+	_timed_viewports.append(get_viewport())
+	if _game.shadow_shader_enabled:
+		_timed_viewports.append_array([_composer._source, _composer._horizontal])
+	if _shadow_mode == "legacy":
+		# Diagnostic reference only: the previous 169-tap CanvasGroup effect.
+		_legacy_group = CanvasGroup.new()
+		_legacy_group.fit_margin = 12.0
+		_legacy_group.clear_margin = 12.0
+		_legacy_group.material = _composer._level_material
+		_game.add_child(_legacy_group)
+		RenderingServer.frame_pre_draw.connect(_sync_legacy)
+	for viewport in _timed_viewports:
+		RenderingServer.viewport_set_measure_render_time(viewport.get_viewport_rid(), true)
+
+
+func _sync_legacy() -> void:
+	if not is_instance_valid(_legacy_group):
+		return
+	for root in [_composer.world_root, _composer.screen_root]:
+		RenderingServer.canvas_item_set_parent(
+			root.get_canvas_item(), _legacy_group.get_canvas_item()
+		)
+	if is_instance_valid(_composer._level) and not _composer._players_behind_world:
+		var players := _composer._level.players
+		RenderingServer.canvas_item_set_parent(
+			players.get_canvas_item(), _legacy_group.get_canvas_item()
+		)
+		RenderingServer.canvas_item_set_draw_index(players.get_canvas_item(), 2)
+
+
+func _render_time(gpu: bool) -> float:
+	var total := 0.0
+	for viewport in _timed_viewports:
+		if is_instance_valid(viewport):
+			total += (
+				RenderingServer.viewport_get_measured_render_time_gpu(viewport.get_viewport_rid())
+				if gpu
+				else RenderingServer.viewport_get_measured_render_time_cpu(
+					viewport.get_viewport_rid()
+				)
+			)
+	return total if gpu else total + RenderingServer.get_frame_setup_time_cpu()
 
 
 func _save() -> void:
@@ -167,7 +228,10 @@ func _save() -> void:
 				"native_step_x",
 				"native_step_y",
 				"on_floor",
-				"state_code"
+				"state_code",
+				"render_cpu_ms",
+				"render_gpu_ms",
+				"canvas_compilations"
 			]
 		)
 	)
@@ -182,8 +246,9 @@ func _save() -> void:
 	intervals.sort()
 	print(
 		(
-			"PACING: %s frames; median %.3f ms, p99 %.3f ms, max %.3f ms. CSV: %s"
+			"PACING (%s): %s frames; median %.3f ms, p99 %.3f ms, max %.3f ms. CSV: %s"
 			% [
+				_shadow_mode,
 				_samples.size(),
 				intervals[int(intervals.size() / 2)],
 				intervals[int(intervals.size() * 0.99)],
@@ -195,5 +260,7 @@ func _save() -> void:
 
 
 func _exit_tree() -> void:
+	if RenderingServer.frame_pre_draw.is_connected(_sync_legacy):
+		RenderingServer.frame_pre_draw.disconnect(_sync_legacy)
 	# Preserve a partial capture when the diagnostic window is closed early.
 	_save()

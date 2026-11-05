@@ -20,7 +20,7 @@ HUD is a full-viewport, mouse-ignoring Control. Labels and the coin use integer 
 | TimeHeading | 25, 2 | TIME |
 | TimeValue | 26, 3 | 400 |
 
-All values are placeholders. There are no score/timer/coin/lives subscriptions, polling or GameHandler writes. They do not describe actual stage/session progress. No opaque HUD backing strip is used; it renders directly over the background.
+HUD values subscribe to GameHandler session/status signals. TimeValue displays the live countdown; a level with Timer Enabled disabled hides the number while retaining TIME. No opaque HUD backing strip is used; it renders directly over the background.
 
 ## Font and coin assets
 
@@ -49,3 +49,5 @@ The title copyright line uses the supplied alternate alphabet as an 8x8 bitmap f
 TitleScreen includes the supplied 192x96 title card at native size above the copyright line. Its PNG follows AreaTheme.texture_overrides alongside the cursor; both palette Aseprite originals are retained as editable sources.
 
 HUD binds the current area theme signal and releases the old connection on area/level replacement and tree exit. Live theme edits refresh the coin without private helper calls, changing atlas references while preserving the global animation phase.
+
+WORLD displays the first three characters of stage_label, right-aligned within its fixed 24px (three 8px characters) field. The full stage label remains available to other presentations.

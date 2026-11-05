@@ -47,3 +47,16 @@ An occasional hitch on a 240 Hz monitor remains under investigation. Opt-in norm
 ## Independent one-screen test level
 
 scenes/levels/test_level.tscn inherits BaseLevel directly and has one MainArea. Its fixed camera sits at (128,120), with World Left/Right=0/256 and Follow Enabled=false. At 1x zoom the view is 256x240 (16x15 world grid cells). Ground fills columns 0..15 at rows 13/14. Its spawn is (48,208). TitleScreen now references it as its background, with Mario suspended by GameHandler. Use F6 for standalone inspection/testing with normal player controls. It has no transport routes. The connected stage is scenes/levels/worlds/world 1/1-1.tscn. Global camera/project settings were not changed.
+
+
+## Screen-edge skids and wall presentation - 2026-11-04
+
+The camera edge is a position clamp with the reference KeepOnscr input exception, not a solid wall. At the left edge, rightward input preserves outward leftward momentum; at the right edge, leftward input preserves outward rightward momentum. Reversal friction can then finish the skid while position remains clamped. Neutral or outward input clears outward velocity. Velocity already directed into the screen and vertical velocity remain unchanged. This applies in the air too; controls unavailable through the entity input gate count as neutral.
+
+Solid walls remain different: BasePlayer.move_body explicitly clears horizontal velocity directed into a reported wall, including floor/wall contacts where Godot can otherwise retain velocity despite blocked displacement. Slide uses the pre-collision braking result for the collision frame's pose, then resolves stopped motion on the next physics tick without a second integration or an idle movement frame. Natural skid completion retains its existing threshold. No full-speed wall momentum or invented timed skid lock is retained. This follows ImpedePlayerMove and the reference's separately cached animation speed rather than treating wall and screen-edge contact identically.
+
+camera_bounds_test covers both edges, zooms, all input signs and vertical speeds. slide_collision_test performs real physics contact, checks the single collision-frame skid pose, next-tick reversal and live edge skid retention in both directions. Existing wall-hop and lower-pipe landing regressions guard against camera ratcheting and lost ledge momentum.
+
+## Flagpole ending lock
+
+The level-owned presentation acquires a runtime owner-scoped scroll lock after consuming actual approach movement. While locked, LevelCamera consumes target history without scrolling, so attachment/dismount placements cannot push the view or accumulate a catch-up jump. The scripted walk releases this lock at the reference-derived vertical cue. Cancellation/shutdown release ownership. Authored Follow Enabled and bounds remain unchanged; unconfigured manual climbables do not acquire an ending lock.

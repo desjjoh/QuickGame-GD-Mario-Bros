@@ -40,3 +40,5 @@ Only Small Mario exists. Recording SUPER/FIRE does not transform Mario or select
 ## Verification
 
 player_status_test covers defaults, bounds, change-only signals, legacy-key routing, initial/live HUD/title/intro values, new-game reset with top-score retention, area travel and death restart continuity. It also checks that coins/score do not grant lives or promote top score automatically. Rendered runs capture the title layout for inspection. Existing HUD, title, death and transition regressions cover integration with their established lifecycles.
+
+Returning to the title uses the same clear_session reset as a new game, after shutting down the outgoing level. Player status, custom session values, pending start, stage index and world progress return to defaults; top score remains in memory until a hard restart. Stage-to-stage advancement does not call this reset.
