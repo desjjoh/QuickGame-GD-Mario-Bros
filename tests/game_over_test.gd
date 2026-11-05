@@ -68,7 +68,7 @@ func _ready() -> void:
 	add_child(game)
 	game.transitions_enabled = true
 	GameHandler.set_top_score(456789)
-	GameHandler.set_score(1234)
+	GameHandler.set_score(456999)
 	GameHandler.set_coins(8)
 	var key := GameHandler.current_level._progress_key
 	GameHandler.store_area_progress(key, &"probe", {"collected_coins": [Vector2i(1, 1)]})
@@ -110,7 +110,7 @@ func _ready() -> void:
 	assert(director.elapsed_frames >= 402)
 	assert(GameHandler.current_level.scene_file_path == "res://scenes/levels/test_level.tscn")
 	assert(GameHandler.get_area_progress(key, &"probe").is_empty())
-	assert(GameHandler.player_status.lives == 2 and GameHandler.top_score == 456789)
+	assert(GameHandler.player_status.lives == 2 and GameHandler.top_score == 456999)
 	assert(GameHandler.player_status.score == 0 and GameHandler.player_status.coins == 0)
 	assert(GameHandler.player_status.powerup_form == PlayerStatus.PowerupForm.SMALL)
 	await ticks(3)

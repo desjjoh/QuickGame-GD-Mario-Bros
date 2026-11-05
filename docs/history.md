@@ -754,3 +754,11 @@ After the earlier jump-only experiment was reverted, reproduced both user-provid
 ## 2026-11-05 - Preserve the reference falling-gravity selection
 
 Confirmed VerticalForceDown is explicitly written during player entrance setup and jump initialization, then reused by FallingSub without being cleared on landing. JumpAction now retains this profile after jump exit; passive Move falls apply it through a temporary modifier. New players and committed transport arrivals initialize the reference $28 entrance force. No air-steering or active-jump tuning changed. Added five-profile, override/weight, cleanup, successful-landing retention and area-reset checks; existing jump benchmarks and gap regressions remain. See docs/verification.md for the actual validation scope. No Git operations were performed.
+
+## 2026-11-05 - Silent timer-to-score ending phase
+
+Replaced the flagpole presentation's no-op Score hook with TimeScoreStep: one remaining timer unit becomes 50 points per physics tick after endpoint retirement, without waiting for stage-clear music and without counting audio. GameHandler remains the value owner and the existing HUD signals render each update. The contact-time snapshot is preserved; disabled/zero timers skip conversion, and completion/cancellation/level replacement stop callbacks through the ticket and weak owner guards. Fireworks remains a placeholder and the existing final hold is unchanged. Added end-to-end conversion coverage and retained the ending audio-tail scenario with a short counter. No Project Settings, Input Map, audio imports or Git operations changed.
+
+## 2026-11-05 - Promote the final run score on title return
+
+Common GameHandler title entry now compares the outgoing score with top_score after stage shutdown and before clear_session resets the run. Higher scores replace the app-session record; ties/lower values preserve it without duplicate record notifications. Time-conversion points are included, and the title's existing binding displays the result. Direct resets/new-game initialization do not independently promote records; no disk persistence is added. Added title-return, time-bonus and game-over regression assertions. No Git operations were performed.

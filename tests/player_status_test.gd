@@ -49,7 +49,7 @@ func _ready() -> void:
 	assert(status.score == 999999 and status.coins == 99)
 	assert(
 		status.lives == 5 and GameHandler.top_score == 54321,
-		"No automatic coin rewards or record promotion yet."
+		"Coin rewards are deferred; score changes do not promote the record before title return."
 	)
 	GameHandler.set_score(-1)
 	GameHandler.set_coins(-1)
@@ -112,8 +112,21 @@ func _ready() -> void:
 	assert(GameHandler.time_remaining == 400 and GameHandler.top_score == 54321)
 	assert(game.get_node("UI/HUD") == hud and hud.get_node("CoinCount").text == "08")
 	await ticks()
-	if DisplayServer.get_name() != "headless":
+	# Returning to title promotes the final run score before clearing it.
+	GameHandler.set_score(60000)
+	assert(GameHandler.top_score == 54321, "Promotion belongs to title return, not score mutation.")
+	assert(GameHandler.show_title(game.initial_level))
+	assert(GameHandler.top_score == 60000 and status.score == 0 and status.coins == 0)
+	assert(game.get_node("UI/ScreenContainer/TitleScreen/TopScore").text == "TOP- 060000")
+	# Ties and lower scores preserve the record without emitting a new record update.
+	for final_score in [60000, 1200]:
+		GameHandler.set_score(final_score)
+		changes.clear()
 		assert(GameHandler.show_title(game.initial_level))
+		assert(GameHandler.top_score == 60000 and status.score == 0)
+		assert(not changes.has(&"top_score"))
+		assert(game.get_node("UI/ScreenContainer/TitleScreen/TopScore").text == "TOP- 060000")
+	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
 		assert(
 			(
@@ -126,17 +139,17 @@ func _ready() -> void:
 	GameHandler.session_value_changed.disconnect(record_change)
 	game.free()
 	await ticks()
-	assert(GameHandler.top_score == 54321)
+	assert(GameHandler.top_score == 60000)
 	GameHandler.clear_session()
 	assert(
 		(
 			status.score == 0
 			and status.coins == 0
 			and status.lives == 2
-			and GameHandler.top_score == 54321
+			and GameHandler.top_score == 60000
 		)
 	)
 	print(
-		"PASS: typed status defaults/ranges, signals, live HUD/title/intro, new-game reset, preserved top score, area/death continuity and no automatic rewards"
+		"PASS: typed status defaults/ranges, signals, live HUD/title/intro, new-game reset, title-return record promotion/tie/lower-score handling, area/death continuity and no automatic coin rewards"
 	)
 	get_tree().quit()

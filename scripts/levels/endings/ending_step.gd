@@ -14,7 +14,7 @@ func begin() -> void:
 
 
 func _begin(ticket: int) -> void:
-	# Score/fireworks are deliberately no-ops until their features are implemented.
+	# The base hook is a no-op; derived steps implement their own presentation.
 	complete(ticket)
 
 

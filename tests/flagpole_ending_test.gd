@@ -143,7 +143,7 @@ func _ready() -> void:
 	assert(GameHandler.top_score == 123456)
 	game.free()
 	await ticks(3)
-	# Real music continues after the player object is gone; no-op gates finish immediately.
+	# Real music continues during timer conversion after player retirement.
 	game = make_game(false)
 	game.transitions_enabled = true
 	var intro = GameHandler.transitions.get_definition(&"level")
@@ -158,6 +158,8 @@ func _ready() -> void:
 	await grab(level, 40.0)
 	assert(ending.grab_height == 152.0)
 	assert(level.player.body.global_position.y < 43.0)
+	# Keep this audio-tail scenario short; conversion cadence has dedicated coverage.
+	GameHandler.time_remaining = 3
 	await wait_phase(ending, FlagpoleEndingPresentation.Phase.WAIT)
 	assert(level.player == null and GameHandler.current_player == null)
 	assert(ending._audio != null and ending._audio.playing)

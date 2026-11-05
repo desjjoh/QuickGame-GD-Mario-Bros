@@ -1,6 +1,6 @@
 # Level completion and stage order
 
-BaseLevel owns the completion lifecycle entry; GameHandler owns destination selection and persistent session status. 1-1 now uses a level-owned [flagpole ending presentation](flagpole-ending.md) with descent, automatic walk, endpoint player retirement and completion audio. Score/firework hooks currently do nothing; time-to-score conversion remains deferred. The level timer is implemented separately.
+BaseLevel owns the completion lifecycle entry; GameHandler owns destination selection and persistent session status. 1-1 now uses a level-owned [flagpole ending presentation](flagpole-ending.md) with descent, automatic walk, endpoint player retirement and completion audio. The Score step converts time into points without counting audio; the Fireworks hook remains empty. Direct/Warp completion bypasses the flagpole presentation and its conversion. The level timer is implemented separately.
 
 ## Authoring the stage order
 
@@ -28,7 +28,7 @@ GameHandler chooses the next list entry or explicit override. A listed override 
 
 Stage advancement preserves score, coin totals, reserve lives and power-up form in GameHandler. Current artwork still supplies only Small Mario; preserving the form does not add Super/Fire player scenes. The next stage initializes its own stage label/time, areas, camera and player. No lives are charged and no new-game reset runs.
 
-The old level shuts down and saves its final snapshot before the next stage visit explicitly resets progress. This ordering prevents shutdown from repopulating a cleared store. Areas within the same level and ordinary death keep their established policies. Finishing the final stage uses the finish transition (12-tick minimum plus 12-tick quick outro, no presentation card), loads the title through its common cleanup lifecycle and resets current_stage_index to -1. No black Cover or background override is introduced. Title background gameplay remains suspended after transition snapshot restoration. Title entry calls clear_session after shutdown, resetting score/coins, Small form, reserves, custom session values, pending startup target, stage index and world progress. Top score survives until hard restart. The next Start also performs the ordinary fresh-session reset defensively.
+The old level shuts down and saves its final snapshot before the next stage visit explicitly resets progress. This ordering prevents shutdown from repopulating a cleared store. Areas within the same level and ordinary death keep their established policies. Finishing the final stage uses the finish transition (12-tick minimum plus 12-tick quick outro, no presentation card), loads the title through its common cleanup lifecycle and resets current_stage_index to -1. No black Cover or background override is introduced. Title background gameplay remains suspended after transition snapshot restoration. Title entry calls clear_session after shutdown, resetting score/coins, Small form, reserves, custom session values, pending startup target, stage index and world progress. Before that reset, common title entry promotes a higher final run score, including completed time bonuses. Top score survives until hard restart. The next Start also performs the ordinary fresh-session reset defensively.
 
 ## Cancellation and ownership
 
