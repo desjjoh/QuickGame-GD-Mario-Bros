@@ -106,3 +106,7 @@ func _on_body_exited(body: Node2D) -> void:
 	var player := body.get_parent() as BasePlayer
 	if player != null and body == player.body:
 		player.climbing.unregister_surface(self)
+
+
+func attachment_y(feet_y: float) -> float:
+	return clampf(feet_y, climb_top.global_position.y, climb_bottom.global_position.y)

@@ -4,7 +4,7 @@
 
 1-1 has one stage in Game.Stages. Its configured flagpole now starts the reusable level-owned ending presentation: scripted Mario/flag descent, 24-tick dismount hold, automatic rightward walk, player retirement at the independent castle endpoint, score/fireworks completion hooks, music/final hold, then the normal final-stage return to title. The castle remains painted DecorationLayout art with no special collision.
 
-Score uses TimeScoreStep to convert remaining time into score without counting audio. Fireworks remains a no-op EndingStep. Flagpole height score, castle flag and fireworks are not awarded/drawn yet. Both steps participate in the asynchronous completion contract. Top-score promotion belongs to common title entry after the final run score is known, before run cleanup.
+Score uses TimeScoreStep to convert remaining time into score without counting audio. Fireworks remains a no-op EndingStep. Flagpole height points are awarded when descent ends. The castle flag and fireworks are deferred. Both steps participate in the asynchronous completion contract. Top-score promotion belongs to common title entry after the final run score is known, before run cleanup.
 
 ## Authoring
 
@@ -32,7 +32,7 @@ The source routines are recorded in [the reference investigation](flagpole-endin
 
 - Consume legitimate approach movement before acquiring a runtime camera lock. Attachment/side snaps do not count as forward camera travel. The lock is owned by the presentation, separate from authored Follow Enabled, and consumes tracking history while held.
 - On contact, play smb_flagpole.wav once and start lowering the flag. Mario is forced onto the left side, facing right. Nominal downward speed is 1+$ff/256 pixels per tick, using our shared floating-point component.
-- Mario stops near two pixels above the base, unless contact began lower. The flag sprite uses a fractional-byte accumulator (normally a one-pixel first step followed by two-pixel steps) and checks its stop threshold before movement, matching the reference ordering. Its center threshold is base-top minus 14 pixels, corresponding to reference flag top $aa at base top $c0; the last step can overshoot it by one pixel. Descent advances when the flag reaches its threshold or Mario passes the fallback threshold, not an unconditional wait-for-both duration.
+- Mario stops near two pixels above the base, unless contact began lower. The flag sprite uses a fractional-byte accumulator (normally a one-pixel first step followed by two-pixel steps) and checks its stop threshold before movement, matching the reference ordering. Its center threshold is base-top minus 14 pixels, corresponding to reference flag top $aa at base top $c0; the last step can overshoot it by one pixel. Descent advances when the flag reaches its threshold or Mario reaches the fallback threshold two pixels below the base top. A low grab retains its Y so this fallback can end descent before moving the flag.
 - Dismount places Mario on the other side facing inward, holds 24 ticks, then nudges four pixels outward and starts ordinary walk-profile motion. There is no invented jump impulse.
 - When his feet reach base-top plus 14 pixels during the walk, release scroll lock and play smb_stage_clear.wav. Locked displacement is not caught up afterwards. A very close custom endpoint starts music/unlocks defensively at retirement if that threshold has not been reached.
 - After the score and fireworks hooks finish and stage-clear playback ends, run a full 126-physics-tick hold (about 2.1 seconds). The reference reloads six 21-frame interval ticks and concurrently waits for event music, producing a phase-dependent roughly 105–126-frame timer. Our hold deliberately starts after music as well, preserving the requested visible pause even when timer conversion is short or skipped. This existing ordering is retained with time conversion; it differs from the reference's overlapping waits. Audio is bounded by stream length plus one second if completion fails.
@@ -52,6 +52,12 @@ Timer-disabled stages and already-zero counters skip conversion immediately, wit
 The counting SFX is deliberately absent. The reference uses Sfx_TimerTick/PlayTimerTick on square channel 2 (six-frame effect, requested during four of every eight global frames). Acquisition, gain normalization and cadence integration remain backlog work; stage-clear and flag audio are unchanged.
 
 Hooks notify completion and use GameHandler for rewards rather than player-owned counters. An individual hook does not dispatch stage progression.
+
+## World-space score popup
+
+Instantiate `scenes/components/presentation/score_popup.tscn` and add it to a world-space parent. Call `show_score(amount, world_position)` for points or `show_one_up(world_position)` for an extra-life display. The position is the center of the 16×8 tile. The scene starts hidden and uses nearest filtering. Unsupported point amounts hide the popup and return false.
+
+The atlas supports 100, 200, 400, 500, 800, 1000, 2000, 4000, 5000, 8000 and 1 UP. Callers own motion, lifetime and reward application. The flagpole presentation selects 100, 400, 800, 2000 or 5000 points from the first accepted grab. Heights above 16, 56, 80 and 126 pixels advance to the next tier after applying the reference whole-pixel Y conversion. The popup starts 12 pixels right of the shaft and 12 pixels above the base, measured at its center. It rises with the flag descent using the upward fractional step and stays in place afterward. Cancellation hides and frees it. The height bonus is applied once when descent ends, before the separate time conversion.
 
 ## Return transition
 

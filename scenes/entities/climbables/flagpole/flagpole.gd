@@ -26,22 +26,22 @@ func reset_flag() -> void:
 	$Visuals/Flag.reset_physics_interpolation()
 
 
-func attachment_fraction(player: BasePlayer, from_feet: Vector2, to_feet: Vector2) -> float:
+func attachment_fraction(player: BasePlayer, _from_feet: Vector2, to_feet: Vector2) -> float:
 	if not is_available() or not is_instance_valid(player) or player.is_dead or player.is_shutdown:
 		return -1.0
 	# HandleClimbing accepts the NES player's X low nibble $06..$09.
 	# With our +8px body origin, these are two bands relative to the shaft.
-	var probe := Vector2(0.0, player.climbing.capture_probe_offset_y)
-	var first := INF
-	for band in [Vector2(-10.0, -6.0), Vector2(6.0, 10.0)]:
-		var low := Vector2(climb_top.global_position.x + band.x, _capture_top(player))
-		var high := Vector2(
-			climb_top.global_position.x + band.y - 0.0001, climb_bottom.global_position.y - 0.0001
-		)
-		var fraction := _sweep_fraction(from_feet + probe, to_feet + probe, low, high)
-		if fraction >= 0.0:
-			first = minf(first, fraction)
-	return first if is_finite(first) else -1.0
+	var probe_y := to_feet.y + player.climbing.capture_probe_offset_y
+	if probe_y < _capture_top(player) or probe_y >= climb_bottom.global_position.y:
+		return -1.0
+	var offset := to_feet.x - climb_top.global_position.x
+	if (offset >= -10.0 and offset < -6.0) or (offset >= 6.0 and offset < 10.0):
+		return 1.0
+	return -1.0
+
+
+func attachment_y(feet_y: float) -> float:
+	return feet_y
 
 
 func _capture_top(_player: BasePlayer) -> float:

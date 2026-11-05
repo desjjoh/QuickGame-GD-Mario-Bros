@@ -81,7 +81,7 @@ func _ready() -> void:
 	pole.player_detached.connect(func(_player: BasePlayer): detached += 1)
 	# Contact alone grabs; no Up press and no completion/fanfare.
 	player.face_direction(1.0)
-	player.body.global_position = Vector2(113, 130)
+	player.body.global_position = Vector2(111, 130)
 	player.body.velocity = Vector2(120, -30)
 	await ticks(5)
 	assert(player.state_machine.current_state == player.climb_state)

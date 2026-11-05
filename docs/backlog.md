@@ -6,7 +6,7 @@ This guide records deferred work, not implemented features.
 
 Update 2026-11-04: shared player status and live HUD/title/intro bindings are implemented first. See [player status](player-status.md). Top-score promotion on title return is implemented; disk saving, coin rollover/rewards and form-based scene selection remain deferred. Game over and the NES reserve/display model are now implemented; see [game over](game-over.md).
 
-Current priority: stage completion foundation and the level timer are implemented. Timer expiry now uses animated death and TIME UP; see [level timer](level-timer.md). The fixed flagpole and manual climbing foundation are implemented; see [climbing](climbing.md). The configured 1-1 flagpole now runs its ending presentation; silent timer-to-score conversion is implemented; height rewards, fireworks and castle-specific endings remain deferred. Warp bypasses this presentation. See [level completion](level-completion.md).
+Current priority: stage completion foundation and the level timer are implemented. Timer expiry now uses animated death and TIME UP; see [level timer](level-timer.md). The fixed flagpole and manual climbing foundation are implemented; see [climbing](climbing.md). The configured 1-1 flagpole now runs its ending presentation; silent timer-to-score conversion is implemented; flagpole height rewards are implemented and fireworks and castle-specific endings remain deferred. Warp bypasses this presentation. See [level completion](level-completion.md).
 
 Requested next priorities:
 
@@ -110,11 +110,11 @@ Open: user reports Run feels dropped mainly after jump/landing and re-press rest
 
 ## Climbing follow-up
 
-Implement actual vines and their top-of-screen transport. The flagpole descent, flag movement, dismount, castle walk and completion audio are now implemented; silent timer-to-score conversion is implemented; height score, castle flag and fireworks remain deferred. Two eventual completion fanfare types remain deferred. Configured flagpole contact now starts the level-owned ending and completion audio; the Score hook converts time while the Fireworks hook remains empty.
+Implement actual vines and their top-of-screen transport. The flagpole descent, flag movement, dismount, castle walk and completion audio are now implemented; silent timer-to-score conversion is implemented; flagpole height scoring is implemented and the castle flag and fireworks remain deferred. Two eventual completion fanfare types remain deferred. Configured flagpole contact now starts the level-owned ending and completion audio; the Score hook converts time while the Fireworks hook remains empty.
 
 ## Flagpole ending presentation planning - 2026-11-05
 
-See [flagpole ending plan](flagpole-ending-plan.md) for reference choreography, level/presentation ownership and the requested endpoint/player-removal differences. Completion acceptance must outlive Mario before presentation finish can advance stages. The foundation is now implemented; see [current flagpole ending](flagpole-ending.md). Timer conversion now uses the Score callback; height rewards and the Fireworks callback remain future work.
+See [flagpole ending plan](flagpole-ending-plan.md) for reference choreography, level/presentation ownership and the requested endpoint/player-removal differences. Completion acceptance must outlive Mario before presentation finish can advance stages. The foundation is now implemented; see [current flagpole ending](flagpole-ending.md). Timer conversion now uses the Score callback; flagpole height points are awarded at descent completion and the Fireworks callback remains future work.
 
 ## Skid audio and final ending hold - 2026-11-05
 

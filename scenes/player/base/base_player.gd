@@ -48,20 +48,20 @@ func _physics_process(delta: float) -> void:
 	var before := body.global_position
 	if not is_shutdown and not is_dead:
 		run_action.advance_timer()
-		_try_attach_climbable(before, before)
+		_try_attach_climbable(before, before, false)
 	super(delta)
 	if not is_shutdown and not is_dead:
 		# Catch actual movement after state integration, including the tick we land.
 		_try_attach_climbable(before, body.global_position)
 
 
-func _try_attach_climbable(from_feet: Vector2, to_feet: Vector2) -> void:
+func _try_attach_climbable(from_feet: Vector2, to_feet: Vector2, after_motion: bool = true) -> void:
 	if climb_state == null or state_machine.current_state == climb_state:
 		return
 	var current := state_machine.current_state as PlayerState
 	if current == null or not current.controller_controls_available():
 		return
-	var surface := climbing.find_surface(self, from_feet, to_feet)
+	var surface := climbing.find_surface(self, from_feet, to_feet, after_motion)
 	if surface == null:
 		return
 	# The state transition lets Jump/Slide clean up their existing modifiers.

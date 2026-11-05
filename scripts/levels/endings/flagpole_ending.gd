@@ -1,6 +1,7 @@
 class_name FlagpoleEndingPresentation
 extends LevelEndingPresentation
 
+const SCORE_POPUP = preload("res://scenes/components/presentation/score_popup.tscn")
 const AudioMix = preload("res://scripts/audio/sound_effect_mix.gd")
 const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
 enum Phase { IDLE, DESCEND, DISMOUNT, WALK, SCORE, FIREWORKS, WAIT, FINISHED }
@@ -18,6 +19,9 @@ signal phase_changed(phase: Phase)
 var phase: Phase = Phase.IDLE
 var active: bool = false
 var grab_height: float = 0.0
+var grab_points: int = 0
+var _score_popup: Sprite2D
+var _popup_fraction: int = 255
 var remaining_time_at_contact: int = 0
 var _level: BaseLevel
 var _player: BasePlayer
@@ -66,6 +70,7 @@ func start(level: BaseLevel, player: BasePlayer, source: BaseEntity) -> bool:
 	_pole = source as FlagpoleEntity
 	_pole.reset_flag()
 	grab_height = maxf(0.0, _pole.climb_bottom.global_position.y - player.body.global_position.y)
+	grab_points = points_for_grab_height(grab_height)
 	remaining_time_at_contact = GameHandler.time_remaining
 	_camera = get_viewport().get_camera_2d() as LevelCamera
 	if _camera == null:
@@ -84,8 +89,10 @@ func start(level: BaseLevel, player: BasePlayer, source: BaseEntity) -> bool:
 	if is_instance_valid(player._active_sound_effect):
 		player._active_sound_effect.stop()
 	_play_audio(flag_sound)
+	_show_grab_score()
 	# FlagpoleRoutine also runs after collision on the contact tick.
-	_pole.lower_flag(get_physics_process_delta_time(), player.climbing.downward_speed)
+	if not _player_reached_descent_cutoff():
+		_advance_flag_and_popup(get_physics_process_delta_time())
 	_set_phase(Phase.DESCEND)
 	if not _valid():
 		return false
@@ -132,12 +139,11 @@ func _physics_process(delta: float) -> void:
 		if _player.state_machine.current_state != _state:
 			return
 		if phase == Phase.DESCEND:
-			var flag_done := _pole.lower_flag(delta, _player.climbing.downward_speed)
-			if (
-				flag_done
-				or _player.body.global_position.y >= _pole.climb_bottom.global_position.y + 2.0
-			):
+			if _player_reached_descent_cutoff() or _advance_flag_and_popup(delta):
 				_state.begin_dismount()
+				GameHandler.add_score(grab_points)
+				if not _valid():
+					return
 				_set_phase(Phase.DISMOUNT)
 		if phase == Phase.DISMOUNT and _state.phase == PlayerFlagpoleEndingState.Phase.WALK:
 			_set_phase(Phase.WALK)
@@ -158,6 +164,48 @@ func _physics_process(delta: float) -> void:
 			set_physics_process(false)
 			if not _level.finish_ending(self) and _valid():
 				_level.cancel_ending()
+
+
+static func points_for_grab_height(height: float) -> int:
+	# Flooring the reference Y is equivalent to rounding height above the base up.
+	var pixels := ceili(height)
+	if pixels >= 127:
+		return 5000
+	if pixels >= 81:
+		return 2000
+	if pixels >= 57:
+		return 800
+	if pixels >= 17:
+		return 400
+	return 100
+
+
+func _show_grab_score() -> void:
+	# Register the sprite at its actual anchor and present the NES pixel steps directly.
+	var anchor := _pole.climb_bottom.global_position + Vector2(12, -12)
+	var popup = SCORE_POPUP.instantiate()
+	popup.position = _pole.to_local(anchor)
+	popup.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+	_pole.add_child(popup)
+	_score_popup = popup
+	_popup_fraction = 255
+	popup.show_score(grab_points, anchor)
+
+
+func _advance_flag_and_popup(delta: float) -> bool:
+	var speed := _player.climbing.downward_speed
+	if _pole.lower_flag(delta, speed):
+		return true
+	if is_instance_valid(_score_popup):
+		# The upward subtraction borrows on the first fractional step.
+		_popup_fraction += roundi(speed * delta * 256.0)
+		_score_popup.position.y -= floori(float(_popup_fraction) / 256.0)
+		_popup_fraction %= 256
+	return false
+
+
+func _player_reached_descent_cutoff() -> bool:
+	return _player.body.global_position.y >= _pole.climb_bottom.global_position.y + 2.0
 
 
 func _begin_music_and_unlock() -> void:
@@ -224,6 +272,10 @@ func cancel() -> void:
 	_generation += 1
 	active = false
 	set_physics_process(false)
+	if is_instance_valid(_score_popup):
+		_score_popup.hide()
+		_score_popup.queue_free()
+	_score_popup = null
 	score_step.cancel()
 	fireworks_step.cancel()
 	if is_instance_valid(_camera):

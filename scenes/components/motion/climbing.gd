@@ -33,7 +33,9 @@ func unregister_surface(surface: BaseClimbable) -> void:
 		_blocked_surface = null
 
 
-func find_surface(player: BasePlayer, from_feet: Vector2, to_feet: Vector2) -> BaseClimbable:
+func find_surface(
+	player: BasePlayer, from_feet: Vector2, to_feet: Vector2, after_motion: bool = true
+) -> BaseClimbable:
 	# Query the swept player region, independent of delayed Area2D overlap signals.
 	var bounds: Rect2 = (
 		player.collision_shape.global_transform * player.collision_shape.shape.get_rect()
@@ -64,6 +66,8 @@ func find_surface(player: BasePlayer, from_feet: Vector2, to_feet: Vector2) -> B
 			continue
 		if _blocked_surface != null and _blocked_surface.get_ref() == surface:
 			continue
+		if not after_motion and surface is FlagpoleEntity:
+			continue
 		var fraction := surface.attachment_fraction(player, from_feet, to_feet)
 		if fraction >= 0.0 and fraction < first:
 			nearest = surface
@@ -87,11 +91,7 @@ func attach(player: BasePlayer, surface: BaseClimbable) -> void:
 	player.body.velocity = Vector2.ZERO
 	player.body.global_position = Vector2(
 		surface.climb_top.global_position.x + _side * side_offset,
-		clampf(
-			_capture_position.y,
-			surface.climb_top.global_position.y,
-			surface.climb_bottom.global_position.y
-		)
+		surface.attachment_y(_capture_position.y)
 	)
 	player.face_direction(-_side)
 	player.body.reset_physics_interpolation()

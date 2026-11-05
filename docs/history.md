@@ -762,3 +762,7 @@ Replaced the flagpole presentation's no-op Score hook with TimeScoreStep: one re
 ## 2026-11-05 - Promote the final run score on title return
 
 Common GameHandler title entry now compares the outgoing score with top_score after stage shutdown and before clear_session resets the run. Higher scores replace the app-session record; ties/lower values preserve it without duplicate record notifications. Time-conversion points are included, and the title's existing binding displays the result. Direct resets/new-game initialization do not independently promote records; no disk persistence is added. Added title-return, time-bonus and game-over regression assertions. No Git operations were performed.
+
+## 2026-11-05 - Flagpole height reward and popup
+
+The flagpole ending selects the reference reward tier on first contact, shows the world-space atlas popup, and awards the points once at descent completion. The popup rises during descent and is freed on cancellation. Focused headless checks passed for flagpole ending, time conversion and popup mapping. The rendered ending passed and showed the 2000 popup beside the shaft with the corresponding HUD score.
