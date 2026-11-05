@@ -14,7 +14,6 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/sideways_pipe_entrance.tscn" id="side_pipe"]
 
 [node name="TestLevel" unique_id=422508678 instance=ExtResource("base")]
-timer_enabled = false
 texture_filter = 1
 player_scene = ExtResource("player")
 entity_scenes = Dictionary[StringName, PackedScene]({
