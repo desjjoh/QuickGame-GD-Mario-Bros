@@ -5,7 +5,6 @@
 
 [node name="ScorePopup" type="Sprite2D"]
 visible = false
-z_index = 1
 texture_filter = 1
 texture = ExtResource("atlas")
 region_enabled = true

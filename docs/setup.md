@@ -24,4 +24,6 @@ Hold Jump for a higher jump. Press the opposite direction while moving to skid. 
 
 Open `scenes/levels/worlds/world 1/1-1.tscn`. Expand **Areas → MainArea → Layouts**. Use **GroundLayout** for solid terrain, **DecorationLayout** for scenery, and **EntityLayout** for entity stamps. Each layer uses the same 16×16 grid. Keep nested areas editable so scene overrides survive saving.
 
+Paint question blocks on **EntityLayout**. Each placed block contains one coin.
+
 Paint a pipe stamp, then configure its destination on the area. To test area switching, enter the vertical pipe in 1-1 and walk into the sideways pipe in the secret area. See [configuration](configuration.md#areas-and-pipe-routes).

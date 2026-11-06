@@ -9,3 +9,5 @@
 - Do not invent dates, approvals, or verification results. Label reconstructed history, unknown prior values, and checks not performed explicitly.
 - Keep changes small and explain their purpose. The user is learning Godot and values walkthroughs; follow the current request about whether to implement or guide.
 - Do not change behavior merely to match an external reference. Discuss significant architectural changes before implementing them.
+
+- Run focused tests that cover the changed behavior and affected integration paths. Run the full regression suite only when the user explicitly asks for it.

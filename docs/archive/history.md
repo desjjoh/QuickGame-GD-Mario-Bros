@@ -822,3 +822,13 @@ Moved trip resolution, entry and exit state, and transition callbacks into the l
 ## 2026-11-06 - Game flow extraction
 
 Moved title operations into TitleFlow and restart, TIME UP, Game Over, and stage handoff into StageFlow. GameHandler retained the public API, flow state, session, and active level ownership. Title, stage completion, death, timer, transition, ending, and player status checks passed. Several headless runs reported ObjectDB leak warnings.
+
+## 2026-11-06 - Question-block coin rewards
+
+Question blocks now award one coin and 200 points on bounce entry through GameHandler. The effect under scenes/entities/blocks/question uses the dedicated block-coin sprite and the shared score popup. The editor add-on under addons/question_block_contents exposes Coin for each selected question-block cell. Existing layouts use the default directly, so per-cell storage is deferred until another reward is available.
+
+Godot 4.7.2 headless editor startup loaded the enabled add-on. The focused question-block, area-theme, area-streaming, and sound-mix scenes emitted PASS. The full regression run produced 60 PASS markers. The strict runner returned a failure because 29 scenes reported ObjectDB leak warnings on the console at shutdown. Interactive editor and Mesen comparisons were not performed.
+
+## 2026-11-06 - Remove the question-block contents dropdown
+
+Removed addons/question_block_contents and its project.godot registration while the reward authoring workflow is reconsidered. Updated the setup, testing, backlog, and entity-layout guides. The question-block regression emitted PASS in Godot 4.7.2 headless with four ObjectDB leak warnings at exit. Interactive editor verification was not performed.

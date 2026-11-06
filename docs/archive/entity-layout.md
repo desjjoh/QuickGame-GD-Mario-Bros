@@ -13,9 +13,9 @@ The block regression covers count, duplicate prevention, marker collision/visibi
 The palette also includes Question block entity (source 1, entity_id question_block). 1-1 maps it to the animated QuestionBlock scene. See [question block](question-block.md) for timing and scene details.
 
 
-## Planned: per-cell entity properties
+## Question-block contents
 
-A future custom editor tool will let us paint a question block, select its cell, and choose its contents from a dropdown. Configuration will belong to the level and be keyed by grid coordinate, while TileSet custom data continues identifying the entity type. The spawner will configure the generated entity before startup. This workflow is planned, not currently available; item spawning is also unimplemented. See the [per-cell editor decision](decisions.md#2026-11-02---planned-per-cell-entity-editor).
+Paint the existing question-block stamp on EntityLayout. Every placed block awards one coin. Per-cell reward authoring is deferred pending a new editor workflow.
 
 ## Static pipes
 
@@ -41,11 +41,11 @@ The Flagpole (2x11) source paints the complete fixed-height climbable and solid 
 
 ## Castle stamp
 
-The Overworld EntityLayout palette includes Castle (5x5), source 6 with entity ID `castle`. Paint its top-left cell and set the ending presentation’s Castle Cell to match. The castle scene supplies a doorway marker and the flag raise behind its art. In 1-1 the stamp at (201,8) replaces the former painted castle tiles. See [flagpole ending](flagpole-ending.md).
+The Overworld EntityLayout palette includes Castle (5x5), source 6 with entity ID `castle`. Paint its top-left cell and set the ending presentationï¿½s Castle Cell to match. The castle scene supplies a doorway marker and the flag raise behind its art. In 1-1 the stamp at (201,8) replaces the former painted castle tiles. See [flagpole ending](flagpole-ending.md).
 
 ## World coin stamp
 
-Choose Coin on EntityLayout in either palette. Source 7 places one 16Ã—16 Coin entity and selects the area texture through its theme. The three atlas frames follow the shared bright/medium/dark/medium clock with the HUD coin and active question blocks. Camera activity pauses the subscription outside the buffer and resamples the current phase on wake. Player contact changes Active to Collected once, hides the sprite, unsubscribes from animation and disables pickup monitoring. The collected state persists by area and marker cell. Death follows the level’s existing progress reset policy. A live pickup awards 200 points and one coin through GameHandler, then emits collected(player). The 100th coin rolls over and grants an extra life. Regular world coins use audio and HUD feedback. Restoring Collected only restores presentation and pickup state.
+Choose Coin on EntityLayout in either palette. Source 7 places one 16Ã—16 Coin entity and selects the area texture through its theme. The three atlas frames follow the shared bright/medium/dark/medium clock with the HUD coin and active question blocks. Camera activity pauses the subscription outside the buffer and resamples the current phase on wake. Player contact changes Active to Collected once, hides the sprite, unsubscribes from animation and disables pickup monitoring. The collected state persists by area and marker cell. Death follows the levelï¿½s existing progress reset policy. A live pickup awards 200 points and one coin through GameHandler, then emits collected(player). The 100th coin rolls over and grants an extra life. Regular world coins use audio and HUD feedback. Restoring Collected only restores presentation and pickup state.
 
 ## Entity progress persistence
 

@@ -6,7 +6,7 @@ QuestionBlock inherits BaseBlock's solid 16x16 body, top-left origin, presentati
 - Bouncing rejects further hits, stops the loop, selects question-block-4.png, and begins the sprite bounce on entry. On completion it transitions to Inactive.
 - Inactive keeps the used sprite and rejects hits, with frame, physics, and input updates disabled.
 
-There are no items, coins, score rewards, or brick-breaking rules yet. Area progress is preserved in GameHandler: returning to an area or replacing the same named level within the session restores used question blocks. A fresh session starts from the authored layout. The solid body stays fixed throughout the visual bounce.
+Question blocks contain one coin by default. Brick-breaking rules remain future work. Area progress is preserved in GameHandler: returning to an area or replacing the same named level within the session restores used question blocks. A fresh session starts from the authored layout. The solid body stays fixed throughout the visual bounce.
 
 ## Hit delivery and reuse
 
@@ -22,11 +22,11 @@ Active enables Presentation/PaletteAnimation, which samples the [shared clock](a
 
 The [reference disassembly](https://gist.github.com/1wErt3r/4048722) supplies ColorRotatePalette's palette phases, BumpBlock's initial Y speed of -2 pixels/frame, and ImposeGravityBlock's force of $50/256 pixels/frame squared. BlockBounce converts the latter two at nominal 60 Hz to initial_speed=-120 pixels/second and gravity=1125 pixels/second squared. It advances the sprite offset and restores its starting position on return or state exit/shutdown. These values are editable on BaseBlock/Presentation/Bounce.
 
-This is a continuous-value visual approximation. The original temporarily blanks its collision metatile and uses a moving block object before replacing the metatile; this project deliberately keeps the static collider. Original fixed-point rounding, metatile update timing, global block slots/timers, interactions above the block, and item-specific behavior are not reproduced. The used texture appears immediately on Bouncing entry and remains in Inactive.
+This is a continuous-value visual approximation. The original temporarily blanks its collision metatile and uses a moving block object before replacing the metatile; this project deliberately keeps the static collider. Original fixed-point rounding, metatile update timing, global block slots/timers, interactions above the block, and additional item types are outside the current implementation. The used texture appears immediately on Bouncing entry and remains in Inactive.
 
 ## Reaction events
 
-Bouncing inherits BaseState.entered and exited signals plus Enter Sound Effect and animation presentation settings. Connect entered for a one-time reaction at bounce entry (future item spawning, particles, or other behavior). Its bounce_completed signal fires once on natural completion, before transition to return_state. Shutdown/interruption restores the sprite through exit without emitting bounce_completed; exited alone does not mean successful completion. No item spawning or additional SFX is connected yet; Mario still owns the existing bump sound.
+Bouncing inherits BaseState.entered and exited signals plus Enter Sound Effect and animation presentation settings. QuestionBlock connects entered for its one-time reward on bounce entry. Its bounce_completed signal fires once on natural completion, before transition to return_state. Shutdown/interruption restores the sprite through exit without emitting bounce_completed; exited alone does not mean successful completion. QuestionBlock calls GameHandler.award_coin() to grant one coin and 200 points and play the existing shared reward cue. Mario still owns the bump sound. The area owns a transient sprite using the four frames in assets/items/block-coin.png. After its rise and fall it shows the existing 200 score sprite, then frees both visuals. It has no pickup collision because the coin is granted at launch. The motion approximates CoinBlock and ProcJumpCoin with a launch of -300 px/s, gravity of 1125 px/s², and a transition to the popup at +300 px/s. Sprite frames advance every two nominal NES frames and the popup floats for about 46 frames. Pixel rounding and global animation phase differ from the disassembly. Mesen frame and audio comparisons remain open. See the [reference mirror](https://gist.github.com/bitemyapp/d2007143221e4f01186949dc37677507).
 
 ## Editing and verification
 

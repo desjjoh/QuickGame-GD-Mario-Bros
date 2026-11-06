@@ -376,3 +376,11 @@ Implemented: keep surface geometry/signals on BaseClimbable and controller-drive
 ## 2026-11-05 - Ending presentation owns choreography
 
 Implemented: BaseLevel/GameHandler claim a single completion transaction before presentation and finish it independently of player existence. A reusable level-owned presentation controls flag capability, player states, camera lock, audio and ticketed hooks; the pole only reports contact and exposes its visual movement. Castle art and endpoint are independent level authoring. Replace original hidden collision/background priority with explicit endpoint and lifecycle removal. Score/firework effects remain deferred but their completion dependencies are active. See [flagpole ending](../architecture.md#death-and-completion).
+
+## 2026-11-06 - Default question-block coin and cell inspection
+
+Partially implements the 2026-11-02 per-cell editor decision. The editor add-on inspects one painted cell at a time and exposes Coin as the only contents choice. With one supported reward, every block uses that default without storing a redundant per-cell value. Serialized overrides, undo/redo and erase behavior remain part of adding a second option. QuestionBlock owns the one-time reward at bounce entry so bricks can continue sharing the bounce state independently.
+
+## 2026-11-06 - Defer question-block reward authoring
+
+Supersedes the dropdown workflow in the two earlier question-block editor decisions. Remove the add-on and keep one painted question-block marker with a fixed coin reward. Choose an authoring workflow before introducing configurable rewards.
