@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/states/blocks/bouncing_block_state.gd" id="4_bouncing"]
 
 [node name="BrickBlock" instance=ExtResource("1_base")]
+persist_progress = false
 
 [node name="Sprite2D" parent="." index="2"]
 texture = ExtResource("2_brick")

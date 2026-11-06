@@ -12,6 +12,8 @@ func _ready() -> void:
 	var streams := {
 		"res://assets/sfx/smb_jump-small.wav": -3.0,
 		"res://assets/sfx/smb_bump.wav": -7.0,
+		"res://assets/sfx/smb_coin.wav": -4.0,
+		"res://assets/sfx/smb_1-up.wav": -5.0,
 		"res://assets/sfx/smb_pipe.wav": -4.5,
 		"res://assets/sfx/smb_flagpole.wav": -5.0,
 		"res://assets/soundtrack/smb_stage_clear.wav": -6.0,

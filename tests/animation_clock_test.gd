@@ -35,6 +35,10 @@ func _ready() -> void:
 		load("res://scenes/entities/blocks/question/question_block.tscn").instantiate() as BaseBlock
 	)
 	add_child(first)
+	var world_coin_scene := load("res://scenes/entities/coin/coin.tscn") as PackedScene
+	var world_coin := world_coin_scene.instantiate() as BaseEntity
+	add_child(world_coin)
+	var lower_coin: BaseEntity
 	var later: BaseBlock
 	for tick in range(96):
 		if tick == 29:
@@ -44,8 +48,16 @@ func _ready() -> void:
 			)
 			later.visual_theme = load("res://assets/themes/underground.tres")
 			add_child(later)
+			lower_coin = world_coin_scene.instantiate() as BaseEntity
+			lower_coin.visual_theme = load("res://assets/themes/underground.tres")
+			add_child(lower_coin)
 		if tick == 35:
 			first.set_gameplay_suspended(true)
+		var expected_frame: int = [0, 1, 2, 1][cycle.phase_at(clock.tick_count)]
+		assert(world_coin.sprite.frame == expected_frame)
+		if lower_coin != null:
+			assert(lower_coin.sprite.frame == expected_frame)
+			assert(lower_coin.sprite.texture.resource_path.contains("/palettes/underground/"))
 		check_pair(first, coin, clock, cycle)
 		if later != null:
 			check_pair(later, coin, clock, cycle)
@@ -71,6 +83,8 @@ func _ready() -> void:
 	for tick in range(60):
 		clock._physics_process(1.0 / 60.0)
 	assert(later.sprite.texture == frozen)
+	world_coin.free()
+	lower_coin.free()
 	first.free()
 	later.free()
 	hud.free()

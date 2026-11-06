@@ -6,6 +6,8 @@ The shared playback mix lives in `assets/audio/sound_effect_mix.tres`. Open that
 
 | Sound | Per-stream trim | Effective playback gain with master -3 dB |
 | --- | --- | --- |
+| World coin | -1 dB | -4 dB |
+| 1 UP | -2 dB | -5 dB |
 | Small jump | 0 dB | -3 dB |
 | Bump | -4 dB | -7 dB |
 | Pipe | -1.5 dB | -4.5 dB |
@@ -43,3 +45,7 @@ FlagpoleEndingPresentation plays smb_flagpole.wav on accepted contact, then repl
 ## Ending balance refinement (2026-11-05)
 
 The two new ending sounds previously fell back to master-only gain. Source PCM measurements gave active-sample RMS of approximately -20.68 dBFS for smb_flagpole.wav and -18.29 dBFS for smb_stage_clear.wav, compared with jump -21.37 and death -16.24 before trims. The stage-clear trim is now -3 dB, giving approximately -24.29 dBFS after master, close to the existing target. Flag lowering uses -2 dB, approximately -25.68 dBFS after master, allowing an additional margin for its reported sharp/loud character. These are active-sample engineering estimates, not LUFS/perceptual normalization. Only the shared playback gain Resource changed; source samples, pitch, timing, loop/import settings and other gains remain intact.
+
+## World coin and extra-life audio
+
+GameHandler's Square2Sfx player is a shared non-positional voice for coin and 1 UP effects. Both use loop-disabled copies and per-stream trims in the shared mix. Measured active-sample levels are approximately -24.5 dBFS for coin and -24.3 dBFS for 1 UP after gain. The rollover pickup plays 1 UP in place of the coin sound. Further coin pickups preserve the playing 1 UP until it finishes. Session reset and game detach stop playback. The voice uses the existing Master bus.

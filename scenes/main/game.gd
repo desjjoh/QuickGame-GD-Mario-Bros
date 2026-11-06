@@ -15,6 +15,12 @@ var initial_level: PackedScene:
 @export var start_with_title: bool = true
 @export var transitions_enabled: bool = true
 
+@export_group("Starting Player Status")
+@export_range(0, 999999) var starting_score: int = PlayerStatus.DEFAULT_SCORE
+@export_range(0, 99) var starting_coins: int = PlayerStatus.DEFAULT_COINS
+## Displayed attempts, including the current life.
+@export_range(1, 99) var starting_lives: int = PlayerStatus.DEFAULT_LIVES + 1
+
 @export_group("Presentation")
 ## Disable the shared shadow shader/compositor pass for frame-pacing comparisons.
 @export var shadow_shader_enabled: bool = true:

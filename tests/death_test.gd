@@ -23,6 +23,9 @@ func make_game() -> Node:
 	var markers := main.get_node("Layouts/EntityLayout") as TileMapLayer
 	markers.clear()
 	markers.set_cell(Vector2i(4, 9), 1, Vector2i.ZERO)
+	markers.set_cell(Vector2i(5, 12), 7, Vector2i.ZERO)
+	markers.set_cell(Vector2i(6, 9), 2, Vector2i.ZERO)
+	markers.set_cell(Vector2i(7, 9), 0, Vector2i.ZERO)
 	var floor := main.get_node("Layouts/GroundLayout") as TileMapLayer
 	floor.clear()
 	for x in range(60):
@@ -58,6 +61,12 @@ func _ready() -> void:
 		for frame in range(30):
 			block.state_machine.process_physics(1.0 / 60.0)
 		assert(block.state_machine.current_state.name == &"Inactive")
+		var coin := level.world_objects.get_node("coin_5_12") as BaseEntity
+		player.body.global_position = Vector2(88, 208)
+		await ticks(4)
+		assert(coin.state_machine.current_state.name == &"Collected")
+		for brick_name in ["brick_alternate_6_9", "brick_7_9"]:
+			level.world_objects.get_node(brick_name).free()
 		# Save an inactive-area edit too; death reset must cover the whole level.
 		assert(level.request_area_transfer(&"lower"))
 		await ticks(2)
@@ -67,6 +76,11 @@ func _ready() -> void:
 		await ticks(2)
 		player = level.player
 		block = level.world_objects.get_node("question_block_4_9") as BaseBlock
+		for brick_name in ["brick_alternate_6_9", "brick_7_9"]:
+			var reloaded := level.world_objects.get_node(brick_name) as BaseEntity
+			assert(not reloaded.persist_progress)
+			assert(reloaded.state_machine.current_state.name == &"Active")
+			reloaded.free()
 		var camera := get_viewport().get_camera_2d()
 		var camera_position := camera.global_position
 		# Partial visibility and the first two tiles below disappearance are safe.
@@ -106,6 +120,13 @@ func _ready() -> void:
 		var fresh_block := fresh.world_objects.get_node("question_block_4_9") as BaseBlock
 		assert(
 			fresh_block.state_machine.current_state.name == (&"Active" if reset else &"Inactive")
+		)
+		for brick_name in ["brick_alternate_6_9", "brick_7_9"]:
+			var fresh_brick := fresh.world_objects.get_node(brick_name) as BaseEntity
+			assert(fresh_brick.state_machine.current_state.name == &"Active")
+		var fresh_coin := fresh.world_objects.get_node("coin_5_12") as BaseEntity
+		assert(
+			fresh_coin.state_machine.current_state.name == (&"Active" if reset else &"Collected")
 		)
 		assert(GameHandler.get_session_value(&"lives") == 1)
 		assert(fresh.request_area_transfer(&"lower"))
@@ -282,9 +303,9 @@ func check_life_loss_boundaries() -> void:
 	await get_tree().process_frame
 
 	# A death from zero reserves is game over; disabled presentations return immediately.
-	GameHandler.set_lives(0)
 	game = make_game()
 	add_child(game)
+	GameHandler.set_lives(0)
 	level = GameHandler.current_level
 	assert(level.on_death(level.player))
 	assert(GameHandler.player_status.lives == -1)

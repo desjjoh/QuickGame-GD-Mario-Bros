@@ -13,6 +13,8 @@ var _activity_entities: Dictionary[int, WeakRef] = {}
 var _enemy_spawners: Dictionary[int, WeakRef] = {}
 
 var _runtime_templates: Dictionary[StringName, PackedScene] = {}
+# Retain the authored policy even if a spawned entity is removed.
+var entity_persistence: Dictionary[String, bool] = {}
 var runtime_loaded: bool = true
 var is_active: bool = false
 @export var area_id: StringName

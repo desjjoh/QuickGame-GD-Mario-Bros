@@ -11,6 +11,10 @@ const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
 		controller_input_enabled = value
 		_sync_controller_input()
 
+@export_group("Progress Persistence")
+## Preserve the entity's outcome across area reload and death restart.
+@export var persist_progress: bool = true
+
 @export_group("Presentation")
 @export var visual_theme: AreaTheme
 @export var sprite: Sprite2D

@@ -41,7 +41,7 @@ func reach_score(level: BaseLevel) -> void:
 		await ticks()
 		if (
 			level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.SCORE
-			or level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.FIREWORKS
+			or level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.RAISE_FLAG
 		):
 			return
 	assert(false, "Ending never reached timer conversion.")
@@ -74,13 +74,15 @@ func _ready() -> void:
 	assert(completed.is_empty())
 	await ticks()
 	assert(completed == [ticket])
-	assert(ending.phase == FlagpoleEndingPresentation.Phase.FIREWORKS)
+	assert(ending.phase == FlagpoleEndingPresentation.Phase.RAISE_FLAG)
 	assert(ending.remaining_time_at_contact == 13 and GameHandler.time_remaining == 0)
 	assert(GameHandler.player_status.score == 1650)
 	await ticks(4)
 	assert(GameHandler.player_status.score == 1650 and completed.size() == 1)
 	assert(not step.is_physics_processing() and step.get_child_count() == 0)
 	GameHandler.set_top_score(1000)
+	await ticks(28)
+	assert(ending.phase == FlagpoleEndingPresentation.Phase.FIREWORKS)
 	ending.fireworks_step.complete(ending.fireworks_step.current_ticket)
 	await ticks(127)
 	assert(GameHandler.flow == GameHandler.GameFlow.TITLE)
@@ -95,7 +97,7 @@ func _ready() -> void:
 		GameHandler.time_remaining = 0 if enabled else 400
 		GameHandler.set_score(321)
 		await reach_score(level)
-		assert(level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.FIREWORKS)
+		assert(level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.RAISE_FLAG)
 		assert(GameHandler.player_status.score == 421)
 		assert(GameHandler.time_remaining == (0 if enabled else 400))
 		game.free()
@@ -142,7 +144,7 @@ func _ready() -> void:
 	await reach_score(level)
 	await ticks(3)
 	assert(GameHandler.time_remaining == 0 and GameHandler.player_status.score == 999999)
-	assert(level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.FIREWORKS)
+	assert(level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.RAISE_FLAG)
 	game.free()
 	await ticks(2)
 	print(

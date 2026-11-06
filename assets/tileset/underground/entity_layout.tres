@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://cenncqdpy2ifh" path="res://assets/palettes/underground/interactibles/blocks/question-block.png" id="2_question"]
 [ext_resource type="Texture2D" uid="uid://e53t4gbes427" path="res://assets/palettes/underground/interactibles/blocks/brick-alternate.png" id="3_alternate"]
 [ext_resource type="Texture2D" uid="uid://5qf43ud83trt" path="res://assets/tileset/underground/previews/pipe_entrance.png" id="4_pipe"]
+[ext_resource type="Texture2D" uid="uid://bai4ut7ntcpkk" path="res://assets/palettes/underground/interactibles/items/coins.png" id="coin"]
 [ext_resource type="Texture2D" uid="uid://ck8w2kxc4e3gx" path="res://assets/tileset/previews/flagpole.png" id="flagpole"]
 [ext_resource type="Texture2D" uid="uid://dnvspcge3gjbk" path="res://assets/tileset/underground/previews/sideways_pipe_entrance.png" id="side"]
 
@@ -49,6 +50,12 @@ texture = ExtResource("flagpole")
 0:0/0/texture_origin = Vector2i(-8, -80)
 0:0/0/custom_data_0 = "flagpole"
 
+[sub_resource type="TileSetAtlasSource" id="coin"]
+resource_name = "Coin"
+texture = ExtResource("coin")
+0:0/0 = 0
+0:0/0/custom_data_0 = "coin"
+
 [resource]
 custom_data_layer_0/name = "entity_id"
 custom_data_layer_0/type = 4
@@ -58,3 +65,4 @@ sources/2 = SubResource("TileSetAtlasSource_alternate")
 sources/3 = SubResource("TileSetAtlasSource_pipe")
 sources/4 = SubResource("Side")
 sources/5 = SubResource("flagpole")
+sources/7 = SubResource("coin")

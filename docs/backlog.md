@@ -4,7 +4,7 @@ This guide records deferred work, not implemented features.
 
 ## Next session - 2026-11-04
 
-Update 2026-11-04: shared player status and live HUD/title/intro bindings are implemented first. See [player status](player-status.md). Top-score promotion on title return is implemented; disk saving, coin rollover/rewards and form-based scene selection remain deferred. Game over and the NES reserve/display model are now implemented; see [game over](game-over.md).
+Update 2026-11-04: shared player status and live HUD/title/intro bindings are implemented first. See [player status](player-status.md). Top-score promotion on title return is implemented; world coin rewards and rollover are implemented. Disk saving and form-based scene selection remain deferred. Game over and the NES reserve/display model are now implemented; see [game over](game-over.md).
 
 Current priority: stage completion foundation and the level timer are implemented. Timer expiry now uses animated death and TIME UP; see [level timer](level-timer.md). The fixed flagpole and manual climbing foundation are implemented; see [climbing](climbing.md). The configured 1-1 flagpole now runs its ending presentation; silent timer-to-score conversion is implemented; flagpole height rewards are implemented and fireworks and castle-specific endings remain deferred. Warp bypasses this presentation. See [level completion](level-completion.md).
 
@@ -110,7 +110,7 @@ Open: user reports Run feels dropped mainly after jump/landing and re-press rest
 
 ## Climbing follow-up
 
-Implement actual vines and their top-of-screen transport. The flagpole descent, flag movement, dismount, castle walk and completion audio are now implemented; silent timer-to-score conversion is implemented; flagpole height scoring is implemented and the castle flag and fireworks remain deferred. Two eventual completion fanfare types remain deferred. Configured flagpole contact now starts the level-owned ending and completion audio; the Score hook converts time while the Fireworks hook remains empty.
+Implement actual vines and their top-of-screen transport. The flagpole descent, flag movement, dismount, castle walk and completion audio are now implemented; silent timer-to-score conversion is implemented; flagpole height scoring is implemented and fireworks remain deferred. Two eventual completion fanfare types remain deferred. Configured flagpole contact now starts the level-owned ending and completion audio; the Score hook converts time while the Fireworks hook remains empty.
 
 ## Flagpole ending presentation planning - 2026-11-05
 
@@ -123,3 +123,7 @@ Skid audio is disabled and its runtime repeat code/scene/mix references removed 
 ## Timer conversion audio
 
 Silent timer-to-score conversion is implemented. Add a suitable isolated Sfx_TimerTick sample, normalize it through the shared mix, and reproduce the reference request cadence with one owned playback voice. AwardGameTimerPoints queues the six-frame square-2 tick during four of every eight global frames; this is separate from the low-time warning music and coin pickup effect. Clean up playback on completion, cancellation, level replacement and title return. No sample has been added and no counting sound is currently played.
+
+## Synthesized sound effects
+
+Create our own chiptune effects from a shared set of pulse, triangle, and noise voices. Keep each effect's waveform, pitch sequence, envelope, and timing reproducible so the cues sound like they belong to the same game. Start with the timer ticker using a roughly 981 Hz, 50% duty-cycle pulse with a six-frame duration. Request it on four consecutive frames out of every eight through the shared second-pulse playback voice and preserve 1 UP priority. Compare the result with the reference in Mesen. Measure and trim each new effect through the shared mix, verify playback, and record the gain in the audio guide.

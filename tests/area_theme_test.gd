@@ -38,18 +38,39 @@ func _ready() -> void:
 		)
 	assert(level.get_node("Areas/MainArea/Camera2D").enabled)
 	assert(not level.get_node("Areas/LowerArea/Camera2D").enabled)
+	for area_name in ["MainArea", "LowerArea"]:
+		var markers := (
+			level.get_node("Areas/" + area_name + "/Layouts/EntityLayout") as TileMapLayer
+		)
+		markers.set_cell(Vector2i(2, 5), 7, Vector2i.ZERO)
 	add_child(level)
 	var main := level.get_node("Areas/MainArea") as BaseLevelArea
 	var lower := level.get_node("Areas/LowerArea") as BaseLevelArea
+	var main_coin := main.get_node("WorldObjects/coin_2_5") as BaseEntity
+	assert(main_coin.position == Vector2(32, 80))
+	assert(main_coin.sprite.texture.resource_path.contains("/palettes/overworld/"))
 	assert(main.theme.display_name == "Overworld")
 	assert(lower.theme.display_name == "Underground")
 	var main_ground := main.get_node("Layouts/GroundLayout") as TileMapLayer
 	assert(not lower.runtime_loaded and not lower.has_node("Layouts"))
 	var main_terrain := main_ground.tile_set
 	var main_decorations := main.theme.decorations
+	GameHandler.set_coins(98)
+	var main_player := level.player
+	main_player.set_physics_process(false)
+	main_player.body.global_position = main_coin.global_position + Vector2(8, 16)
+	for frame in range(4):
+		await get_tree().physics_frame
+	assert(GameHandler.player_status.coins == 99 and GameHandler.player_status.score == 200)
+	assert(GameHandler.player_status.lives == 2)
+	var reward_voice := GameHandler.get_node("Square2Sfx") as AudioStreamPlayer
+	assert(reward_voice.playing and reward_voice.stream == GameHandler._coin_one_shot)
 	assert(level.request_area_transfer(&"lower"))
 	await get_tree().process_frame
 	assert(lower.runtime_loaded and not main.runtime_loaded)
+	var lower_coin := lower.get_node("WorldObjects/coin_2_5") as BaseEntity
+	assert(lower_coin.position == Vector2(32, 80))
+	assert(lower_coin.sprite.texture.resource_path.contains("/palettes/underground/"))
 	var lower_ground := lower.get_node("Layouts/GroundLayout") as TileMapLayer
 	assert(main_terrain != lower_ground.tile_set)
 	assert(
@@ -135,7 +156,7 @@ func _ready() -> void:
 	)
 	assert(main.theme.resolve_texture(original_texture) == original_texture)
 	# Every supplied counterpart is mapped, including all question animation frames.
-	assert(lower.theme.texture_overrides.size() == 21)
+	assert(lower.theme.texture_overrides.size() == 22)
 	for source_path: String in lower.theme.texture_overrides:
 		var replacement := lower.theme.resolve_texture(load(source_path))
 		assert(
@@ -194,10 +215,46 @@ func _ready() -> void:
 	assert(original_question.sprite.texture.resource_path.contains("/palettes/overworld/"))
 	original_question.free()
 	assert(lower.get_node("Camera2D").enabled)
+	# Enter the painted coin's pickup area, then revisit it through real area loading.
+	var pickups: Array[BasePlayer] = []
+	lower_coin.connect("collected", func(player: BasePlayer): pickups.append(player))
+	var player := level.player
+	player.set_physics_process(false)
+	player.body.global_position = lower_coin.global_position + Vector2(8, 16)
+	player.body.velocity = Vector2.ZERO
+	for frame in range(4):
+		await get_tree().physics_frame
+	assert(pickups == [player])
+	assert(GameHandler.player_status.coins == 0 and GameHandler.player_status.score == 400)
+	assert(GameHandler.player_status.lives == 3)
+	assert(reward_voice.playing and reward_voice.stream == GameHandler._extra_life_one_shot)
+	assert((reward_voice.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED)
+	GameHandler.award_coin()
+	assert(GameHandler.player_status.coins == 1 and GameHandler.player_status.score == 600)
+	assert(GameHandler.player_status.lives == 3)
+	assert(reward_voice.playing and reward_voice.stream == GameHandler._extra_life_one_shot)
+	assert(lower_coin.state_machine.current_state.name == &"Collected")
+	assert(not lower_coin.sprite.visible and not lower_coin.get_node("Pickup").monitoring)
+	assert(not lower_coin.get_node("PaletteAnimation").enabled)
+	assert(level.request_area_transfer(&"main", &"player_spawn"))
+	await get_tree().process_frame
+	assert(level.request_area_transfer(&"lower"))
+	await get_tree().process_frame
+	var restored_coin := lower.get_node("WorldObjects/coin_2_5") as BaseEntity
+	assert(restored_coin.state_machine.current_state.name == &"Collected")
+	assert(
+		not restored_coin.sprite.visible and not restored_coin.get_node("PaletteAnimation").enabled
+	)
+	assert(GameHandler.player_status.coins == 1 and GameHandler.player_status.score == 600)
+	assert(GameHandler.player_status.lives == 3)
+	GameHandler.clear_session()
+	assert(not reward_voice.playing)
 	level.shutdown()
 	for block in lower.get_node("WorldObjects").get_children():
 		assert(block.is_shutdown)
 	level.free()
+	for frame in range(6):
+		await get_tree().physics_frame
 	print(
 		"PASS: independent area themes, Underground terrain/decorations/pipes/question frames, artwork fallback, inherited bounce, resource isolation, and shutdown."
 	)

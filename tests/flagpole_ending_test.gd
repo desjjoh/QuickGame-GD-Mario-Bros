@@ -132,11 +132,11 @@ func _ready() -> void:
 	await ticks()
 	assert(
 		ending.phase == FlagpoleEndingPresentation.Phase.WALK,
-		"Phase %s endpoint %s" % [ending.phase, ending.endpoint.global_position]
+		"Phase %s endpoint %s" % [ending.phase, ending._castle.doorway.global_position]
 	)
 	assert(player.body.global_position.x > pole.climb_bottom.global_position.x + 10)
 	var retired: WeakRef = weakref(player)
-	assert(player.flagpole_ending_state.endpoint == ending.endpoint.global_position)
+	assert(player.flagpole_ending_state.endpoint == ending._castle.doorway.global_position)
 	var walk_steps := 0
 	for frame in range(400):
 		walk_steps += 1
@@ -149,6 +149,7 @@ func _ready() -> void:
 		if ending.phase == FlagpoleEndingPresentation.Phase.SCORE:
 			break
 	assert(ending.phase == FlagpoleEndingPresentation.Phase.SCORE)
+	assert(level.player == null and GameHandler.current_player == null)
 	assert(walk_steps >= 30, "The endpoint must require a real walk to the castle.")
 	await ticks(2)
 	assert(
@@ -163,7 +164,20 @@ func _ready() -> void:
 	ending.score_step.complete(score_ticket - 1)
 	assert(ending.phase == FlagpoleEndingPresentation.Phase.SCORE)
 	ending.score_step.complete(score_ticket)
+	assert(ending.phase == FlagpoleEndingPresentation.Phase.RAISE_FLAG)
+	var castle := ending._castle
+	assert(castle.doorway.global_position == Vector2(3256, 208))
+	assert(castle._flag.visible and castle._flag.position.y == 16.0)
+	# The presentation must keep the flag moving outside the activity buffer.
+	level.active_area.set_physics_process(false)
+	castle.set_activity_suspended(true)
+	for frame in range(31):
+		await ticks()
+		assert(ending.phase == FlagpoleEndingPresentation.Phase.RAISE_FLAG)
+		assert(castle.activity_suspended and castle._flag.position.y == 15.0 - frame)
+	await ticks()
 	assert(ending.phase == FlagpoleEndingPresentation.Phase.FIREWORKS)
+	level.active_area.set_physics_process(true)
 	await ticks(20)
 	assert(GameHandler.current_level == level)
 	ending.fireworks_step.complete(ending.fireworks_step.current_ticket)

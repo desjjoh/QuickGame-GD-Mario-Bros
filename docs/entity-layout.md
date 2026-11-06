@@ -38,3 +38,15 @@ GroundLayout also offers Pipe junction - top (source 5, pipe-3.png) and Pipe jun
 ## Flagpole
 
 The Flagpole (2x11) source paints the complete fixed-height climbable and solid palette-block base in one placement. Its entity_id is flagpole (source 5). See [climbing and flagpole](climbing.md) for anchor/height, controls and current manual test behavior.
+
+## Castle stamp
+
+The Overworld EntityLayout palette includes Castle (5x5), source 6 with entity ID `castle`. Paint its top-left cell and set the ending presentation’s Castle Cell to match. The castle scene supplies a doorway marker and the flag raise behind its art. In 1-1 the stamp at (201,8) replaces the former painted castle tiles. See [flagpole ending](flagpole-ending.md).
+
+## World coin stamp
+
+Choose Coin on EntityLayout in either palette. Source 7 places one 16Ã—16 Coin entity and selects the area texture through its theme. The three atlas frames follow the shared bright/medium/dark/medium clock with the HUD coin and active question blocks. Camera activity pauses the subscription outside the buffer and resamples the current phase on wake. Player contact changes Active to Collected once, hides the sprite, unsubscribes from animation and disables pickup monitoring. The collected state persists by area and marker cell. Death follows the level’s existing progress reset policy. A live pickup awards 200 points and one coin through GameHandler, then emits collected(player). The 100th coin rolls over and grants an extra life. Regular world coins use audio and HUD feedback. Restoring Collected only restores presentation and pickup state.
+
+## Entity progress persistence
+
+Persist Progress on BaseEntity controls both area reloads and death restarts. It defaults to enabled. Enabled entities keep their saved state or removal. Disabled entities respawn from the painted marker and ignore prior saved state. The level-wide reset-on-death option still clears all progress. Camera suspension keeps the current instance.

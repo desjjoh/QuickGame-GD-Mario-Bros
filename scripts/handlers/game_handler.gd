@@ -1,6 +1,10 @@
 extends Node
 ## Global game ownership and in-memory session data. No disk persistence yet.
 
+const COIN_SOUND = preload("res://assets/sfx/smb_coin.wav")
+const EXTRA_LIFE_SOUND = preload("res://assets/sfx/smb_1-up.wav")
+const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
+
 enum GameFlow { DETACHED, TITLE, STARTING, PLAYING, GAME_OVER, COMPLETING }
 
 signal flow_changed(value: GameFlow)
@@ -63,9 +67,16 @@ var transitions: Variant
 # Global world-progress policy; session counters/lives are unaffected.
 var reset_progress_on_death: bool = false
 var _current_level_scene: PackedScene
+var _square_two := AudioStreamPlayer.new()
+var _coin_one_shot: AudioStream
+var _extra_life_one_shot: AudioStream
 
 
 func _ready() -> void:
+	_square_two.name = "Square2Sfx"
+	add_child(_square_two)
+	_coin_one_shot = SoundEffectMix.one_shot_copy(COIN_SOUND)
+	_extra_life_one_shot = SoundEffectMix.one_shot_copy(EXTRA_LIFE_SOUND)
 	player_status.changed_value.connect(_on_player_status_changed)
 	transitions = load("res://scripts/handlers/transition_coordinator.gd").new()
 	animation_clock.name = "AnimationClock"
@@ -86,6 +97,7 @@ func detach_game(game: Node) -> void:
 	if current_game != game:
 		return
 	_detaching = true
+	_square_two.stop()
 	transitions.detach_game(game)
 	_clear_title()
 	_first_level = null
@@ -209,6 +221,25 @@ func add_coins(amount: int) -> void:
 	set_coins(player_status.coins + amount)
 
 
+func award_coin() -> void:
+	var total := player_status.coins + 1
+	var extra_life := total == 100
+	set_coins(total % 100)
+	if extra_life:
+		set_lives(player_status.lives + 1)
+	add_score(200)
+	_play_coin_reward(extra_life)
+
+
+func _play_coin_reward(extra_life: bool) -> void:
+	# The reference protects the extra-life sound from later square-2 requests.
+	if _square_two.playing and _square_two.stream == _extra_life_one_shot:
+		return
+	_square_two.stream = _extra_life_one_shot if extra_life else _coin_one_shot
+	_square_two.volume_db = SOUND_MIX.volume_for(_square_two.stream)
+	_square_two.play()
+
+
 func set_lives(value: int) -> void:
 	player_status.lives = value
 
@@ -223,14 +254,26 @@ func set_top_score(value: int) -> void:
 
 ## Reset the run; app-session top score and authored configuration survive.
 func clear_session() -> void:
+	_square_two.stop()
 	current_stage_index = -1
 	_start_level = null
 	_session.clear()
 	clear_level_progress()
-	player_status.reset()
+	_reset_player_status()
 	stage_label = "1-1"
 	time_remaining = 400
 	timer_enabled = true
+
+
+func _reset_player_status() -> void:
+	if is_instance_valid(current_game):
+		player_status.reset(
+			current_game.starting_score,
+			current_game.starting_coins,
+			current_game.starting_lives - 1
+		)
+	else:
+		player_status.reset()
 
 
 ## Select one logical level. Same-level scene recreation preserves its areas.
@@ -376,6 +419,7 @@ func start_game_flow(first_level: PackedScene, with_title: bool = true) -> bool:
 	_first_level = first_level
 	if with_title:
 		return show_title(first_level)
+	_reset_player_status()
 	_set_flow(GameFlow.PLAYING)
 	return transition_to_level(first_level)
 

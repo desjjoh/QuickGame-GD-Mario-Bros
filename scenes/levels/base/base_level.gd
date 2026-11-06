@@ -127,6 +127,7 @@ func _spawn_area_entities(area: BaseLevelArea, saved_entities: Dictionary) -> vo
 	var objects := area.get_node("WorldObjects") as Node2D
 	# Markers remain editable in the scene, but only entities render at runtime.
 	layout.hide()
+	area.entity_persistence.clear()
 	if layout.tile_set == null:
 		return
 	if layout.tile_set.get_custom_data_layer_by_name("entity_id") < 0:
@@ -143,11 +144,15 @@ func _spawn_area_entities(area: BaseLevelArea, saved_entities: Dictionary) -> vo
 			continue
 		var entity_name := "%s_%s_%s" % [entity_id, cell.x, cell.y]
 		var progress: Dictionary = saved_entities.get(entity_name, {})
-		if progress.get("removed", false):
-			continue
 		var instance := scene.instantiate()
 		if not instance is BaseEntity:
 			push_error("EntityLayout scenes must inherit BaseEntity: %s" % entity_id)
+			instance.free()
+			continue
+		area.entity_persistence[entity_name] = instance.persist_progress
+		if not instance.persist_progress:
+			progress = {}
+		elif progress.get("removed", false):
 			instance.free()
 			continue
 		if instance is TransportEntity and not area.configure_transport(instance, cell):
@@ -724,6 +729,11 @@ func _save_area(area: BaseLevelArea) -> void:
 		var id := StringName(str(data.get_custom_data("entity_id")))
 		var entity_name := "%s_%s_%s" % [id, cell.x, cell.y]
 		var entity := objects.get_node_or_null(NodePath(entity_name)) as BaseEntity
+		if entity != null:
+			if not entity.persist_progress:
+				continue
+		elif not area.entity_persistence.get(entity_name, false):
+			continue
 		entities[entity_name] = {
 			"removed": entity == null,
 			"state": entity.capture_area_state() if entity != null else {}

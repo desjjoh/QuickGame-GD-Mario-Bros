@@ -766,3 +766,15 @@ Common GameHandler title entry now compares the outgoing score with top_score af
 ## 2026-11-05 - Flagpole height reward and popup
 
 The flagpole ending selects the reference reward tier on first contact, shows the world-space atlas popup, and awards the points once at descent completion. The popup rises during descent and is freed on cancellation. Focused headless checks passed for flagpole ending, time conversion and popup mapping. The rendered ending passed and showed the 2000 popup beside the shaft with the corresponding HUD score.
+
+## 2026-11-05 - Paintable castle and rooftop flag
+
+Replaced the 21 castle decoration tiles in 1-1 with the collision-free Castle (5x5) entity stamp at (201,8). The presentation binds that castle and the configured flagpole by cell in the same area. The castle owns the preserved doorway position and the flag sprite. After time conversion, the presentation raises the flag one pixel per tick for 31 ticks, then starts the Fireworks hook. Headless and rendered ending and time-conversion checks passed. The rendered ending confirmed the flag above the roof, and the regression covered the full raise while castle activity was suspended.
+
+## 2026-11-05 - Paintable world coins
+
+Added a 16x16 Coin entity stamp to both area palettes. The coin uses the shared 48-tick cosmetic clock and the area theme selects its atlas. Headless placement checks passed in both areas, and headless and rendered clock checks verified synchronization with the HUD coin and question blocks. Pickup behavior remains a separate milestone.
+
+## 2026-11-05 - World coin rewards
+
+World coin pickup awards 200 points and increments the coin count. At 100 coins the count resets and a reserve life is awarded. Coin and extra-life sounds share a non-positional voice with reference 1 UP priority. Focused area, death, and player status tests passed. The area test verifies rollover, sound selection and protection, and no duplicate rewards after restoration.

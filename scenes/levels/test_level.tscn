@@ -1,5 +1,6 @@
 [gd_scene format=4 uid="uid://cdk8de34c4pg4"]
 
+[ext_resource type="PackedScene" path="res://scenes/entities/coin/coin.tscn" id="coin"]
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/brick/brick_block.tscn" id="4_brick"]
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/question_block.tscn" id="6_question"]
 [ext_resource type="Resource" uid="uid://chfcnww7r30v7" path="res://assets/themes/underground.tres" id="8_jmx14"]
@@ -18,6 +19,7 @@ timer_enabled = false
 texture_filter = 1
 player_scene = ExtResource("player")
 entity_scenes = Dictionary[StringName, PackedScene]({
+&"coin": ExtResource("coin"),
 &"brick": ExtResource("4_brick"),
 &"brick_alternate": ExtResource("9_alternate"),
 &"flagpole": ExtResource("flagpole"),

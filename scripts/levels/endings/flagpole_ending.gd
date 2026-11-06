@@ -4,12 +4,12 @@ extends LevelEndingPresentation
 const SCORE_POPUP = preload("res://scenes/components/presentation/score_popup.tscn")
 const AudioMix = preload("res://scripts/audio/sound_effect_mix.gd")
 const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
-enum Phase { IDLE, DESCEND, DISMOUNT, WALK, SCORE, FIREWORKS, WAIT, FINISHED }
+enum Phase { IDLE, DESCEND, DISMOUNT, WALK, SCORE, FIREWORKS, WAIT, FINISHED, RAISE_FLAG }
 signal phase_changed(phase: Phase)
 
 @export var area_id: StringName = &"main"
 @export var flagpole_cell: Vector2i
-@export var endpoint: Marker2D
+@export var castle_cell: Vector2i
 @export var flag_sound: AudioStream
 @export var music: AudioStream
 @export var post_delay_frames: int = 126
@@ -26,6 +26,7 @@ var remaining_time_at_contact: int = 0
 var _level: BaseLevel
 var _player: BasePlayer
 var _pole: FlagpoleEntity
+var _castle: CastleEntity
 var _camera: LevelCamera
 var _state: PlayerFlagpoleEndingState
 var _audio: AudioStreamPlayer
@@ -45,15 +46,19 @@ func _ready() -> void:
 
 
 func bind_entity(entity: BaseEntity, cell: Vector2i, area: BaseLevelArea) -> void:
-	if entity is FlagpoleEntity and cell == flagpole_cell and area.area_id == area_id:
+	if area.area_id != area_id:
+		return
+	if entity is FlagpoleEntity and cell == flagpole_cell:
 		entity.player_attached.connect(_on_attached.bind(entity))
+	elif entity is CastleEntity and cell == castle_cell:
+		_castle = entity
 
 
 func _on_attached(player: BasePlayer, pole: FlagpoleEntity) -> void:
 	if active or player.state_machine.current_state == player.flagpole_ending_state:
 		return
 	var level := get_parent() as BaseLevel
-	if level != null:
+	if level != null and is_instance_valid(_castle) and not _castle.is_shutdown:
 		level.begin_ending(self, player, pole)
 
 
@@ -61,7 +66,8 @@ func start(level: BaseLevel, player: BasePlayer, source: BaseEntity) -> bool:
 	if (
 		active
 		or not source is FlagpoleEntity
-		or endpoint == null
+		or not is_instance_valid(_castle)
+		or _castle.is_shutdown
 		or player.flagpole_ending_state == null
 	):
 		return false
@@ -97,7 +103,7 @@ func start(level: BaseLevel, player: BasePlayer, source: BaseEntity) -> bool:
 	if not _valid():
 		return false
 	_state = player.flagpole_ending_state
-	_state.configure(_pole, endpoint.global_position)
+	_state.configure(_pole, _castle.doorway.global_position)
 	if not _state.endpoint_reached.is_connected(_on_endpoint):
 		_state.endpoint_reached.connect(_on_endpoint)
 	_install_state.call_deferred(_generation)
@@ -128,6 +134,9 @@ func _physics_process(delta: float) -> void:
 	if not _valid():
 		cancel()
 		return
+	if not is_instance_valid(_castle) or _castle.is_shutdown:
+		_level.cancel_ending()
+		return
 	if _music_started and is_instance_valid(_audio) and _audio.playing:
 		_music_ticks += 1
 		if _music_ticks > _music_limit:
@@ -154,6 +163,11 @@ func _physics_process(delta: float) -> void:
 			_begin_music_and_unlock()
 		_camera.follow_target(_player.body)
 		_level.clamp_player_to_camera()
+	if phase == Phase.RAISE_FLAG and _castle.advance_flag_raise():
+		_set_phase(Phase.FIREWORKS)
+		if _valid():
+			fireworks_step.begin()
+		return
 	if phase == Phase.WAIT:
 		# Hooks have completed. Give the player a visible pause after audio too.
 		if is_instance_valid(_audio) and _audio.playing:
@@ -252,8 +266,11 @@ func _on_endpoint() -> void:
 func _on_score_finished(ticket: int) -> void:
 	if not _valid() or phase != Phase.SCORE or ticket != score_step.current_ticket:
 		return
-	_set_phase(Phase.FIREWORKS)
-	fireworks_step.begin()
+	if not is_instance_valid(_castle) or _castle.is_shutdown:
+		_level.cancel_ending()
+		return
+	_castle.raise_flag()
+	_set_phase(Phase.RAISE_FLAG)
 
 
 func _on_fireworks_finished(ticket: int) -> void:
@@ -291,6 +308,8 @@ func cancel() -> void:
 	_player = null
 	if is_instance_valid(_pole) and not _pole.is_shutdown:
 		_pole.reset_flag()
+	if is_instance_valid(_castle) and not _castle.is_shutdown:
+		_castle.reset_flag()
 
 
 func _exit_tree() -> void:

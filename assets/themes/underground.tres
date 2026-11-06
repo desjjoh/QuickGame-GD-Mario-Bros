@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cskir81ip20rf" path="res://scripts/themes/area_theme.gd" id="1"]
 [ext_resource type="TileSet" uid="uid://g7pmg7w6xn86" path="res://assets/tileset/underground/terrain.tres" id="2"]
-[ext_resource type="TileSet" path="res://assets/tileset/underground/decorations.tres" id="3"]
+[ext_resource type="TileSet" uid="uid://4mdqmclyqcmk" path="res://assets/tileset/underground/decorations.tres" id="3"]
 [ext_resource type="TileSet" uid="uid://cs6ppr1ph7fpm" path="res://assets/tileset/underground/entity_layout.tres" id="4"]
 [ext_resource type="Texture2D" uid="uid://e53t4gbes427" path="res://assets/palettes/underground/interactibles/blocks/brick-alternate.png" id="art_0"]
 [ext_resource type="Texture2D" uid="uid://u8v7p2v8ep1r" path="res://assets/palettes/underground/interactibles/blocks/brick.png" id="art_1"]
@@ -26,6 +26,7 @@
 [ext_resource type="FontFile" uid="uid://cnagecrnf8opo" path="res://assets/palettes/underground/ui/alphabet-alt.fnt" id="title_accent"]
 [ext_resource type="Texture2D" uid="uid://b3asgrqfa0i4r" path="res://assets/palettes/underground/ui/start-title.png" id="title_card"]
 [ext_resource type="Texture2D" uid="uid://clblmsvsl46nd" path="res://assets/palettes/underground/ui/start-cursor.png" id="title_cursor"]
+[ext_resource type="Texture2D" uid="uid://bai4ut7ntcpkk" path="res://assets/palettes/underground/interactibles/items/coins.png" id="world_coin"]
 
 [resource]
 script = ExtResource("1")
@@ -41,6 +42,7 @@ texture_overrides = Dictionary[String, Texture2D]({
 "res://assets/palettes/overworld/interactibles/blocks/question-block-3.png": ExtResource("art_3"),
 "res://assets/palettes/overworld/interactibles/blocks/question-block-4.png": ExtResource("art_4"),
 "res://assets/palettes/overworld/interactibles/blocks/question-block.png": ExtResource("art_5"),
+"res://assets/palettes/overworld/interactibles/items/coins.png": ExtResource("world_coin"),
 "res://assets/palettes/overworld/interactibles/pipes/pipe-1.png": ExtResource("art_6"),
 "res://assets/palettes/overworld/interactibles/pipes/pipe-2.png": ExtResource("art_7"),
 "res://assets/palettes/overworld/interactibles/pipes/pipe-3.png": ExtResource("art_8"),

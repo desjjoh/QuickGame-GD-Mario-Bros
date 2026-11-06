@@ -9,3 +9,5 @@
 - Do not invent dates, approvals, or verification results. Label reconstructed history, unknown prior values, and checks not performed explicitly.
 - Keep changes small and explain their purpose. The user is learning Godot and values walkthroughs; follow the current request about whether to implement or guide.
 - Do not change behavior merely to match an external reference. Discuss significant architectural changes before implementing them.
+
+- For every new sound effect, measure its audible portion against comparable effects, set a per-stream gain trim in `assets/audio/sound_effect_mix.tres`, and verify playback uses the shared mix. Preserve the source recording and document the chosen trim in `docs/audio.md`.
