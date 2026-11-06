@@ -864,3 +864,11 @@ Configured the leftmost lower question block of the second multi-block cluster i
 ## 2026-11-06 - Mushroom falling and emergence fidelity
 
 Mushroom uses the NES downward force of 61/256 pixel per frame squared at nominal 60 Hz and applies it after movement. The project retains its 300 px/s fall cap and Godot terrain collision. PowerUp reveals one row per four nominal frames and clips the sprite to the block's fixed top edge during the rise. The question-block and 1-Up headless checks passed. The question-block check reported four ObjectDB leaks at exit. Rendered comparison in Mesen remains open.
+
+## 2026-11-06 - Paint question-block rewards
+
+Added a brush to addons/block_rewards. Authors choose 1-Up or Coin and click the existing question block in the viewport. The scene saves the assignment through the area property and editor undo history. Godot 4.7.2 headless editor import loaded the add-on. Interactive input, save, and undo were not verified.
+
+## 2026-11-06 - Outlined hidden question blocks
+
+Added a Hidden Question Block stamp to all three EntityLayout palettes and painted one at (8, 8) in TestLevel. The scene uses the bottom-right atlas outline, an underside query, and the regular question-block bounce, rewards, and used state. The reward brush accepts both block stamps. Godot 4.7.2 headless editor import and the bonk regression passed. The regression compared stopping position and vertical response with a regular bonk, verified side and top pass-through, and landed on the used block. The test reported ObjectDB leak warnings at exit. Rendered playtesting remains open.

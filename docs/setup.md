@@ -28,4 +28,4 @@ Paint question blocks on **EntityLayout**. Each placed block contains one coin.
 
 Paint a pipe stamp, then configure its destination on the area. To test area switching, enter the vertical pipe in 1-1 and walk into the sideways pipe in the secret area. See [configuration](configuration.md#areas-and-pipe-routes).
 
-In the 2D editor, painted question blocks show a translucent coin over the tile. Paint and erase blocks using the normal EntityLayout tools.
+In the 2D editor, question blocks show a translucent reward icon. Select EntityLayout and choose **Apply 1-Up Reward** from the 2D toolbar, then click a painted question block. Choose **Apply Coin Reward** to clear an override. Reward edits support undo and redo. Choose **Paint Tiles** to return to normal painting. Reward overrides are keyed by cell, so clear the override before erasing, moving, or replacing a configured block.

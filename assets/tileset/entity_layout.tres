@@ -73,6 +73,13 @@ texture = ExtResource("one_up")
 0:0/0 = 0
 0:0/0/custom_data_0 = "one_up_spawner"
 
+[sub_resource type="TileSetAtlasSource" id="hidden_question"]
+resource_name = "Hidden Question Block"
+texture = ExtResource("coin")
+margins = Vector2i(48, 32)
+0:0/0 = 0
+0:0/0/custom_data_0 = "hidden_question_block"
+
 [resource]
 custom_data_layer_0/name = "entity_id"
 custom_data_layer_0/type = 4
@@ -85,3 +92,4 @@ sources/5 = SubResource("flagpole")
 sources/6 = SubResource("castle")
 sources/7 = SubResource("coin")
 sources/8 = SubResource("one_up")
+sources/9 = SubResource("hidden_question")

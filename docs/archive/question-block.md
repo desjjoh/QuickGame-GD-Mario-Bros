@@ -35,3 +35,7 @@ Paint question markers in 1-1/Areas/MainArea/Layouts/EntityLayout using source 1
 question_block_test verifies palette timings and loop wrap, real Mario jump-to-block activation, invalid-hit rejection, ordered Active -> Bouncing -> Inactive transitions, entry/completion event counts, one-time activation, used appearance, sprite bounce with fixed collision, independence of neighboring blocks, and cleanup during a bounce. Headless checks do not replace visual/audio playtesting.
 
 Area unload during Bouncing saves its logical Inactive result. Restoration selects Inactive before startup, so entry bounce/events are not replayed. See [area lifecycle](areas.md).
+
+## Hidden question blocks
+
+Paint Hidden Question Block on EntityLayout. The unused outline is visible in the editor and in-game for this pass. Mario passes through from the side and above. A rising center-head crossing at the underside triggers the existing bonk response and reward. The block then becomes solid and uses the normal used sprite. The same reward brush applies to both question-block stamps.

@@ -121,6 +121,9 @@ func _ready() -> void:
 	var reward_block := level.world_objects.get_node("question_block_8_9") as QuestionBlock
 	var lives_before := GameHandler.player_status.lives
 	assert(reward_block.receive_hit(EntityHit.new(level.player, &"bonk", Vector2.UP)))
+	var reveal_voice := SoundHandler.get_node("Square2Sfx") as AudioStreamPlayer
+	assert(reveal_voice.playing and reveal_voice.stream == SoundHandler.get_sound(&"power_up_reveal"))
+	assert(is_equal_approx(reveal_voice.stream.get_length(), 31.0 / 60.0))
 	assert(previous.is_queued_for_deletion() and not previous.visible)
 	var mushroom: Mushroom
 	for object in level.world_objects.get_children():

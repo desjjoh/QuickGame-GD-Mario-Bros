@@ -1,9 +1,37 @@
 class_name BonkAction
 extends Node
-## Called only for an upward ceiling collision, after character movement.
+## Resolves regular ceiling contacts and underside crossings on hidden blocks.
+
+const HIDDEN_BLOCK_PROBE_MASK := 1 << 31
 
 @export var enabled: bool = false
 @export var strength: float = 1.0
+
+
+func deliver_hidden(player: BasePlayer, previous_position: Vector2) -> bool:
+	if not enabled or player.is_shutdown:
+		return false
+	var shape := player.collision_shape.shape as RectangleShape2D
+	if shape == null or player.body.global_position.y >= previous_position.y:
+		return false
+	var head := Vector2(
+		player.body.global_position.x + 0.0001,
+		player.collision_shape.global_position.y - shape.size.y / 2.0
+	)
+	var previous_head := head + previous_position - player.body.global_position
+	var query := PhysicsRayQueryParameters2D.create(
+		previous_head + Vector2(0, 0.001), head, HIDDEN_BLOCK_PROBE_MASK
+	)
+	query.collide_with_areas = true
+	query.collide_with_bodies = false
+	var hit := player.body.get_world_2d().direct_space_state.intersect_ray(query)
+	if hit.is_empty() or hit.normal.y < 0.5:
+		return false
+	var block := (hit.collider as Node).get_parent() as HiddenQuestionBlock
+	if block == null or not block.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP, strength)):
+		return false
+	player.body.global_position.y += hit.position.y - head.y
+	return true
 
 
 func deliver(player: BasePlayer) -> bool:

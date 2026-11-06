@@ -404,3 +404,11 @@ Supersedes the waiting rule in the level spawn capacity decision. Each painted E
 ## 2026-11-06 - Replace the active power-up on block release
 
 Block release claims a power-up slot by retiring the oldest live item if the category is full. The retired item grants no reward. Tree exit removes only the retiring actor's entry. The area stores the test placement as a cell-to-scene override. The viewport overlay shows the reward. A click-to-assign editor workflow remains deferred.
+
+## 2026-11-06 - Apply block rewards directly on EntityLayout
+
+Extends the block-release decision with editor authoring. The reward brush edits the area dictionary through editor undo and redo. Coin clears an override. The overlay stays visible in all modes. Native tile erase, move, and replace operations do not edit the reward dictionary, so clear a reward before changing its tile.
+
+## 2026-11-06 - Hidden question block contacts
+
+Unused hidden blocks use a query-only head probe on a dedicated scene collision bit. Rising head crossings enter the same ceiling response as regular bonks. Side and falling contacts ignore the probe. Accepted hits enable the regular solid body and use the existing question-block reward and used-state logic. The outline stays visible for the first pass.

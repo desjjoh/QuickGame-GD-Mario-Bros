@@ -18,6 +18,7 @@ func _ready() -> void:
 	super()
 	if _emergence_remaining > 0.0:
 		sprite.hide()
+		SoundHandler.play_reward(&"power_up_reveal")
 	set_process(false)
 	pickup.body_entered.connect(_on_body_entered)
 

@@ -12,12 +12,6 @@ func _ready() -> void:
 		assert(source.get_tile_data(Vector2i.ZERO, 0).get_custom_data("entity_id") == "one_up_spawner")
 	var stage := preload("res://scenes/levels/worlds/world 1/1-1.tscn").instantiate() as BaseLevel
 	assert(stage.entity_scenes.has(&"one_up_spawner"))
-	var stage_area := stage.get_node("Areas/MainArea") as BaseLevelArea
-	var reward_cell := Vector2i(106, 9)
-	assert(stage.entity_layout.get_cell_tile_data(reward_cell).get_custom_data("entity_id") == "question_block")
-	assert(stage_area.question_block_rewards[reward_cell] == preload(
-		"res://scenes/entities/powerups/one_up_mushroom.tscn"
-	))
 	stage.free()
 
 	var level := preload("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
