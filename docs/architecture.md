@@ -22,6 +22,8 @@ GameHandler owns the active game, level, session, and flow state. Its TitleFlow 
 
 ## Area lifecycle and persistence
 
+The level scene groups its children under Areas, Players, Systems, and Presentations. Areas and Players remain siblings so pipe travel can change their relative draw order. Systems contains LevelDeath, LevelTimer, and AreaTransport. BaseLevel leaves Presentations empty for derived levels. In 1-1, it contains FlagpoleEnding.
+
 Only the active area keeps its runtime layouts, objects, and camera loaded. The level captures progress on unload and applies it when that area returns. Progress belongs to the current level. Coins and used question blocks retain their state by default, while bricks return to their active state. A level can suspend off-camera entities without destroying them, and controller input is opt-in.
 
 Transport resolves explicit area and target IDs. A pipe handles player entry and exit presentation. The level-owned AreaTransport child validates the trip and requests the transition. BaseLevel commits player placement, the active area, and the camera handoff. The destination can be a pipe or a spawn target.

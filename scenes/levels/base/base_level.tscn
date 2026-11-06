@@ -42,13 +42,17 @@ area_id = &"main"
 
 [node name="PlayerSpawn" type="Marker2D" parent="Players" unique_id=321075723]
 
-[node name="LevelDeath" type="Node" parent="."]
+[node name="Systems" type="Node" parent="."]
+
+[node name="LevelDeath" type="Node" parent="Systems"]
 script = ExtResource("level_death")
 
-[node name="LevelTimer" type="Node" parent="."]
+[node name="LevelTimer" type="Node" parent="Systems"]
 script = ExtResource("level_timer")
 
-[node name="AreaTransport" type="Node" parent="."]
+[node name="AreaTransport" type="Node" parent="Systems"]
 script = ExtResource("area_transport")
+
+[node name="Presentations" type="Node" parent="."]
 
 [editable path="Areas/MainArea"]

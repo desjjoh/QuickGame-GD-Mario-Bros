@@ -62,9 +62,9 @@ var active_target_id: StringName = &""
 
 @onready var player_spawn: Marker2D = $Players/PlayerSpawn
 @onready var players: Node2D = $Players
-@onready var death_sequence: LevelDeath = $LevelDeath
-@onready var level_timer: LevelTimer = $LevelTimer
-@onready var area_transport: AreaTransport = $AreaTransport
+@onready var death_sequence: LevelDeath = $Systems/LevelDeath
+@onready var level_timer: LevelTimer = $Systems/LevelTimer
+@onready var area_transport: AreaTransport = $Systems/AreaTransport
 var entity_layout: TileMapLayer:
 	get:
 		return get_node_or_null("Areas/MainArea/Layouts/EntityLayout") as TileMapLayer

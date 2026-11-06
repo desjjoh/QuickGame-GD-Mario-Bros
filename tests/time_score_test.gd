@@ -14,7 +14,7 @@ func ticks(count: int = 1) -> void:
 func make_game(timer_enabled: bool = true) -> Node:
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	fixture.timer_enabled = timer_enabled
-	var ending := fixture.get_node("FlagpoleEnding") as FlagpoleEndingPresentation
+	var ending := fixture.ending_presentation as FlagpoleEndingPresentation
 	fixture.set_editable_instance(ending, true)
 	ending.get_node("Fireworks").set_script(load("res://tests/fixtures/manual_ending_step.gd"))
 	for area in fixture.get_node("Areas").get_children():

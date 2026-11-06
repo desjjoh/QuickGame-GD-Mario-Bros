@@ -25,7 +25,7 @@ func wait_phase(
 
 func make_game(manual: bool) -> Node:
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
-	var ending := fixture.get_node("FlagpoleEnding") as FlagpoleEndingPresentation
+	var ending := fixture.ending_presentation as FlagpoleEndingPresentation
 	fixture.set_editable_instance(ending, true)
 	if manual:
 		ending.music = null

@@ -53,7 +53,7 @@ destination = SubResource("Destination_start")
 
 [node name="1-1" unique_id=441193935 node_paths=PackedStringArray("ending_presentation") instance=ExtResource("2_base")]
 texture_filter = 1
-ending_presentation = NodePath("FlagpoleEnding")
+ending_presentation = NodePath("Presentations/FlagpoleEnding")
 player_scene = ExtResource("3_player")
 entity_scenes = Dictionary[StringName, PackedScene]({
 &"brick": ExtResource("4_brick"),
@@ -121,7 +121,7 @@ world_right = 1152.0
 [node name="PlayerSpawn" parent="Players" parent_id_path=PackedInt32Array(1625753015) index="0" unique_id=321075723]
 position = Vector2(48, 208)
 
-[node name="FlagpoleEnding" parent="." index="2" unique_id=1345145040 instance=ExtResource("ending")]
+[node name="FlagpoleEnding" parent="Presentations" index="0" unique_id=1345145040 instance=ExtResource("ending")]
 flagpole_cell = Vector2i(196, 2)
 castle_cell = Vector2i(201, 8)
 
