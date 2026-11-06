@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://kc8o4gk646ue"
-path="res://.godot/imported/flagpole-flag.png-a0106cef6c10a752684765353c9d1824.ctex"
+uid="uid://tt0q4hh8heuf"
+path="res://.godot/imported/hud-coin.png-aeb9e0be535232c1659a9725a73e8689.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/palettes/overworld/interactibles/flag/flagpole-flag.png"
-dest_files=["res://.godot/imported/flagpole-flag.png-a0106cef6c10a752684765353c9d1824.ctex"]
+source_file="res://assets/palettes/castle/ui/hud-coin.png"
+dest_files=["res://.godot/imported/hud-coin.png-aeb9e0be535232c1659a9725a73e8689.ctex"]
 
 [params]
 

@@ -2,6 +2,20 @@ extends Node
 
 
 func _ready() -> void:
+	var castle := load("res://assets/themes/castle.tres") as AreaTheme
+	var underground := load("res://assets/themes/underground.tres") as AreaTheme
+	var flag := load("res://assets/palettes/overworld/misc/flagpole-flag.png") as Texture2D
+	assert(castle.resolve_texture(flag).resource_path.contains("/castle/"))
+	assert(underground.resolve_texture(flag).resource_path.contains("/underground/"))
+	var underground_castle := underground.entity_markers.get_source(6) as TileSetAtlasSource
+	assert(underground_castle.texture.resource_path.contains("/underground/"))
+	assert(underground_castle.get_tile_data(Vector2i.ZERO, 0).get_custom_data("entity_id") == "castle")
+	assert(castle.title_accent_font != null)
+	assert(castle.terrain.get_source_count() == 2)
+	assert(castle.decorations.get_source_count() == 4)
+	for source_id in [3, 4, 5, 6]:
+		var marker := castle.entity_markers.get_source(source_id) as TileSetAtlasSource
+		assert(marker.texture.resource_path.contains("/castle/"))
 	var level := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	# Editing and saving nested areas must retain each painted layer and camera.
 	var saved_cells: Dictionary = {}
@@ -154,7 +168,7 @@ func _ready() -> void:
 	)
 	assert(main.theme.resolve_texture(original_texture) == original_texture)
 	# Every supplied counterpart is mapped, including all question animation frames.
-	assert(lower.theme.texture_overrides.size() == 21)
+	assert(lower.theme.texture_overrides.size() == 23)
 	for source_path: String in lower.theme.texture_overrides:
 		var replacement := lower.theme.resolve_texture(load(source_path))
 		assert(

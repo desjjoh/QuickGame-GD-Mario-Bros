@@ -12,8 +12,6 @@
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/interactibles/blocks/question-block.tres" id="art_5"]
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/interactibles/pipes/pipe-1.tres" id="art_6"]
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/interactibles/pipes/pipe-2.tres" id="art_7"]
-[ext_resource type="Texture2D" path="res://assets/palettes/underground/interactibles/pipes/pipe-3.tres" id="art_8"]
-[ext_resource type="Texture2D" path="res://assets/palettes/underground/interactibles/pipes/pipe-4.tres" id="art_9"]
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/interactibles/pipes/pipe-h-1.tres" id="art_10"]
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/interactibles/pipes/pipe-h-2.tres" id="art_11"]
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/interactibles/pipes/pipe-top-1.tres" id="art_12"]
@@ -27,6 +25,12 @@
 [ext_resource type="Texture2D" uid="uid://clblmsvsl46nd" path="res://assets/palettes/underground/ui/start-cursor.png" id="title_cursor"]
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/interactibles/items/coins.tres" id="world_coin"]
 
+[ext_resource type="Texture2D" path="res://assets/palettes/underground/misc/flagpole-top.tres" id="flag_top"]
+[ext_resource type="Texture2D" path="res://assets/palettes/underground/misc/flagpole-pole.tres" id="flag_pole"]
+[ext_resource type="Texture2D" path="res://assets/palettes/underground/misc/flagpole-flag.png" id="flag_banner"]
+
+[ext_resource type="Texture2D" path="res://assets/palettes/underground/tileset/Palette 1 (Ground and Stone).png" id="castle_art"]
+
 [resource]
 script = ExtResource("1")
 display_name = "Underground"
@@ -35,6 +39,10 @@ terrain = ExtResource("2")
 decorations = ExtResource("3")
 entity_markers = ExtResource("4")
 texture_overrides = Dictionary[String, Texture2D]({
+"res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png": ExtResource("castle_art"),
+"res://assets/palettes/overworld/misc/flagpole-top.tres": ExtResource("flag_top"),
+"res://assets/palettes/overworld/misc/flagpole-pole.tres": ExtResource("flag_pole"),
+"res://assets/palettes/overworld/misc/flagpole-flag.png": ExtResource("flag_banner"),
 "res://assets/palettes/overworld/interactibles/blocks/brick-alternate.tres": ExtResource("art_0"),
 "res://assets/palettes/overworld/interactibles/blocks/brick.tres": ExtResource("art_1"),
 "res://assets/palettes/overworld/interactibles/blocks/question-block-2.tres": ExtResource("art_2"),
@@ -44,8 +52,6 @@ texture_overrides = Dictionary[String, Texture2D]({
 "res://assets/palettes/overworld/interactibles/items/coins.tres": ExtResource("world_coin"),
 "res://assets/palettes/overworld/interactibles/pipes/pipe-1.tres": ExtResource("art_6"),
 "res://assets/palettes/overworld/interactibles/pipes/pipe-2.tres": ExtResource("art_7"),
-"res://assets/palettes/overworld/interactibles/pipes/pipe-3.tres": ExtResource("art_8"),
-"res://assets/palettes/overworld/interactibles/pipes/pipe-4.tres": ExtResource("art_9"),
 "res://assets/palettes/overworld/interactibles/pipes/pipe-h-1.tres": ExtResource("art_10"),
 "res://assets/palettes/overworld/interactibles/pipes/pipe-h-2.tres": ExtResource("art_11"),
 "res://assets/palettes/overworld/interactibles/pipes/pipe-top-1.tres": ExtResource("art_12"),

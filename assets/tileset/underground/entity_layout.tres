@@ -5,8 +5,9 @@
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/tileset/Palette 1 (Ground and Stone).png" id="3_alternate"]
 [ext_resource type="Texture2D" uid="uid://5qf43ud83trt" path="res://assets/tileset/underground/previews/pipe_entrance.png" id="4_pipe"]
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/tileset/Palette 4 (Coins and Interactibles).png" id="coin"]
-[ext_resource type="Texture2D" uid="uid://ck8w2kxc4e3gx" path="res://assets/tileset/previews/flagpole.png" id="flagpole"]
+[ext_resource type="Texture2D" path="res://assets/tileset/underground/previews/flagpole.png" id="flagpole"]
 [ext_resource type="Texture2D" uid="uid://dnvspcge3gjbk" path="res://assets/tileset/underground/previews/sideways_pipe_entrance.png" id="side"]
+[ext_resource type="Texture2D" path="res://assets/tileset/underground/previews/castle.png" id="castle"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_brick"]
 resource_name = "Brick entity"
@@ -59,6 +60,14 @@ margins = Vector2i(0, 16)
 0:0/0 = 0
 0:0/0/custom_data_0 = "coin"
 
+[sub_resource type="TileSetAtlasSource" id="castle"]
+resource_name = "Castle (5x5)"
+texture = ExtResource("castle")
+0:0/size_in_atlas = Vector2i(5, 5)
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(-32, -32)
+0:0/0/custom_data_0 = "castle"
+
 [resource]
 custom_data_layer_0/name = "entity_id"
 custom_data_layer_0/type = 4
@@ -68,4 +77,5 @@ sources/2 = SubResource("TileSetAtlasSource_alternate")
 sources/3 = SubResource("TileSetAtlasSource_pipe")
 sources/4 = SubResource("Side")
 sources/5 = SubResource("flagpole")
+sources/6 = SubResource("castle")
 sources/7 = SubResource("coin")

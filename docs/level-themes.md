@@ -13,7 +13,7 @@ AreaTheme groups terrain, decoration, and entity-marker TileSets, explicit sourc
 
 ## Supplied Underground art and fallback
 
-Underground texture_overrides maps 21 supplied entity/terrain/UI texture counterparts under assets/palettes/underground: solid block, both bricks, all four question-block frames (including used), and all ten pipe sections, plus the world coin strip, HUD coin atlas, title cursor and title card. Both upright and sideways pipe entities use the replacements, as do terrain pipe tiles. All 15 decoration counterparts now use assets/tileset/underground/decorations.tres: three bush pieces, six hill pieces and six cloud pieces. The theme assigns this TileSet directly, with matching source IDs, atlas coordinates and alternative IDs; existing painted decoration cells select the Underground artwork automatically. Mario remains independent of the area theme. Mario is not assigned the area's visual theme.
+Underground texture_overrides maps 19 supplied entity/terrain/UI texture counterparts under assets/palettes/underground: solid block, both bricks, all four question-block frames (including used), and eight pipe entity sections, plus the world coin strip, HUD coin atlas, title cursor and title card. Both upright and sideways pipe entities use the replacements, while terrain pipe tiles read directly from the palette atlas. All 15 decoration counterparts now use assets/tileset/underground/decorations.tres: three bush pieces, six hill pieces and six cloud pieces. The theme assigns this TileSet directly, with matching source IDs, atlas coordinates and alternative IDs; existing painted decoration cells select the Underground artwork automatically. Mario remains independent of the area theme. Mario is not assigned the area's visual theme.
 
 Underground terrain and marker TileSets are under assets/tileset/underground/. They preserve source IDs, atlas coordinates, alternative IDs, entity_id custom data, and collision definitions from the Overworld counterparts. Thus an area's painted cells do not change when selecting the matching theme. Marker textures preview themed bricks and question blocks; Underground-specific 32x32 pipe previews preserve whole-pipe painting. Rebuild both themes' previews with scripts/build_pipe_marker.gd after changing pipe artwork. Terrain exposes Solid ground and Pipe parts as sources 0 and 1. The pipe tiles retain their square collision.
 
@@ -32,7 +32,7 @@ Main-area content stays at its original world positions. LowerArea currently sit
 
 ## Verification
 
-area_theme_test checks all 21 texture mappings and dimensions, all 17 terrain tiles and retained collisions, both pipe entity variants, marker previews, Underground question animation and used art, all four themed decoration sources and retained tile IDs, themed brick bounce, source-resource isolation, and descendant shutdown. Migration validation compares every saved painted cell's world coordinate and identifiers before/after. Both areas were rendered and visually inspected. Theme resources configure appearance; pipe travel is coordinated separately by BaseLevel.
+area_theme_test checks all 19 texture mappings and dimensions, all 17 terrain tiles and retained collisions, both pipe entity variants, marker previews, Underground question animation and used art, all four themed decoration sources and retained tile IDs, themed brick bounce, source-resource isolation, and descendant shutdown. Migration validation compares every saved painted cell's world coordinate and identifiers before/after. Both areas were rendered and visually inspected. Theme resources configure appearance; pipe travel is coordinated separately by BaseLevel.
 
 ## Editing nested areas safely
 
@@ -57,3 +57,7 @@ Both palettes expose Castle parts as decoration source 15. Each palette reads th
 ## Palette sheets
 
 The four sheets under each palette cover ground and stone, water and sky, pipes and scenery, and coins and interactibles. Pipe, bush, hill, and cloud parts are grouped into named sources in the Tiles panel. Solid ground enables the seven selected ground and stone cells with square collision. Tile-sized entity markers use sheet margins. Entity scenes and animations use named AtlasTexture regions. Whole-object paint previews remain separate so a single click still places the complete pipe, flagpole, or castle. Mario uses separate walk and climb strips shared by both themes.
+
+## Castle theme
+
+Assign assets/themes/castle.tres to an area to select Castle terrain, decorations, entity artwork, and UI accents. The Castle sheets use the existing tile coordinates and collision definitions. Underground and Castle each provide their own flagpole artwork and paint preview.
