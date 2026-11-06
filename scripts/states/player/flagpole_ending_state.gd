@@ -50,10 +50,14 @@ func begin_dismount() -> void:
 func process_physics(delta: float) -> BaseState:
 	var player := get_player()
 	if phase == Phase.DESCEND:
+		if player.body.global_position.y >= stop_y:
+			return null
 		super.process_physics(delta)
 		if player.body.global_position.y >= stop_y:
 			player.body.global_position.y = stop_y
 			player.body.velocity = Vector2.ZERO
+			player.animation_player.seek(0.0, true)
+			player.animation_player.pause()
 		return null
 	if phase == Phase.DISMOUNT:
 		player.body.velocity = Vector2.ZERO

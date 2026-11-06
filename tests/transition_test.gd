@@ -203,6 +203,9 @@ func _ready() -> void:
 	release_work.emit()
 	await wait_until_idle()
 	assert(ControllerHandler.enabled and level.players.visible)
+	var music := MusicHandler.get_node("BackgroundMusic") as AudioStreamPlayer
+	assert(music.playing and music.stream == MusicHandler._loops[MusicHandler.Track.OVERWORLD])
+	assert((music.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_FORWARD)
 	# Pipe entry finishes before the cover; only then can the area change.
 	var pipe := level.world_objects.get_node("pipe_entrance_6_11") as PipeEntrance
 	pipe.set_physics_process(false)
@@ -221,18 +224,22 @@ func _ready() -> void:
 			and not game.get_node("UI/HUD").visible
 		)
 	)
+	assert(not music.playing)
 	await wait_until_idle()
+	assert(music.playing and music.stream == MusicHandler._loops[MusicHandler.Track.UNDERGROUND])
 	assert(level.active_area.area_id == &"lower" and not level._transfer_pending)
 	assert(level.player.body.collision_mask != 0 and level.players.visible)
 	assert(not level.player.gameplay_suspended)
 	# Respawn has the same global card lifecycle after the death sound stage.
 	assert(level.on_death(level.player))
+	assert(not music.playing)
 	await wait_until_busy()
 	assert(view.presentation == null and not game.get_node("UI/HUD").visible)
 	await wait_until_idle()
 	assert(GameHandler.current_level != level)
 	level = GameHandler.current_level
 	assert(level.active_area.area_id == &"main" and level.player != null)
+	assert(music.playing and music.stream == MusicHandler._loops[MusicHandler.Track.OVERWORLD])
 	assert(director.elapsed_frames >= 8 and not level.transition_in_progress)
 	# Public level transition replaces under cover and unlocks the new player.
 	assert(GameHandler.transition_to_level(game.initial_level))

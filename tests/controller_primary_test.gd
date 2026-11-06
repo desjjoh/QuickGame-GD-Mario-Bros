@@ -32,7 +32,7 @@ func run_checks() -> void:
 		var mario := GameHandler.current_player
 		await tick(5)
 		assert(mario.body.is_on_floor())
-		var jump_sound := mario.jump_action.sound_effect as AudioStreamWAV
+		var jump_sound := SoundHandler.get_sound(mario.jump_action.sound_cue) as AudioStreamWAV
 		assert(
 			jump_sound.loop_mode == AudioStreamWAV.LOOP_DISABLED,
 			"One-shot jump audio must not inherit the WAV's invalid embedded loop."
@@ -53,7 +53,7 @@ func run_checks() -> void:
 		var sounds: Array[AudioStream] = []
 		mario.body.child_entered_tree.connect(
 			func(child: Node):
-				if child is AudioStreamPlayer2D:
+				if child is AudioStreamPlayer:
 					sounds.append(child.stream)
 		)
 		mario.jump_action.jumped.connect(func(): jumps.append(1))
@@ -66,7 +66,7 @@ func run_checks() -> void:
 		assert(mario.body.velocity.y < 0.0)
 		assert(jumps.size() == 1)
 		assert(sounds.size() == 1)
-		assert(sounds[0].resource_path == "res://assets/sfx/smb_jump-small.wav")
+		assert(sounds[0] == SoundHandler.get_sound(&"jump_small"))
 		assert(not mario.jump_action.begin(mario.motion_values))
 		assert(jumps.size() == 1, "Rejected midair jumps must not emit another jump sound.")
 		Input.parse_input_event(button(device, false))

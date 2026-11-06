@@ -72,7 +72,7 @@ func _ready() -> void:
 		)
 	)
 	assert(
-		pole.get_node("Visuals/Base").texture.resource_path.ends_with("overworld/tileset/block.png")
+		pole.get_node("Visuals/Base").texture.resource_path.ends_with("overworld/tileset/block.tres")
 	)
 	pole.set_activity_suspended(true)
 	pole.set_activity_suspended(false)
@@ -81,7 +81,7 @@ func _ready() -> void:
 	pole.player_detached.connect(func(_player: BasePlayer): detached += 1)
 	# Contact alone grabs; no Up press and no completion/fanfare.
 	player.face_direction(1.0)
-	player.body.global_position = Vector2(113, 130)
+	player.body.global_position = Vector2(111, 130)
 	player.body.velocity = Vector2(120, -30)
 	await ticks(5)
 	assert(player.state_machine.current_state == player.climb_state)
@@ -106,12 +106,12 @@ func _ready() -> void:
 	Input.action_press("ui_up")
 	for frame in range(20):
 		await ticks()
-		if player.sprite.texture.resource_path.ends_with("mario-climb-2.png"):
+		if player.sprite.texture.resource_path.ends_with("mario-climb-2.tres"):
 			break
-	assert(player.sprite.texture.resource_path.ends_with("mario-climb-2.png"))
+	assert(player.sprite.texture.resource_path.ends_with("mario-climb-2.tres"))
 	Input.action_release("ui_up")
 	await ticks()
-	assert(player.sprite.texture.resource_path.ends_with("mario-climb-1.png"))
+	assert(player.sprite.texture.resource_path.ends_with("mario-climb-1.tres"))
 	# Down is faster; Run and Jump cannot replace the attached state.
 	start_y = player.body.global_position.y
 	Input.action_press("ui_down")
@@ -240,7 +240,7 @@ func _ready() -> void:
 		await ticks()
 		assert(player.climbing.get_surface() == pole)
 		assert(player.state_machine.current_state == player.climb_state)
-		assert(player.sprite.texture.resource_path.ends_with("mario-climb-1.png"))
+		assert(player.sprite.texture.resource_path.ends_with("mario-climb-1.tres"))
 	# Removing the surface must safely return to normal falling.
 	pole.queue_free()
 	await ticks(3)

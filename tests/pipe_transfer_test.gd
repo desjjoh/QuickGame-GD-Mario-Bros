@@ -105,9 +105,9 @@ func _ready() -> void:
 	assert(player.body.collision_layer == 0 and player.body.collision_mask == 0)
 	var entry_origin := player.body.global_position
 	var source_camera_position: Vector2 = main_area.get_node("Camera2D").global_position
-	var pipe_sounds := player.body.find_children("*", "AudioStreamPlayer2D", true, false)
+	var pipe_sounds := player.body.find_children("*", "AudioStreamPlayer", true, false)
 	assert(pipe_sounds.size() == 1)
-	var sound := pipe_sounds[0] as AudioStreamPlayer2D
+	var sound := pipe_sounds[0] as AudioStreamPlayer
 	assert(sound.stream == player.pipe_enter_state.enter_sound_effect)
 	assert((sound.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED)
 	var playback := sound.stream.instantiate_playback()

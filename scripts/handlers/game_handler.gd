@@ -1,6 +1,7 @@
 extends Node
 ## Global game ownership and in-memory session data. No disk persistence yet.
 
+
 enum GameFlow { DETACHED, TITLE, STARTING, PLAYING, GAME_OVER, COMPLETING }
 
 signal flow_changed(value: GameFlow)
@@ -86,6 +87,7 @@ func detach_game(game: Node) -> void:
 	if current_game != game:
 		return
 	_detaching = true
+	SoundHandler.stop_reward()
 	transitions.detach_game(game)
 	_clear_title()
 	_first_level = null
@@ -209,6 +211,16 @@ func add_coins(amount: int) -> void:
 	set_coins(player_status.coins + amount)
 
 
+func award_coin() -> void:
+	var total := player_status.coins + 1
+	var extra_life := total == 100
+	set_coins(total % 100)
+	if extra_life:
+		set_lives(player_status.lives + 1)
+	add_score(200)
+	SoundHandler.play_reward(&"extra_life" if extra_life else &"coin")
+
+
 func set_lives(value: int) -> void:
 	player_status.lives = value
 
@@ -223,14 +235,26 @@ func set_top_score(value: int) -> void:
 
 ## Reset the run; app-session top score and authored configuration survive.
 func clear_session() -> void:
+	SoundHandler.stop_reward()
 	current_stage_index = -1
 	_start_level = null
 	_session.clear()
 	clear_level_progress()
-	player_status.reset()
+	_reset_player_status()
 	stage_label = "1-1"
 	time_remaining = 400
 	timer_enabled = true
+
+
+func _reset_player_status() -> void:
+	if is_instance_valid(current_game):
+		player_status.reset(
+			current_game.starting_score,
+			current_game.starting_coins,
+			current_game.starting_lives - 1
+		)
+	else:
+		player_status.reset()
 
 
 ## Select one logical level. Same-level scene recreation preserves its areas.
@@ -376,6 +400,7 @@ func start_game_flow(first_level: PackedScene, with_title: bool = true) -> bool:
 	_first_level = first_level
 	if with_title:
 		return show_title(first_level)
+	_reset_player_status()
 	_set_flow(GameFlow.PLAYING)
 	return transition_to_level(first_level)
 

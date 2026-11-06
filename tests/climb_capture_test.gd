@@ -115,12 +115,18 @@ func _ready() -> void:
 	for offset in [-11.0, -6.0, -1.0, 0.0, 5.0, 10.0]:
 		player.body.global_position = Vector2(120 + offset, 100)
 		assert(not pole.can_attach(player), "Outside reference grab bands: %s" % offset)
-	# Descending through the first left band preserves the earlier, higher contact.
+	# A descending grab preserves the accepted end-of-tick height.
 	await reset_trial(player)
 	player.body.global_position = Vector2(112, 76)
 	player._try_attach_climbable(Vector2(109, 70), player.body.global_position)
 	assert(player.climbing.get_surface() == pole)
-	assert(is_equal_approx(player.body.global_position.y, 72.0))
+	assert(is_equal_approx(player.body.global_position.y, 76.0))
+	# A low side probe can reach the shaft while feet are below the base top.
+	await reset_trial(player)
+	player.body.global_position = Vector2(113, 194)
+	player._try_attach_climbable(player.body.global_position, player.body.global_position)
+	assert(player.climbing.get_surface() == pole)
+	assert(player.body.global_position.y == 194.0)
 	# Landing in the gap between probe bands and then walking still grabs before leaving.
 	await reset_trial(player)
 	player.body.global_position = Vector2(120, 191.92)
@@ -165,7 +171,7 @@ func _ready() -> void:
 		"Running jump should retain a high ball grab, got %s" % player.body.global_position.y
 	)
 	platform.free()
-	# Sweep the actual displacement with both endpoints outside the trigger.
+	# Crossing the band without an accepted final position does not grab.
 	for direction in [-1.0, 1.0]:
 		await reset_trial(player)
 		var start := Vector2(90 if direction > 0 else 150, 130)
@@ -174,7 +180,7 @@ func _ready() -> void:
 		player.body.move_and_slide()
 		assert(not pole.can_attach(player))
 		player._try_attach_climbable(start, player.body.global_position)
-		assert(player.climbing.get_surface() == pole)
+		assert(player.climbing.get_surface() == null)
 	# A solid wall before the shaft must prevent capture; no predicted-motion grab.
 	await reset_trial(player)
 	var wall := StaticBody2D.new()
@@ -201,6 +207,6 @@ func _ready() -> void:
 	game.free()
 	await ticks(2)
 	print(
-		"PASS: 28 real-tick captures from both directions at walk/run speed, top/middle/base/landing edges; base standing, swept pass-through prevention, wall occlusion and below-shaft rejection."
+		"PASS: 28 real-tick captures from both directions at walk/run speed, top/middle/base/landing edges; base standing, end-of-tick sampling, wall occlusion and below-shaft rejection."
 	)
 	get_tree().quit()

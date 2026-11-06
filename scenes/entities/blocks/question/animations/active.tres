@@ -1,8 +1,8 @@
 [gd_resource type="Animation" format=3 uid="uid://c24sgmbq2asp4"]
 
-[ext_resource type="Texture2D" uid="uid://de0xqmdl5jj4c" path="res://assets/palettes/overworld/interactibles/blocks/question-block.png" id="1_bright"]
-[ext_resource type="Texture2D" uid="uid://cv712fn1vvhsh" path="res://assets/palettes/overworld/interactibles/blocks/question-block-2.png" id="2_medium"]
-[ext_resource type="Texture2D" uid="uid://b07r5612mri7p" path="res://assets/palettes/overworld/interactibles/blocks/question-block-3.png" id="3_dark"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/blocks/question-block.tres" id="1_bright"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/blocks/question-block-2.tres" id="2_medium"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/blocks/question-block-3.tres" id="3_dark"]
 
 [resource]
 resource_name = "active"

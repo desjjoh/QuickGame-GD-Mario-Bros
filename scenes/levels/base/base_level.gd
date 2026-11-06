@@ -1,7 +1,6 @@
 class_name BaseLevel
 extends CanvasGroup
 
-const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
 ## Shared foundation for playable levels.
 
 enum CompletionMode { NORMAL, WARP }
@@ -127,6 +126,7 @@ func _spawn_area_entities(area: BaseLevelArea, saved_entities: Dictionary) -> vo
 	var objects := area.get_node("WorldObjects") as Node2D
 	# Markers remain editable in the scene, but only entities render at runtime.
 	layout.hide()
+	area.entity_persistence.clear()
 	if layout.tile_set == null:
 		return
 	if layout.tile_set.get_custom_data_layer_by_name("entity_id") < 0:
@@ -143,11 +143,15 @@ func _spawn_area_entities(area: BaseLevelArea, saved_entities: Dictionary) -> vo
 			continue
 		var entity_name := "%s_%s_%s" % [entity_id, cell.x, cell.y]
 		var progress: Dictionary = saved_entities.get(entity_name, {})
-		if progress.get("removed", false):
-			continue
 		var instance := scene.instantiate()
 		if not instance is BaseEntity:
 			push_error("EntityLayout scenes must inherit BaseEntity: %s" % entity_id)
+			instance.free()
+			continue
+		area.entity_persistence[entity_name] = instance.persist_progress
+		if not instance.persist_progress:
+			progress = {}
+		elif progress.get("removed", false):
 			instance.free()
 			continue
 		if instance is TransportEntity and not area.configure_transport(instance, cell):
@@ -206,8 +210,18 @@ func on_level_start() -> bool:
 	has_started = true
 	_timer_ticks_remaining = 24
 	_last_timer_tick = GameHandler.animation_clock.tick_count
+	_play_area_music()
 	level_started.emit()
 	return true
+
+
+func _play_area_music() -> void:
+	if (
+		has_started and not is_shutdown and not death_in_progress and not completion_in_progress
+		and GameHandler.current_level == self and GameHandler.flow == GameHandler.GameFlow.PLAYING
+		and is_instance_valid(active_area)
+	):
+		MusicHandler.play_area(self, active_area.background_music)
 
 
 func _update_level_timer() -> void:
@@ -311,6 +325,7 @@ func shutdown() -> void:
 	if is_shutdown:
 		return
 	is_shutdown = true
+	MusicHandler.stop_area(self)
 	if ending_presentation != null:
 		ending_presentation.cancel()
 	if ending_in_progress and not completion_dispatched:
@@ -540,6 +555,8 @@ func _finish_transport(phase: int) -> void:
 			== 0
 		):
 			_abort_transport(true)
+		elif GameHandler.transitions.busy:
+			MusicHandler.stop_area(self)
 		return
 	_commit_transport(phase)
 
@@ -549,7 +566,7 @@ func _commit_transport_under_cover(phase: int) -> bool:
 		return false
 	if not _transport_trip_valid():
 		return false
-	_commit_transport(phase)
+	_commit_transport(phase, true)
 	return not is_shutdown and GameHandler.current_level == self
 
 
@@ -564,6 +581,7 @@ func _area_transition_valid() -> bool:
 func _area_transition_complete(success: bool) -> void:
 	if not success and not is_shutdown:
 		_abort_transport(true)
+	_play_area_music()
 
 
 func _start_player_state() -> void:
@@ -573,7 +591,7 @@ func _start_player_state() -> void:
 	player.state_machine.gameplay_suspended = suspended
 
 
-func _commit_transport(phase: int) -> void:
+func _commit_transport(phase: int, under_cover: bool = false) -> void:
 	if phase != _transport_phase or is_shutdown or not _transfer_pending:
 		return
 	if (
@@ -624,6 +642,8 @@ func _commit_transport(phase: int) -> void:
 	area.enter_area()
 	_transport_input_locked = true
 	_record_active_area()
+	if previous_area != area and not under_cover:
+		_play_area_music()
 	if is_shutdown or not is_instance_valid(player) or player.is_shutdown:
 		_abort_transport(false)
 		return
@@ -724,6 +744,11 @@ func _save_area(area: BaseLevelArea) -> void:
 		var id := StringName(str(data.get_custom_data("entity_id")))
 		var entity_name := "%s_%s_%s" % [id, cell.x, cell.y]
 		var entity := objects.get_node_or_null(NodePath(entity_name)) as BaseEntity
+		if entity != null:
+			if not entity.persist_progress:
+				continue
+		elif not area.entity_persistence.get(entity_name, false):
+			continue
 		entities[entity_name] = {
 			"removed": entity == null,
 			"state": entity.capture_area_state() if entity != null else {}
@@ -861,10 +886,12 @@ func cancel_ending() -> void:
 			else:
 				camera.reset_target(player.body)
 		GameHandler.cancel_completion(self)
+		_play_area_music()
 
 
 func notify_completion_started() -> void:
 	# GameHandler calls this after claiming completion and before transitioning.
+	MusicHandler.stop_area(self)
 	completion_started.emit()
 
 
@@ -884,6 +911,7 @@ func on_death(
 		return false
 	death_reason = reason
 	death_in_progress = true
+	MusicHandler.stop_area(self)
 	if reason == DeathReason.TIMEOUT:
 		GameHandler.set_player_form(PlayerStatus.PowerupForm.SMALL)
 	GameHandler.set_lives(GameHandler.player_status.lives - 1)
@@ -929,7 +957,6 @@ func _start_death_audio() -> void:
 		stream.loop = false
 	_death_audio = AudioStreamPlayer.new()
 	_death_audio.stream = stream
-	_death_audio.volume_db = SOUND_MIX.volume_for(death_sound)
 	add_child(_death_audio)
 	_death_audio.finished.connect(func(): _death_audio_done = true)
 	_death_audio.play()

@@ -14,7 +14,7 @@ GameHandler owns one runtime PlayerStatus Resource (scripts/session/player_statu
 | GameHandler | stage_label | Loaded BaseLevel.stage_label, default 1-1 | String |
 | GameHandler | time_remaining | Loaded BaseLevel.starting_time, default 400 | 0..999 |
 
-Numeric values clamp to their current display ranges; invalid form values are ignored. These are initial storage constraints, not a recreation of NES numeric overflow. No 100-coin rollover, extra-life award or score reward exists yet. Negative reserves now trigger [game over](game-over.md). Extend add_coins atomically with the agreed rollover/reward policy before connecting collectibles; it currently clamps at 99. Time is a bound value, not a running countdown. Form is durable session data, separate from movement states, death presentation and future temporary invincibility.
+Numeric values clamp to their current display ranges; invalid form values are ignored. These are initial storage constraints, not a recreation of NES numeric overflow. World coin pickup uses GameHandler.award_coin. Each pickup adds 200 points and one coin. The 100th coin rolls the count to zero and adds one reserve life. Raw set_coins and add_coins still update the bounded counter directly. Negative reserves trigger [game over](game-over.md). Time is a bound value, not a running countdown. Form is durable session data, separate from movement states, death presentation and future temporary invincibility.
 
 ## Updating values
 
@@ -42,3 +42,7 @@ Only Small Mario exists. Recording SUPER/FIRE does not transform Mario or select
 player_status_test covers defaults, bounds, change-only signals, legacy-key routing, initial/live HUD/title/intro values, new-game reset with top-score retention, area travel and death restart continuity. It also checks that coins/score do not grant lives, score mutation alone does not promote the record, and title return promotes only a higher final score while ties/lower values preserve it. Rendered runs capture the title layout for inspection. Existing HUD, title, death and transition regressions cover integration with their established lifecycles.
 
 Returning to the title shuts down the outgoing level, promotes top_score to max(top_score, final run score), then calls clear_session. Direct clear_session calls, including defensive new-game reset, do not perform record promotion. Player status, custom session values, pending start, stage index and world progress return to defaults; top score remains in memory until a hard restart. Stage-to-stage advancement does not call this reset.
+
+## Starting values
+
+Select Game in the scene Inspector and open Starting Player Status. Starting Score, Starting Coins, and Starting Lives apply when a run starts and when the session resets. Starting Lives is the displayed number of attempts, including the current life. GameHandler converts it to the stored reserve count.

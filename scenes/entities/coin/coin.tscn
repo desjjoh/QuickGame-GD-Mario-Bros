@@ -1,0 +1,74 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/coin/coin.gd" id="coin"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/items/coins.tres" id="art"]
+[ext_resource type="Script" path="res://scenes/components/presentation/synchronized_animation.gd" id="sync"]
+[ext_resource type="Resource" path="res://scenes/components/presentation/palette_pulse.tres" id="pulse"]
+
+[ext_resource type="Script" path="res://scenes/entities/base/states/entity_state.gd" id="state"]
+
+[sub_resource type="RectangleShape2D" id="pickup_shape"]
+size = Vector2(16, 16)
+
+[sub_resource type="Animation" id="pulse_animation"]
+resource_name = "pulse"
+length = 0.8
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.4, 0.53333336, 0.6666667),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 1]
+}
+
+[sub_resource type="AnimationLibrary" id="library"]
+_data = {&"pulse": SubResource("pulse_animation")}
+
+[node name="Coin" node_paths=PackedStringArray("sprite", "animation_player") instance=ExtResource("base")]
+script = ExtResource("coin")
+texture_filter = 1
+sprite = NodePath("Sprite2D")
+animation_player = NodePath("AnimationPlayer")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(8, 8)
+texture = ExtResource("art")
+hframes = 3
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {&"": SubResource("library")}
+
+[node name="PaletteAnimation" type="Node" parent="." node_paths=PackedStringArray("animation_player")]
+script = ExtResource("sync")
+cycle = ExtResource("pulse")
+animation_player = NodePath("../AnimationPlayer")
+animation_name = &"pulse"
+
+[node name="StateMachine" parent="." index="0" node_paths=PackedStringArray("initial_state")]
+initial_state = NodePath("Active")
+
+[node name="Active" type="Node" parent="StateMachine"]
+script = ExtResource("state")
+input_enabled = false
+frame_updates_enabled = false
+physics_updates_enabled = false
+
+[node name="Collected" type="Node" parent="StateMachine"]
+script = ExtResource("state")
+input_enabled = false
+frame_updates_enabled = false
+physics_updates_enabled = false
+
+[node name="Pickup" type="Area2D" parent="."]
+position = Vector2(8, 8)
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pickup"]
+shape = SubResource("pickup_shape")

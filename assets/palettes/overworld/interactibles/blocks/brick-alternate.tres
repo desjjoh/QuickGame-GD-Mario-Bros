@@ -1,0 +1,8 @@
+[gd_resource type="AtlasTexture" format=3 uid="uid://c2pjpgt4yghxm"]
+
+[ext_resource type="Texture2D" uid="uid://craxm1r4g00kk" path="res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png" id="1"]
+
+[resource]
+atlas = ExtResource("1")
+region = Rect2(32, 0, 16, 16)
+filter_clip = true

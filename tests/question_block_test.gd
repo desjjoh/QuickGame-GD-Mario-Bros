@@ -33,17 +33,17 @@ func _ready() -> void:
 	var animation := block.animation_player.get_animation(&"active")
 	assert(animation.loop_mode == Animation.LOOP_LINEAR and is_equal_approx(animation.length, 0.8))
 	for sample in [
-		[0.0, "question-block.png"],
-		[0.39, "question-block.png"],
-		[0.41, "question-block-2.png"],
-		[0.55, "question-block-3.png"],
-		[0.7, "question-block-2.png"]
+		[0.0, "question-block.tres"],
+		[0.39, "question-block.tres"],
+		[0.41, "question-block-2.tres"],
+		[0.55, "question-block-3.tres"],
+		[0.7, "question-block-2.tres"]
 	]:
 		block.animation_player.seek(sample[0], true)
 		assert(block.sprite.texture.resource_path.ends_with(sample[1]))
 	block.animation_player.seek(0.79, true)
 	block.animation_player.advance(0.03)
-	assert(block.sprite.texture.resource_path.ends_with("question-block.png"))
+	assert(block.sprite.texture.resource_path.ends_with("question-block.tres"))
 	assert(other.animation_player != block.animation_player)
 	for frame in range(10):
 		await get_tree().physics_frame
@@ -55,10 +55,10 @@ func _ready() -> void:
 	assert(
 		block.sprite.texture.resource_path.ends_with(
 			[
-				"question-block.png",
-				"question-block-2.png",
-				"question-block-3.png",
-				"question-block-2.png"
+				"question-block.tres",
+				"question-block-2.tres",
+				"question-block-3.tres",
+				"question-block-2.tres"
 			][phase]
 		)
 	)
@@ -85,7 +85,7 @@ func _ready() -> void:
 	assert(activated and moved_sprite)
 	assert(phases == [&"Bouncing", &"Inactive"])
 	assert(events == {"entered": 1, "completed": 1})
-	assert(block.sprite.texture.resource_path.ends_with("question-block-4.png"))
+	assert(block.sprite.texture.resource_path.ends_with("question-block-4.tres"))
 	assert(block.sprite.position == Vector2(8, 8))
 	assert(not block.animation_player.is_playing())
 	assert(not block.receive_hit(EntityHit.new(level.player, &"bonk", Vector2.UP)))

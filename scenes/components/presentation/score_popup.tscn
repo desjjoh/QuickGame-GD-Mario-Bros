@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/components/presentation/score_popup.gd" id="script"]
+[ext_resource type="Texture2D" path="res://assets/ui/score.png" id="atlas"]
+
+[node name="ScorePopup" type="Sprite2D"]
+visible = false
+z_index = 1
+texture_filter = 1
+texture = ExtResource("atlas")
+region_enabled = true
+region_rect = Rect2(0, 0, 16, 8)
+region_filter_clip_enabled = true
+script = ExtResource("script")

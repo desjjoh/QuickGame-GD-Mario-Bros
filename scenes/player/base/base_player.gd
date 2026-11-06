@@ -1,7 +1,6 @@
 class_name BasePlayer
 extends BaseEntity
 
-const AudioMix = preload("res://scripts/audio/sound_effect_mix.gd")
 ## Player foundation. States coordinate motion, actions, and presentation.
 ## Use body.global_position for the moving player's world position.
 
@@ -18,6 +17,7 @@ var _death_finished: bool = false
 
 @export_group("Ceiling Response")
 @export var ceiling_bump_sound: AudioStream
+@export var ceiling_bump_cue: StringName
 @export var ceiling_bump_speed: float = 3.75
 
 @onready var climbing: ClimbingComponent = $Motion/Climbing
@@ -48,20 +48,20 @@ func _physics_process(delta: float) -> void:
 	var before := body.global_position
 	if not is_shutdown and not is_dead:
 		run_action.advance_timer()
-		_try_attach_climbable(before, before)
+		_try_attach_climbable(before, before, false)
 	super(delta)
 	if not is_shutdown and not is_dead:
 		# Catch actual movement after state integration, including the tick we land.
 		_try_attach_climbable(before, body.global_position)
 
 
-func _try_attach_climbable(from_feet: Vector2, to_feet: Vector2) -> void:
+func _try_attach_climbable(from_feet: Vector2, to_feet: Vector2, after_motion: bool = true) -> void:
 	if climb_state == null or state_machine.current_state == climb_state:
 		return
 	var current := state_machine.current_state as PlayerState
 	if current == null or not current.controller_controls_available():
 		return
-	var surface := climbing.find_surface(self, from_feet, to_feet)
+	var surface := climbing.find_surface(self, from_feet, to_feet, after_motion)
 	if surface == null:
 		return
 	# The state transition lets Jump/Slide clean up their existing modifiers.
@@ -71,7 +71,10 @@ func _try_attach_climbable(from_feet: Vector2, to_feet: Vector2) -> void:
 
 
 func _on_jump_started() -> void:
-	play_sound_effect(jump_action.sound_effect)
+	var sound := jump_action.sound_effect
+	if sound == null:
+		sound = SoundHandler.get_sound(jump_action.sound_cue)
+	play_sound_effect(sound)
 
 
 func move_body(gravity_after_motion: bool = false) -> void:
@@ -106,7 +109,9 @@ func move_body(gravity_after_motion: bool = false) -> void:
 		var sound := ceiling_bump_sound
 		if sound is AudioStreamWAV:
 			# One-shot playback without trusting embedded WAV loop metadata.
-			sound = AudioMix.one_shot_copy(sound)
+			sound = SoundHandler.one_shot_copy(sound)
+		if sound == null:
+			sound = SoundHandler.get_sound(ceiling_bump_cue)
 		play_sound_effect(sound)
 
 

@@ -41,7 +41,7 @@ func reach_score(level: BaseLevel) -> void:
 		await ticks()
 		if (
 			level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.SCORE
-			or level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.FIREWORKS
+			or level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.RAISE_FLAG
 		):
 			return
 	assert(false, "Ending never reached timer conversion.")
@@ -67,25 +67,28 @@ func _ready() -> void:
 	for frame in range(13):
 		await ticks()
 		assert(GameHandler.time_remaining == 12 - frame)
-		assert(GameHandler.player_status.score == 950 + 50 * frame)
+		assert(GameHandler.player_status.score == 1050 + 50 * frame)
 		assert(hud.get_node("TimeValue").text == "%03d" % (12 - frame))
-		assert(hud.get_node("Score").text == " %06d" % (950 + 50 * frame))
+		assert(hud.get_node("Score").text == " %06d" % (1050 + 50 * frame))
 		assert(ending.phase == FlagpoleEndingPresentation.Phase.SCORE)
+	assert(SoundHandler._square_two.stream == SoundHandler.get_sound(&"timer_tick"))
 	assert(completed.is_empty())
 	await ticks()
 	assert(completed == [ticket])
-	assert(ending.phase == FlagpoleEndingPresentation.Phase.FIREWORKS)
+	assert(ending.phase == FlagpoleEndingPresentation.Phase.RAISE_FLAG)
 	assert(ending.remaining_time_at_contact == 13 and GameHandler.time_remaining == 0)
-	assert(GameHandler.player_status.score == 1550)
+	assert(GameHandler.player_status.score == 1650)
 	await ticks(4)
-	assert(GameHandler.player_status.score == 1550 and completed.size() == 1)
+	assert(GameHandler.player_status.score == 1650 and completed.size() == 1)
 	assert(not step.is_physics_processing() and step.get_child_count() == 0)
 	GameHandler.set_top_score(1000)
+	await ticks(28)
+	assert(ending.phase == FlagpoleEndingPresentation.Phase.FIREWORKS)
 	ending.fireworks_step.complete(ending.fireworks_step.current_ticket)
 	await ticks(127)
 	assert(GameHandler.flow == GameHandler.GameFlow.TITLE)
-	assert(GameHandler.top_score == 1550 and GameHandler.player_status.score == 0)
-	assert(game.get_node("UI/ScreenContainer/TitleScreen/TopScore").text == "TOP- 001550")
+	assert(GameHandler.top_score == 1650 and GameHandler.player_status.score == 0)
+	assert(game.get_node("UI/ScreenContainer/TitleScreen/TopScore").text == "TOP- 001650")
 	game.free()
 	await ticks(2)
 	# Zero and disabled timers skip conversion, even if a disabled timer stores time.
@@ -95,8 +98,8 @@ func _ready() -> void:
 		GameHandler.time_remaining = 0 if enabled else 400
 		GameHandler.set_score(321)
 		await reach_score(level)
-		assert(level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.FIREWORKS)
-		assert(GameHandler.player_status.score == 321)
+		assert(level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.RAISE_FLAG)
+		assert(GameHandler.player_status.score == 421)
 		assert(GameHandler.time_remaining == (0 if enabled else 400))
 		game.free()
 		await ticks(2)
@@ -109,13 +112,13 @@ func _ready() -> void:
 	ending = level.ending_presentation as FlagpoleEndingPresentation
 	step = ending.score_step as TimeScoreStep
 	await ticks(2)
-	assert(GameHandler.player_status.score == 100 and GameHandler.time_remaining == 18)
+	assert(GameHandler.player_status.score == 200 and GameHandler.time_remaining == 18)
 	ticket = step.current_ticket
 	level.cancel_ending()
 	step.complete(ticket)
 	await ticks(3)
 	assert(not step.active and not step.is_physics_processing())
-	assert(GameHandler.player_status.score == 100 and GameHandler.time_remaining == 18)
+	assert(GameHandler.player_status.score == 200 and GameHandler.time_remaining == 18)
 	assert(GameHandler.flow == GameHandler.GameFlow.PLAYING)
 	game.free()
 	await ticks(2)
@@ -131,7 +134,7 @@ func _ready() -> void:
 	GameHandler.session_value_changed.connect(replace_level, CONNECT_ONE_SHOT)
 	await ticks(2)
 	assert(GameHandler.current_level != level)
-	assert(GameHandler.time_remaining == 400 and GameHandler.player_status.score == 777)
+	assert(GameHandler.time_remaining == 400 and GameHandler.player_status.score == 877)
 	game.free()
 	await ticks(2)
 	# Score saturation still drains the timer and completes exactly once.
@@ -142,10 +145,10 @@ func _ready() -> void:
 	await reach_score(level)
 	await ticks(3)
 	assert(GameHandler.time_remaining == 0 and GameHandler.player_status.score == 999999)
-	assert(level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.FIREWORKS)
+	assert(level.ending_presentation.phase == FlagpoleEndingPresentation.Phase.RAISE_FLAG)
 	game.free()
 	await ticks(2)
 	print(
-		"PASS: 50 points per timer unit per tick, HUD updates, preserved contact time, zero/disabled skip, completion gate, cancellation, stale callbacks, reentrant level replacement and score saturation; no counting audio."
+		"PASS: 50 points per timer unit per tick, HUD updates, preserved contact time, zero/disabled skip, completion gate, cancellation, stale callbacks, reentrant level replacement and score saturation; synthesized counting audio uses the shared voice."
 	)
 	get_tree().quit()

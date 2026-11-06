@@ -2,30 +2,32 @@
 
 [ext_resource type="Script" uid="uid://cskir81ip20rf" path="res://scripts/themes/area_theme.gd" id="1"]
 [ext_resource type="TileSet" uid="uid://g7pmg7w6xn86" path="res://assets/tileset/underground/terrain.tres" id="2"]
-[ext_resource type="TileSet" path="res://assets/tileset/underground/decorations.tres" id="3"]
+[ext_resource type="TileSet" uid="uid://4mdqmclyqcmk" path="res://assets/tileset/underground/decorations.tres" id="3"]
 [ext_resource type="TileSet" uid="uid://cs6ppr1ph7fpm" path="res://assets/tileset/underground/entity_layout.tres" id="4"]
-[ext_resource type="Texture2D" uid="uid://e53t4gbes427" path="res://assets/palettes/underground/interactibles/blocks/brick-alternate.png" id="art_0"]
-[ext_resource type="Texture2D" uid="uid://u8v7p2v8ep1r" path="res://assets/palettes/underground/interactibles/blocks/brick.png" id="art_1"]
-[ext_resource type="Texture2D" uid="uid://cq8e3sjsrxoh4" path="res://assets/palettes/underground/interactibles/blocks/question-block-2.png" id="art_2"]
-[ext_resource type="Texture2D" uid="uid://brqceugoxypc1" path="res://assets/palettes/underground/interactibles/blocks/question-block-3.png" id="art_3"]
-[ext_resource type="Texture2D" uid="uid://dl4vx5xejefk4" path="res://assets/palettes/underground/interactibles/blocks/question-block-4.png" id="art_4"]
-[ext_resource type="Texture2D" uid="uid://cenncqdpy2ifh" path="res://assets/palettes/underground/interactibles/blocks/question-block.png" id="art_5"]
-[ext_resource type="Texture2D" uid="uid://ct34vkixelawr" path="res://assets/palettes/underground/interactibles/pipes/pipe-1.png" id="art_6"]
-[ext_resource type="Texture2D" uid="uid://b2gxbf88dpuep" path="res://assets/palettes/underground/interactibles/pipes/pipe-2.png" id="art_7"]
-[ext_resource type="Texture2D" uid="uid://b1d11tpd83pfy" path="res://assets/palettes/underground/interactibles/pipes/pipe-3.png" id="art_8"]
-[ext_resource type="Texture2D" uid="uid://vqh2obapwfai" path="res://assets/palettes/underground/interactibles/pipes/pipe-4.png" id="art_9"]
-[ext_resource type="Texture2D" uid="uid://0uxkflw05bga" path="res://assets/palettes/underground/interactibles/pipes/pipe-h-1.png" id="art_10"]
-[ext_resource type="Texture2D" uid="uid://n8epclti4t7k" path="res://assets/palettes/underground/interactibles/pipes/pipe-h-2.png" id="art_11"]
-[ext_resource type="Texture2D" uid="uid://b0fmupjqaf7xq" path="res://assets/palettes/underground/interactibles/pipes/pipe-top-1.png" id="art_12"]
-[ext_resource type="Texture2D" uid="uid://vsm2fsxmwo32" path="res://assets/palettes/underground/interactibles/pipes/pipe-top-2.png" id="art_13"]
-[ext_resource type="Texture2D" uid="uid://dsh0py6h0d2o6" path="res://assets/palettes/underground/interactibles/pipes/pipe-top-h-1.png" id="art_14"]
-[ext_resource type="Texture2D" uid="uid://dtuggrgc7o46e" path="res://assets/palettes/underground/interactibles/pipes/pipe-top-h-2.png" id="art_15"]
-[ext_resource type="Texture2D" uid="uid://c0ww4vjjjcp3k" path="res://assets/palettes/underground/tileset/block.png" id="art_16"]
-[ext_resource type="Texture2D" uid="uid://besv7n8r7umo5" path="res://assets/palettes/underground/tileset/ground.png" id="art_17"]
+[ext_resource type="Texture2D" uid="uid://der0i0tjc46dj" path="res://assets/palettes/underground/interactibles/blocks/brick-alternate.tres" id="art_0"]
+[ext_resource type="Texture2D" uid="uid://ca4bbw5xd2cnw" path="res://assets/palettes/underground/interactibles/blocks/brick.tres" id="art_1"]
+[ext_resource type="Texture2D" uid="uid://dn8b7mc7tf2cl" path="res://assets/palettes/underground/interactibles/blocks/question-block-2.tres" id="art_2"]
+[ext_resource type="Texture2D" uid="uid://wwlx7gyr1xdh" path="res://assets/palettes/underground/interactibles/blocks/question-block-3.tres" id="art_3"]
+[ext_resource type="Texture2D" uid="uid://ccfj3lon8pk4s" path="res://assets/palettes/underground/interactibles/blocks/question-block-4.tres" id="art_4"]
+[ext_resource type="Texture2D" uid="uid://r72i5v8vtgfr" path="res://assets/palettes/underground/interactibles/blocks/question-block.tres" id="art_5"]
+[ext_resource type="Texture2D" uid="uid://w68vqsluxabn" path="res://assets/palettes/underground/interactibles/pipes/pipe-1.tres" id="art_6"]
+[ext_resource type="Texture2D" uid="uid://b76q074l65rcb" path="res://assets/palettes/underground/interactibles/pipes/pipe-2.tres" id="art_7"]
+[ext_resource type="Texture2D" uid="uid://hyjvcqxachrv" path="res://assets/palettes/underground/interactibles/pipes/pipe-h-1.tres" id="art_10"]
+[ext_resource type="Texture2D" uid="uid://dmddl1ww2uy3x" path="res://assets/palettes/underground/interactibles/pipes/pipe-h-2.tres" id="art_11"]
+[ext_resource type="Texture2D" uid="uid://kxt5gsgqlknx" path="res://assets/palettes/underground/interactibles/pipes/pipe-top-1.tres" id="art_12"]
+[ext_resource type="Texture2D" uid="uid://d1mevdl4mqdsb" path="res://assets/palettes/underground/interactibles/pipes/pipe-top-2.tres" id="art_13"]
+[ext_resource type="Texture2D" uid="uid://kojhe6yvc4gw" path="res://assets/palettes/underground/interactibles/pipes/pipe-top-h-1.tres" id="art_14"]
+[ext_resource type="Texture2D" uid="uid://pjvn7cg44m8y" path="res://assets/palettes/underground/interactibles/pipes/pipe-top-h-2.tres" id="art_15"]
+[ext_resource type="Texture2D" path="res://assets/palettes/underground/tileset/block.tres" id="art_16"]
+[ext_resource type="Texture2D" uid="uid://rojclmop6o2k" path="res://assets/palettes/underground/tileset/Palette 1 (Ground and Stone).png" id="castle_art"]
+[ext_resource type="Texture2D" uid="uid://bhmfkcm66quc2" path="res://assets/palettes/underground/misc/flagpole-flag.png" id="flag_banner"]
+[ext_resource type="Texture2D" path="res://assets/palettes/underground/misc/flagpole-pole.tres" id="flag_pole"]
+[ext_resource type="Texture2D" path="res://assets/palettes/underground/misc/flagpole-top.tres" id="flag_top"]
 [ext_resource type="Texture2D" uid="uid://c7psk8vqg64p0" path="res://assets/palettes/underground/ui/hud-coin.png" id="hud_coin"]
 [ext_resource type="FontFile" uid="uid://cnagecrnf8opo" path="res://assets/palettes/underground/ui/alphabet-alt.fnt" id="title_accent"]
 [ext_resource type="Texture2D" uid="uid://b3asgrqfa0i4r" path="res://assets/palettes/underground/ui/start-title.png" id="title_card"]
 [ext_resource type="Texture2D" uid="uid://clblmsvsl46nd" path="res://assets/palettes/underground/ui/start-cursor.png" id="title_cursor"]
+[ext_resource type="Texture2D" uid="uid://bs8mp6mky012v" path="res://assets/palettes/underground/interactibles/items/coins.tres" id="world_coin"]
 
 [resource]
 script = ExtResource("1")
@@ -35,24 +37,26 @@ terrain = ExtResource("2")
 decorations = ExtResource("3")
 entity_markers = ExtResource("4")
 texture_overrides = Dictionary[String, Texture2D]({
-"res://assets/palettes/overworld/interactibles/blocks/brick-alternate.png": ExtResource("art_0"),
-"res://assets/palettes/overworld/interactibles/blocks/brick.png": ExtResource("art_1"),
-"res://assets/palettes/overworld/interactibles/blocks/question-block-2.png": ExtResource("art_2"),
-"res://assets/palettes/overworld/interactibles/blocks/question-block-3.png": ExtResource("art_3"),
-"res://assets/palettes/overworld/interactibles/blocks/question-block-4.png": ExtResource("art_4"),
-"res://assets/palettes/overworld/interactibles/blocks/question-block.png": ExtResource("art_5"),
-"res://assets/palettes/overworld/interactibles/pipes/pipe-1.png": ExtResource("art_6"),
-"res://assets/palettes/overworld/interactibles/pipes/pipe-2.png": ExtResource("art_7"),
-"res://assets/palettes/overworld/interactibles/pipes/pipe-3.png": ExtResource("art_8"),
-"res://assets/palettes/overworld/interactibles/pipes/pipe-4.png": ExtResource("art_9"),
-"res://assets/palettes/overworld/interactibles/pipes/pipe-h-1.png": ExtResource("art_10"),
-"res://assets/palettes/overworld/interactibles/pipes/pipe-h-2.png": ExtResource("art_11"),
-"res://assets/palettes/overworld/interactibles/pipes/pipe-top-1.png": ExtResource("art_12"),
-"res://assets/palettes/overworld/interactibles/pipes/pipe-top-2.png": ExtResource("art_13"),
-"res://assets/palettes/overworld/interactibles/pipes/pipe-top-h-1.png": ExtResource("art_14"),
-"res://assets/palettes/overworld/interactibles/pipes/pipe-top-h-2.png": ExtResource("art_15"),
-"res://assets/palettes/overworld/tileset/block.png": ExtResource("art_16"),
-"res://assets/palettes/overworld/tileset/ground.png": ExtResource("art_17"),
+"res://assets/palettes/overworld/interactibles/blocks/brick-alternate.tres": ExtResource("art_0"),
+"res://assets/palettes/overworld/interactibles/blocks/brick.tres": ExtResource("art_1"),
+"res://assets/palettes/overworld/interactibles/blocks/question-block-2.tres": ExtResource("art_2"),
+"res://assets/palettes/overworld/interactibles/blocks/question-block-3.tres": ExtResource("art_3"),
+"res://assets/palettes/overworld/interactibles/blocks/question-block-4.tres": ExtResource("art_4"),
+"res://assets/palettes/overworld/interactibles/blocks/question-block.tres": ExtResource("art_5"),
+"res://assets/palettes/overworld/interactibles/items/coins.tres": ExtResource("world_coin"),
+"res://assets/palettes/overworld/interactibles/pipes/pipe-1.tres": ExtResource("art_6"),
+"res://assets/palettes/overworld/interactibles/pipes/pipe-2.tres": ExtResource("art_7"),
+"res://assets/palettes/overworld/interactibles/pipes/pipe-h-1.tres": ExtResource("art_10"),
+"res://assets/palettes/overworld/interactibles/pipes/pipe-h-2.tres": ExtResource("art_11"),
+"res://assets/palettes/overworld/interactibles/pipes/pipe-top-1.tres": ExtResource("art_12"),
+"res://assets/palettes/overworld/interactibles/pipes/pipe-top-2.tres": ExtResource("art_13"),
+"res://assets/palettes/overworld/interactibles/pipes/pipe-top-h-1.tres": ExtResource("art_14"),
+"res://assets/palettes/overworld/interactibles/pipes/pipe-top-h-2.tres": ExtResource("art_15"),
+"res://assets/palettes/overworld/misc/flagpole-flag.png": ExtResource("flag_banner"),
+"res://assets/palettes/overworld/misc/flagpole-pole.tres": ExtResource("flag_pole"),
+"res://assets/palettes/overworld/misc/flagpole-top.tres": ExtResource("flag_top"),
+"res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png": ExtResource("castle_art"),
+"res://assets/palettes/overworld/tileset/block.tres": ExtResource("art_16"),
 "res://assets/palettes/overworld/ui/hud-coin.png": ExtResource("hud_coin"),
 "res://assets/palettes/overworld/ui/start-cursor.png": ExtResource("title_cursor"),
 "res://assets/palettes/overworld/ui/start-title.png": ExtResource("title_card")

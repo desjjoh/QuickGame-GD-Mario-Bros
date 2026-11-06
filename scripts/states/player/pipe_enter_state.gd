@@ -1,11 +1,11 @@
 class_name PlayerPipeEnterState
 extends PlayerTransportState
 
-const AudioMix = preload("res://scripts/audio/sound_effect_mix.gd")
 ## Directional pipe entry and emergence; normal movement and collisions are suspended.
 
 signal descent_finished
 
+@export var entry_sound_cue: StringName
 @export var entry_speed: float = 60.0
 @export var entry_duration: float = 48.0 / 60.0
 ## Normal side-pipe timer after the sprite's left edge reaches the next grid boundary.
@@ -32,9 +32,12 @@ var _committed: bool = false
 
 
 func _ready() -> void:
+	if enter_sound_effect == null:
+		enter_sound_effect = SoundHandler.get_sound(entry_sound_cue)
+		return
 	# One-shot runtime copy; preserve the supplied asset's import settings.
 	if enter_sound_effect is AudioStreamWAV:
-		enter_sound_effect = AudioMix.one_shot_copy(enter_sound_effect)
+		enter_sound_effect = SoundHandler.one_shot_copy(enter_sound_effect)
 
 
 func configure(

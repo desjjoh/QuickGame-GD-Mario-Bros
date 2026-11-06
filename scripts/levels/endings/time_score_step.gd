@@ -3,6 +3,7 @@ extends EndingStep
 ## Normal ending bonus: one timer unit becomes 50 points per physics tick.
 
 const POINTS_PER_UNIT: int = 50
+const TICK_SOUND_FRAME_BIT: int = 4
 var _level: WeakRef
 var _started_frame: int = -1
 
@@ -59,6 +60,8 @@ func _physics_process(_delta: float) -> void:
 	# Session observers can cancel or replace the level synchronously.
 	if not _owns_conversion() or ticket != current_ticket:
 		return
+	if (Engine.get_physics_frames() & TICK_SOUND_FRAME_BIT) != 0:
+		SoundHandler.play_reward(&"timer_tick")
 	GameHandler.add_score(POINTS_PER_UNIT)
 
 

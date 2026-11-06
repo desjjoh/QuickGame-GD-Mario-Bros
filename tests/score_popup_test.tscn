@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/score_popup_test.gd" id="script"]
+
+[node name="ScorePopupTest" type="Node2D"]
+script = ExtResource("script")

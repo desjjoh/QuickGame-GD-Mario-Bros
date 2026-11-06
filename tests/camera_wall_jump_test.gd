@@ -38,8 +38,8 @@ func make_game(direction: float) -> Node:
 	ground.clear()
 	for x in range(64):
 		ground.set_cell(Vector2i(x, 13), 0, Vector2i.ZERO)
-	ground.set_cell(Vector2i(16, 12), 3, Vector2i.ZERO)
-	ground.set_cell(Vector2i(17, 12), 4, Vector2i.ZERO)
+	ground.set_cell(Vector2i(16, 12), 1, Vector2i(7, 1))
+	ground.set_cell(Vector2i(17, 12), 1, Vector2i(8, 1))
 	var markers := main.get_node("Layouts/EntityLayout") as TileMapLayer
 	markers.clear()
 	markers.set_cell(Vector2i(16, 10), 3, Vector2i.ZERO)

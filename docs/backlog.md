@@ -4,9 +4,9 @@ This guide records deferred work, not implemented features.
 
 ## Next session - 2026-11-04
 
-Update 2026-11-04: shared player status and live HUD/title/intro bindings are implemented first. See [player status](player-status.md). Top-score promotion on title return is implemented; disk saving, coin rollover/rewards and form-based scene selection remain deferred. Game over and the NES reserve/display model are now implemented; see [game over](game-over.md).
+Update 2026-11-04: shared player status and live HUD/title/intro bindings are implemented first. See [player status](player-status.md). Top-score promotion on title return is implemented; world coin rewards and rollover are implemented. Disk saving and form-based scene selection remain deferred. Game over and the NES reserve/display model are now implemented; see [game over](game-over.md).
 
-Current priority: stage completion foundation and the level timer are implemented. Timer expiry now uses animated death and TIME UP; see [level timer](level-timer.md). The fixed flagpole and manual climbing foundation are implemented; see [climbing](climbing.md). The configured 1-1 flagpole now runs its ending presentation; silent timer-to-score conversion is implemented; height rewards, fireworks and castle-specific endings remain deferred. Warp bypasses this presentation. See [level completion](level-completion.md).
+Current priority: stage completion foundation and the level timer are implemented. Timer expiry now uses animated death and TIME UP; see [level timer](level-timer.md). The fixed flagpole and manual climbing foundation are implemented; see [climbing](climbing.md). The configured 1-1 flagpole now runs its ending presentation; silent timer-to-score conversion is implemented; flagpole height rewards are implemented and fireworks and castle-specific endings remain deferred. Warp bypasses this presentation. See [level completion](level-completion.md).
 
 Requested next priorities:
 
@@ -39,7 +39,7 @@ Acceptance checks:
 
 ## Restore area music when suitable sound files are available
 
-Status: deferred at the user's request on 2026-11-02. Suitable soundtrack files are not ready. Area music playback, theme music fields/assignments and the Music Enabled override have been removed. Generic area entry/exit and active-area tracking remain. Existing soundtrack files are retained unassigned; their presence is not approval to use them again. Entity sound effects remain enabled.
+Status: Overworld and Underground loops are implemented. Remaining work includes listening against Mesen, and adding further track choices.
 
 ### Asset prerequisites
 
@@ -110,11 +110,11 @@ Open: user reports Run feels dropped mainly after jump/landing and re-press rest
 
 ## Climbing follow-up
 
-Implement actual vines and their top-of-screen transport. The flagpole descent, flag movement, dismount, castle walk and completion audio are now implemented; silent timer-to-score conversion is implemented; height score, castle flag and fireworks remain deferred. Two eventual completion fanfare types remain deferred. Configured flagpole contact now starts the level-owned ending and completion audio; the Score hook converts time while the Fireworks hook remains empty.
+Implement actual vines and their top-of-screen transport. The flagpole descent, flag movement, dismount, castle walk and completion audio are now implemented; silent timer-to-score conversion is implemented; flagpole height scoring is implemented and fireworks remain deferred. Two eventual completion fanfare types remain deferred. Configured flagpole contact now starts the level-owned ending and completion audio; the Score hook converts time while the Fireworks hook remains empty.
 
 ## Flagpole ending presentation planning - 2026-11-05
 
-See [flagpole ending plan](flagpole-ending-plan.md) for reference choreography, level/presentation ownership and the requested endpoint/player-removal differences. Completion acceptance must outlive Mario before presentation finish can advance stages. The foundation is now implemented; see [current flagpole ending](flagpole-ending.md). Timer conversion now uses the Score callback; height rewards and the Fireworks callback remain future work.
+See [flagpole ending plan](flagpole-ending-plan.md) for reference choreography, level/presentation ownership and the requested endpoint/player-removal differences. Completion acceptance must outlive Mario before presentation finish can advance stages. The foundation is now implemented; see [current flagpole ending](flagpole-ending.md). Timer conversion now uses the Score callback; flagpole height points are awarded at descent completion and the Fireworks callback remains future work.
 
 ## Skid audio and final ending hold - 2026-11-05
 
@@ -123,3 +123,7 @@ Skid audio is disabled and its runtime repeat code/scene/mix references removed 
 ## Timer conversion audio
 
 Silent timer-to-score conversion is implemented. Add a suitable isolated Sfx_TimerTick sample, normalize it through the shared mix, and reproduce the reference request cadence with one owned playback voice. AwardGameTimerPoints queues the six-frame square-2 tick during four of every eight global frames; this is separate from the low-time warning music and coin pickup effect. Clean up playback on completion, cancellation, level replacement and title return. No sample has been added and no counting sound is currently played.
+
+## Synthesized sound effects
+
+Create our own chiptune effects from a shared set of pulse, triangle, and noise voices. Keep each effect's waveform, pitch sequence, envelope, and timing reproducible so the cues sound like they belong to the same game. The timer ticker is implemented. Compare its sound and loudness with the reference in Mesen before using it as the basis for additional effects. Measure and trim each new effect through the shared mix, verify playback, and record the gain in the audio guide.

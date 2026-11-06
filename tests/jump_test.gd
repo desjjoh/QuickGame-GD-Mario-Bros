@@ -90,8 +90,8 @@ func run_checks() -> void:
 	player.body.child_entered_tree.connect(
 		func(child: Node) -> void:
 			if (
-				child is AudioStreamPlayer2D
-				and child.stream.resource_path != "res://assets/sfx/smb_jump-small.wav"
+				child is AudioStreamPlayer
+				and child.stream == SoundHandler.get_sound(&"bump")
 			):
 				bump_sounds.append(child.stream)
 	)

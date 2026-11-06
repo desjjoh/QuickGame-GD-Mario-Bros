@@ -149,6 +149,18 @@ func _ready() -> void:
 			and GameHandler.top_score == 60000
 		)
 	)
+	var configured := load("res://scenes/main/game.tscn").instantiate() as Node
+	configured.transitions_enabled = false
+	configured.starting_score = 125
+	configured.starting_coins = 99
+	configured.starting_lives = 5
+	add_child(configured)
+	assert(status.score == 125 and status.coins == 99 and status.get_display_lives() == 5)
+	GameHandler.set_coins(10)
+	assert(GameHandler.start_new_game())
+	assert(status.score == 125 and status.coins == 99 and status.get_display_lives() == 5)
+	assert(configured.get_node("UI/HUD/CoinCount").text == "99")
+	configured.free()
 	print(
 		"PASS: typed status defaults/ranges, signals, live HUD/title/intro, new-game reset, title-return record promotion/tie/lower-score handling, area/death continuity and no automatic coin rewards"
 	)

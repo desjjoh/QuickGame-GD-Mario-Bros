@@ -29,7 +29,7 @@ signal exited
 @export var physics_updates_enabled: bool = true
 @export var input_enabled: bool = true
 
-var _enter_audio: AudioStreamPlayer2D = null
+var _enter_audio: AudioStreamPlayer = null
 
 var entity: BaseEntity
 var state_machine: EntityStateMachine

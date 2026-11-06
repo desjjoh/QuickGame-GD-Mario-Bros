@@ -1,9 +1,9 @@
 [gd_scene format=3]
 [ext_resource type="PackedScene" path="res://scenes/entities/climbables/base/base_climbable.tscn" id="base"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/flag/flagpole-top.png" id="top"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/flag/flagpole-pole.png" id="pole"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/flag/flagpole-flag.png" id="flag"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/block.png" id="block"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/misc/flagpole-top.tres" id="top"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/misc/flagpole-pole.tres" id="pole"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/misc/flagpole-flag.png" id="flag"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/block.tres" id="block"]
 [ext_resource type="Script" path="res://scenes/entities/climbables/flagpole/flagpole.gd" id="script"]
 
 [sub_resource type="RectangleShape2D" id="capture"]
