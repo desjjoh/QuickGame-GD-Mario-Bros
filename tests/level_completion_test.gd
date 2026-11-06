@@ -110,7 +110,7 @@ func _ready() -> void:
 		assert(GameHandler.player_status.powerup_form == PlayerStatus.PowerupForm.SMALL)
 		assert(GameHandler.top_score == 987654)
 		assert(GameHandler.get_session_value(&"run_probe", null) == null)
-		assert(GameHandler._start_level == null)
+		assert(GameHandler.title_flow.starting_stage == null)
 		assert(not GameHandler.current_level.on_complete())
 		assert(GameHandler.current_player.gameplay_suspended)
 		assert(not GameHandler.current_level.is_physics_processing())

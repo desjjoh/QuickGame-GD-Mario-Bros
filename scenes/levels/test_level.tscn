@@ -16,6 +16,7 @@
 
 [node name="TestLevel" unique_id=422508678 instance=ExtResource("base")]
 texture_filter = 1
+timer_enabled = false
 player_scene = ExtResource("player")
 entity_scenes = Dictionary[StringName, PackedScene]({
 &"brick": ExtResource("4_brick"),

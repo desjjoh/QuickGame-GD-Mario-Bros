@@ -9,6 +9,12 @@
 
 [ext_resource type="PackedScene" path="res://scenes/entities/climbables/flagpole/flagpole.tscn" id="flagpole"]
 
+[ext_resource type="Script" path="res://scenes/levels/base/level_death.gd" id="level_death"]
+
+[ext_resource type="Script" path="res://scenes/levels/base/level_timer.gd" id="level_timer"]
+
+[ext_resource type="Script" path="res://scenes/levels/base/area_transport.gd" id="area_transport"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_shadow"]
 shader = ExtResource("2_shadow")
 shader_parameter/shadow_offset = Vector2(2, 2)
@@ -35,5 +41,14 @@ area_id = &"main"
 [node name="Players" type="Node2D" parent="." unique_id=1625753015]
 
 [node name="PlayerSpawn" type="Marker2D" parent="Players" unique_id=321075723]
+
+[node name="LevelDeath" type="Node" parent="."]
+script = ExtResource("level_death")
+
+[node name="LevelTimer" type="Node" parent="."]
+script = ExtResource("level_timer")
+
+[node name="AreaTransport" type="Node" parent="."]
+script = ExtResource("area_transport")
 
 [editable path="Areas/MainArea"]

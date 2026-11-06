@@ -11,17 +11,13 @@ func _ready() -> void:
 	add_child(_square_two)
 	_square_two.finished.connect(func(): reward_voice_changed.emit(false))
 	_sounds[&"coin"] = _build_pulse([113, 84], [5, 48], 0.5, 14, true)
-	_sounds[&"extra_life"] = _build_pulse(
-		[84, 71, 42, 53, 47, 35], [8, 8, 8, 8, 8, 8], 0.5, 3
-	)
+	_sounds[&"extra_life"] = _build_pulse([84, 71, 42, 53, 47, 35], [8, 8, 8, 8, 8, 8], 0.5, 3)
 	_sounds[&"timer_tick"] = _build_pulse([113], [6], 0.5, 9)
 
 	_sounds[&"jump_small"] = _build_swept_pulse(
 		0x0fe, [3, 5, 32], [0x82, 0x5f, 0x48], [0xa7, 0xf6, 0xbc]
 	)
-	_sounds[&"bump"] = _build_swept_pulse(
-		0x23a, [4, 6], [0x9e, 0x9e], [0x93, 0xbb]
-	)
+	_sounds[&"bump"] = _build_swept_pulse(0x23a, [4, 6], [0x9e, 0x9e], [0x93, 0xbb])
 
 	_sounds[&"flagpole"] = _build_swept_pulse(0x1fc, [64], [0x99], [0xbc])
 	var pipe_data := PackedByteArray()
@@ -94,6 +90,7 @@ static func _build_pulse(
 	stream.data = pcm
 	return stream
 
+
 # Render Square 1 control and sweep changes on a nominal 60 Hz clock.
 static func _build_swept_pulse(
 	period: int, frames: Array[int], controls: Array[int], sweeps: Array[int]
@@ -134,7 +131,6 @@ static func _build_swept_pulse(
 	stream.mix_rate = SAMPLE_RATE
 	stream.data = pcm
 	return stream
-
 
 
 func one_shot_copy(sound: AudioStream) -> AudioStream:

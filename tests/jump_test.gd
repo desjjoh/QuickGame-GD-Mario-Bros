@@ -89,10 +89,7 @@ func run_checks() -> void:
 	var bump_sounds: Array[AudioStream] = []
 	player.body.child_entered_tree.connect(
 		func(child: Node) -> void:
-			if (
-				child is AudioStreamPlayer
-				and child.stream == SoundHandler.get_sound(&"bump")
-			):
+			if child is AudioStreamPlayer and child.stream == SoundHandler.get_sound(&"bump"):
 				bump_sounds.append(child.stream)
 	)
 	for index in range(60):

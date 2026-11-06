@@ -27,11 +27,12 @@ func _ready() -> void:
 		mario.body.global_position = Vector2(30, 120)
 		mario.body.velocity = Vector2(0, -60)
 		mario.body.move_and_slide()
-		mario.body.global_position = Vector2(60 if side < 0 else 84, 110.2)
+		mario.body.global_position = Vector2(63.75 if side < 0 else 80.25, 110.2)
 		mario.body.velocity = Vector2(0, -240)
 		mario.move_body()
 		assert(mario.body.velocity.y < 0, "An unobstructed center head probe must pass the corner.")
-		assert(mario.body.global_position.x < 60 if side < 0 else mario.body.global_position.x > 84)
+		var clearance: float = (mario.body.global_position.x - 0.5 - 72.0) * side
+		assert(clearance >= 13.5 and clearance < 13.85)
 		await get_tree().physics_frame
 	# Feet can start above the ledge and cross its top during this one step.
 	for side in [-1.0, 1.0]:
@@ -87,6 +88,19 @@ func _ready() -> void:
 		mario.body.global_position.y >= 82,
 		"Landing assistance must reject a space below a low ceiling."
 	)
+	# A second block leaves too little space for the corner escape.
+	var blocker := StaticBody2D.new()
+	var blocker_shape := CollisionShape2D.new()
+	blocker_shape.shape = box
+	blocker.add_child(blocker_shape)
+	add_child(blocker)
+	blocker.global_position = Vector2(49, 102)
+	await get_tree().physics_frame
+	mario.body.global_position = Vector2(63.75, 110.2)
+	mario.body.velocity = Vector2(0, -240)
+	mario.move_body()
+	assert(is_equal_approx(mario.body.velocity.y, 3.75), "Blocked escape must still bump.")
+	blocker.free()
 	mario.free()
 	platform.free()
 	ceiling.free()

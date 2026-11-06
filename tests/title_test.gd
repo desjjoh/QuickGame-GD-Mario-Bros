@@ -274,7 +274,7 @@ func run_checks() -> void:
 		assert(GameHandler.flow == GameHandler.GameFlow.TITLE and not director.busy)
 		assert(GameHandler.current_player.gameplay_suspended and ControllerHandler.enabled)
 		starts.clear()
-		title = GameHandler._title_screen
+		title = GameHandler.title_flow.screen
 		assert(not title.has_node("PlayerTest"))
 		Input.action_press(ControllerHandler.select_action)
 		await tick(4)
@@ -298,13 +298,13 @@ func run_checks() -> void:
 				== "res://scenes/levels/worlds/world 1/1-1.tscn"
 			)
 		)
-		assert(GameHandler._first_level == game.initial_level)
+		assert(GameHandler.title_flow.first_stage == game.initial_level)
 		assert(GameHandler.current_level != background)
 		assert(background.is_shutdown if is_instance_valid(background) else true)
 		assert(GameHandler.current_player.body.is_on_floor())
 		assert(not GameHandler.current_player.gameplay_suspended)
 		assert(GameHandler.get_session_value(&"score", 0) == 0)
-		assert(GameHandler._title_screen == null)
+		assert(GameHandler.title_flow.screen == null)
 		# Holding Enter across reveal cannot become an immediate Jump.
 		assert(not ControllerHandler.input_primary_just_pressed)
 		if keyboard:
@@ -323,7 +323,10 @@ func run_checks() -> void:
 		game.free()
 		await get_tree().process_frame
 		assert(
-			GameHandler.flow == GameHandler.GameFlow.DETACHED and GameHandler._title_screen == null
+			(
+				GameHandler.flow == GameHandler.GameFlow.DETACHED
+				and GameHandler.title_flow.screen == null
+			)
 		)
 	# Alternate destinations remain available independently of visible menu entries.
 	var alternate: Node = load("res://scenes/main/game.tscn").instantiate()
@@ -331,7 +334,7 @@ func run_checks() -> void:
 	assert(GameHandler.start_new_game(load("res://scenes/levels/test_level.tscn")))
 	await wait_for_play()
 	assert(GameHandler.current_level.scene_file_path == "res://scenes/levels/test_level.tscn")
-	assert(GameHandler._first_level == alternate.initial_level)
+	assert(GameHandler.title_flow.first_stage == alternate.initial_level)
 	assert(not GameHandler.current_player.gameplay_suspended)
 	alternate.free()
 	await tick(2)
@@ -342,7 +345,11 @@ func run_checks() -> void:
 	closing.free()
 	await tick(3)
 	assert(
-		not director.busy and GameHandler.current_game == null and GameHandler._title_screen == null
+		(
+			not director.busy
+			and GameHandler.current_game == null
+			and GameHandler.title_flow.screen == null
+		)
 	)
 	definition.minimum_frames = 12
 	definition.stages[0].minimum_frames = 147

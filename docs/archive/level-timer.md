@@ -25,3 +25,8 @@ The start hook is driven by GameHandler's PLAYING flow after transitions. Standa
 ## Verification
 
 The level_timer_test scene checks single value initialization, a full first interval, idempotent start, phase-preserving pauses and area transfers, disabled HUD digits, zero dwell, animated timeout, and TIME UP before both respawn and GAME OVER. Run it through scripts/run_tests.ps1 with the rest of the gameplay regressions.
+
+
+## LevelTimer ownership
+
+BaseLevel starts and advances its LevelTimer child on eligible gameplay ticks. LevelTimer retains the 24-tick phase through pauses and updates GameHandler.time_remaining. It signals expiry once after the zero interval. BaseLevel routes that signal into timeout death. Test Level disables the timer and keeps the TIME label visible.

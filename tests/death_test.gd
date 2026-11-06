@@ -231,9 +231,19 @@ func _ready() -> void:
 	var level := GameHandler.current_level
 	level.death_sound = load("res://assets/audio/music/death.wav")
 	assert(level.on_death(level.player))
-	assert(level._death_audio.playing and level._death_audio.get_parent() == level)
-	assert((level._death_audio.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED)
-	var playback := level._death_audio.stream.instantiate_playback()
+	assert(
+		(
+			level.death_sequence._audio.playing
+			and level.death_sequence._audio.get_parent() == level.death_sequence
+		)
+	)
+	assert(
+		(
+			(level.death_sequence._audio.stream as AudioStreamWAV).loop_mode
+			== AudioStreamWAV.LOOP_DISABLED
+		)
+	)
+	var playback := level.death_sequence._audio.stream.instantiate_playback()
 	playback.start()
 	var amplitude := 0.0
 	for sample in playback.mix_audio(1.0, 44100):
@@ -328,7 +338,7 @@ func check_life_loss_boundaries() -> void:
 	assert(level.on_death(level.player))
 	GameHandler.session_value_changed.disconnect(callback)
 	assert(GameHandler.current_level != level and level.is_shutdown)
-	assert(GameHandler.player_status.lives == 1 and level._death_audio == null)
+	assert(GameHandler.player_status.lives == 1 and level.death_sequence._audio == null)
 	assert(not GameHandler.current_level.player.is_dead)
 	game.free()
 	await get_tree().process_frame

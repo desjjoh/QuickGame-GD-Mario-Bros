@@ -5,7 +5,12 @@ extends SceneTree
 func _initialize() -> void:
 	var scene := FileAccess.get_file_as_string("res://scenes/entities/castle/castle.tscn")
 	var pattern := RegEx.new()
-	pattern.compile("position = Vector2\\((\\d+), (\\d+)\\)(?:(?!\\[node)[\\s\\S])*?region_rect = Rect2\\((\\d+), (\\d+), 16, 16\\)")
+	(
+		pattern
+		. compile(
+			"position = Vector2\\((\\d+), (\\d+)\\)(?:(?!\\[node)[\\s\\S])*?region_rect = Rect2\\((\\d+), (\\d+), 16, 16\\)"
+		)
+	)
 	var tiles := pattern.search_all(scene)
 	assert(not tiles.is_empty())
 	for theme: String in ["underground", "castle"]:

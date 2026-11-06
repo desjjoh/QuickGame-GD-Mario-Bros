@@ -10,9 +10,7 @@ func _initialize() -> void:
 	for theme: String in ["overworld", "underground", "castle"]:
 		var folder := "res://assets/palettes/" + theme + "/interactibles/pipes/"
 		var output := (
-			"res://assets/tileset/"
-			+ (theme + "/" if theme != "overworld" else "")
-			+ "previews/"
+			"res://assets/tileset/" + (theme + "/" if theme != "overworld" else "") + "previews/"
 		)
 		DirAccess.make_dir_recursive_absolute(output)
 		for preview: String in previews:
