@@ -801,3 +801,24 @@ World coin pickup awards 200 points and increments the coin count. At 100 coins 
 
 - Grouped seven Ground and Stone cells into Solid ground in both palettes with full-tile collision. Remapped existing solid-block placements.
 - Verification: area theme and jump benchmark regressions passed headlessly.
+
+
+## 2026-11-06 - Level-owned death sequence
+
+- Extracted presentation, suspension, jingle, timing, and cancellation into LevelDeath. BaseLevel retains lifecycle acceptance and player retirement. GameHandler retains restart and game-over routing.
+- Death and Game Over passed before and after extraction. Audio, transition, and climbing checks passed. Several runs reported ObjectDB leak warnings. The timer test stopped at its existing Test Level timer configuration assumption before exercising timeout.
+
+
+## 2026-11-06 - Level timer extraction
+
+Moved the countdown phase and expiry signal into LevelTimer. BaseLevel retained gameplay gating and timeout death routing. Restored the untimed sandbox. The timer regression passed, including TIME UP and both respawn and game-over paths.
+
+
+## 2026-11-06 - Area transport extraction
+
+Moved trip resolution, entry and exit state, and transition callbacks into the level-owned AreaTransport child. BaseLevel kept the public transport API and commits player placement, active area, and camera.
+
+
+## 2026-11-06 - Game flow extraction
+
+Moved title operations into TitleFlow and restart, TIME UP, Game Over, and stage handoff into StageFlow. GameHandler retained the public API, flow state, session, and active level ownership. Title, stage completion, death, timer, transition, ending, and player status checks passed. Several headless runs reported ObjectDB leak warnings.

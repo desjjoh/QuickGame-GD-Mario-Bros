@@ -69,3 +69,8 @@ GameHandler.start_new_game(destination: PackedScene = null) still accepts an opt
 The title regression checks keyboard and controller Start into 1-1, an inert Select press with one visible option, explicit TestLevel launch through the handler, preserved default destination, cancellation, fresh gameplay controls and cleanup.
 
 A title created during an active transition remains hidden until coordinator completion, so menu artwork and background appear together. Final-stage completion uses the finish transition with a 12-tick minimum hidden operation and 12-tick quick outro; ordinary startup remains immediate.
+
+
+## TitleFlow ownership
+
+TitleFlow owns the title screen and pending new-game destination. GameHandler exposes the public title and start operations and owns session reset, active level replacement, and game flow state. StageFlow handles stage handoff, restart, and Game Over through the shared transition coordinator.

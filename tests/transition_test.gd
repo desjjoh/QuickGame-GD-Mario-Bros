@@ -227,7 +227,7 @@ func _ready() -> void:
 	assert(not music.playing)
 	await wait_until_idle()
 	assert(music.playing and music.stream == MusicHandler._loops[MusicHandler.Track.UNDERGROUND])
-	assert(level.active_area.area_id == &"lower" and not level._transfer_pending)
+	assert(level.active_area.area_id == &"lower" and not level.area_transport.pending)
 	assert(level.player.body.collision_mask != 0 and level.players.visible)
 	assert(not level.player.gameplay_suspended)
 	# Respawn has the same global card lifecycle after the death sound stage.
@@ -241,6 +241,13 @@ func _ready() -> void:
 	assert(level.active_area.area_id == &"main" and level.player != null)
 	assert(music.playing and music.stream == MusicHandler._loops[MusicHandler.Track.OVERWORLD])
 	assert(director.elapsed_frames >= 8 and not level.transition_in_progress)
+	var main_area := level.active_area
+	assert(level.request_area_transfer(&"main", &"player_spawn"))
+	await wait_until_busy()
+	assert(not music.playing)
+	await wait_until_idle()
+	assert(level.active_area == main_area and level.active_target_id == &"player_spawn")
+	assert(music.playing and music.stream == MusicHandler._loops[MusicHandler.Track.OVERWORLD])
 	# Public level transition replaces under cover and unlocks the new player.
 	assert(GameHandler.transition_to_level(game.initial_level))
 	await wait_until_idle()

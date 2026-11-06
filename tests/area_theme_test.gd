@@ -9,7 +9,9 @@ func _ready() -> void:
 	assert(underground.resolve_texture(flag).resource_path.contains("/underground/"))
 	var underground_castle := underground.entity_markers.get_source(6) as TileSetAtlasSource
 	assert(underground_castle.texture.resource_path.contains("/underground/"))
-	assert(underground_castle.get_tile_data(Vector2i.ZERO, 0).get_custom_data("entity_id") == "castle")
+	assert(
+		underground_castle.get_tile_data(Vector2i.ZERO, 0).get_custom_data("entity_id") == "castle"
+	)
 	assert(castle.title_accent_font != null)
 	assert(castle.terrain.get_source_count() == 2)
 	assert(castle.decorations.get_source_count() == 4)
@@ -201,7 +203,9 @@ func _ready() -> void:
 	question.visual_theme = lower.theme
 	lower.get_node("WorldObjects").add_child(question)
 	for sample in [
-		[0.0, "question-block.tres"], [0.41, "question-block-2.tres"], [0.55, "question-block-3.tres"]
+		[0.0, "question-block.tres"],
+		[0.41, "question-block-2.tres"],
+		[0.55, "question-block-3.tres"]
 	]:
 		question.animation_player.seek(sample[0], true)
 		assert(

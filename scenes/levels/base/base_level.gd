@@ -16,11 +16,11 @@ enum DeathReason { NORMAL, TIMEOUT }
 
 signal level_started
 var has_started: bool = false
-var timer_expired: bool = false
+var timer_expired: bool:
+	get:
+		return level_timer.has_expired
 var time_up_shown: bool = false
 var death_reason: DeathReason = DeathReason.NORMAL
-var _timer_ticks_remaining: int = 24
-var _last_timer_tick: int = -1
 
 signal death_started
 
@@ -42,11 +42,6 @@ signal death_started
 
 var death_in_progress: bool = false
 var transition_in_progress: bool = false
-var _death_elapsed: float = 0.0
-var _death_audio: AudioStreamPlayer
-var _death_audio_done: bool = true
-var _death_player_done: bool = false
-var _death_restart_queued: bool = false
 
 @export_group("Spawning")
 @export var player_scene: PackedScene
@@ -64,17 +59,12 @@ var _persistent_progress: bool = false
 var active_area: BaseLevelArea
 var active_endpoint: AreaEndpoint
 var active_target_id: StringName = &""
-var _transport_input_locked: bool = false
-var _transfer_pending: bool = false
-var _players_draw_index: int = -1
-var _transport_state: PlayerTransportState = null
-var _transport_trip: Dictionary = {}
-var _transport_exiting: bool = false
-var _transport_phase: int = 0
-var _transport_completion_callback: Callable
 
 @onready var player_spawn: Marker2D = $Players/PlayerSpawn
 @onready var players: Node2D = $Players
+@onready var death_sequence: LevelDeath = $LevelDeath
+@onready var level_timer: LevelTimer = $LevelTimer
+@onready var area_transport: AreaTransport = $AreaTransport
 var entity_layout: TileMapLayer:
 	get:
 		return get_node_or_null("Areas/MainArea/Layouts/EntityLayout") as TileMapLayer
@@ -85,6 +75,9 @@ var world_objects: Node2D:
 
 
 func _ready() -> void:
+	level_timer.expired.connect(_on_timer_expired)
+	death_sequence.presentation_finished.connect(_retire_death_player)
+	death_sequence.finished.connect(_restart_after_death, CONNECT_DEFERRED)
 	transition_in_progress = GameHandler.transitions.busy and GameHandler.current_level == self
 	# Keep gameplay in one CanvasGroup Z band, with players drawn last.
 	move_child(players, get_child_count() - 1)
@@ -174,19 +167,10 @@ func _physics_process(_delta: float) -> void:
 	if transition_in_progress or completion_in_progress:
 		return
 	if death_in_progress:
-		_update_death(_delta)
+		death_sequence.advance(_delta)
 		return
-	if _transport_state != null:
-		if not _transport_trip_valid() or player.state_machine.current_state != _transport_state:
-			_abort_transport(true)
+	if area_transport.advance():
 		return  # Freeze camera/bounds during controlled transport.
-	if (
-		ControllerHandler.input_down <= 0.5
-		and ControllerHandler.input_up <= 0.5
-		and ControllerHandler.input_left <= 0.5
-		and ControllerHandler.input_right <= 0.5
-	):
-		_transport_input_locked = false
 	var camera := get_viewport().get_camera_2d() as LevelCamera
 	if camera != null and is_instance_valid(player) and not player.is_shutdown:
 		camera.follow_target(player.body)
@@ -208,8 +192,7 @@ func on_level_start() -> bool:
 		return false
 	# load_level initialized the value once. Start only the local countdown phase.
 	has_started = true
-	_timer_ticks_remaining = 24
-	_last_timer_tick = GameHandler.animation_clock.tick_count
+	level_timer.start(GameHandler.animation_clock.tick_count)
 	_play_area_music()
 	level_started.emit()
 	return true
@@ -217,8 +200,12 @@ func on_level_start() -> bool:
 
 func _play_area_music() -> void:
 	if (
-		has_started and not is_shutdown and not death_in_progress and not completion_in_progress
-		and GameHandler.current_level == self and GameHandler.flow == GameHandler.GameFlow.PLAYING
+		has_started
+		and not is_shutdown
+		and not death_in_progress
+		and not completion_in_progress
+		and GameHandler.current_level == self
+		and GameHandler.flow == GameHandler.GameFlow.PLAYING
 		and is_instance_valid(active_area)
 	):
 		MusicHandler.play_area(self, active_area.background_music)
@@ -228,12 +215,11 @@ func _update_level_timer() -> void:
 	if (
 		not has_started
 		or not timer_enabled
-		or timer_expired
 		or is_shutdown
 		or death_in_progress
 		or completion_in_progress
 		or transition_in_progress
-		or _transfer_pending
+		or area_transport.pending
 	):
 		return
 	if (
@@ -243,19 +229,11 @@ func _update_level_timer() -> void:
 		or player.is_dead
 	):
 		return
-	var tick: int = GameHandler.animation_clock.tick_count
-	if tick == _last_timer_tick:
-		return
-	_last_timer_tick = tick
-	_timer_ticks_remaining -= 1
-	if _timer_ticks_remaining > 0:
-		return
-	_timer_ticks_remaining = 24
-	if GameHandler.time_remaining == 0:
-		timer_expired = true
-		on_death(player, true, DeathReason.TIMEOUT)
-	else:
-		GameHandler.time_remaining -= 1
+	level_timer.advance(GameHandler.animation_clock.tick_count)
+
+
+func _on_timer_expired() -> void:
+	on_death(player, true, DeathReason.TIMEOUT)
 
 
 func clamp_player_to_camera() -> void:
@@ -331,11 +309,8 @@ func shutdown() -> void:
 	if ending_in_progress and not completion_dispatched:
 		GameHandler.cancel_completion(self)
 	GameHandler.transitions.cancel_for_level(self)
-	if is_instance_valid(_death_audio):
-		_death_audio.stop()
-		_death_audio.queue_free()
-		_death_audio = null
-	_abort_transport(false)
+	death_sequence.cancel()
+	area_transport.cancel(false)
 	set_process(false)
 	set_physics_process(false)
 	if is_instance_valid(active_area):
@@ -357,7 +332,7 @@ func _shutdown_entities(parent: Node) -> void:
 func transport(
 	traveler: BasePlayer, destination: TransportDestination, source: TransportEntity = null
 ) -> bool:
-	return _begin_transport(traveler, destination, source, true)
+	return area_transport.begin(traveler, destination, source, true)
 
 
 func request_area_transfer(
@@ -370,7 +345,7 @@ func request_area_transfer(
 		and endpoint_id == &"arrival"
 	):
 		return false
-	return _begin_transport(
+	return area_transport.begin(
 		player, TransportDestination.create(destination_id, endpoint_id), null, false
 	)
 
@@ -379,248 +354,9 @@ func request_pipe_entry(pipe: PipeEntrance) -> bool:
 	return is_instance_valid(pipe) and transport(player, pipe.get_destination(), pipe)
 
 
-func _resolve_area(id: StringName) -> BaseLevelArea:
-	var selected: BaseLevelArea = null
-	for area in $Areas.get_children():
-		if area is BaseLevelArea and area.area_id == id:
-			if selected != null:
-				return null
-			selected = area
-	return selected
-
-
-func _resolve_target(area: BaseLevelArea, id: StringName) -> Object:
-	# Reserved main-area destination follows the real level spawn marker.
-	if area == $Areas/MainArea and id == &"player_spawn":
-		return player_spawn if is_instance_valid(player_spawn) else null
-	var definition := area.resolve_transport_target(id)
-	if definition is TransportPlacement:
-		if area.runtime_loaded:
-			var target := area.find_transport_entity(id)
-			if target == null or target.is_shutdown or not target.exit_enabled:
-				return null
-		else:
-			var progress := GameHandler.get_area_progress(_progress_key, area.area_id)
-			var entity_state: Dictionary = progress.get("entities", {}).get(
-				area.transport_entity_name(definition), {}
-			)
-			if entity_state.get("removed", false):
-				return null
-	return definition
-
-
-func _begin_transport(
-	traveler: BasePlayer,
-	destination: TransportDestination,
-	source: TransportEntity,
-	animate_arrival: bool
+func _commit_area_arrival(
+	area: BaseLevelArea, target_id: StringName, arrival: Dictionary, under_cover: bool
 ) -> bool:
-	if (
-		is_shutdown
-		or transition_in_progress
-		or death_in_progress
-		or completion_in_progress
-		or _transfer_pending
-		or not is_instance_valid(traveler)
-		or traveler != player
-		or traveler.is_shutdown
-		or destination == null
-	):
-		return false
-	if destination.area_id == &"" or destination.target_id == &"":
-		return false
-	var area := _resolve_area(destination.area_id)
-	if area == null:
-		return false
-	var definition := _resolve_target(area, destination.target_id)
-	if definition == null or (area == active_area and destination.target_id == active_target_id):
-		return false
-	var state: PlayerTransportState = null
-	if source != null:
-		if (
-			not is_instance_valid(source)
-			or not source.is_inside_tree()
-			or not can_transport()
-			or source.get_parent().get_parent() != active_area
-			or not source.can_start_transport(traveler)
-		):
-			return false
-		state = source.get_transport_state(traveler)
-		if state == null:
-			return false
-	_transport_trip = {
-		"area": weakref(area),
-		"definition": weakref(definition),
-		"area_id": destination.area_id,
-		"target_id": destination.target_id,
-		"source": weakref(source) if source != null else null,
-		"animate": animate_arrival
-	}
-	_transfer_pending = true
-	_transport_phase += 1
-	if source == null:
-		_finish_transport.call_deferred(_transport_phase)
-	else:
-		state.configure(source.entry_position(), source.entry_direction())
-		_start_transport_state(state)
-	return _transfer_pending
-
-
-func _start_transport_state(state: PlayerTransportState) -> void:
-	_transport_state = state
-	_transport_phase += 1
-	_transport_completion_callback = _on_transport_finished.bind(_transport_phase)
-	state.travel_finished.connect(_transport_completion_callback)
-	state.exited.connect(_restore_player_draw_order)
-	_players_draw_index = players.get_index()
-	move_child(players, $Areas.get_index())
-	var suspended := player.state_machine.gameplay_suspended
-	player.state_machine.gameplay_suspended = false
-	var changed := player.state_machine.change_state(state)
-	player.state_machine.gameplay_suspended = suspended
-	if not changed:
-		_abort_transport(true)
-
-
-func _transport_trip_valid() -> bool:
-	if _transport_trip.is_empty() or not is_instance_valid(player) or player.is_shutdown:
-		return false
-	var area := (_transport_trip["area"] as WeakRef).get_ref() as BaseLevelArea
-	var definition: Object = (_transport_trip["definition"] as WeakRef).get_ref()
-	if (
-		not is_instance_valid(area)
-		or not is_instance_valid(definition)
-		or _resolve_area(_transport_trip["area_id"]) != area
-		or _resolve_target(area, _transport_trip["target_id"]) != definition
-	):
-		return false
-	if not _transport_exiting and _transport_trip["source"] != null:
-		var source := (_transport_trip["source"] as WeakRef).get_ref() as TransportEntity
-		return is_instance_valid(source) and not source.is_shutdown
-	return true
-
-
-func _arrival_data(area: BaseLevelArea, target_id: StringName, animate: bool) -> Dictionary:
-	var definition := _resolve_target(area, target_id)
-	if definition == player_spawn:
-		return {
-			"position": player_spawn.global_position,
-			"direction": Vector2.ZERO,
-			"distance": 0.0,
-			"state": null,
-			"endpoint": null
-		}
-	if definition is TransportPlacement:
-		var target := area.find_transport_entity(target_id)
-		if target == null:
-			return {}
-		var state := target.get_transport_state(player)
-		if animate and state == null:
-			return {}
-		return {
-			"position": target.exit_position(),
-			"direction": target.exit_direction(),
-			"distance": target.exit_distance,
-			"state": state if animate else null,
-			"endpoint": null
-		}
-	if definition is AreaEndpoint:
-		# Existing standalone spawns remain valid; animated legacy markers adapt to pipe presentation.
-		return {
-			"position": definition.global_position,
-			"direction": definition.get_exit_vector(),
-			"distance": definition.exit_distance,
-			"state": player.pipe_enter_state if animate and definition.animate_exit else null,
-			"endpoint": definition
-		}
-	return {}
-
-
-func _on_transport_finished(phase: int) -> void:
-	_finish_transport.call_deferred(phase)
-
-
-func _finish_transport(phase: int) -> void:
-	if phase != _transport_phase or is_shutdown or not _transfer_pending:
-		return
-	if not _transport_exiting and GameHandler.transitions.available():
-		if (
-			GameHandler.transitions.begin(
-				self,
-				_commit_transport_under_cover.bind(phase),
-				&"area",
-				_area_transition_complete,
-				_area_transition_valid
-			)
-			== 0
-		):
-			_abort_transport(true)
-		elif GameHandler.transitions.busy:
-			MusicHandler.stop_area(self)
-		return
-	_commit_transport(phase)
-
-
-func _commit_transport_under_cover(phase: int) -> bool:
-	if phase != _transport_phase or is_shutdown or GameHandler.current_level != self:
-		return false
-	if not _transport_trip_valid():
-		return false
-	_commit_transport(phase, true)
-	return not is_shutdown and GameHandler.current_level == self
-
-
-func _area_transition_valid() -> bool:
-	return (
-		not is_shutdown
-		and GameHandler.current_level == self
-		and (not _transfer_pending or _transport_trip_valid())
-	)
-
-
-func _area_transition_complete(success: bool) -> void:
-	if not success and not is_shutdown:
-		_abort_transport(true)
-	_play_area_music()
-
-
-func _start_player_state() -> void:
-	var suspended := player.state_machine.gameplay_suspended
-	player.state_machine.gameplay_suspended = false
-	player.state_machine.start()
-	player.state_machine.gameplay_suspended = suspended
-
-
-func _commit_transport(phase: int, under_cover: bool = false) -> void:
-	if phase != _transport_phase or is_shutdown or not _transfer_pending:
-		return
-	if (
-		not _transport_trip_valid()
-		or (_transport_state != null and player.state_machine.current_state != _transport_state)
-	):
-		_abort_transport(true)
-		return
-	if _transport_exiting:
-		_transport_state.commit_transfer()
-		_disconnect_transport_state()
-		_transfer_pending = false
-		player.state_machine.stop(false)
-		player.face_direction(1.0)
-		_start_player_state()
-		return
-	var trip := _transport_trip.duplicate()
-	var area := (trip["area"] as WeakRef).get_ref() as BaseLevelArea
-	var was_loaded := area.runtime_loaded
-	_load_area(area)
-	var arrival := _arrival_data(area, trip["target_id"], trip["animate"])
-	if arrival.is_empty():
-		if not was_loaded:
-			_unload_area(area)
-		_abort_transport(true)
-		return
-	if _transport_state != null:
-		_transport_state.commit_transfer()
-	_disconnect_transport_state()
 	player.state_machine.stop(false)
 	player.body.velocity = Vector2.ZERO
 	player.jump_action.reset_falling_gravity()
@@ -635,30 +371,15 @@ func _commit_transport(phase: int, under_cover: bool = false) -> void:
 	camera.snap_to_arrival(player.body)
 	var previous_area := active_area
 	active_area = area
-	active_target_id = trip["target_id"]
+	active_target_id = target_id
 	active_endpoint = arrival["endpoint"]
 	if previous_area != area:
 		_unload_area(previous_area)
 	area.enter_area()
-	_transport_input_locked = true
 	_record_active_area()
 	if previous_area != area and not under_cover:
 		_play_area_music()
-	if is_shutdown or not is_instance_valid(player) or player.is_shutdown:
-		_abort_transport(false)
-		return
-	var arrival_state := arrival["state"] as PlayerTransportState
-	if arrival_state != null:
-		_transport_trip = trip
-		_transport_trip["source"] = null
-		_transport_exiting = true
-		arrival_state.configure(
-			arrival["position"], arrival["direction"], true, arrival["distance"]
-		)
-		_start_transport_state(arrival_state)
-	else:
-		_transfer_pending = false
-		_start_player_state()
+	return not is_shutdown and is_instance_valid(player) and not player.is_shutdown
 
 
 func _record_active_area() -> void:
@@ -683,41 +404,9 @@ func can_transport() -> bool:
 		and not transition_in_progress
 		and not death_in_progress
 		and not completion_in_progress
-		and not _transfer_pending
-		and not _transport_input_locked
+		and not area_transport.pending
+		and not area_transport.input_locked
 	)
-
-
-func _disconnect_transport_state() -> void:
-	# Invalidate queued notifications before another phase/request can begin.
-	_transport_phase += 1
-	_restore_player_draw_order()
-	if is_instance_valid(_transport_state):
-		if _transport_state.exited.is_connected(_restore_player_draw_order):
-			_transport_state.exited.disconnect(_restore_player_draw_order)
-		if (
-			_transport_completion_callback.is_valid()
-			and _transport_state.travel_finished.is_connected(_transport_completion_callback)
-		):
-			_transport_state.travel_finished.disconnect(_transport_completion_callback)
-	_transport_state = null
-	_transport_completion_callback = Callable()
-	_transport_trip.clear()
-	_transport_exiting = false
-
-
-func _abort_transport(resume_player: bool) -> void:
-	var state := _transport_state
-	_disconnect_transport_state()
-	_transfer_pending = false
-	if state == null:
-		return
-	if resume_player:
-		_transport_input_locked = true
-	if is_instance_valid(player) and player.state_machine.current_state == state:
-		player.state_machine.stop(false)
-		if resume_player and not is_shutdown and not player.is_shutdown:
-			_start_player_state()
 
 
 func _load_area(area: BaseLevelArea) -> void:
@@ -766,23 +455,11 @@ func _unload_area(area: BaseLevelArea) -> void:
 	_spawned_areas.erase(area.get_instance_id())
 
 
-func _restore_player_draw_order() -> void:
-	if _players_draw_index < 0:
-		return
-	var original_index := _players_draw_index
-	_players_draw_index = -1
-	# Do not reorder siblings while a dying player/level exits the tree.
-	if is_shutdown or not is_instance_valid(player) or player.is_shutdown:
-		return
-	if is_instance_valid(players) and players.get_parent() == self:
-		move_child(players, mini(original_index, get_child_count() - 1))
-
-
 func _check_fall_death() -> void:
 	if (
 		not fall_death_enabled
 		or death_in_progress
-		or _transfer_pending
+		or area_transport.pending
 		or not is_instance_valid(player)
 		or player.is_shutdown
 	):
@@ -806,8 +483,8 @@ func on_complete(
 		or death_in_progress
 		or completion_in_progress
 		or transition_in_progress
-		or _transfer_pending
-		or _transport_state != null
+		or area_transport.pending
+		or area_transport.has_active_state()
 		or not is_instance_valid(player)
 		or player.is_dead
 		or player.is_shutdown
@@ -839,8 +516,8 @@ func begin_ending(
 		or death_in_progress
 		or completion_in_progress
 		or transition_in_progress
-		or _transfer_pending
-		or _transport_state != null
+		or area_transport.pending
+		or area_transport.has_active_state()
 	):
 		return false
 	completion_in_progress = true
@@ -903,7 +580,7 @@ func on_death(
 		or transition_in_progress
 		or death_in_progress
 		or completion_in_progress
-		or _transfer_pending
+		or area_transport.pending
 		or not is_instance_valid(victim)
 		or victim != player
 		or victim.is_shutdown
@@ -919,68 +596,24 @@ func on_death(
 	# The accepted death is charged once; never continue old-world cleanup afterward.
 	if is_shutdown or not is_instance_valid(victim) or victim != player or victim.is_shutdown:
 		return true
-	_death_elapsed = 0.0
-	# Suspend gameplay callbacks and physics without pausing AnimationPlayers.
-	for entity in find_children("*", "BaseEntity", true, false):
-		if entity != player:
-			(entity as BaseEntity).set_gameplay_suspended(true)
-	_start_death_audio()
-	player.death_presentation_finished.connect(_on_death_player_finished, CONNECT_ONE_SHOT)
-	player.begin_death(present)
+	death_sequence.begin(
+		self, victim, present, death_sound, death_fallback_delay, death_presentation_timeout
+	)
 	if not is_shutdown:
 		death_started.emit()
 	return true
 
 
-func _on_death_player_finished() -> void:
-	if not death_in_progress or is_shutdown:
+func _retire_death_player(victim: BasePlayer) -> void:
+	if not death_in_progress or is_shutdown or victim != player:
 		return
-	_death_player_done = true
-	if is_instance_valid(player):
-		var victim := player
+	if is_instance_valid(victim):
 		victim.shutdown()
 		victim.hide()
 		if GameHandler.current_player == victim:
 			GameHandler.current_player = null
 		player = null
 		victim.queue_free()
-
-
-func _start_death_audio() -> void:
-	_death_audio_done = death_sound == null
-	if death_sound == null:
-		return
-	var stream := death_sound.duplicate() as AudioStream
-	if stream is AudioStreamWAV:
-		stream.loop_mode = AudioStreamWAV.LOOP_DISABLED
-	elif stream is AudioStreamMP3 or stream is AudioStreamOggVorbis:
-		stream.loop = false
-	_death_audio = AudioStreamPlayer.new()
-	_death_audio.stream = stream
-	add_child(_death_audio)
-	_death_audio.finished.connect(func(): _death_audio_done = true)
-	_death_audio.play()
-
-
-func _update_death(delta: float) -> void:
-	_death_elapsed += delta
-	var audio_limit := maxf(
-		death_fallback_delay,
-		death_sound.get_length() + 1.0 if death_sound != null else death_fallback_delay
-	)
-	if _death_elapsed >= maxf(death_presentation_timeout, audio_limit):
-		_on_death_player_finished()
-		_death_audio_done = true
-	if not _death_player_done and not is_instance_valid(player):
-		_death_player_done = true
-	if (
-		_death_player_done
-		and (_death_audio_done or _death_elapsed >= audio_limit)
-		and (death_sound != null or _death_elapsed >= death_fallback_delay)
-	):
-		if not _death_restart_queued:
-			_death_restart_queued = true
-			_restart_after_death.call_deferred()
 
 
 func _restart_after_death() -> void:

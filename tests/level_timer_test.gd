@@ -103,11 +103,11 @@ func _ready() -> void:
 	await ticks()
 	assert(GameHandler.time_remaining == 4 and time_values == [5, 4])
 	await ticks(5)
-	var phase := level._timer_ticks_remaining
+	var phase := level.level_timer.ticks_remaining
 	var clock_before: int = GameHandler.animation_clock.tick_count
 	level.transition_in_progress = true
 	await ticks(40)
-	assert(GameHandler.time_remaining == 4 and level._timer_ticks_remaining == phase)
+	assert(GameHandler.time_remaining == 4 and level.level_timer.ticks_remaining == phase)
 	assert(GameHandler.animation_clock.tick_count == clock_before + 40)
 	level.transition_in_progress = false
 	await ticks(phase - 1)

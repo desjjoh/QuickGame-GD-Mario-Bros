@@ -1,7 +1,6 @@
 extends Node
 
 
-
 func _ready() -> void:
 	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
 	add_child(game)
@@ -10,7 +9,12 @@ func _ready() -> void:
 	for cue in [&"jump_small", &"bump", &"flagpole", &"pipe"]:
 		var generated := SoundHandler.get_sound(cue) as AudioStreamWAV
 		assert(generated != null, "Missing generated player cue: %s" % cue)
-		assert(generated.data.size() > 2 and generated.data.decode_s16(4410 if cue == &"pipe" else 0) != 0)
+		assert(
+			(
+				generated.data.size() > 2
+				and generated.data.decode_s16(4410 if cue == &"pipe" else 0) != 0
+			)
+		)
 	var streams := [
 		"jump_small",
 		"bump",
@@ -20,7 +24,11 @@ func _ready() -> void:
 	]
 	var previous: AudioStreamPlayer
 	for path: String in streams:
-		var source := load(path) as AudioStream if path.begins_with("res://") else SoundHandler.get_sound(path)
+		var source := (
+			load(path) as AudioStream
+			if path.begins_with("res://")
+			else SoundHandler.get_sound(path)
+		)
 		var original_length := source.get_length()
 		var copy := SoundHandler.one_shot_copy(source)
 		var nested_copy := SoundHandler.one_shot_copy(copy)
@@ -56,10 +64,15 @@ func _ready() -> void:
 		assert((ending._audio.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED)
 	ending._play_audio(null)
 	var level := GameHandler.current_level
-	level._start_death_audio()
-	assert(level._death_audio.playing)
-	assert(is_equal_approx(level._death_audio.volume_db, 0.0))
-	assert((level._death_audio.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED)
+	assert(level.on_death(player))
+	assert(level.death_sequence._audio.playing)
+	assert(is_equal_approx(level.death_sequence._audio.volume_db, 0.0))
+	assert(
+		(
+			(level.death_sequence._audio.stream as AudioStreamWAV).loop_mode
+			== AudioStreamWAV.LOOP_DISABLED
+		)
+	)
 	await get_tree().physics_frame
 	await get_tree().process_frame
 	game.free()

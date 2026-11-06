@@ -72,7 +72,9 @@ func _ready() -> void:
 		)
 	)
 	assert(
-		pole.get_node("Visuals/Base").texture.resource_path.ends_with("overworld/tileset/block.tres")
+		pole.get_node("Visuals/Base").texture.resource_path.ends_with(
+			"overworld/tileset/block.tres"
+		)
 	)
 	pole.set_activity_suspended(true)
 	pole.set_activity_suspended(false)

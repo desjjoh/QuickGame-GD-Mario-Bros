@@ -3,7 +3,10 @@ extends Node
 
 func expected_texture(phase: int) -> String:
 	return [
-		"question-block.tres", "question-block-2.tres", "question-block-3.tres", "question-block-2.tres"
+		"question-block.tres",
+		"question-block-2.tres",
+		"question-block-3.tres",
+		"question-block-2.tres"
 	][phase]
 
 

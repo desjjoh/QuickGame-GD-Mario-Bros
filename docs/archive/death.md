@@ -64,3 +64,8 @@ Open tests/dead_state_test.tscn and run it with F6 to watch the automated visibl
 ## Timer expiry
 
 BaseLevel DeathReason.TIMEOUT uses the presented death path and queues TIME UP before the lives/game-over sequence. Normal pit deaths remain unpresented. See [level timer](level-timer.md).
+
+
+## Level-owned death sequence
+
+BaseLevel.on_death remains the entry point. The level validates the victim, charges the life, and starts its LevelDeath child. The child suspends world gameplay and owns the presentation callback, audio, and bounded wait. It signals BaseLevel to retire the player and later to hand off to GameHandler for respawn, TIME UP, or Game Over. Level shutdown cancels the child and disconnects its pending player callback. Existing Death inspector settings remain on BaseLevel.

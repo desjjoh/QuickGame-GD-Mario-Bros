@@ -3,7 +3,7 @@ extends Node
 ## Bounded approximation of SMB's separate head/foot terrain probes.
 
 @export var landing_tolerance: float = 4.0
-@export var head_corner_tolerance: int = 4
+const HEAD_ESCAPE_STEP := 0.25
 
 
 func _ray(body: CharacterBody2D, from: Vector2, to: Vector2) -> Dictionary:
@@ -39,11 +39,14 @@ func _correct_head(
 	):
 		return
 	var head := Vector2(body.global_position.x, shape.global_position.y - half.y)
-	var projected_head := head + Vector2(motion.x, 0)
+	var projected_head := head + Vector2(collision.get_travel().x, 0)
 	if not _ray(body, projected_head, projected_head + Vector2(0, motion.y - 0.1)).is_empty():
 		return
 	var preferred := 1.0 if body.velocity.x >= 0.0 else -1.0
-	for distance in range(1, head_corner_tolerance + 1):
+	var shape_offset := absf(shape.global_position.x - head.x)
+	var escape_limit := half.x + shape_offset + body.safe_margin
+	for step in range(1, ceili(escape_limit / HEAD_ESCAPE_STEP) + 1):
+		var distance := minf(step * HEAD_ESCAPE_STEP, escape_limit)
 		for direction in [preferred, -preferred]:
 			var offset := Vector2(distance * direction, 0)
 			var candidate := body.global_position + offset

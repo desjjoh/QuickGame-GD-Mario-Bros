@@ -375,3 +375,8 @@ Within the requested top-grab fix, Flagpole overrides ClimbTop from local (24,24
 ## Retained falling gravity - 2026-11-05
 
 Authorized after reviewing the reference's gravity lifetime: JumpAction adds an editable entrance_falling_gravity default of 562.5 px/s² ($28 at nominal 60 Hz). New players and committed transport arrivals initialize this value; successful jumps select 1575/1350/2025 from the existing speed-profile table and retain it across landing. Passive Move falls apply that selection through a temporary priority-250 modifier. Grounded MotionValues.base_gravity remains 1575; jump speeds, existing gravity arrays, weight, terminal speed, Project Settings, Input Map and imports are unchanged.
+
+
+## 2026-11-06 - Test Level timer
+
+Restored Test Level timer_enabled=false, the previously requested sandbox setting. Playable stages retain their own timer settings.
