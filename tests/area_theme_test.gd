@@ -170,7 +170,7 @@ func _ready() -> void:
 	)
 	assert(main.theme.resolve_texture(original_texture) == original_texture)
 	# Every supplied counterpart is mapped, including all question animation frames.
-	assert(lower.theme.texture_overrides.size() == 23)
+	assert(lower.theme.texture_overrides.size() == 24)
 	for source_path: String in lower.theme.texture_overrides:
 		var replacement := lower.theme.resolve_texture(load(source_path))
 		assert(
@@ -215,6 +215,9 @@ func _ready() -> void:
 			)
 		)
 	assert(question.receive_hit(EntityHit.new(null, &"bonk", Vector2.UP)))
+	assert(GameHandler.player_status.coins == 0 and GameHandler.player_status.score == 400)
+	assert(GameHandler.player_status.lives == 3)
+	assert(reward_voice.playing and reward_voice.stream == SoundHandler.get_sound(&"extra_life"))
 	for frame in range(30):
 		question.state_machine.process_physics(1.0 / 60.0)
 	assert(question.state_machine.current_state.name == &"Inactive")
@@ -241,12 +244,12 @@ func _ready() -> void:
 	for frame in range(4):
 		await get_tree().physics_frame
 	assert(pickups == [player])
-	assert(GameHandler.player_status.coins == 0 and GameHandler.player_status.score == 400)
+	assert(GameHandler.player_status.coins == 1 and GameHandler.player_status.score == 600)
 	assert(GameHandler.player_status.lives == 3)
 	assert(reward_voice.playing and reward_voice.stream == SoundHandler.get_sound(&"extra_life"))
 	assert((reward_voice.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED)
 	GameHandler.award_coin()
-	assert(GameHandler.player_status.coins == 1 and GameHandler.player_status.score == 600)
+	assert(GameHandler.player_status.coins == 2 and GameHandler.player_status.score == 800)
 	assert(GameHandler.player_status.lives == 3)
 	assert(reward_voice.playing and reward_voice.stream == SoundHandler.get_sound(&"extra_life"))
 	assert(lower_coin.state_machine.current_state.name == &"Collected")
@@ -261,7 +264,7 @@ func _ready() -> void:
 	assert(
 		not restored_coin.sprite.visible and not restored_coin.get_node("PaletteAnimation").enabled
 	)
-	assert(GameHandler.player_status.coins == 1 and GameHandler.player_status.score == 600)
+	assert(GameHandler.player_status.coins == 2 and GameHandler.player_status.score == 800)
 	assert(GameHandler.player_status.lives == 3)
 	GameHandler.clear_session()
 	assert(not reward_voice.playing)

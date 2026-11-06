@@ -1,5 +1,8 @@
 extends Node
 
+const BLOCK_COIN := preload("res://scenes/entities/blocks/question/block_coin.gd")
+const ONE_UP := preload("res://scenes/entities/powerups/one_up_mushroom.tscn")
+
 
 func _ready() -> void:
 	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
@@ -8,6 +11,10 @@ func _ready() -> void:
 	layout.clear()
 	layout.set_cell(Vector2i(4, 9), 1, Vector2i.ZERO)
 	layout.set_cell(Vector2i(6, 9), 1, Vector2i.ZERO)
+	var reward_cell := Vector2i(8, 9)
+	layout.set_cell(reward_cell, 1, Vector2i.ZERO)
+	var fixture_area := layout.get_parent().get_parent() as BaseLevelArea
+	fixture_area.question_block_rewards[reward_cell] = ONE_UP
 	var fixture_scene := PackedScene.new()
 	for area in fixture.get_node("Areas").get_children():
 		fixture.set_editable_instance(area, true)
@@ -69,10 +76,13 @@ func _ready() -> void:
 	for frame in range(5):
 		await get_tree().physics_frame
 		await get_tree().process_frame
+	var starting_coins: int = GameHandler.get_session_value(&"coins")
+	var starting_score: int = GameHandler.get_session_value(&"score")
 	Input.action_press(ControllerHandler.primary_action)
 	var activated := false
 	var moved_sprite := false
 	var original_body := block.body.global_transform
+	var reward_effect: Sprite2D
 	for frame in range(60):
 		await get_tree().physics_frame
 		await get_tree().process_frame
@@ -80,9 +90,16 @@ func _ready() -> void:
 		moved_sprite = moved_sprite or block.sprite.position.y < 8.0
 		assert(block.body.global_transform == original_body)
 		if block.state_machine.current_state.name == &"Bouncing":
+			assert(GameHandler.get_session_value(&"coins") == starting_coins + 1)
+			assert(GameHandler.get_session_value(&"score") == starting_score + 200)
+			for object in level.world_objects.get_children():
+				if object is BLOCK_COIN:
+					reward_effect = object
 			assert(not block.receive_hit(EntityHit.new(level.player, &"bonk", Vector2.UP)))
 	Input.action_release(ControllerHandler.primary_action)
 	assert(activated and moved_sprite)
+	assert(GameHandler.get_session_value(&"coins") == starting_coins + 1)
+	assert(GameHandler.get_session_value(&"score") == starting_score + 200)
 	assert(phases == [&"Bouncing", &"Inactive"])
 	assert(events == {"entered": 1, "completed": 1})
 	assert(block.sprite.texture.resource_path.ends_with("question-block-4.tres"))
@@ -90,6 +107,45 @@ func _ready() -> void:
 	assert(not block.animation_player.is_playing())
 	assert(not block.receive_hit(EntityHit.new(level.player, &"bonk", Vector2.UP)))
 	assert(other.state_machine.current_state.name == &"Active")
+	assert(GameHandler.get_session_value(&"coins") == starting_coins + 1)
+	assert(is_instance_valid(reward_effect))
+	assert(reward_effect.texture == null and reward_effect.get_child_count() == 1)
+	var popup := reward_effect.get_child(0) as Sprite2D
+	assert(popup.visible and popup.region_rect == Rect2(0, 8, 16, 8))
+	for frame in range(80):
+		await get_tree().physics_frame
+	assert(not is_instance_valid(reward_effect))
+	var previous := ONE_UP.instantiate() as Mushroom
+	assert(level.try_claim_spawn_slot(&"power_up", previous))
+	level.world_objects.add_child(previous)
+	var reward_block := level.world_objects.get_node("question_block_8_9") as QuestionBlock
+	var lives_before := GameHandler.player_status.lives
+	assert(reward_block.receive_hit(EntityHit.new(level.player, &"bonk", Vector2.UP)))
+	var reveal_voice := SoundHandler.get_node("Square2Sfx") as AudioStreamPlayer
+	assert(reveal_voice.playing and reveal_voice.stream == SoundHandler.get_sound(&"power_up_reveal"))
+	assert(is_equal_approx(reveal_voice.stream.get_length(), 31.0 / 60.0))
+	assert(previous.is_queued_for_deletion() and not previous.visible)
+	var mushroom: Mushroom
+	for object in level.world_objects.get_children():
+		if object is Mushroom and object != previous:
+			mushroom = object
+	assert(mushroom != null and mushroom.position == reward_block.position)
+	assert(not mushroom.sprite.visible)
+	assert(not mushroom.pickup.monitoring and not level.has_spawn_capacity(&"power_up"))
+	for frame in range(32):
+		await get_tree().physics_frame
+	assert(mushroom.position.y < reward_block.position.y and not mushroom.pickup.monitoring)
+	assert(mushroom.sprite.region_enabled and mushroom.sprite.visible)
+	var revealed_bottom := mushroom.sprite.global_position.y + mushroom.sprite.get_rect().end.y
+	assert(is_equal_approx(revealed_bottom, reward_block.global_position.y))
+	assert(is_zero_approx(mushroom.body.velocity.x))
+	for frame in range(36):
+		await get_tree().physics_frame
+	assert(mushroom.position.y == reward_block.position.y - 16.0)
+	assert(mushroom.pickup.monitoring and mushroom.body.velocity.x > 0.0)
+	assert(not mushroom.sprite.region_enabled and mushroom.sprite.offset.y == 0.0)
+	assert(GameHandler.player_status.lives == lives_before)
+	assert(reward_block.capture_area_state() == {"state": &"Inactive"})
 	# Shutdown during the entry reaction restores presentation and rejects hits.
 	assert(other.receive_hit(EntityHit.new(level.player, &"bonk", Vector2.UP)))
 	assert(other.state_machine.current_state.name == &"Bouncing")

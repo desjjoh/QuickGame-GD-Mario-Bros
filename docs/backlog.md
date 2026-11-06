@@ -3,7 +3,7 @@
 ## Gameplay
 
 - Add enemy spawners and define activation, despawn, and return behavior.
-- Add block rewards with per-placement configuration, breakable bricks, and power-up forms.
+- Decide how to author per-cell question-block rewards before adding a second reward. Add breakable bricks and power-up forms.
 - Add fireworks scoring and presentation for level endings.
 - Extend climbable behavior to vines and add any vine-specific detach rules.
 - Define standalone level restart behavior for isolated F6 testing.

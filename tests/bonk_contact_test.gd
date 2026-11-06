@@ -82,7 +82,53 @@ func _ready() -> void:
 		game.free()
 		await get_tree().physics_frame
 		await get_tree().process_frame
+	await _test_hidden_block()
 	print(
-		"PASS: Bonk accepts real ceiling edge hits, selects one seam target, and ignores escaped corners and side hits."
+		"PASS: Regular bonk edges and seams, hidden-block side and top pass-through, shared bonk response, and used-block landing."
 	)
 	get_tree().quit()
+
+
+func _test_hidden_block() -> void:
+	var level := preload("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	level.entity_layout.clear()
+	level.entity_layout.set_cell(Vector2i(8, 8), 9, Vector2i.ZERO)
+	level.entity_layout.set_cell(Vector2i(10, 8), 1, Vector2i.ZERO)
+	add_child(level)
+	var player := level.player
+	player.set_physics_process(false)
+	var block := level.world_objects.get_node("hidden_question_block_8_8") as HiddenQuestionBlock
+	await get_tree().physics_frame
+	pending_sweep = func():
+		player.body.global_position = Vector2(121, 142)
+		player.body.velocity = Vector2(360, 0)
+		player.move_body()
+		assert(not player.body.is_on_wall() and player.body.global_position.x > 121.0)
+		player.body.global_position = Vector2(136, 126)
+		player.body.velocity = Vector2(0, 240)
+		player.move_body()
+		assert(not player.body.is_on_floor() and player.body.global_position.y > 128.0)
+		assert(block.state_machine.current_state.name == &"Active")
+		var coins := GameHandler.player_status.coins
+		player.body.global_position = Vector2(136, 160)
+		player.body.velocity = Vector2(0, -240)
+		player.move_body()
+		assert(block.state_machine.current_state.name == &"Bouncing")
+		assert(GameHandler.player_status.coins == coins + 1)
+		var hidden_stop := player.body.global_position.y
+		var hidden_speed := player.body.velocity.y
+		player.body.global_position = Vector2(168, 160)
+		player.body.velocity = Vector2(0, -240)
+		player.move_body()
+		assert(player.body.is_on_ceiling())
+		assert(absf(player.body.global_position.y - hidden_stop) < 0.1)
+		assert(player.body.velocity.y == hidden_speed)
+	await sweep_finished
+	await get_tree().physics_frame
+	pending_sweep = func():
+		player.body.global_position = Vector2(136, 126)
+		player.body.velocity = Vector2(0, 240)
+		player.move_body()
+		assert(player.body.is_on_floor())
+	await sweep_finished
+	level.free()

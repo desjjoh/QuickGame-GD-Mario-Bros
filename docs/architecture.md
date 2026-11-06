@@ -22,6 +22,8 @@ GameHandler owns the active game, level, session, and flow state. Its TitleFlow 
 
 ## Area lifecycle and persistence
 
+The level scene groups its children under Areas, Players, Systems, and Presentations. Areas and Players remain siblings so pipe travel can change their relative draw order. Systems contains LevelDeath, LevelTimer, and AreaTransport. BaseLevel leaves Presentations empty for derived levels. In 1-1, it contains FlagpoleEnding.
+
 Only the active area keeps its runtime layouts, objects, and camera loaded. The level captures progress on unload and applies it when that area returns. Progress belongs to the current level. Coins and used question blocks retain their state by default, while bricks return to their active state. A level can suspend off-camera entities without destroying them, and controller input is opt-in.
 
 Transport resolves explicit area and target IDs. A pipe handles player entry and exit presentation. The level-owned AreaTransport child validates the trip and requests the transition. BaseLevel commits player placement, the active area, and the camera handoff. The destination can be a pipe or a spawn target.
@@ -30,7 +32,9 @@ Transport resolves explicit area and target IDs. A pipe handles player entry and
 
 `BaseEntity` owns state-machine shutdown and exclusive one-shot playback. `BasePlayer` adds a character body and reusable movement and action nodes. Mario owns his concrete states and artwork. Movement states select behavior, while motion values carry velocity and tuning between states. Jump retains its own pose until landing, while walking off a ledge keeps the ground movement pose with animation paused.
 
-Painted entity stamps resolve to scenes at runtime. A question block moves through Active, Bouncing, and Inactive. A brick returns to Active after bouncing. Both receive a hit through the entity hit contract. Coins collect once, award 200 points, and grant an extra life when the coin counter rolls over at 100.
+Painted spawner stamps create placements on area load. The area activates them at the camera boundary, and the placement saves consumption after the live actor is freed. The 1-Up uses this path in TestLevel. BaseLevel limits live power-ups to one. A painted spawner attempts once per area load. If the slot is occupied when the marker activates, it skips the spawn for that load. Mushroom owns terrain movement. PowerUp frees the item once its bounds are fully outside the camera cleanup region, without recording collection. A configured question block can replace the current item and release a 1-Up. PowerUp raises it one tile before normal movement and pickup begin.
+
+Painted entity stamps resolve to scenes at runtime. A question block moves through Active, Bouncing, and Inactive. A hidden question block accepts a rising underside hit before becoming solid. A brick returns to Active after bouncing. Both receive a hit through the entity hit contract. Question blocks award a coin on bounce entry and create a temporary coin and score effect under the area. World coins award on contact. Both use GameHandler for the coin, 200 points, and the extra life at 100 coins.
 
 ## Death and completion
 

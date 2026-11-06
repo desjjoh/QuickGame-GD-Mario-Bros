@@ -84,6 +84,7 @@ func move_body(gravity_after_motion: bool = false) -> void:
 			motion_values, get_physics_process_delta_time()
 		)
 	var rising := body.velocity.y < 0.0
+	var previous_position := body.global_position
 	var horizontal_speed := body.velocity.x
 	var corrected_landing := corner_correction.prepare(
 		body, collision_shape, get_physics_process_delta_time()
@@ -102,8 +103,10 @@ func move_body(gravity_after_motion: bool = false) -> void:
 	# velocity at a floor/wall contact even when displacement is blocked.
 	if body.is_on_wall() and body.velocity.x * body.get_wall_normal().x < 0.0:
 		body.velocity.x = 0.0
-	if rising and body.is_on_ceiling():
-		bonk_action.deliver(self)
+	var hidden_hit := rising and bonk_action.deliver_hidden(self, previous_position)
+	if rising and (hidden_hit or body.is_on_ceiling()):
+		if not hidden_hit:
+			bonk_action.deliver(self)
 		body.velocity.y = ceiling_bump_speed
 		jump_action.update(motion_values, false)
 		var sound := ceiling_bump_sound

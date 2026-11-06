@@ -10,7 +10,7 @@ signal area_theme_changed(theme: AreaTheme)
 @export_range(0.0, 512.0, 16.0) var activation_buffer: float = 64.0
 @export_range(0.0, 512.0, 16.0) var deactivation_buffer: float = 96.0
 var _activity_entities: Dictionary[int, WeakRef] = {}
-var _enemy_spawners: Dictionary[int, WeakRef] = {}
+var _spawners: Dictionary[int, WeakRef] = {}
 
 var _runtime_templates: Dictionary[StringName, PackedScene] = {}
 # Retain the authored policy even if a spawned entity is removed.
@@ -20,6 +20,7 @@ var is_active: bool = false
 @export var area_id: StringName
 @export var background_music: MusicHandler.Track = MusicHandler.Track.OVERWORLD
 @export var transport_points: Array[TransportPlacement] = []
+@export var question_block_rewards: Dictionary[Vector2i, PackedScene] = {}
 var _transport_cells: Dictionary[Vector2i, StringName] = {}
 
 @export var pipe_routes: Array[PipeRoute] = []
@@ -223,7 +224,7 @@ func unload_runtime() -> void:
 		if branch != null:
 			branch.free()
 	_activity_entities.clear()
-	_enemy_spawners.clear()
+	_spawners.clear()
 	runtime_loaded = false
 	process_mode = Node.PROCESS_MODE_DISABLED
 	hide()
@@ -247,8 +248,8 @@ func register_activity_entity(entity: BaseEntity) -> void:
 		)
 
 
-func register_enemy_spawner(spawner: Node2D) -> void:
-	_enemy_spawners[spawner.get_instance_id()] = weakref(spawner)
+func register_spawner(spawner: Node2D) -> void:
+	_spawners[spawner.get_instance_id()] = weakref(spawner)
 
 
 func get_activity_region(sleep_region: bool) -> Rect2:
@@ -276,8 +277,12 @@ func update_camera_activity() -> void:
 		if not is_instance_valid(entity) or entity.is_shutdown:
 			_activity_entities.erase(id)
 			continue
+		var bounds := entity.get_activity_rect()
+		if entity is PowerUp and not sleep_region.intersects(bounds):
+			entity.remove_offscreen()
+			continue
 		var region := wake_region if entity.activity_suspended else sleep_region
-		entity.set_activity_suspended(not region.intersects(entity.get_activity_rect()))
+		entity.set_activity_suspended(not region.intersects(bounds))
 	# Existing actors retain their independent death/transition suspension.
 	# Do not create fresh actors while the parent level is frozen (including title).
 	var level := get_parent().get_parent() as BaseLevel
@@ -292,9 +297,9 @@ func update_camera_activity() -> void:
 		)
 	):
 		return
-	for id: int in _enemy_spawners.keys():
-		var spawner := _enemy_spawners[id].get_ref() as Node2D
+	for id: int in _spawners.keys():
+		var spawner := _spawners[id].get_ref() as Node2D
 		if not is_instance_valid(spawner):
-			_enemy_spawners.erase(id)
+			_spawners.erase(id)
 			continue
 		spawner.update_activity(wake_region, sleep_region, theme)

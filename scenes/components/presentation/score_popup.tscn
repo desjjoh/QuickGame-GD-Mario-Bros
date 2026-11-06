@@ -4,8 +4,8 @@
 [ext_resource type="Texture2D" path="res://assets/ui/score.png" id="atlas"]
 
 [node name="ScorePopup" type="Sprite2D"]
+physics_interpolation_mode = 2
 visible = false
-z_index = 1
 texture_filter = 1
 texture = ExtResource("atlas")
 region_enabled = true

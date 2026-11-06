@@ -156,7 +156,7 @@ func _ready() -> void:
 	area.unload_runtime()
 	await ticks()
 	assert(last_actor.get_ref() == null and not area.runtime_loaded)
-	assert(area._activity_entities.is_empty() and area._enemy_spawners.is_empty())
+	assert(area._activity_entities.is_empty() and area._spawners.is_empty())
 	area.free()
 	# Authored residents must retain their default processing flags across templates.
 	var authored_area := (

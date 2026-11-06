@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/powerups/one_up_mushroom.gd" id="mushroom"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/misc/green-mushroom.png" id="art"]
+
+[sub_resource type="RectangleShape2D" id="pickup_shape"]
+size = Vector2(16, 16)
+
+[sub_resource type="RectangleShape2D" id="body_shape"]
+size = Vector2(14, 16)
+
+[node name="OneUpMushroom" node_paths=PackedStringArray("sprite", "pickup") instance=ExtResource("base")]
+script = ExtResource("mushroom")
+sprite = NodePath("Body/Sprite2D")
+pickup = NodePath("Body/Pickup")
+
+[node name="Body" type="CharacterBody2D" parent="."]
+position = Vector2(8, 8)
+collision_layer = 0
+floor_snap_length = 0.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
+shape = SubResource("body_shape")
+
+[node name="Sprite2D" type="Sprite2D" parent="Body"]
+texture = ExtResource("art")
+
+[node name="Pickup" type="Area2D" parent="Body"]
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/Pickup"]
+shape = SubResource("pickup_shape")

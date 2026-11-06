@@ -376,3 +376,39 @@ Implemented: keep surface geometry/signals on BaseClimbable and controller-drive
 ## 2026-11-05 - Ending presentation owns choreography
 
 Implemented: BaseLevel/GameHandler claim a single completion transaction before presentation and finish it independently of player existence. A reusable level-owned presentation controls flag capability, player states, camera lock, audio and ticketed hooks; the pole only reports contact and exposes its visual movement. Castle art and endpoint are independent level authoring. Replace original hidden collision/background priority with explicit endpoint and lifecycle removal. Score/firework effects remain deferred but their completion dependencies are active. See [flagpole ending](../architecture.md#death-and-completion).
+
+## 2026-11-06 - Default question-block coin and cell inspection
+
+Partially implements the 2026-11-02 per-cell editor decision. The editor add-on inspects one painted cell at a time and exposes Coin as the only contents choice. With one supported reward, every block uses that default without storing a redundant per-cell value. Serialized overrides, undo/redo and erase behavior remain part of adding a second option. QuestionBlock owns the one-time reward at bounce entry so bricks can continue sharing the bounce state independently.
+
+## 2026-11-06 - Defer question-block reward authoring
+
+Supersedes the dropdown workflow in the two earlier question-block editor decisions. Remove the add-on and keep one painted question-block marker with a fixed coin reward. Choose an authoring workflow before introducing configurable rewards.
+
+## 2026-11-06 - Preview block rewards on the painted layer
+
+Extends the earlier decision to defer reward authoring. The Block Rewards mode previews the fixed Coin reward directly on EntityLayout. The badge exists only in the editor viewport. Serialized overrides and their editing rules are deferred until a second reward exists.
+
+## 2026-11-06 - Separate painted spawners from live power-ups
+
+EntitySpawner is a painted placement that participates in the area camera pass. SpawnableEntity is the contract for a live actor and reports consumption. PowerUp owns contact and removal on collection. OneUpMushroom supplies the reward. The actor's Persist Progress choice determines whether the placement records collection, and the existing level progress policy determines when that record resets. Ordinary blocks still instantiate directly on area load. Add the Mushroom movement layer when there is movement to share.
+
+## 2026-11-06 - Track live spawn capacity per level
+
+BaseLevel claims slots before an actor enters the tree and releases them on tree exit. Categories have independent limits so future enemies and fireballs can share the mechanism. Power-ups currently have one slot. Painted spawners wait when full. The proposed replacement rule for question blocks remains deferred until block release exists.
+
+## 2026-11-06 - Skip blocked painted spawns
+
+Supersedes the waiting rule in the level spawn capacity decision. Each painted EntitySpawner attempts once per area load. A full category or failed spawn uses that attempt, so freeing a slot cannot create an actor after its activation point.
+
+## 2026-11-06 - Replace the active power-up on block release
+
+Block release claims a power-up slot by retiring the oldest live item if the category is full. The retired item grants no reward. Tree exit removes only the retiring actor's entry. The area stores the test placement as a cell-to-scene override. The viewport overlay shows the reward. A click-to-assign editor workflow remains deferred.
+
+## 2026-11-06 - Apply block rewards directly on EntityLayout
+
+Extends the block-release decision with editor authoring. The reward brush edits the area dictionary through editor undo and redo. Coin clears an override. The overlay stays visible in all modes. Native tile erase, move, and replace operations do not edit the reward dictionary, so clear a reward before changing its tile.
+
+## 2026-11-06 - Hidden question block contacts
+
+Unused hidden blocks use a query-only head probe on a dedicated scene collision bit. Rising head crossings enter the same ceiling response as regular bonks. Side and falling contacts ignore the probe. Accepted hits enable the regular solid body and use the existing question-block reward and used-state logic. The outline stays visible for the first pass.

@@ -11,7 +11,7 @@ var _transport_exiting: bool = false
 var _transport_phase: int = 0
 var _transport_completion_callback: Callable
 
-@onready var level: BaseLevel = get_parent()
+@onready var level: BaseLevel = $"../.."
 
 
 func has_active_state() -> bool:

@@ -3,6 +3,8 @@ extends CanvasGroup
 
 ## Shared foundation for playable levels.
 
+const SPAWN_LIMITS := {&"power_up": 1}
+
 enum CompletionMode { NORMAL, WARP }
 
 signal completion_started
@@ -54,6 +56,7 @@ var transition_in_progress: bool = false
 var player: BasePlayer
 var is_shutdown: bool = false
 var _spawned_areas: Dictionary[int, bool] = {}
+var _live_spawns: Dictionary[StringName, Array] = {}
 var _progress_key: String
 var _persistent_progress: bool = false
 var active_area: BaseLevelArea
@@ -62,9 +65,9 @@ var active_target_id: StringName = &""
 
 @onready var player_spawn: Marker2D = $Players/PlayerSpawn
 @onready var players: Node2D = $Players
-@onready var death_sequence: LevelDeath = $LevelDeath
-@onready var level_timer: LevelTimer = $LevelTimer
-@onready var area_transport: AreaTransport = $AreaTransport
+@onready var death_sequence: LevelDeath = $Systems/LevelDeath
+@onready var level_timer: LevelTimer = $Systems/LevelTimer
+@onready var area_transport: AreaTransport = $Systems/AreaTransport
 var entity_layout: TileMapLayer:
 	get:
 		return get_node_or_null("Areas/MainArea/Layouts/EntityLayout") as TileMapLayer
@@ -72,6 +75,32 @@ var entity_layout: TileMapLayer:
 var world_objects: Node2D:
 	get:
 		return get_node_or_null("Areas/MainArea/WorldObjects") as Node2D
+
+
+func has_spawn_capacity(category: StringName) -> bool:
+	return not SPAWN_LIMITS.has(category) or _live_spawns.get(category, []).size() < SPAWN_LIMITS[category]
+
+
+## Claim immediately before adding a new actor to the tree.
+func try_claim_spawn_slot(category: StringName, actor: Node, replace_oldest := false) -> bool:
+	if is_shutdown:
+		return false
+	if SPAWN_LIMITS.has(category):
+		var live: Array = _live_spawns.get_or_add(category, [])
+		if live.size() >= SPAWN_LIMITS[category]:
+			if not replace_oldest:
+				return false
+			var previous: Node = live.pop_front()
+			previous.queue_free()
+			if previous is CanvasItem:
+				previous.hide()
+		live.append(actor)
+		actor.tree_exited.connect(_release_spawn_slot.bind(category, actor), CONNECT_ONE_SHOT)
+	return true
+
+
+func _release_spawn_slot(category: StringName, actor: Node) -> void:
+	_live_spawns[category].erase(actor)
 
 
 func _ready() -> void:
@@ -151,6 +180,8 @@ func _spawn_area_entities(area: BaseLevelArea, saved_entities: Dictionary) -> vo
 			instance.free()
 			continue
 		instance.visual_theme = area.theme
+		if instance is QuestionBlock:
+			instance.power_up_scene = area.question_block_rewards.get(cell)
 		instance.name = entity_name
 		instance.restore_area_state(progress.get("state", {}))
 		# Block/entity marker origins are the top-left of each grid cell.

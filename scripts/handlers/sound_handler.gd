@@ -12,6 +12,12 @@ func _ready() -> void:
 	_square_two.finished.connect(func(): reward_voice_changed.emit(false))
 	_sounds[&"coin"] = _build_pulse([113, 84], [5, 48], 0.5, 14, true)
 	_sounds[&"extra_life"] = _build_pulse([84, 71, 42, 53, 47, 35], [8, 8, 8, 8, 8, 8], 0.5, 3)
+	# The reveal table holds the previous period when a frequency entry is zero.
+	_sounds[&"power_up_reveal"] = _build_pulse(
+		[0x1ab, 0x11d, 0x10d, 0x193, 0x10d, 0xfe, 0x17c, 0xfe, 0xef, 0x167, 0xef, 0xe2],
+		[3, 2, 2, 4, 2, 2, 4, 2, 2, 4, 2, 2],
+		0.5
+	)
 	_sounds[&"timer_tick"] = _build_pulse([113], [6], 0.5, 9)
 
 	_sounds[&"jump_small"] = _build_swept_pulse(

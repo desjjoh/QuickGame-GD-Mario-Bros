@@ -61,7 +61,10 @@ func bind_entity(entity: BaseEntity, cell: Vector2i, area: BaseLevelArea) -> voi
 func _on_attached(player: BasePlayer, pole: FlagpoleEntity) -> void:
 	if active or player.state_machine.current_state == player.flagpole_ending_state:
 		return
-	var level := get_parent() as BaseLevel
+	var ancestor := get_parent()
+	while ancestor != null and not ancestor is BaseLevel:
+		ancestor = ancestor.get_parent()
+	var level := ancestor as BaseLevel
 	if level != null and is_instance_valid(_castle) and not _castle.is_shutdown:
 		level.begin_ending(self, player, pole)
 
@@ -204,7 +207,6 @@ func _show_grab_score() -> void:
 	var anchor := _pole.climb_bottom.global_position + Vector2(12, -12)
 	var popup = SCORE_POPUP.instantiate()
 	popup.position = _pole.to_local(anchor)
-	popup.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	_pole.add_child(popup)
 	_score_popup = popup
 	_popup_fraction = 255

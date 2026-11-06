@@ -20,7 +20,7 @@ Hold Jump for more height, and press the opposite direction while running to ski
 ## What the project demonstrates
 
 - **Player movement and state machines.** Mario owns his movement states and animations. Reusable actions and motion components handle running, jumping, and collision responses.
-- **Paintable entities.** Place coins, blocks, pipes, and flagpoles on the same grid as the terrain. The level creates the corresponding scene instances when the area loads.
+- **Paintable entities.** Place coins, blocks, pipes, and flagpoles on the same grid as the terrain. The level creates the corresponding scene instances when the area loads. Hit a question block from below for a coin and 200 points.
 - **Area and session lifecycle.** Areas own their cameras, palettes, and background tracks. Used question blocks and collected coins can persist across area changes, while bricks reset.
 - **HUD and audio.** An 8×8 bitmap HUD follows session state and area palettes. Synthesized effects share playback voices where appropriate, and background music restarts on area transitions.
 

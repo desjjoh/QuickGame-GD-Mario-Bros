@@ -8,6 +8,8 @@ The timer conversion requests a synthesized 981 Hz, 50% duty pulse for four phys
 
 Coin and 1 UP are also synthesized on the shared voice. Coin uses two tones over 53 frames with one continuous decay and a 50% duty cycle. 1 UP uses six eight-frame tones with a fresh envelope on each tone and a 50% duty cycle.
 
+Power-up emergence requests the reveal cue on the same voice. It uses the NES reveal frequency sequence, with the previous note held through zero-frequency entries, over 31 nominal frames. The shared voice keeps its default playback gain and gives the 1 UP pickup cue priority.
+
 ## Jump and ceiling bump
 
 Small Mario uses the jump_small and bump cues from SoundHandler. The generated streams approximate the original Square 1 pitch sweeps and volume changes on a 60 Hz timeline. They play through the existing player voice.
