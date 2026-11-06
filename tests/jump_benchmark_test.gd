@@ -23,11 +23,11 @@ func _ready() -> void:
 	for x in range(96, 190):
 		ground.set_cell(Vector2i(x, 13), 0, Vector2i.ZERO)
 	for x in [178, 179]:
-		ground.set_cell(Vector2i(x, 11), 1 if x == 178 else 2, Vector2i.ZERO)
-		ground.set_cell(Vector2i(x, 12), 3 if x == 178 else 4, Vector2i.ZERO)
+		ground.set_cell(Vector2i(x, 11), 1, Vector2i(7 if x == 178 else 8, 0))
+		ground.set_cell(Vector2i(x, 12), 1, Vector2i(7 if x == 178 else 8, 1))
 	for x in range(180, 189):
 		for y in range(maxi(5, 192 - x), 13):
-			ground.set_cell(Vector2i(x, y), 11, Vector2i.ZERO)
+			ground.set_cell(Vector2i(x, y), 0, Vector2i(0, 1))
 	var layout := main.get_node("Layouts/EntityLayout") as TileMapLayer
 	layout.clear()
 	# Use the existing marker IDs rather than assuming their numeric identity.

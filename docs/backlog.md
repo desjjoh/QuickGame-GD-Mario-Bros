@@ -39,7 +39,7 @@ Acceptance checks:
 
 ## Restore area music when suitable sound files are available
 
-Status: deferred at the user's request on 2026-11-02. Suitable soundtrack files are not ready. Area music playback, theme music fields/assignments and the Music Enabled override have been removed. Generic area entry/exit and active-area tracking remain. Existing soundtrack files are retained unassigned; their presence is not approval to use them again. Entity sound effects remain enabled.
+Status: deferred at the user's request on 2026-11-02. Suitable soundtrack files are not ready. Area music playback, theme music fields/assignments and the Music Enabled override have been removed. Generic area entry/exit and active-area tracking remain. The unassigned area tracks were removed during asset cleanup. Entity sound effects remain enabled.
 
 ### Asset prerequisites
 

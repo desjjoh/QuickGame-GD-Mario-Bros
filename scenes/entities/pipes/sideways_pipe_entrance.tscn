@@ -1,9 +1,9 @@
 [gd_scene format=3]
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/pipe_entrance.tscn" id="1"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/pipes/pipe-top-h-1.png" id="2"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/pipes/pipe-h-1.png" id="3"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/pipes/pipe-top-h-2.png" id="4"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/pipes/pipe-h-2.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/pipes/pipe-top-h-1.tres" id="2"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/pipes/pipe-h-1.tres" id="3"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/pipes/pipe-top-h-2.tres" id="4"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/pipes/pipe-h-2.tres" id="5"]
 [node name="SidewaysPipeEntrance" instance=ExtResource("1")]
 sideways = true
 destination_area_id = &"main"

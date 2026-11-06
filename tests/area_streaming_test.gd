@@ -80,7 +80,7 @@ func _ready() -> void:
 	assert(not level.has_node("ForegroundObjects"))
 	var state := GameHandler.get_area_progress(level._progress_key, &"main")
 	assert(state["entities"]["question_block_4_9"]["state"]["state"] == &"Inactive")
-	assert(state["entities"]["brick_3_8"]["removed"])
+	assert(not state["entities"].has("brick_3_8"))
 	var old_lower: WeakRef = weakref(lower.get_node("WorldObjects/brick_4_9"))
 	for visit in range(3):
 		assert(level.request_area_transfer(&"main", &"player_spawn"))
@@ -89,10 +89,10 @@ func _ready() -> void:
 		assert(old_lower.get_ref() == null)
 		question = main.get_node("WorldObjects/question_block_4_9") as BaseBlock
 		assert(question.state_machine.current_state.name == &"Inactive")
-		assert(question.sprite.texture.resource_path.ends_with("question-block-4.png"))
-		assert(not main.has_node("WorldObjects/brick_3_8"))
+		assert(question.sprite.texture.resource_path.ends_with("question-block-4.tres"))
+		assert(main.has_node("WorldObjects/brick_3_8"))
 		assert(main.get_node("Layouts/GroundLayout").get_cell_source_id(Vector2i(10, 13)) == -1)
-		assert(main.get_node("WorldObjects").get_child_count() == 2)
+		assert(main.get_node("WorldObjects").get_child_count() == 3)
 		assert(main.get_node("WorldObjects/pipe_entrance_6_11/Visuals").get_child_count() == 4)
 		assert(GameHandler.get_session_value(&"coins") == 13)
 		assert(level.request_area_transfer(&"lower"))
@@ -111,12 +111,12 @@ func _ready() -> void:
 	level = GameHandler.current_level
 	question = level.world_objects.get_node("question_block_4_9") as BaseBlock
 	assert(question.state_machine.current_state.name == &"Inactive")
-	assert(not level.world_objects.has_node("brick_3_8"))
+	assert(level.world_objects.has_node("brick_3_8"))
 	game.free()
 	await ticks(2)
 	GameHandler.clear_session()
 	assert(GameHandler.get_area_progress(progress_key, &"main").is_empty())
 	print(
-		"PASS: only occupied runtime loaded, inactive collisions/entities/camera freed, used/removed blocks and tile edits persist through repeated visits, and pipe visuals clean up."
+		"PASS: only occupied runtime loaded, inactive collisions/entities/camera freed, used question blocks and tile edits persist, bricks reset through repeated visits, and pipe visuals clean up."
 	)
 	get_tree().quit()

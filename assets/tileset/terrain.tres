@@ -1,101 +1,51 @@
 [gd_resource type="TileSet" format=3 uid="uid://dy01p3ioyfiqi"]
 
-[ext_resource type="Texture2D" uid="uid://bwthmecy78jan" path="res://assets/palettes/overworld/tileset/ground.png" id="1_ground"]
-[ext_resource type="Texture2D" uid="uid://b4yhoscyntoru" path="res://assets/palettes/overworld/interactibles/pipes/pipe-top-1.png" id="pipe_1"]
-[ext_resource type="Texture2D" uid="uid://r36rk1udyftu" path="res://assets/palettes/overworld/interactibles/pipes/pipe-top-2.png" id="pipe_2"]
-[ext_resource type="Texture2D" uid="uid://ckbbdea5appnv" path="res://assets/palettes/overworld/interactibles/pipes/pipe-1.png" id="pipe_3"]
-[ext_resource type="Texture2D" uid="uid://b33g4v20ka1d7" path="res://assets/palettes/overworld/interactibles/pipes/pipe-2.png" id="pipe_4"]
-[ext_resource type="Texture2D" uid="uid://b4kcp0gpd0oqq" path="res://assets/palettes/overworld/interactibles/pipes/pipe-3.png" id="pipe_5"]
-[ext_resource type="Texture2D" uid="uid://0fturk85vmqy" path="res://assets/palettes/overworld/interactibles/pipes/pipe-4.png" id="pipe_6"]
-[ext_resource type="Texture2D" uid="uid://otppgdjske85" path="res://assets/palettes/overworld/interactibles/pipes/pipe-top-h-1.png" id="side_7"]
-[ext_resource type="Texture2D" uid="uid://dmo5732argm1" path="res://assets/palettes/overworld/interactibles/pipes/pipe-top-h-2.png" id="side_8"]
-[ext_resource type="Texture2D" uid="uid://davermg57yuu0" path="res://assets/palettes/overworld/interactibles/pipes/pipe-h-1.png" id="side_9"]
-[ext_resource type="Texture2D" uid="uid://1i7ki0gersip" path="res://assets/palettes/overworld/interactibles/pipes/pipe-h-2.png" id="side_10"]
-[ext_resource type="Texture2D" uid="uid://bff56bx8ardnb" path="res://assets/palettes/overworld/tileset/block.png" id="solid_block"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 3 (Pipes and Scenery).png" id="art_1"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png" id="art_2"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ground"]
-resource_name = "Ground"
-texture = ExtResource("1_ground")
+[sub_resource type="TileSetAtlasSource" id="Source_0"]
+resource_name = "Solid ground"
+texture = ExtResource("art_2")
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+1:0/0 = 0
+1:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+2:0/0 = 0
+2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+3:0/0 = 0
+3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+0:1/0 = 0
+0:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+0:2/0 = 0
+0:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+0:3/0 = 0
+0:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pipe_1"]
-resource_name = "Pipe top - left"
-texture = ExtResource("pipe_1")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="Side_10"]
-resource_name = "pipe-h-2"
-texture = ExtResource("side_10")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="SolidBlock"]
-resource_name = "Solid block"
-texture = ExtResource("solid_block")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pipe_2"]
-resource_name = "Pipe top - right"
-texture = ExtResource("pipe_2")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pipe_3"]
-resource_name = "Pipe body - left"
-texture = ExtResource("pipe_3")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pipe_4"]
-resource_name = "Pipe body - right"
-texture = ExtResource("pipe_4")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pipe_5"]
-resource_name = "Pipe junction - top"
-texture = ExtResource("pipe_5")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pipe_6"]
-resource_name = "Pipe junction - bottom"
-texture = ExtResource("pipe_6")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="Side_7"]
-resource_name = "pipe-top-h-1"
-texture = ExtResource("side_7")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="Side_8"]
-resource_name = "pipe-top-h-2"
-texture = ExtResource("side_8")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="Side_9"]
-resource_name = "pipe-h-1"
-texture = ExtResource("side_9")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+[sub_resource type="TileSetAtlasSource" id="Source_1"]
+resource_name = "Pipe parts"
+texture = ExtResource("art_1")
+7:0/0 = 0
+7:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+8:0/0 = 0
+8:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+7:1/0 = 0
+7:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+8:1/0 = 0
+8:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+7:2/0 = 0
+7:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+7:3/0 = 0
+7:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+5:2/0 = 0
+5:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+5:3/0 = 0
+5:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+6:2/0 = 0
+6:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+6:3/0 = 0
+6:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
 [resource]
 physics_layer_0/collision_layer = 1
-sources/0 = SubResource("TileSetAtlasSource_ground")
-sources/1 = SubResource("TileSetAtlasSource_pipe_1")
-sources/2 = SubResource("TileSetAtlasSource_pipe_2")
-sources/3 = SubResource("TileSetAtlasSource_pipe_3")
-sources/4 = SubResource("TileSetAtlasSource_pipe_4")
-sources/5 = SubResource("TileSetAtlasSource_pipe_5")
-sources/6 = SubResource("TileSetAtlasSource_pipe_6")
-sources/7 = SubResource("Side_7")
-sources/8 = SubResource("Side_8")
-sources/9 = SubResource("Side_9")
-sources/10 = SubResource("Side_10")
-sources/11 = SubResource("SolidBlock")
+sources/0 = SubResource("Source_0")
+sources/1 = SubResource("Source_1")

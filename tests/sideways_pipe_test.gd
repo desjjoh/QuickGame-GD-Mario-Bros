@@ -51,19 +51,9 @@ func _ready() -> void:
 		"res://assets/themes/overworld.tres", "res://assets/themes/underground.tres"
 	]:
 		var theme = load(theme_path) as AreaTheme
-		for id in range(7, 11):
-			assert(
-				(
-					(
-						theme
-						. terrain
-						. get_source(id)
-						. get_tile_data(Vector2i.ZERO, 0)
-						. get_collision_polygons_count(0)
-					)
-					== 1
-				)
-			)
+		var source := theme.terrain.get_source(1) as TileSetAtlasSource
+		for coords in [Vector2i(5, 2), Vector2i(5, 3), Vector2i(6, 2), Vector2i(6, 3)]:
+			assert(source.get_tile_data(coords, 0).get_collision_polygons_count(0) == 1)
 		assert(
 			(
 				theme.entity_markers.get_source(4).get_tile_size_in_atlas(Vector2i.ZERO)

@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="base"]
 [ext_resource type="Script" path="res://scenes/entities/castle/castle.gd" id="script"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/decorations/castle.png" id="art"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png" id="art"]
 [ext_resource type="Texture2D" path="res://assets/ui/castle-flag.png" id="flag"]
 
 [node name="Castle" instance=ExtResource("base")]
@@ -24,7 +24,7 @@ position = Vector2(0, 32)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 0, 16, 16)
+region_rect = Rect2(64, 0, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_0_3" type="Sprite2D" parent="."]
@@ -32,7 +32,7 @@ position = Vector2(0, 48)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 16, 16, 16)
+region_rect = Rect2(64, 16, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_0_4" type="Sprite2D" parent="."]
@@ -40,7 +40,7 @@ position = Vector2(0, 64)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 16, 16, 16)
+region_rect = Rect2(64, 16, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_1_0" type="Sprite2D" parent="."]
@@ -48,7 +48,7 @@ position = Vector2(16, 0)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 0, 16, 16)
+region_rect = Rect2(64, 0, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_1_1" type="Sprite2D" parent="."]
@@ -56,7 +56,7 @@ position = Vector2(16, 16)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(0, 16, 16, 16)
+region_rect = Rect2(48, 16, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_1_2" type="Sprite2D" parent="."]
@@ -64,7 +64,7 @@ position = Vector2(16, 32)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(32, 0, 16, 16)
+region_rect = Rect2(80, 0, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_1_3" type="Sprite2D" parent="."]
@@ -72,7 +72,7 @@ position = Vector2(16, 48)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 16, 16, 16)
+region_rect = Rect2(64, 16, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_1_4" type="Sprite2D" parent="."]
@@ -80,7 +80,7 @@ position = Vector2(16, 64)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 16, 16, 16)
+region_rect = Rect2(64, 16, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_2_0" type="Sprite2D" parent="."]
@@ -88,7 +88,7 @@ position = Vector2(32, 0)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 0, 16, 16)
+region_rect = Rect2(64, 0, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_2_1" type="Sprite2D" parent="."]
@@ -96,7 +96,7 @@ position = Vector2(32, 16)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 16, 16, 16)
+region_rect = Rect2(64, 16, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_2_2" type="Sprite2D" parent="."]
@@ -104,7 +104,7 @@ position = Vector2(32, 32)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(32, 0, 16, 16)
+region_rect = Rect2(80, 0, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_2_3" type="Sprite2D" parent="."]
@@ -112,7 +112,7 @@ position = Vector2(32, 48)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(48, 0, 16, 16)
+region_rect = Rect2(96, 0, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_2_4" type="Sprite2D" parent="."]
@@ -120,7 +120,7 @@ position = Vector2(32, 64)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(48, 16, 16, 16)
+region_rect = Rect2(96, 16, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_3_0" type="Sprite2D" parent="."]
@@ -128,7 +128,7 @@ position = Vector2(48, 0)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 0, 16, 16)
+region_rect = Rect2(64, 0, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_3_1" type="Sprite2D" parent="."]
@@ -136,7 +136,7 @@ position = Vector2(48, 16)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(32, 16, 16, 16)
+region_rect = Rect2(80, 16, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_3_2" type="Sprite2D" parent="."]
@@ -144,7 +144,7 @@ position = Vector2(48, 32)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(32, 0, 16, 16)
+region_rect = Rect2(80, 0, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_3_3" type="Sprite2D" parent="."]
@@ -152,7 +152,7 @@ position = Vector2(48, 48)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 16, 16, 16)
+region_rect = Rect2(64, 16, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_3_4" type="Sprite2D" parent="."]
@@ -160,7 +160,7 @@ position = Vector2(48, 64)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 16, 16, 16)
+region_rect = Rect2(64, 16, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_4_2" type="Sprite2D" parent="."]
@@ -168,7 +168,7 @@ position = Vector2(64, 32)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 0, 16, 16)
+region_rect = Rect2(64, 0, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_4_3" type="Sprite2D" parent="."]
@@ -176,7 +176,7 @@ position = Vector2(64, 48)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 16, 16, 16)
+region_rect = Rect2(64, 16, 16, 16)
 region_filter_clip_enabled = true
 
 [node name="Tile_4_4" type="Sprite2D" parent="."]
@@ -184,5 +184,5 @@ position = Vector2(64, 64)
 centered = false
 texture = ExtResource("art")
 region_enabled = true
-region_rect = Rect2(16, 16, 16, 16)
+region_rect = Rect2(64, 16, 16, 16)
 region_filter_clip_enabled = true

@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="base"]
 [ext_resource type="Script" path="res://scenes/entities/coin/coin.gd" id="coin"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/items/coins.png" id="art"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/items/coins.tres" id="art"]
 [ext_resource type="Script" path="res://scenes/components/presentation/synchronized_animation.gd" id="sync"]
 [ext_resource type="Resource" path="res://scenes/components/presentation/palette_pulse.tres" id="pulse"]
 

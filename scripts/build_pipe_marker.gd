@@ -19,7 +19,7 @@ func _initialize() -> void:
 			var image := Image.create(32, 32, false, Image.FORMAT_RGBA8)
 			for index in range(4):
 				var part := (
-					(load(folder + previews[preview][index] + ".png") as Texture2D).get_image()
+					(load(folder + previews[preview][index] + ".tres") as Texture2D).get_image()
 				)
 				part.convert(Image.FORMAT_RGBA8)
 				image.blit_rect(

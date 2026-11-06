@@ -83,19 +83,17 @@ func _ready() -> void:
 			"/palettes/underground/"
 		)
 	)
-	for source_id in range(12):
-		var source := lower_ground.tile_set.get_source(source_id) as TileSetAtlasSource
-		assert(source.get_tile_data(Vector2i.ZERO, 0).get_collision_polygons_count(0) == 1)
-	# All terrain and decoration variants use Underground art with matching tile IDs.
-	for source_id in range(12):
-		assert(
-			(
-				(lower_ground.tile_set.get_source(source_id) as TileSetAtlasSource)
-				. texture
-				. resource_path
-				. contains("/palettes/underground/")
-			)
-		)
+	assert(main_terrain.get_source_count() == 2 and lower_ground.tile_set.get_source_count() == 2)
+	for source_id in [0, 1]:
+		var original := main_terrain.get_source(source_id) as TileSetAtlasSource
+		var themed := lower_ground.tile_set.get_source(source_id) as TileSetAtlasSource
+		assert(themed.texture.resource_path.contains("/palettes/underground/"))
+		assert(themed.get_tiles_count() == (10 if source_id == 1 else 7))
+		assert(original.get_tiles_count() == themed.get_tiles_count())
+		for tile_index in range(original.get_tiles_count()):
+			var coords := original.get_tile_id(tile_index)
+			assert(themed.has_tile(coords))
+			assert(themed.get_tile_data(coords, 0).get_collision_polygons_count(0) == 1)
 	var lower_decorations := (lower.get_node("Layouts/DecorationLayout") as TileMapLayer).tile_set
 	assert(main_decorations != lower_decorations and lower_decorations == lower.theme.decorations)
 	assert(
@@ -104,7 +102,7 @@ func _ready() -> void:
 			and lower_decorations.get_physics_layers_count() == 0
 		)
 	)
-	assert(main_decorations.get_source_count() == 16 and lower_decorations.get_source_count() == 16)
+	assert(main_decorations.get_source_count() == 4 and lower_decorations.get_source_count() == 4)
 	for index in range(main_decorations.get_source_count()):
 		var id := main_decorations.get_source_id(index)
 		assert(lower_decorations.has_source(id))
@@ -156,7 +154,7 @@ func _ready() -> void:
 	)
 	assert(main.theme.resolve_texture(original_texture) == original_texture)
 	# Every supplied counterpart is mapped, including all question animation frames.
-	assert(lower.theme.texture_overrides.size() == 22)
+	assert(lower.theme.texture_overrides.size() == 21)
 	for source_path: String in lower.theme.texture_overrides:
 		var replacement := lower.theme.resolve_texture(load(source_path))
 		assert(
@@ -189,7 +187,7 @@ func _ready() -> void:
 	question.visual_theme = lower.theme
 	lower.get_node("WorldObjects").add_child(question)
 	for sample in [
-		[0.0, "question-block.png"], [0.41, "question-block-2.png"], [0.55, "question-block-3.png"]
+		[0.0, "question-block.tres"], [0.41, "question-block-2.tres"], [0.55, "question-block-3.tres"]
 	]:
 		question.animation_player.seek(sample[0], true)
 		assert(
@@ -204,7 +202,7 @@ func _ready() -> void:
 	assert(question.state_machine.current_state.name == &"Inactive")
 	assert(
 		question.sprite.texture.resource_path.ends_with(
-			"palettes/underground/interactibles/blocks/question-block-4.png"
+			"palettes/underground/interactibles/blocks/question-block-4.tres"
 		)
 	)
 	var original_question := (

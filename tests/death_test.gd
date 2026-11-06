@@ -194,10 +194,10 @@ func _ready() -> void:
 	assert(
 		question.sprite.texture.resource_path.ends_with(
 			[
-				"question-block.png",
-				"question-block-2.png",
-				"question-block-3.png",
-				"question-block-2.png"
+				"question-block.tres",
+				"question-block-2.tres",
+				"question-block-3.tres",
+				"question-block-2.tres"
 			][phase]
 		)
 	)
