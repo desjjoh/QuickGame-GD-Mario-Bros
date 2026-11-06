@@ -41,7 +41,7 @@ Declaration reordering can affect initialization, so review it in small changes.
 
 HUD listened to level/area session changes but not BaseLevelArea.area_theme_changed. Live theme selection could update title artwork while leaving the HUD coin on the previous atlas. hud_test previously masked this with explicit calls to the private refresh helper. HUD now binds the active area's theme signal, rebinds on area/level changes and disconnects during cleanup. The regression test checks automatic refresh and removal of the old area's subscription; shared coin phase and private SpriteFrames behavior remain.
 
-Standalone F6 pit-death restart and intermittent native engine shutdown failures remain tracked in the [backlog](backlog.md). This cleanup does not resolve them. See [verification](verification.md) for actual regression outcomes.
+Standalone F6 pit-death restart and intermittent native engine shutdown failures remain tracked in the [backlog](../backlog.md). This cleanup does not resolve them. See [verification](verification.md) for actual regression outcomes.
 
 ## Title background activity
 

@@ -2,7 +2,7 @@
 
 ## Composition
 
-BasePlayer groups HorizontalMovement, AirMovement, and Gravity under Motion; Run, Jump, and Slide under Actions; with the MotionValues script attached directly to Motion. Mario adds WalkAnimation under Presentation and owns Idle, Move, Slide, and Jump. States coordinate the components; their calculations and invocation order are unchanged by the folder split. See [architecture](architecture.md) for the full scene tree.
+BasePlayer groups HorizontalMovement, AirMovement, and Gravity under Motion; Run, Jump, and Slide under Actions; with the MotionValues script attached directly to Motion. Mario adds WalkAnimation under Presentation and owns Idle, Move, Slide, and Jump. States coordinate the components; their calculations and invocation order are unchanged by the folder split. See [architecture](../architecture.md) for the full scene tree.
 
 Mario adds a WalkAnimation component for its character-specific animation timing. It changes AnimationPlayer playback speed and does not alter movement values.
 
