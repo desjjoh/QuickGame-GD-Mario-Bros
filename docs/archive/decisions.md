@@ -384,3 +384,23 @@ Partially implements the 2026-11-02 per-cell editor decision. The editor add-on 
 ## 2026-11-06 - Defer question-block reward authoring
 
 Supersedes the dropdown workflow in the two earlier question-block editor decisions. Remove the add-on and keep one painted question-block marker with a fixed coin reward. Choose an authoring workflow before introducing configurable rewards.
+
+## 2026-11-06 - Preview block rewards on the painted layer
+
+Extends the earlier decision to defer reward authoring. The Block Rewards mode previews the fixed Coin reward directly on EntityLayout. The badge exists only in the editor viewport. Serialized overrides and their editing rules are deferred until a second reward exists.
+
+## 2026-11-06 - Separate painted spawners from live power-ups
+
+EntitySpawner is a painted placement that participates in the area camera pass. SpawnableEntity is the contract for a live actor and reports consumption. PowerUp owns contact and removal on collection. OneUpMushroom supplies the reward. The actor's Persist Progress choice determines whether the placement records collection, and the existing level progress policy determines when that record resets. Ordinary blocks still instantiate directly on area load. Add the Mushroom movement layer when there is movement to share.
+
+## 2026-11-06 - Track live spawn capacity per level
+
+BaseLevel claims slots before an actor enters the tree and releases them on tree exit. Categories have independent limits so future enemies and fireballs can share the mechanism. Power-ups currently have one slot. Painted spawners wait when full. The proposed replacement rule for question blocks remains deferred until block release exists.
+
+## 2026-11-06 - Skip blocked painted spawns
+
+Supersedes the waiting rule in the level spawn capacity decision. Each painted EntitySpawner attempts once per area load. A full category or failed spawn uses that attempt, so freeing a slot cannot create an actor after its activation point.
+
+## 2026-11-06 - Replace the active power-up on block release
+
+Block release claims a power-up slot by retiring the oldest live item if the category is full. The retired item grants no reward. Tree exit removes only the retiring actor's entry. The area stores the test placement as a cell-to-scene override. The viewport overlay shows the reward. A click-to-assign editor workflow remains deferred.

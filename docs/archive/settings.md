@@ -388,3 +388,7 @@ Added project setting editor_plugins/enabled. Previously the section was absent.
 ## 2026-11-06 - Remove the question-block editor add-on
 
 With explicit user approval, removed the Question Block Contents entry from editor_plugins/enabled. It was the only entry, so the section is absent again.
+
+## 2026-11-06 - Enable the Block Rewards preview add-on
+
+With explicit user approval, added res://addons/block_rewards/plugin.cfg to editor_plugins/enabled. The setting was previously absent. This enables the editor-only reward preview on EntityLayout.

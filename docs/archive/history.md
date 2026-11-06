@@ -832,3 +832,35 @@ Godot 4.7.2 headless editor startup loaded the enabled add-on. The focused quest
 ## 2026-11-06 - Remove the question-block contents dropdown
 
 Removed addons/question_block_contents and its project.godot registration while the reward authoring workflow is reconsidered. Updated the setup, testing, backlog, and entity-layout guides. The question-block regression emitted PASS in Godot 4.7.2 headless with four ObjectDB leak warnings at exit. Interactive editor verification was not performed.
+
+## 2026-11-06 - Block Rewards editor preview
+
+Added addons/block_rewards to let authors click a painted question block and preview Coin without looking up coordinates. The add-on uses the existing EntityLayout and stores no overrides. The script check and headless editor startup succeeded. Interactive click and overlay placement checks were not performed.
+
+## 2026-11-06 - Stationary 1-Up sandbox milestone
+
+Painted a 1-Up spawner at (8, 12) on the TestLevel EntityLayout. The spawner uses BaseLevelArea camera activation, creates a stationary PowerUp, and records collection. The item uses the area theme, grants one life and plays the shared 1-Up cue, then frees itself. Movement, offscreen disposal and block release remain future steps.
+
+The 1-Up, entity activity and area theme regressions emitted PASS in Godot 4.7.2 headless. The 1-Up check reported two ObjectDB leaks at exit. Existing missing palette resources prevented running the sandbox directly in the working tree. Verification used an isolated copy with those resources supplied from HEAD.
+
+## 2026-11-06 - Mushroom movement and offscreen removal
+
+Added the Mushroom movement layer under scenes/entities/powerups. The 1-Up walks right at launch, falls under gravity, and reverses against walls. BaseLevelArea compares the live item's bounds to the existing camera cleanup region. PowerUp frees the item when it is fully outside, without granting a reward or reporting collection. The placement stays spent for the current area load. Existing collection persistence still applies. The sandbox's painted 1-Up at (8, 12) was restored.
+
+The focused 1-Up regression passed in Godot 4.7.2 headless. It checks landing, reversal, pickup and popup, partial visibility at the boundary, disposal and no same-visit respawn. Motion is initial tuning and was not compared in Mesen.
+
+## 2026-11-06 - Level spawn limits
+
+Added a category-based spawn limit to BaseLevel and assigned the painted 1-Up spawner to power_up. The limit is one live item. A waiting spawner stays eligible and can activate when the previous actor exits the tree. The 1-Up and entity activity regressions passed headlessly. The 1-Up regression used two painted placements to verify waiting and activation after offscreen cleanup.
+
+## 2026-11-06 - Skip blocked painted spawns
+
+Changed EntitySpawner in scenes/entities/spawners/entity_spawner.gd to spend its attempt at camera activation, even when a full category or another failure prevents spawning. This replaces the earlier waiting rule so freeing a slot cannot cause a power-up to appear late on screen. The two-placement regression in tests/one_up_test.gd passed in Godot 4.7.2 headless. It verified that the second mushroom stayed absent after the slot freed and after the camera left and returned.
+
+## 2026-11-06 - Question-block 1-Up release
+
+Configured the leftmost lower question block of the second multi-block cluster in 1-1 at (106, 9) to release the shared 1-Up scene. PowerUp rises one tile before movement and collection begin. BaseLevel replaces the previous live power-up on a block release. Painted spawners keep the skip rule. The editor overlay previews the authored reward. Godot 4.7.2 headless editor import and focused question-block and 1-Up checks passed. The question-block check reported four ObjectDB leaks at exit. Rendered emergence and Mesen timing were not checked.
+
+## 2026-11-06 - Mushroom falling and emergence fidelity
+
+Mushroom uses the NES downward force of 61/256 pixel per frame squared at nominal 60 Hz and applies it after movement. The project retains its 300 px/s fall cap and Godot terrain collision. PowerUp reveals one row per four nominal frames and clips the sprite to the block's fixed top edge during the rise. The question-block and 1-Up headless checks passed. The question-block check reported four ObjectDB leaks at exit. Rendered comparison in Mesen remains open.

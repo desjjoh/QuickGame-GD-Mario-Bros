@@ -30,6 +30,8 @@
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/misc/flagpole-flag.png" id="flag_banner"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/tileset/Palette 1 (Ground and Stone).png" id="castle_art"]
 
+[ext_resource type="Texture2D" path="res://assets/palettes/castle/misc/green-mushroom.png" id="one_up"]
+
 [resource]
 script = ExtResource("1")
 display_name = "Castle"
@@ -38,6 +40,7 @@ terrain = ExtResource("2")
 decorations = ExtResource("3")
 entity_markers = ExtResource("4")
 texture_overrides = Dictionary[String, Texture2D]({
+"res://assets/palettes/overworld/misc/green-mushroom.png": ExtResource("one_up"),
 "res://assets/palettes/overworld/misc/flagpole-top.tres": ExtResource("flag_top"),
 "res://assets/palettes/overworld/misc/flagpole-pole.tres": ExtResource("flag_pole"),
 "res://assets/palettes/overworld/misc/flagpole-flag.png": ExtResource("flag_banner"),

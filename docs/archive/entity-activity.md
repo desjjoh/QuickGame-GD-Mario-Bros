@@ -37,3 +37,9 @@ This is a reusable foundation, not enemy AI or defeated-enemy persistence across
 entity_input_test checks default entity/block opt-out, explicit player/pipe scene opt-in, actual signal delivery/counts, duplicate prevention, runtime toggles, suspension/resume, polling gates and dead/shutdown cleanup. Existing controller, movement, pipe, death and title tests provide gameplay integration coverage. CPU time and retained memory have not been benchmarked for a large stage.
 
 entity_activity_test checks actual callback counts, input availability, hysteresis, stable placed-object identity/state, live sleeping collision, shared cosmetic phase on wake, independent suspension gates, moving-child enemy disposal, reentry rearming and runtime-unload cleanup.
+
+## Painted power-up spawners
+
+The 1-Up Spawner stamp creates an EntitySpawner when the area loads. On its first eligible camera activation, the spawner attempts to claim a power-up slot from BaseLevel. The level currently allows one live power-up. If two markers activate in the same camera pass, the first checked claims the slot. A blocked or failed attempt spends that placement's attempt for the current area load. Clearing the slot or moving the camera away and back cannot trigger a late spawn.
+
+Collection and offscreen disposal free the mushroom and release its slot on tree exit. Only collection records consumption, subject to the placement and level progress rules. An area reload creates a fresh placement unless saved progress marks it consumed. The separate EnemySpawner still follows its own reentry policy. Enemy and fireball limits and question-block power-up release remain future work.

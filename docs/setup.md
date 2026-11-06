@@ -6,7 +6,7 @@
 2. Press **F5** to run the game from the title screen.
 3. Press **Enter** or controller **Start** to load 1-1.
 
-Open `scenes/levels/test_level.tscn` and press **F6** to run the one-screen sandbox. The same scene serves as the title backdrop with gameplay disabled.
+Open `scenes/levels/test_level.tscn` and press **F6** to run the one-screen sandbox. The same scene serves as the title backdrop with gameplay disabled. In the sandbox, walk right to intercept the moving 1-Up mushroom to collect an extra life.
 
 ## Controls
 
@@ -27,3 +27,5 @@ Open `scenes/levels/worlds/world 1/1-1.tscn`. Expand **Areas → MainArea → La
 Paint question blocks on **EntityLayout**. Each placed block contains one coin.
 
 Paint a pipe stamp, then configure its destination on the area. To test area switching, enter the vertical pipe in 1-1 and walk into the sideways pipe in the secret area. See [configuration](configuration.md#areas-and-pipe-routes).
+
+In the 2D editor, painted question blocks show a translucent coin over the tile. Paint and erase blocks using the normal EntityLayout tools.

@@ -24,6 +24,7 @@
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/misc/flagpole-pole.tres" id="flag_pole"]
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/misc/flagpole-top.tres" id="flag_top"]
 [ext_resource type="Texture2D" uid="uid://c7psk8vqg64p0" path="res://assets/palettes/underground/ui/hud-coin.png" id="hud_coin"]
+[ext_resource type="Texture2D" uid="uid://djwa8a77btioc" path="res://assets/palettes/underground/misc/green-mushroom.png" id="one_up"]
 [ext_resource type="FontFile" uid="uid://cnagecrnf8opo" path="res://assets/palettes/underground/ui/alphabet-alt.fnt" id="title_accent"]
 [ext_resource type="Texture2D" uid="uid://b3asgrqfa0i4r" path="res://assets/palettes/underground/ui/start-title.png" id="title_card"]
 [ext_resource type="Texture2D" uid="uid://clblmsvsl46nd" path="res://assets/palettes/underground/ui/start-cursor.png" id="title_cursor"]
@@ -55,6 +56,7 @@ texture_overrides = Dictionary[String, Texture2D]({
 "res://assets/palettes/overworld/misc/flagpole-flag.png": ExtResource("flag_banner"),
 "res://assets/palettes/overworld/misc/flagpole-pole.tres": ExtResource("flag_pole"),
 "res://assets/palettes/overworld/misc/flagpole-top.tres": ExtResource("flag_top"),
+"res://assets/palettes/overworld/misc/green-mushroom.png": ExtResource("one_up"),
 "res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png": ExtResource("castle_art"),
 "res://assets/palettes/overworld/tileset/block.tres": ExtResource("art_16"),
 "res://assets/palettes/overworld/ui/hud-coin.png": ExtResource("hud_coin"),

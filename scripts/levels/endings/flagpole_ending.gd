@@ -207,7 +207,6 @@ func _show_grab_score() -> void:
 	var anchor := _pole.climb_bottom.global_position + Vector2(12, -12)
 	var popup = SCORE_POPUP.instantiate()
 	popup.position = _pole.to_local(anchor)
-	popup.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	_pole.add_child(popup)
 	_score_popup = popup
 	_popup_fraction = 255

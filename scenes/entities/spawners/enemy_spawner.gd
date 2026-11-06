@@ -11,8 +11,8 @@ var _armed: bool = true
 func _ready() -> void:
 	var ancestor := get_parent()
 	while ancestor != null:
-		if ancestor.has_method("register_enemy_spawner"):
-			ancestor.register_enemy_spawner(self)
+		if ancestor.has_method("register_spawner"):
+			ancestor.register_spawner(self)
 			return
 		ancestor = ancestor.get_parent()
 

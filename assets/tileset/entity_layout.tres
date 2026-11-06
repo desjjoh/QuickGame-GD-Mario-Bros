@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bpuii87lnqeh3" path="res://assets/tileset/previews/castle.png" id="castle"]
 [ext_resource type="Texture2D" uid="uid://dy6q3mjh18ndw" path="res://assets/palettes/overworld/tileset/Palette 4 (Coins and Interactibles).png" id="coin"]
 [ext_resource type="Texture2D" uid="uid://ck8w2kxc4e3gx" path="res://assets/tileset/previews/flagpole.png" id="flagpole"]
+[ext_resource type="Texture2D" uid="uid://c0ougu8jkdm8p" path="res://assets/palettes/overworld/misc/green-mushroom.png" id="one_up"]
 [ext_resource type="Texture2D" uid="uid://b87hu6kqi013q" path="res://assets/tileset/previews/sideways_pipe_entrance.png" id="side"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_brick"]
@@ -66,6 +67,12 @@ margins = Vector2i(0, 16)
 0:0/0 = 0
 0:0/0/custom_data_0 = "coin"
 
+[sub_resource type="TileSetAtlasSource" id="one_up"]
+resource_name = "1-Up Spawner"
+texture = ExtResource("one_up")
+0:0/0 = 0
+0:0/0/custom_data_0 = "one_up_spawner"
+
 [resource]
 custom_data_layer_0/name = "entity_id"
 custom_data_layer_0/type = 4
@@ -77,3 +84,4 @@ sources/4 = SubResource("Side")
 sources/5 = SubResource("flagpole")
 sources/6 = SubResource("castle")
 sources/7 = SubResource("coin")
+sources/8 = SubResource("one_up")

@@ -19,6 +19,8 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/coin/coin.tscn" id="coin"]
 [ext_resource type="PackedScene" path="res://scenes/levels/endings/flagpole_ending.tscn" id="ending"]
 [ext_resource type="PackedScene" path="res://scenes/entities/climbables/flagpole/flagpole.tscn" id="flagpole"]
+[ext_resource type="PackedScene" path="res://scenes/entities/spawners/one_up_spawner.tscn" id="one_up"]
+[ext_resource type="PackedScene" path="res://scenes/entities/powerups/one_up_mushroom.tscn" id="one_up_reward"]
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/sideways_pipe_entrance.tscn" id="side_pipe"]
 [ext_resource type="Script" uid="uid://cd6coksrndgvl" path="res://scripts/levels/transport_destination.gd" id="transport_destination"]
 [ext_resource type="Script" uid="uid://bw6vhx3gvr1o" path="res://scripts/levels/transport_placement.gd" id="transport_placement"]
@@ -61,6 +63,7 @@ entity_scenes = Dictionary[StringName, PackedScene]({
 &"castle": ExtResource("castle"),
 &"coin": ExtResource("coin"),
 &"flagpole": ExtResource("flagpole"),
+&"one_up_spawner": ExtResource("one_up"),
 &"pipe_entrance": ExtResource("13_pipe"),
 &"question_block": ExtResource("6_question"),
 &"sideways_pipe_entrance": ExtResource("side_pipe")
@@ -69,6 +72,9 @@ entity_scenes = Dictionary[StringName, PackedScene]({
 [node name="MainArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="0" unique_id=250103957]
 process_physics_priority = 110
 transport_points = Array[ExtResource("transport_placement")]([SubResource("Point_entrance"), SubResource("Point_secret_exit")])
+question_block_rewards = Dictionary[Vector2i, PackedScene]({
+Vector2i(106, 9): ExtResource("one_up_reward")
+})
 theme = ExtResource("11_overworld")
 
 [node name="DecorationLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="0" unique_id=1428866671]
@@ -80,7 +86,7 @@ tile_map_data = PackedByteArray("AAAAAA0AAAAAAAAAAAAAAA4AAAAAAAAAAAABAA0AAAAAAAA
 tile_set = ExtResource("9_3ay3b")
 
 [node name="EntityLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="2" unique_id=257943121]
-tile_map_data = PackedByteArray("AAAQAAkAAQAAAAAAAAAUAAkAAAAAAAAAAAAWAAkAAAAAAAAAAAAXAAkAAQAAAAAAAAAYAAkAAAAAAAAAAAA5AAkAAwAAAAAAAABNAAkAAAAAAAAAAABPAAkAAAAAAAAAAABOAAkAAQAAAAAAAABQAAUAAAAAAAAAAABRAAUAAAAAAAAAAABSAAUAAAAAAAAAAABTAAUAAAAAAAAAAABUAAUAAAAAAAAAAABVAAUAAAAAAAAAAABWAAUAAAAAAAAAAABXAAUAAAAAAAAAAABeAAkAAAAAAAAAAABdAAUAAAAAAAAAAABcAAUAAAAAAAAAAABbAAUAAAAAAAAAAABeAAUAAQAAAAAAAABkAAkAAAAAAAAAAABlAAkAAAAAAAAAAABqAAkAAQAAAAAAAABtAAkAAQAAAAAAAABtAAUAAQAAAAAAAABwAAkAAQAAAAAAAAB2AAkAAAAAAAAAAAB5AAUAAAAAAAAAAAB6AAUAAAAAAAAAAAB7AAUAAAAAAAAAAACAAAUAAAAAAAAAAACDAAUAAAAAAAAAAACBAAkAAAAAAAAAAACCAAkAAAAAAAAAAACBAAUAAQAAAAAAAACCAAUAAQAAAAAAAACiAAsAAwAAAAAAAACnAAkAAAAAAAAAAACoAAkAAAAAAAAAAACqAAkAAAAAAAAAAACpAAkAAQAAAAAAAADEAAIABQAAAAAAAADJAAgABgAAAAAAAAAVAAkAAQAAAAAAAAAWAAUAAQAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAQAAkAAQAAAAAAAAAUAAkAAAAAAAAAAAAWAAkAAAAAAAAAAAAXAAkAAQAAAAAAAAAYAAkAAAAAAAAAAAA5AAkAAwAAAAAAAABNAAkAAAAAAAAAAABPAAkAAAAAAAAAAABOAAkAAQAAAAAAAABQAAUAAAAAAAAAAABRAAUAAAAAAAAAAABSAAUAAAAAAAAAAABTAAUAAAAAAAAAAABUAAUAAAAAAAAAAABVAAUAAAAAAAAAAABWAAUAAAAAAAAAAABXAAUAAAAAAAAAAABeAAkAAAAAAAAAAABdAAUAAAAAAAAAAABcAAUAAAAAAAAAAABbAAUAAAAAAAAAAABeAAUAAQAAAAAAAABkAAkAAAAAAAAAAABlAAkAAAAAAAAAAABtAAkAAQAAAAAAAABtAAUAAQAAAAAAAABwAAkAAQAAAAAAAAB2AAkAAAAAAAAAAAB5AAUAAAAAAAAAAAB6AAUAAAAAAAAAAAB7AAUAAAAAAAAAAACAAAUAAAAAAAAAAACDAAUAAAAAAAAAAACBAAkAAAAAAAAAAACCAAkAAAAAAAAAAACBAAUAAQAAAAAAAACCAAUAAQAAAAAAAACiAAsAAwAAAAAAAACnAAkAAAAAAAAAAACoAAkAAAAAAAAAAACqAAkAAAAAAAAAAACpAAkAAQAAAAAAAADEAAIABQAAAAAAAADJAAgABgAAAAAAAAAVAAkAAQAAAAAAAAAWAAUAAQAAAAAAAAAJAAwACAAAAAAAAABqAAkAAQAAAAAAAAA=")
 tile_set = ExtResource("10_hppjq")
 
 [node name="Camera2D" parent="Areas/MainArea" index="3" unique_id=254826152]
