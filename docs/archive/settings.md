@@ -136,7 +136,7 @@ User requested renaming the project to QuickGame-Godot2D (Super Mario Bros). Upd
 
 ## Platformer project identity — 2026-11-02
 
-At the user's request, application/config/name changed from QuickGame-Godot2D (Super Mario Bros) to QuickGame-Godot2D (Platformer). This supersedes the earlier display-name decision: the tutorial covers multiple games. README uses the broader identity; game-specific implementation references remain accurate. The workspace folder is unchanged. The default user:// directory follows the new display name; no saved-data migration was performed.
+At the user's request, application/config/name changed from QuickGame-Godot2D (Super Mario Bros) to QuickGAME-GD Mario Bros. This supersedes the earlier display-name decision: the tutorial covers multiple games. README uses the broader identity; game-specific implementation references remain accurate. The workspace folder is unchanged. The default user:// directory follows the new display name; no saved-data migration was performed.
 
 ## Shared layout grid — 2026-11-02
 
@@ -240,7 +240,7 @@ Requested music lifecycle assigns Overworld Music to assets/soundtrack/01. Groun
 
 ## Area music configuration removed - 2026-11-03
 
-At the user's request, remove the AreaTheme Music/Music Loop/Music Volume Db fields and BaseLevelArea Music Enabled property together with area playback. Remove soundtrack resource assignments and test fixture mute overrides. This supersedes the earlier area music configuration; retained audio assets are unassigned. Generic area entry/exit and entity SFX remain. No Project Settings or import settings changed. Future restoration prerequisites are tracked in [backlog](backlog.md).
+At the user's request, remove the AreaTheme Music/Music Loop/Music Volume Db fields and BaseLevelArea Music Enabled property together with area playback. Remove soundtrack resource assignments and test fixture mute overrides. This supersedes the earlier area music configuration; retained audio assets are unassigned. Generic area entry/exit and entity SFX remain. No Project Settings or import settings changed. Future restoration prerequisites are tracked in [backlog](../backlog.md).
 
 ## Pit death configuration - 2026-11-03
 

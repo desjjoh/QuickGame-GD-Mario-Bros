@@ -48,7 +48,7 @@ For scene cleanup, also check scene/resource paths and declared-resource usage, 
 
 Headless tests do not prove subjective movement feel, display frame pacing, speaker output, or renderer performance. A Forward+ render smoke check can catch scene/material failures and layering regressions, but interactive editor playtesting remains useful. No exact NES trace qualification is claimed.
 
-Integration tests retain `tests/fixtures/silent_game.tscn` and `silent_level.tscn` as shared inherited fixtures, now without music overrides. area_music_test retains its existing entry point but checks silent area lifecycle behavior; it no longer decodes soundtrack assets. Music playback and audible-loop qualification are deferred in the [backlog](backlog.md).
+Integration tests retain `tests/fixtures/silent_game.tscn` and `silent_level.tscn` as shared inherited fixtures, now without music overrides. area_music_test retains its existing entry point but checks silent area lifecycle behavior; it no longer decodes soundtrack assets. Music playback and audible-loop qualification are deferred in the [backlog](../backlog.md).
 
 ## Global transition milestone - 2026-11-03
 

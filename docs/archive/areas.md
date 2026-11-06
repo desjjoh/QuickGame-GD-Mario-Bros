@@ -6,7 +6,7 @@ Only the occupied area's runtime content remains loaded. Area roots, Arrival/End
 
 BaseLevel calls `enter_area()` only when an area becomes occupied, after loading content and selecting its camera. It calls `exit_area()` through unload and on level shutdown; tree removal is a cleanup fallback. Entry/exit are idempotent and maintain is_active. Loading a destination for validation does not activate it.
 
-Area music is currently removed pending suitable sound files. Areas create no soundtrack player, and themes expose no music configuration. Entity sound effects remain independent and enabled. See the [music restoration backlog](backlog.md#restore-area-music-when-suitable-sound-files-are-available).
+Area music is currently removed pending suitable sound files. Areas create no soundtrack player, and themes expose no music configuration. Entity sound effects remain independent and enabled. See the [music restoration backlog](../backlog.md).
 
 ## Editor and runtime
 

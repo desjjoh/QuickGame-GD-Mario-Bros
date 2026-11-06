@@ -28,7 +28,7 @@ BaseEntity resolves its child Sprite2D textures and BaseState's static sprite te
 
 ## Current stage migration
 
-Main-area content stays at its original world positions. LowerArea currently sits at (896,240) after a user move; its camera is local (128,120), world (1024,360), and its arrival marker is local (32,48), world (928,288). Lower cells were converted from level coordinates to area-local coordinates with no world-position or tile-ID changes. MainArea's camera stays enabled and LowerArea's stays disabled. Theme selection does not change backgrounds or shader tuning. Area music is deferred; see the [backlog](backlog.md).
+Main-area content stays at its original world positions. LowerArea currently sits at (896,240) after a user move; its camera is local (128,120), world (1024,360), and its arrival marker is local (32,48), world (928,288). Lower cells were converted from level coordinates to area-local coordinates with no world-position or tile-ID changes. MainArea's camera stays enabled and LowerArea's stays disabled. Theme selection does not change backgrounds or shader tuning. Area music is deferred; see the [backlog](../backlog.md).
 
 ## Verification
 
