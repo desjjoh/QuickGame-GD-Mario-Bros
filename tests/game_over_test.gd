@@ -86,7 +86,7 @@ func _ready() -> void:
 	await begin_final_death()
 	var card := game.get_node("UI/ScreenContainer/TransitionScreen").presentation as Control
 	assert(card.get_node("Message").text == "GAME OVER" and not card.has_node("Lives"))
-	assert(card.audio.playing and card.audio.volume_db == -8.0)
+	assert(card.audio.playing and card.audio.volume_db == 0.0)
 	assert(not (card.audio.stream as AudioStreamWAV).loop_mode)
 	assert(GameHandler.current_level == null)
 	assert(GameHandler.get_area_progress(key, &"probe").collected_coins.size() == 1)

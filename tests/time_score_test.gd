@@ -71,6 +71,7 @@ func _ready() -> void:
 		assert(hud.get_node("TimeValue").text == "%03d" % (12 - frame))
 		assert(hud.get_node("Score").text == " %06d" % (1050 + 50 * frame))
 		assert(ending.phase == FlagpoleEndingPresentation.Phase.SCORE)
+	assert(SoundHandler._square_two.stream == SoundHandler.get_sound(&"timer_tick"))
 	assert(completed.is_empty())
 	await ticks()
 	assert(completed == [ticket])
@@ -148,6 +149,6 @@ func _ready() -> void:
 	game.free()
 	await ticks(2)
 	print(
-		"PASS: 50 points per timer unit per tick, HUD updates, preserved contact time, zero/disabled skip, completion gate, cancellation, stale callbacks, reentrant level replacement and score saturation; no counting audio."
+		"PASS: 50 points per timer unit per tick, HUD updates, preserved contact time, zero/disabled skip, completion gate, cancellation, stale callbacks, reentrant level replacement and score saturation; synthesized counting audio uses the shared voice."
 	)
 	get_tree().quit()

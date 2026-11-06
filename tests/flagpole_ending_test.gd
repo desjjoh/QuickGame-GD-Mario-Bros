@@ -209,6 +209,12 @@ func _ready() -> void:
 	await wait_phase(ending, FlagpoleEndingPresentation.Phase.WAIT)
 	assert(level.player == null and GameHandler.current_player == null)
 	assert(ending._audio != null and ending._audio.playing)
+	assert(ending._pulse_audio != null and ending._pulse_audio.playing)
+	SoundHandler.play_reward(&"timer_tick")
+	assert(ending._pulse_audio.volume_linear == 0.0)
+	assert(ending._audio.playing and ending._pulse_audio.playing)
+	SoundHandler.stop_reward()
+	assert(ending._pulse_audio.volume_linear == 1.0)
 	while ending._audio.playing:
 		assert(ending._wait_frames == 0)
 		await ticks()

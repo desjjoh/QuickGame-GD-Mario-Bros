@@ -1,9 +1,6 @@
 extends Node
 ## Global game ownership and in-memory session data. No disk persistence yet.
 
-const COIN_SOUND = preload("res://assets/sfx/smb_coin.wav")
-const EXTRA_LIFE_SOUND = preload("res://assets/sfx/smb_1-up.wav")
-const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
 
 enum GameFlow { DETACHED, TITLE, STARTING, PLAYING, GAME_OVER, COMPLETING }
 
@@ -67,16 +64,9 @@ var transitions: Variant
 # Global world-progress policy; session counters/lives are unaffected.
 var reset_progress_on_death: bool = false
 var _current_level_scene: PackedScene
-var _square_two := AudioStreamPlayer.new()
-var _coin_one_shot: AudioStream
-var _extra_life_one_shot: AudioStream
 
 
 func _ready() -> void:
-	_square_two.name = "Square2Sfx"
-	add_child(_square_two)
-	_coin_one_shot = SoundEffectMix.one_shot_copy(COIN_SOUND)
-	_extra_life_one_shot = SoundEffectMix.one_shot_copy(EXTRA_LIFE_SOUND)
 	player_status.changed_value.connect(_on_player_status_changed)
 	transitions = load("res://scripts/handlers/transition_coordinator.gd").new()
 	animation_clock.name = "AnimationClock"
@@ -97,7 +87,7 @@ func detach_game(game: Node) -> void:
 	if current_game != game:
 		return
 	_detaching = true
-	_square_two.stop()
+	SoundHandler.stop_reward()
 	transitions.detach_game(game)
 	_clear_title()
 	_first_level = null
@@ -228,16 +218,7 @@ func award_coin() -> void:
 	if extra_life:
 		set_lives(player_status.lives + 1)
 	add_score(200)
-	_play_coin_reward(extra_life)
-
-
-func _play_coin_reward(extra_life: bool) -> void:
-	# The reference protects the extra-life sound from later square-2 requests.
-	if _square_two.playing and _square_two.stream == _extra_life_one_shot:
-		return
-	_square_two.stream = _extra_life_one_shot if extra_life else _coin_one_shot
-	_square_two.volume_db = SOUND_MIX.volume_for(_square_two.stream)
-	_square_two.play()
+	SoundHandler.play_reward(&"extra_life" if extra_life else &"coin")
 
 
 func set_lives(value: int) -> void:
@@ -254,7 +235,7 @@ func set_top_score(value: int) -> void:
 
 ## Reset the run; app-session top score and authored configuration survive.
 func clear_session() -> void:
-	_square_two.stop()
+	SoundHandler.stop_reward()
 	current_stage_index = -1
 	_start_level = null
 	_session.clear()

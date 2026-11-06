@@ -1,7 +1,7 @@
 [gd_resource type="TileSet" format=3 uid="uid://g7pmg7w6xn86"]
 
-[ext_resource type="Texture2D" path="res://assets/palettes/underground/tileset/Palette 3 (Pipes and Scenery).png" id="art_1"]
-[ext_resource type="Texture2D" path="res://assets/palettes/underground/tileset/Palette 1 (Ground and Stone).png" id="art_2"]
+[ext_resource type="Texture2D" uid="uid://c5rlcoc6354mt" path="res://assets/palettes/underground/tileset/Palette 3 (Pipes and Scenery).png" id="art_1"]
+[ext_resource type="Texture2D" uid="uid://rojclmop6o2k" path="res://assets/palettes/underground/tileset/Palette 1 (Ground and Stone).png" id="art_2"]
 
 [sub_resource type="TileSetAtlasSource" id="Source_0"]
 resource_name = "Solid ground"

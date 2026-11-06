@@ -1,24 +1,22 @@
-[gd_resource type="TileSet" format=3]
+[gd_resource type="TileSet" format=3 uid="uid://p7ufagqdbq1u"]
 
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/tileset/Palette 1 (Ground and Stone).png" id="1_brick"]
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/tileset/Palette 4 (Coins and Interactibles).png" id="2_question"]
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/tileset/Palette 1 (Ground and Stone).png" id="3_alternate"]
-[ext_resource type="Texture2D" path="res://assets/tileset/castle/previews/pipe_entrance.png" id="4_pipe"]
-[ext_resource type="Texture2D" path="res://assets/tileset/castle/previews/castle.png" id="castle"]
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/tileset/Palette 4 (Coins and Interactibles).png" id="coin"]
-[ext_resource type="Texture2D" path="res://assets/tileset/castle/previews/flagpole.png" id="flagpole"]
-[ext_resource type="Texture2D" path="res://assets/tileset/castle/previews/sideways_pipe_entrance.png" id="side"]
+[ext_resource type="Texture2D" uid="uid://cg7iopsn3q2hb" path="res://assets/palettes/castle/tileset/Palette 1 (Ground and Stone).png" id="3_alternate"]
+[ext_resource type="Texture2D" uid="uid://cxs85m5t66ueq" path="res://assets/tileset/castle/previews/pipe_entrance.png" id="4_pipe"]
+[ext_resource type="Texture2D" uid="uid://c0wlckxrx6c0w" path="res://assets/tileset/castle/previews/castle.png" id="castle"]
+[ext_resource type="Texture2D" uid="uid://cgxilwrkd7fx5" path="res://assets/palettes/castle/tileset/Palette 4 (Coins and Interactibles).png" id="coin"]
+[ext_resource type="Texture2D" uid="uid://cre2hc0wsvd7k" path="res://assets/tileset/castle/previews/flagpole.png" id="flagpole"]
+[ext_resource type="Texture2D" uid="uid://dwygpw8s4jkf" path="res://assets/tileset/castle/previews/sideways_pipe_entrance.png" id="side"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_brick"]
 resource_name = "Brick entity"
-texture = ExtResource("1_brick")
+texture = ExtResource("3_alternate")
 margins = Vector2i(16, 0)
 0:0/0 = 0
 0:0/0/custom_data_0 = "brick"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_question"]
 resource_name = "Question block entity"
-texture = ExtResource("2_question")
+texture = ExtResource("coin")
 0:0/0 = 0
 0:0/0/custom_data_0 = "question_block"
 

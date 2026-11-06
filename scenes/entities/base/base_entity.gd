@@ -1,7 +1,6 @@
 class_name BaseEntity
 extends Node2D
 
-const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
 ## Shared scene root for characters, pickups, and world objects.
 ## Specialized entities own their physics bodies as child nodes.
 
@@ -24,7 +23,7 @@ const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
 
 var _activity_geometry: Array[WeakRef] = []
 var _controller_input_ready: bool = false
-var _active_sound_effect: AudioStreamPlayer2D
+var _active_sound_effect: AudioStreamPlayer
 var is_shutdown: bool = false
 var gameplay_suspended: bool = false
 var activity_suspended: bool = false
@@ -99,16 +98,15 @@ func get_effects_parent() -> Node2D:
 	return self
 
 
-func play_sound_effect(sound: AudioStream) -> AudioStreamPlayer2D:
+func play_sound_effect(sound: AudioStream) -> AudioStreamPlayer:
 	if sound == null or is_shutdown:
 		return null
 	if is_instance_valid(_active_sound_effect):
 		_active_sound_effect.stop()
 		_active_sound_effect.queue_free()
-	var audio := AudioStreamPlayer2D.new()
+	var audio := AudioStreamPlayer.new()
 	_active_sound_effect = audio
 	audio.stream = sound
-	audio.volume_db = SOUND_MIX.volume_for(sound)
 	get_effects_parent().add_child(audio)
 	audio.finished.connect(audio.queue_free)
 	audio.play()

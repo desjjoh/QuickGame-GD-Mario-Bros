@@ -39,7 +39,7 @@ Acceptance checks:
 
 ## Restore area music when suitable sound files are available
 
-Status: deferred at the user's request on 2026-11-02. Suitable soundtrack files are not ready. Area music playback, theme music fields/assignments and the Music Enabled override have been removed. Generic area entry/exit and active-area tracking remain. The unassigned area tracks were removed during asset cleanup. Entity sound effects remain enabled.
+Status: Overworld and Underground loops are implemented. Remaining work includes listening against Mesen, and adding further track choices.
 
 ### Asset prerequisites
 
@@ -126,4 +126,4 @@ Silent timer-to-score conversion is implemented. Add a suitable isolated Sfx_Tim
 
 ## Synthesized sound effects
 
-Create our own chiptune effects from a shared set of pulse, triangle, and noise voices. Keep each effect's waveform, pitch sequence, envelope, and timing reproducible so the cues sound like they belong to the same game. Start with the timer ticker using a roughly 981 Hz, 50% duty-cycle pulse with a six-frame duration. Request it on four consecutive frames out of every eight through the shared second-pulse playback voice and preserve 1 UP priority. Compare the result with the reference in Mesen. Measure and trim each new effect through the shared mix, verify playback, and record the gain in the audio guide.
+Create our own chiptune effects from a shared set of pulse, triangle, and noise voices. Keep each effect's waveform, pitch sequence, envelope, and timing reproducible so the cues sound like they belong to the same game. The timer ticker is implemented. Compare its sound and loudness with the reference in Mesen before using it as the basis for additional effects. Measure and trim each new effect through the shared mix, verify playback, and record the gain in the audio guide.

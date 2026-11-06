@@ -1,6 +1,6 @@
-[gd_resource type="AtlasTexture" load_steps=2 format=3]
+[gd_resource type="AtlasTexture" format=3 uid="uid://bpbu47vnu0o60"]
 
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 4 (Coins and Interactibles).png" id="1"]
+[ext_resource type="Texture2D" uid="uid://dy6q3mjh18ndw" path="res://assets/palettes/overworld/tileset/Palette 4 (Coins and Interactibles).png" id="1"]
 
 [resource]
 atlas = ExtResource("1")

@@ -1,8 +1,8 @@
 [gd_resource type="TileSet" format=3 uid="uid://58ym0wu30sv7"]
 
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 3 (Pipes and Scenery).png" id="art_1"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 2 (Water and Sky).png" id="art_2"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png" id="art_3"]
+[ext_resource type="Texture2D" uid="uid://248ye63jfgud" path="res://assets/palettes/overworld/tileset/Palette 3 (Pipes and Scenery).png" id="art_1"]
+[ext_resource type="Texture2D" uid="uid://b773oa4q6281c" path="res://assets/palettes/overworld/tileset/Palette 2 (Water and Sky).png" id="art_2"]
+[ext_resource type="Texture2D" uid="uid://craxm1r4g00kk" path="res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png" id="art_3"]
 
 [sub_resource type="TileSetAtlasSource" id="Source_0"]
 resource_name = "Bush parts"
@@ -10,6 +10,18 @@ texture = ExtResource("art_1")
 0:1/0 = 0
 1:1/0 = 0
 2:1/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="Source_15"]
+resource_name = "Castle parts"
+texture = ExtResource("art_3")
+margins = Vector2i(48, 0)
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="Source_3"]
 resource_name = "Hill parts"
@@ -30,18 +42,6 @@ texture = ExtResource("art_2")
 0:1/0 = 0
 1:1/0 = 0
 2:1/0 = 0
-
-[sub_resource type="TileSetAtlasSource" id="Source_15"]
-resource_name = "Castle parts"
-texture = ExtResource("art_3")
-margins = Vector2i(48, 0)
-1:0/0 = 0
-2:0/0 = 0
-3:0/0 = 0
-0:1/0 = 0
-1:1/0 = 0
-2:1/0 = 0
-3:1/0 = 0
 
 [resource]
 sources/0 = SubResource("Source_0")

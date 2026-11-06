@@ -87,7 +87,7 @@ func run_checks() -> void:
 	assert(first.calls == ["enter"])
 	assert(one.sprite.modulate == Color.RED)
 	assert(one.animation_player.current_animation == "idle")
-	assert(one.find_children("*", "AudioStreamPlayer2D", false, false).size() == 1)
+	assert(one.find_children("*", "AudioStreamPlayer", false, false).size() == 1)
 	var lifecycle_events: Array[String] = []
 	first.exited.connect(func(): lifecycle_events.append("first_exited"))
 	second.entered.connect(func(): lifecycle_events.append("second_entered"))
@@ -111,8 +111,8 @@ func run_checks() -> void:
 	assert(first.calls == ["enter", "input", "physics", "update", "exit"])
 	assert(second.calls == ["enter"])
 	assert(lifecycle_events == ["first_exited", "second_entered", "changed"])
-	assert(one.find_children("*", "AudioStreamPlayer2D", false, false).size() == 2)
-	var audio: AudioStreamPlayer2D = one.find_children("*", "AudioStreamPlayer2D", false, false)[0]
+	assert(one.find_children("*", "AudioStreamPlayer", false, false).size() == 2)
+	var audio: AudioStreamPlayer = one.find_children("*", "AudioStreamPlayer", false, false)[0]
 	assert(
 		not audio.playing and audio.is_queued_for_deletion(),
 		"New effects must stop the previous entity sound immediately."
@@ -133,7 +133,7 @@ func run_checks() -> void:
 	machine.stop()
 	assert(machine.current_state == null and second.calls.count("exit") == 1)
 	assert(machine.start() and machine.current_state == first)
-	var sounds_before := one.find_children("*", "AudioStreamPlayer2D", false, false).size()
+	var sounds_before := one.find_children("*", "AudioStreamPlayer", false, false).size()
 	var exits_before := first.calls.count("exit")
 	one.shutdown()
 	one.shutdown()
@@ -143,10 +143,10 @@ func run_checks() -> void:
 	assert(not ControllerHandler.input_received.is_connected(machine.process_input))
 	assert(not one.animation_player.animation_finished.is_connected(machine.on_animation_finished))
 	assert(
-		one.find_children("*", "AudioStreamPlayer2D", false, false).size() == sounds_before,
+		one.find_children("*", "AudioStreamPlayer", false, false).size() == sounds_before,
 		"Shutdown must skip exit presentation."
 	)
-	for effect: AudioStreamPlayer2D in one.find_children("*", "AudioStreamPlayer2D", false, false):
+	for effect: AudioStreamPlayer in one.find_children("*", "AudioStreamPlayer", false, false):
 		assert(not effect.playing)
 	var calls_after := first.calls.duplicate()
 	one._process(0.016)

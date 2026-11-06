@@ -18,6 +18,7 @@ var entity_persistence: Dictionary[String, bool] = {}
 var runtime_loaded: bool = true
 var is_active: bool = false
 @export var area_id: StringName
+@export var background_music: MusicHandler.Track = MusicHandler.Track.OVERWORLD
 @export var transport_points: Array[TransportPlacement] = []
 var _transport_cells: Dictionary[Vector2i, StringName] = {}
 

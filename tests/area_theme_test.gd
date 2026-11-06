@@ -77,8 +77,8 @@ func _ready() -> void:
 		await get_tree().physics_frame
 	assert(GameHandler.player_status.coins == 99 and GameHandler.player_status.score == 200)
 	assert(GameHandler.player_status.lives == 2)
-	var reward_voice := GameHandler.get_node("Square2Sfx") as AudioStreamPlayer
-	assert(reward_voice.playing and reward_voice.stream == GameHandler._coin_one_shot)
+	var reward_voice := SoundHandler.get_node("Square2Sfx") as AudioStreamPlayer
+	assert(reward_voice.playing and reward_voice.stream == SoundHandler.get_sound(&"coin"))
 	assert(level.request_area_transfer(&"lower"))
 	await get_tree().process_frame
 	assert(lower.runtime_loaded and not main.runtime_loaded)
@@ -239,12 +239,12 @@ func _ready() -> void:
 	assert(pickups == [player])
 	assert(GameHandler.player_status.coins == 0 and GameHandler.player_status.score == 400)
 	assert(GameHandler.player_status.lives == 3)
-	assert(reward_voice.playing and reward_voice.stream == GameHandler._extra_life_one_shot)
+	assert(reward_voice.playing and reward_voice.stream == SoundHandler.get_sound(&"extra_life"))
 	assert((reward_voice.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED)
 	GameHandler.award_coin()
 	assert(GameHandler.player_status.coins == 1 and GameHandler.player_status.score == 600)
 	assert(GameHandler.player_status.lives == 3)
-	assert(reward_voice.playing and reward_voice.stream == GameHandler._extra_life_one_shot)
+	assert(reward_voice.playing and reward_voice.stream == SoundHandler.get_sound(&"extra_life"))
 	assert(lower_coin.state_machine.current_state.name == &"Collected")
 	assert(not lower_coin.sprite.visible and not lower_coin.get_node("Pickup").monitoring)
 	assert(not lower_coin.get_node("PaletteAnimation").enabled)

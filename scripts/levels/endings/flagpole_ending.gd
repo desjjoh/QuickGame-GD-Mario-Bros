@@ -2,8 +2,6 @@ class_name FlagpoleEndingPresentation
 extends LevelEndingPresentation
 
 const SCORE_POPUP = preload("res://scenes/components/presentation/score_popup.tscn")
-const AudioMix = preload("res://scripts/audio/sound_effect_mix.gd")
-const SOUND_MIX = preload("res://assets/audio/sound_effect_mix.tres")
 enum Phase { IDLE, DESCEND, DISMOUNT, WALK, SCORE, FIREWORKS, WAIT, FINISHED, RAISE_FLAG }
 signal phase_changed(phase: Phase)
 
@@ -11,7 +9,9 @@ signal phase_changed(phase: Phase)
 @export var flagpole_cell: Vector2i
 @export var castle_cell: Vector2i
 @export var flag_sound: AudioStream
+@export var flag_sound_cue: StringName
 @export var music: AudioStream
+@export var music_pulse: AudioStream
 @export var post_delay_frames: int = 126
 @onready var score_step: EndingStep = $Score
 @onready var fireworks_step: EndingStep = $Fireworks
@@ -30,6 +30,7 @@ var _castle: CastleEntity
 var _camera: LevelCamera
 var _state: PlayerFlagpoleEndingState
 var _audio: AudioStreamPlayer
+var _pulse_audio: AudioStreamPlayer
 var _wait_frames: int = 0
 var _generation: int = 0
 var _previous_climb_controls: bool = true
@@ -39,6 +40,9 @@ var _music_limit: int = 0
 
 
 func _ready() -> void:
+	SoundHandler.reward_voice_changed.connect(_set_reward_voice_occupied)
+	if flag_sound == null:
+		flag_sound = SoundHandler.get_sound(flag_sound_cue)
 	process_physics_priority = 50
 	set_physics_process(false)
 	score_step.finished.connect(_on_score_finished)
@@ -141,6 +145,7 @@ func _physics_process(delta: float) -> void:
 		_music_ticks += 1
 		if _music_ticks > _music_limit:
 			_audio.stop()
+			_stop_music_pulse()
 	if is_instance_valid(_player) and not _player.is_shutdown:
 		if not is_instance_valid(_pole) or _pole.is_shutdown:
 			_level.cancel_ending()
@@ -230,6 +235,25 @@ func _begin_music_and_unlock() -> void:
 	_play_audio(music)
 	if music != null:
 		_music_limit = maxi(60, ceili(music.get_length() * 60.0) + 60)
+		if music_pulse != null:
+			_pulse_audio = AudioStreamPlayer.new()
+			_pulse_audio.stream = SoundHandler.one_shot_copy(music_pulse)
+			add_child(_pulse_audio)
+			_set_reward_voice_occupied(SoundHandler.is_reward_voice_occupied())
+			_pulse_audio.play()
+
+
+func _set_reward_voice_occupied(occupied: bool) -> void:
+	if is_instance_valid(_pulse_audio):
+		# Keep the music timeline advancing while the reward cue owns this voice.
+		_pulse_audio.volume_linear = 0.0 if occupied else 1.0
+
+
+func _stop_music_pulse() -> void:
+	if is_instance_valid(_pulse_audio):
+		_pulse_audio.stop()
+		_pulse_audio.queue_free()
+		_pulse_audio = null
 
 
 func _play_audio(stream: AudioStream) -> void:
@@ -240,8 +264,7 @@ func _play_audio(stream: AudioStream) -> void:
 	if stream == null:
 		return
 	_audio = AudioStreamPlayer.new()
-	_audio.stream = AudioMix.one_shot_copy(stream)
-	_audio.volume_db = SOUND_MIX.volume_for(stream)
+	_audio.stream = SoundHandler.one_shot_copy(stream)
 	add_child(_audio)
 	_audio.play()
 
@@ -289,6 +312,7 @@ func cancel() -> void:
 	_generation += 1
 	active = false
 	set_physics_process(false)
+	_stop_music_pulse()
 	if is_instance_valid(_score_popup):
 		_score_popup.hide()
 		_score_popup.queue_free()

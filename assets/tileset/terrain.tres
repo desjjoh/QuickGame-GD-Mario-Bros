@@ -1,7 +1,7 @@
 [gd_resource type="TileSet" format=3 uid="uid://dy01p3ioyfiqi"]
 
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 3 (Pipes and Scenery).png" id="art_1"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png" id="art_2"]
+[ext_resource type="Texture2D" uid="uid://248ye63jfgud" path="res://assets/palettes/overworld/tileset/Palette 3 (Pipes and Scenery).png" id="art_1"]
+[ext_resource type="Texture2D" uid="uid://craxm1r4g00kk" path="res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png" id="art_2"]
 
 [sub_resource type="TileSetAtlasSource" id="Source_0"]
 resource_name = "Solid ground"

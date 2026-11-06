@@ -229,7 +229,7 @@ func _ready() -> void:
 	var game := make_game()
 	add_child(game)
 	var level := GameHandler.current_level
-	level.death_sound = load("res://assets/soundtrack/smb_mariodie.wav")
+	level.death_sound = load("res://assets/audio/music/death.wav")
 	assert(level.on_death(level.player))
 	assert(level._death_audio.playing and level._death_audio.get_parent() == level)
 	assert((level._death_audio.stream as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED)

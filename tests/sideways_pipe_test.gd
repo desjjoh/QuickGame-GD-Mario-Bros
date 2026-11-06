@@ -70,7 +70,7 @@ func _ready() -> void:
 	var sound_count := [0]
 	player.body.child_entered_tree.connect(
 		func(child: Node):
-			if child is AudioStreamPlayer2D:
+			if child is AudioStreamPlayer:
 				sound_count[0] += 1
 	)
 	Input.action_press(ControllerHandler.right_action)

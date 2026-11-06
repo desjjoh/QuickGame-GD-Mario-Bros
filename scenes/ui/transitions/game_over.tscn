@@ -1,7 +1,7 @@
 [gd_scene format=3]
 [ext_resource type="Script" path="res://scenes/ui/transitions/game_over.gd" id="script"]
 [ext_resource type="Theme" path="res://scenes/ui/hud/hud_theme.tres" id="theme"]
-[ext_resource type="AudioStream" path="res://assets/soundtrack/smb_gameover.wav" id="sound"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/game_over.wav" id="sound"]
 [node name="GameOver" type="Control"]
 layout_mode = 3
 anchors_preset = 15

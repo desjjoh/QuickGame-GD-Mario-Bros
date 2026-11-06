@@ -5,7 +5,7 @@
 [ext_resource type="Shader" uid="uid://cpscldbgpm4tf" path="res://scenes/levels/base/level_shadow.gdshader" id="2_shadow"]
 [ext_resource type="PackedScene" path="res://scenes/levels/areas/base_area.tscn" id="3_area"]
 
-[ext_resource type="AudioStream" path="res://assets/soundtrack/smb_mariodie.wav" id="death_sound"]
+[ext_resource type="AudioStream" path="res://assets/audio/music/death.wav" id="death_sound"]
 
 [ext_resource type="PackedScene" path="res://scenes/entities/climbables/flagpole/flagpole.tscn" id="flagpole"]
 

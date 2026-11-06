@@ -4,6 +4,7 @@ extends Node
 signal jumped
 
 @export var sound_effect: AudioStream
+@export var sound_cue: StringName
 
 @export var speed_thresholds := PackedFloat32Array([33.75, 60, 93.75, 105])
 @export var jump_speeds := PackedFloat32Array([240, 240, 240, 300, 300])

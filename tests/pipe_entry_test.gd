@@ -37,10 +37,10 @@ func _ready() -> void:
 	transient.endpoint_id = &"temporary"
 	level.get_node("Areas/LowerArea/Endpoints").add_child(transient)
 	pipe.destination_endpoint_id = &"temporary"
-	var sounds: Array[AudioStreamPlayer2D] = []
+	var sounds: Array[AudioStreamPlayer] = []
 	player.body.child_entered_tree.connect(
 		func(child: Node):
-			if child is AudioStreamPlayer2D:
+			if child is AudioStreamPlayer:
 				sounds.append(child)
 	)
 	assert(level.request_pipe_entry(pipe))

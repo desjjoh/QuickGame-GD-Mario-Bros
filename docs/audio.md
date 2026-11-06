@@ -1,51 +1,41 @@
-# Sound effect mix
+# Audio
 
-The shared playback mix lives in `assets/audio/sound_effect_mix.tres`. Open that Resource in Godot's Inspector to adjust Master Volume Db or the per-stream dictionary. BaseEntity applies the profile to state/action effects before playback. BaseLevel applies the same profile to its non-positional death player. This does not create an autoload, add an audio bus, or change source recordings, import settings or Project Settings.
+Sounds play at the audio player default gain. SoundHandler caches the generated cues and owns the shared reward voice. All audio playback is non-positional. Entity and transition players own their playback. Loop-disabled copies preserve the source stream.
 
-## Current balance
+## Level-clear timer tick
 
-| Sound | Per-stream trim | Effective playback gain with master -3 dB |
-| --- | --- | --- |
-| World coin | -1 dB | -4 dB |
-| 1 UP | -2 dB | -5 dB |
-| Small jump | 0 dB | -3 dB |
-| Bump | -4 dB | -7 dB |
-| Pipe | -1.5 dB | -4.5 dB |
-| Flag lowering | -2 dB | -5 dB |
-| Stage-clear music | -3 dB | -6 dB |
-| Death jingle | -5 dB | -8 dB |
-| Game-over jingle | -5 dB | -8 dB |
+The timer conversion requests a synthesized 981 Hz, 50% duty pulse for four physics ticks out of every eight. The one-shot is 100 ms long and shares the coin and 1 UP playback voice, with 1 UP protected. Its PCM peak is about -15 dBFS.
 
-Unknown effects receive the shared master gain without a per-stream trim. Negative dB values reduce level; zero trim keeps the source relative to master. Master changes all these paths together. Area soundtrack playback remains disabled/deferred; this profile does not normalize the unused music files.
+Coin and 1 UP are also synthesized on the shared voice. Coin uses two tones over 53 frames with one continuous decay and a 50% duty cycle. 1 UP uses six eight-frame tones with a fresh envelope on each tone and a 50% duty cycle.
 
-## Basis and limits
+## Jump and ceiling bump
 
-The initial balance analysis decoded the then-active assets through Godot playback at 44,100 Hz and measured source peak/average levels. Approximate active-sample RMS values before playback trims were jump -21.39 dBFS, bump -17.32, pipe -20.00 and death -16.27. Active samples here exclude magnitudes below one percent of that recording's peak; this is an engineering estimate, not a standardized perceptual loudness measurement. The skid's entire recording averaged -22.20 dBFS but its first 100ms averaged -18.06; repeated gameplay restarts that first burst every six 60Hz ticks. Its trim uses that audible burst rather than the full-file average. The initial trims clustered these estimates around -24.3 to -24.6 dBFS including the master gain. Following user listening feedback that skidding was too quiet, its trim was raised by 6 dB (from -3.5 to +2.5 dB); other effects retain their original balance. The current skid gain deliberately departs from that initial measurement target.
+Small Mario uses the jump_small and bump cues from SoundHandler. The generated streams approximate the original Square 1 pitch sweeps and volume changes on a 60 Hz timeline. They play through the existing player voice.
 
-Measurements guide the initial pass; different pitch, timbre, envelopes and repeated exposure still affect perceived loudness. The death jingle retains its musical dynamics. Existing positional entity attenuation is unchanged, while the death jingle remains non-positional. Speaker/headphone audition is needed for final preference tuning. No EQ, compression, pitch change, resampling or gameplay timing change was introduced.
+## Pipe entry and flagpole
 
-## Runtime copies and lifecycle
+SoundHandler generates the pipe entry cue from six swept pulse bursts and the flagpole cue from a descending-period pulse sweep. Pipe entry uses the player voice. The ending presentation plays the flagpole cue on its own voice.
 
-Loop-disabled private copies are made through `SoundEffectMix.one_shot_copy`. It retains the original source path in runtime metadata so the dictionary still matches bumps and pipe sounds after duplication. Nested copies keep that identity. Original resources and imports stay intact. Death resolves its gain from the original death_sound before playing its private one-shot copy.
+## Event music
 
-Starting another entity SFX still cancels its previous SFX. Sliding is silent: its Lost Levels-style repeat playback and scene/mix references were removed at the user's request. The source MP3 remains unused for possible later revisiting. The mix does not alter collision reactions, animation synchronization, death completion or transport gating.
+Stage clear, death, and game over each use a separate WAV under assets/audio/music. Run python scripts/build_music_tracks.py from the project root to regenerate them from note and duration data. The renderer approximates two pulse voices and a triangle voice. Death uses the alternate Square 1 pitch sweep and hardware-style pulse decay. The reference leaves its noise channel silent for this event. The existing ending, death, and game-over scenes own playback and completion timing.
 
-## Verification and listening
+Stage clear and game over step through the NES event pulse volume table at 60 Hz. Their short triangle notes use the 31-quarter-frame gate.
 
-sound_mix_test checks actual playback gains for all active sources and nested copies, original durations, one-shot loops, pitch, cancellation, the pipe state's private copy and BaseLevel death audio. Existing jump, slide, pipe and death regressions exercise their gameplay paths. Automated checks establish gain application, not subjective sound quality.
+During stage clear, the second pulse plays from stage_clear_pulse.wav alongside the main track. Reward cues temporarily take over that pulse voice while both music timelines keep advancing. The timer tick uses its original-style decay.
 
-Local previews are `.godot/validation/sfx-original-preview.wav` and `sfx-balanced-preview.wav`. Both play jump, bump, pipe, six 100ms skid bursts, then death, with equal pauses. These historical previews include the now-disabled skid sound and do not represent the current active mix. They use decoded recordings and playback gain equivalents, not spatial attenuation or the complete gameplay mix. Previews are ignored validation artifacts, not shipping assets.
+All generated music and effects map a full-volume pulse to 5,900 PCM units. Music uses one triangle scale across tracks. Cue envelopes and the pulse takeover determine relative levels during playback.
 
-GameOver presentation owns the non-positional smb_gameover.wav one-shot independently of the departing level. It uses the shared mix and stops on cancellation/removal. Stage completion waits for its finished state, with minimum presentation frames and bounded fallback. This trim follows the death-jingle policy and has not been subjectively normalized through speaker audition.
+## Background music
 
-## Flagpole ending audio
+Set Background Music on a level area to Overworld, Underground, or None. MusicHandler starts its non-positional loop once the area is revealed. Any area transition stops and restarts the music, including a transition within the same area. A direct relocation within the same area keeps the loop playing. Death, completion, and level shutdown stop the loop. Test Level and the title backdrop are silent.
 
-FlagpoleEndingPresentation plays smb_flagpole.wav on accepted contact, then replaces it with smb_stage_clear.wav at the scripted walk cue. Both use runtime one-shot copies and the shared mix; preceding player SFX are stopped at contact. The level-owned audio survives Mario's endpoint shutdown/removal. After the score/fireworks hooks and stage-clear playback finish, the final 126-tick hold runs before completion. This is event music only; deferred area background music is not re-enabled.
+Run python scripts/build_area_music.py to regenerate the two loops. Their pulse and triangle arrangements use reference note data. Overworld includes the reference noise-channel rhythm. Underground uses the pitched voices alone, as in the reference.
 
-## Ending balance refinement (2026-11-05)
+Overworld and Underground use the area pulse envelope and triangle counter. Their note periods and playback rate are unchanged.
 
-The two new ending sounds previously fell back to master-only gain. Source PCM measurements gave active-sample RMS of approximately -20.68 dBFS for smb_flagpole.wav and -18.29 dBFS for smb_stage_clear.wav, compared with jump -21.37 and death -16.24 before trims. The stage-clear trim is now -3 dB, giving approximately -24.29 dBFS after master, close to the existing target. Flag lowering uses -2 dB, approximately -25.68 dBFS after master, allowing an additional margin for its reported sharp/loud character. These are active-sample engineering estimates, not LUFS/perceptual normalization. Only the shared playback gain Resource changed; source samples, pitch, timing, loop/import settings and other gains remain intact.
+## Checking new sounds against the NES
 
-## World coin and extra-life audio
+When a cue sounds off-pitch, soft, or too sharp, compare it side by side with Mesen at the same playback level. First check the note periods and sample rate. Then check the channel waveform and duty cycle, attack and decay, note cutoff, and retrigger timing. For music, use the envelope and triangle counter rules for that track type. Area loops and event jingles can use the same pitches and still sound different.
 
-GameHandler's Square2Sfx player is a shared non-positional voice for coin and 1 UP effects. Both use loop-disabled copies and per-stream trims in the shared mix. Measured active-sample levels are approximately -24.5 dBFS for coin and -24.3 dBFS for 1 UP after gain. The rollover pickup plays 1 UP in place of the coin sound. Further coin pickups preserve the playing 1 UP until it finishes. Session reset and game detach stop playback. The voice uses the existing Master bus.
+Keep the shared PCM scale and default playback gain during this comparison. A headless playback test verifies that the cue reaches its player. The listening comparison verifies its sound.

@@ -17,6 +17,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+MusicHandler="*res://scripts/handlers/music_handler.gd"
+SoundHandler="*res://scripts/handlers/sound_handler.gd"
 GameHandler="*res://scripts/handlers/game_handler.gd"
 ControllerHandler="*res://scripts/handlers/controller_handler.gd"
 

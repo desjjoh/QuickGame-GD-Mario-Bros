@@ -13,11 +13,8 @@
 
 [ext_resource type="Script" path="res://scenes/player/mario (small)/states/jump.gd" id="11_jump"]
 [ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-small-air.png" id="12_jump_sprite"]
-[ext_resource type="AudioStream" path="res://assets/sfx/smb_jump-small.wav" id="13_jump_sound"]
-[ext_resource type="AudioStream" path="res://assets/sfx/smb_bump.wav" id="15_bump_sound"]
 
 [ext_resource type="Script" path="res://scripts/states/player/pipe_enter_state.gd" id="16_pipe_state"]
-[ext_resource type="AudioStream" path="res://assets/sfx/smb_pipe.wav" id="17_pipe_sound"]
 
 [ext_resource type="Script" path="res://scenes/player/mario (small)/states/dead.gd" id="dead_state"]
 [ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-dead.png" id="dead_sprite"]
@@ -45,7 +42,7 @@ death_state = NodePath("StateMachine/Dead")
 pipe_enter_state = NodePath("StateMachine/PipeEnter")
 texture_filter = 1
 script = ExtResource("2_script")
-ceiling_bump_sound = ExtResource("15_bump_sound")
+ceiling_bump_cue = &"bump"
 sprite = NodePath("Body/Sprite2D")
 animation_player = NodePath("Body/AnimationPlayer")
 
@@ -97,15 +94,12 @@ texture = ExtResource("6_nrfpf")
 callback_mode_process = 0
 libraries/ = SubResource("AnimationLibrary_mario")
 
-[node name="Jump" parent="Actions"]
-sound_effect = ExtResource("13_jump_sound")
-
 [node name="Presentation" type="Node" parent="."]
 
 [node name="WalkAnimation" parent="Presentation" unique_id=274353247 instance=ExtResource("10_cadence")]
 
 [node name="Jump" parent="Actions"]
-sound_effect = ExtResource("13_jump_sound")
+sound_cue = &"jump_small"
 
 [node name="Bonk" parent="Actions"]
 enabled = true
@@ -116,7 +110,7 @@ walk_animation_name = &"walk"
 walk_cadence = NodePath("../../Presentation/WalkAnimation")
 sprite_texture = ExtResource("6_nrfpf")
 stop_animation_on_enter = true
-enter_sound_effect = ExtResource("17_pipe_sound")
+entry_sound_cue = &"pipe"
 controls_enabled = false
 input_enabled = false
 frame_updates_enabled = false

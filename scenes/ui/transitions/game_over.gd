@@ -1,6 +1,4 @@
 extends Control
-const MIX = preload("res://assets/audio/sound_effect_mix.tres")
-const AudioMix = preload("res://scripts/audio/sound_effect_mix.gd")
 
 @export var sound: AudioStream
 @export var fallback_timeout: float = 10.0
@@ -14,8 +12,7 @@ func _ready() -> void:
 		_complete = true
 		set_physics_process(false)
 		return
-	audio.stream = AudioMix.one_shot_copy(sound)
-	audio.volume_db = MIX.volume_for(sound)
+	audio.stream = SoundHandler.one_shot_copy(sound)
 	audio.finished.connect(_on_audio_finished)
 	audio.play()
 
