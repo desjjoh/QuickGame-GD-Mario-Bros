@@ -99,7 +99,8 @@ func _ready() -> void:
 		var rise := previous_y - ending._score_popup.global_position.y
 		assert(rise >= 1.0 and rise <= 2.0)
 		assert(camera.global_position.x == locked_x)
-		assert(player.state_machine.current_state == player.flagpole_ending_state)
+		assert(player.state_machine.current_state == player.climb_state)
+		assert(player.scripted_motion_step.is_valid())
 	assert(player.body.global_position.y > 100 and player.body.velocity.x == 0)
 	assert(pole.get_node("Visuals/Flag").global_position.y > flag_start)
 	assert(ending._score_popup.global_position.y < popup_start)
@@ -112,7 +113,7 @@ func _ready() -> void:
 	for frame in range(90):
 		if ending.phase != FlagpoleEndingPresentation.Phase.DESCEND:
 			break
-		if player.body.global_position.y == player.flagpole_ending_state.stop_y:
+		if player.body.global_position.y == ending._descent_stop_y:
 			held_at_cutoff = true
 			assert(player.body.velocity == Vector2.ZERO)
 			assert(not player.animation_player.is_playing())
@@ -136,7 +137,7 @@ func _ready() -> void:
 	)
 	assert(player.body.global_position.x > pole.climb_bottom.global_position.x + 10)
 	var retired: WeakRef = weakref(player)
-	assert(player.flagpole_ending_state.endpoint == ending._castle.doorway.global_position)
+	assert(ending._walk_endpoint == ending._castle.doorway.global_position)
 	var walk_steps := 0
 	for frame in range(400):
 		walk_steps += 1

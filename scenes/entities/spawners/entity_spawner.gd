@@ -28,16 +28,16 @@ func _ready() -> void:
 		area.register_spawner(self)
 
 
-func update_activity(wake_region: Rect2, _sleep_region: Rect2, theme: AreaTheme) -> void:
+func update_activity(wake_region: Rect2, sleep_region: Rect2, theme: AreaTheme) -> void:
 	if is_shutdown or _attempted or _consumed or not wake_region.has_point(global_position):
 		return
 	_attempted = true
 	for offset in actor_offsets:
-		if not _spawn_actor(offset, theme):
+		if not _spawn_actor(offset, sleep_region, theme):
 			break
 
 
-func _spawn_actor(offset: Vector2, theme: AreaTheme) -> bool:
+func _spawn_actor(offset: Vector2, sleep_region: Rect2, theme: AreaTheme) -> bool:
 	if _level != null and not _level.has_spawn_capacity(spawn_category):
 		return false
 	var instance := actor_scene.instantiate() if actor_scene != null else null
@@ -54,6 +54,10 @@ func _spawn_actor(offset: Vector2, theme: AreaTheme) -> bool:
 	actor.visual_theme = theme
 	actor.consumed.connect(_on_actor_consumed.bind(actor), CONNECT_ONE_SHOT)
 	add_child(actor)
+	# A group activates at its marker. Members inside the outer buffer start
+	# together even when an offset puts one beyond the inner wake region.
+	if actor_offsets.size() > 1 and sleep_region.intersects(actor.get_activity_rect()):
+		actor.set_activity_suspended(false)
 	actor.reset_physics_interpolation()
 	return true
 

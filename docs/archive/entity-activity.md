@@ -52,6 +52,8 @@ The Goomba stamp uses EntitySpawner with the enemy category. It attempts once wh
 
 The Overworld EntityLayout includes Goomba Pair Spawner. A pair uses one marker and attempts both members in the same camera pass, 24 pixels apart. Each Goomba takes one enemy slot. If only one slot is free, the second member is skipped for that area load.
 
+When the pair marker activates, both members start walking together as long as their bounds intersect the outer camera buffer. This keeps the rear Goomba from waiting for its own bounds to enter the inner activation buffer.
+
 ## EnemyLayout and defeat
 
 Paint enemies in EnemyLayout on its 8×8 grid. The migrated markers in TestLevel and 1-1 retain their world positions. The marker uses the same activation boundary and cap as before. Defeat and offscreen cleanup both release the live slot when the actor exits. Enemy defeats are not saved, so enemy placements get a fresh attempt on area reload or death restart.

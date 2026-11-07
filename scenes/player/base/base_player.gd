@@ -9,9 +9,9 @@ signal death_presentation_finished
 var is_dead: bool = false
 var _death_finished: bool = false
 var last_enemy_stomp_tick := -1
+var scripted_motion_step: Callable
 
 @export_group("Transitions")
-@export var flagpole_ending_state: PlayerFlagpoleEndingState
 @export var climb_state: PlayerClimbState
 @export var death_state: PlayerState
 @export var pipe_enter_state: PlayerPipeEnterState
@@ -47,6 +47,10 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if scripted_motion_step.is_valid() and not is_shutdown and not is_dead:
+		if not gameplay_suspended and not activity_suspended:
+			scripted_motion_step.call(delta)
+		return
 	var before := body.global_position
 	if not is_shutdown and not is_dead:
 		run_action.advance_timer()
@@ -55,6 +59,18 @@ func _physics_process(delta: float) -> void:
 	if not is_shutdown and not is_dead:
 		# Catch actual movement after state integration, including the tick we land.
 		_try_attach_climbable(before, body.global_position)
+
+
+func advance_scripted_walk(direction: float, delta: float) -> void:
+	horizontal_movement.apply(body, motion_values, direction, delta)
+	face_direction(direction)
+	gravity_component.apply(motion_values, delta)
+	move_body()
+	update_scripted_walk_animation()
+
+
+func update_scripted_walk_animation() -> void:
+	pass
 
 
 func _try_attach_climbable(from_feet: Vector2, to_feet: Vector2, after_motion: bool = true) -> void:

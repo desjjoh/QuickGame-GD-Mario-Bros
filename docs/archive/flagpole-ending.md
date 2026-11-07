@@ -18,7 +18,7 @@ Levels without an Ending Presentation retain manual climbing. Castle-ending pres
 
 BaseLevel.begin_ending accepts the configured presentation, current live player and source once. It gates normal timeout/death/transport/completion requests. GameHandler.claim_completion changes flow to COMPLETING and emits completion_started once without immediately replacing the level. Ordinary on_complete and Warp callers keep their previous direct progression behavior.
 
-The presentation installs Mario's owned FlagpoleEnding state after the contact-state transition finishes. PlayerFlagpoleEndingState reuses climbing, horizontal movement, gravity and walk cadence while ignoring controller input. Scripted physics remains active; the presentation does not pause the FSM it needs to animate.
+FlagpoleEndingPresentation owns the descent target, dismount hold, nudge and castle endpoint. After the contact-state transition finishes, it takes scripted control on the player's normal physics tick. It uses the ordinary Climb and Move states for their poses and the player's own walk animation cadence. It releases scripted control on cancellation or doorway arrival.
 
 At the endpoint, the presentation calls player.shutdown(), clears matching BaseLevel.player and GameHandler.current_player references and queues the entity for deletion. The ending owns audio and hooks, so it continues after Mario is gone. No hidden stopping block or background-priority hiding is used. Handler-owned player/session status survives until normal next-stage/title policy runs.
 

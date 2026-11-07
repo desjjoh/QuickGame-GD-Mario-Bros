@@ -910,3 +910,11 @@ Corrected EnemyLayout texture_origin from (4, 4) to (-4, -4), aligning each 16×
 ## 2026-11-06 - Mushroom pickup bounds and block bump
 
 Changed the mushroom pickup to a 12×12 rectangle one pixel above sprite center, following the NES power-up box offsets. Pickup uses Mario's separate contact area. Terrain still uses the 14×16 Godot body. A block hit launches the mushroom at -180 px/s and sends it away from Mario at its walk speed. The 1-Up, enemy spawn and question-block checks emitted PASS. The question-block check reported ObjectDB leaks at exit. Exact terrain probe and edge-contact timing remain unverified in Mesen.
+
+## 2026-11-06 - Flagpole presentation motion ownership
+
+Moved the descent stop, 24-tick dismount, four-pixel nudge and doorway arrival to scripts/levels/endings/flagpole_ending.gd. The existing player state now adapts climb and walk mechanics at the original player physics priority. Flagpole ending, time score and level completion emitted PASS in Godot 4.7.2 headless. Flagpole ending and level completion each reported two ObjectDB leaks at exit. Rendered playtesting remains open.
+
+## 2026-11-06 - Flagpole presentation phase two
+
+Removed the FlagpoleEnding player state and scene wiring. FlagpoleEndingPresentation now directs the existing Climb and Move states through a scripted physics callback on BasePlayer. Mario supplies his normal walk animation and cadence. The presentation clears the callback at the doorway or on cancellation. Flagpole ending, time score, climbing and level completion emitted PASS in Godot 4.7.2 headless. The flagpole check reported two ObjectDB leaks at exit. Rendered playtesting remains open.

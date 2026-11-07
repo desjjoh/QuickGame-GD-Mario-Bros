@@ -428,3 +428,11 @@ BaseEnemy uses an enemy-only contact area. The shared Walking state reverses onc
 ## 2026-11-06 - Enemy authoring, contact and reload
 
 EnemyLayout uses an 8×8 placement grid. Existing stage markers keep their world positions during migration. Enemy defeat is transient and is excluded from area progress. BaseEnemy classifies player overlap and receives typed hits through EntityHit. Goomba owns the state transition and reward. BlockImpact sends upward hits to a reusable BlockHitReceiver at actor feet. Future attacks can deliver shell, fireball or star hits through the same contract.
+
+## 2026-11-06 - Flagpole sequence ownership
+
+Moved descent target, dismount timing, outward nudge and doorway arrival into FlagpoleEndingPresentation. The existing PlayerFlagpoleEndingState remains as an adapter for the player's physics tick and climb and walk presentation. Removing the flagpole-specific player state is a later step after playtesting.
+
+## 2026-11-06 - Remove the flagpole-specific player state
+
+Completes the flagpole sequence ownership decision. The ending presentation directs movement through BasePlayer's scripted physics callback and the ordinary Climb and Move states. Each character owns its animation. Cancellation and doorway arrival release scripted control.

@@ -140,17 +140,25 @@ func _test_stage_placements() -> void:
 			assert(not floor_hit.is_empty(), "No surface below enemy: %s" % origin)
 			assert(is_equal_approx(floor_hit.position.y - feet.y, 8.0))
 	var pair := level.world_objects.get_node("goomba_pair_spawner_102_23") as EntitySpawner
+	var camera := level.active_area.get_node("Camera2D") as LevelCamera
+	camera.follow_enabled = false
+	camera.position.x += pair.global_position.x - level.active_area.get_activity_region(false).end.x + 1
+	level.active_area.update_camera_activity()
 	var wake := Rect2(pair.global_position - Vector2.ONE, Vector2(2, 2))
-	pair.update_activity(wake, wake, level.active_area.theme)
-	pair.update_activity(wake, wake, level.active_area.theme)
 	var actors: Array[BaseEnemy] = []
 	for child in pair.get_children():
 		if child is BaseEnemy:
 			actors.append(child)
 	assert(actors.size() == 2)
 	assert(actors[1].global_position - actors[0].global_position == Vector2(24, 0))
+	assert(not level.active_area.get_activity_region(false).intersects(actors[1].get_activity_rect()))
+	assert(not actors[0].activity_suspended and not actors[1].activity_suspended)
+	var first_x := actors[0].body.global_position.x
+	for tick in range(5):
+		await get_tree().physics_frame
+	assert(actors[0].body.global_position.x < first_x)
+	assert(is_equal_approx(actors[1].body.global_position.x - actors[0].body.global_position.x, 24.0))
 	assert(not pair.persist_progress)
-	actors[0].set_activity_suspended(false)
 	assert(actors[0].receive_hit(EntityHit.new(null, &"fireball", Vector2.RIGHT)))
 	assert(actors[0].state_machine.current_state.name == &"KnockedOut")
 	var area := level.active_area
