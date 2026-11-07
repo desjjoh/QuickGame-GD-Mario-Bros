@@ -1,0 +1,24 @@
+[gd_resource type="TileSet" format=3 uid="uid://mvsib0q06hhk"]
+
+[ext_resource type="Texture2D" uid="uid://cfj8ik0hvucpe" path="res://assets/palettes/overworld/enemies/goomba.png" id="goomba"]
+
+[sub_resource type="TileSetAtlasSource" id="single"]
+resource_name = "Goomba Spawner"
+texture = ExtResource("goomba")
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(-4, -4)
+0:0/0/custom_data_0 = "goomba_spawner"
+
+[sub_resource type="TileSetAtlasSource" id="pair"]
+resource_name = "Goomba Pair Spawner"
+texture = ExtResource("goomba")
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(-4, -4)
+0:0/0/custom_data_0 = "goomba_pair_spawner"
+
+[resource]
+tile_size = Vector2i(8, 8)
+custom_data_layer_0/name = "entity_id"
+custom_data_layer_0/type = 4
+sources/0 = SubResource("single")
+sources/1 = SubResource("pair")

@@ -19,6 +19,8 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/coin/coin.tscn" id="coin"]
 [ext_resource type="PackedScene" path="res://scenes/levels/endings/flagpole_ending.tscn" id="ending"]
 [ext_resource type="PackedScene" path="res://scenes/entities/climbables/flagpole/flagpole.tscn" id="flagpole"]
+[ext_resource type="PackedScene" path="res://scenes/entities/spawners/goomba_spawner.tscn" id="goomba"]
+[ext_resource type="PackedScene" path="res://scenes/entities/spawners/goomba_pair_spawner.tscn" id="goomba_pair"]
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/hidden_question_block.tscn" id="hidden_question"]
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/one_up_spawner.tscn" id="one_up"]
 [ext_resource type="PackedScene" path="res://scenes/entities/powerups/one_up_mushroom.tscn" id="one_up_reward"]
@@ -64,6 +66,8 @@ entity_scenes = Dictionary[StringName, PackedScene]({
 &"castle": ExtResource("castle"),
 &"coin": ExtResource("coin"),
 &"flagpole": ExtResource("flagpole"),
+&"goomba_pair_spawner": ExtResource("goomba_pair"),
+&"goomba_spawner": ExtResource("goomba"),
 &"hidden_question_block": ExtResource("hidden_question"),
 &"one_up_spawner": ExtResource("one_up"),
 &"pipe_entrance": ExtResource("13_pipe"),
@@ -90,6 +94,9 @@ tile_set = ExtResource("9_3ay3b")
 [node name="EntityLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="2" unique_id=257943121]
 tile_map_data = PackedByteArray("AAAQAAkAAQAAAAAAAAAUAAkAAAAAAAAAAAAWAAkAAAAAAAAAAAAXAAkAAQAAAAAAAAAYAAkAAAAAAAAAAAA5AAkAAwAAAAAAAABNAAkAAAAAAAAAAABPAAkAAAAAAAAAAABOAAkAAQAAAAAAAABQAAUAAAAAAAAAAABRAAUAAAAAAAAAAABSAAUAAAAAAAAAAABTAAUAAAAAAAAAAABUAAUAAAAAAAAAAABVAAUAAAAAAAAAAABWAAUAAAAAAAAAAABXAAUAAAAAAAAAAABeAAkAAAAAAAAAAABdAAUAAAAAAAAAAABcAAUAAAAAAAAAAABbAAUAAAAAAAAAAABeAAUAAQAAAAAAAABkAAkAAAAAAAAAAABlAAkAAAAAAAAAAABtAAkAAQAAAAAAAABtAAUAAQAAAAAAAABwAAkAAQAAAAAAAAB2AAkAAAAAAAAAAAB5AAUAAAAAAAAAAAB6AAUAAAAAAAAAAAB7AAUAAAAAAAAAAACAAAUAAAAAAAAAAACDAAUAAAAAAAAAAACBAAkAAAAAAAAAAACCAAkAAAAAAAAAAACBAAUAAQAAAAAAAACCAAUAAQAAAAAAAACiAAsAAwAAAAAAAACnAAkAAAAAAAAAAACoAAkAAAAAAAAAAACqAAkAAAAAAAAAAACpAAkAAQAAAAAAAADEAAIABQAAAAAAAADJAAgABgAAAAAAAAAVAAkAAQAAAAAAAAAWAAUAAQAAAAAAAABqAAkAAQAAAAAAAABAAAgACQAAAAAAAAA=")
 tile_set = ExtResource("10_hppjq")
+
+[node name="EnemyLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="3" unique_id=1742010551]
+tile_map_data = PackedByteArray("AAAsABcAAAAAAAAAAABQABcAAAAAAAAAAACgAAcAAAAAAAAAAACkAAcAAAAAAAAAAABmABcAAQAAAAAAAADCABcAAQAAAAAAAADkABcAAQAAAAAAAAD4ABcAAQAAAAAAAAAAARcAAQAAAAAAAABcARcAAQAAAAAAAAA=")
 
 [node name="Camera2D" parent="Areas/MainArea" index="3" unique_id=254826152]
 position = Vector2(128, 120)

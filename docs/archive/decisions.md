@@ -412,3 +412,19 @@ Extends the block-release decision with editor authoring. The reward brush edits
 ## 2026-11-06 - Hidden question block contacts
 
 Unused hidden blocks use a query-only head probe on a dedicated scene collision bit. Rising head crossings enter the same ceiling response as regular bonks. Side and falling contacts ignore the probe. Accepted hits enable the regular solid body and use the existing question-block reward and used-state logic. The outline stays visible for the first pass.
+
+## 2026-11-06 - Shared enemy walking state
+
+BaseEnemy owns the terrain body and inherits the SpawnableEntity contract and entity state machine. WalkingEnemyState owns patrol speed, gravity and wall reversal. Concrete scenes select the state and artwork. Goomba uses this composition for its walking and falling behavior.
+
+## 2026-11-06 - Shared enemy spawn cap
+
+Painted Goombas use EntitySpawner. Both EntitySpawner and the existing EnemySpawner use the enemy category, which starts at five live actors per level. The power-up limit remains independent. A failed enemy activation is spent for that area load. Successful legacy EnemySpawner activations can still use their configured camera reentry behavior.
+
+## 2026-11-06 - Separate enemy contact from terrain collision
+
+BaseEnemy uses an enemy-only contact area. The shared Walking state reverses once when a new enemy overlap begins, so two walkers turn without treating each other as solid terrain. Power-ups and Mario do not participate in this contact layer. Concrete enemy states can choose their own contact response.
+
+## 2026-11-06 - Enemy authoring, contact and reload
+
+EnemyLayout uses an 8×8 placement grid. Existing stage markers keep their world positions during migration. Enemy defeat is transient and is excluded from area progress. BaseEnemy classifies player overlap and receives typed hits through EntityHit. Goomba owns the state transition and reward. BlockImpact sends upward hits to a reusable BlockHitReceiver at actor feet. Future attacks can deliver shell, fireball or star hits through the same contract.

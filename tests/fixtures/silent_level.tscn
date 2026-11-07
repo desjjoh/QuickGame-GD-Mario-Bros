@@ -2,6 +2,8 @@
 [ext_resource type="PackedScene" path="res://scenes/levels/worlds/world 1/1-1.tscn" id="1"]
 [node name="1-1" instance=ExtResource("1")]
 [node name="MainArea" parent="Areas" index="0"]
+[node name="EnemyLayout" parent="Areas/MainArea/Layouts" index="3"]
+tile_map_data = PackedByteArray()
 [node name="LowerArea" parent="Areas" index="1"]
 [editable path="Areas/MainArea"]
 [editable path="Areas/LowerArea"]

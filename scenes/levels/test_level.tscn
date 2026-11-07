@@ -11,6 +11,8 @@
 [ext_resource type="PackedScene" uid="uid://wlp13xllihs5" path="res://scenes/levels/base/base_level.tscn" id="base"]
 [ext_resource type="PackedScene" path="res://scenes/entities/coin/coin.tscn" id="coin"]
 [ext_resource type="PackedScene" path="res://scenes/entities/climbables/flagpole/flagpole.tscn" id="flagpole"]
+[ext_resource type="PackedScene" path="res://scenes/entities/spawners/goomba_spawner.tscn" id="goomba"]
+[ext_resource type="PackedScene" path="res://scenes/entities/spawners/goomba_pair_spawner.tscn" id="goomba_pair"]
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/hidden_question_block.tscn" id="hidden_question"]
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/one_up_spawner.tscn" id="one_up"]
 [ext_resource type="PackedScene" uid="uid://b5m1vkcrml3t2" path="res://scenes/player/mario (small)/mario.tscn" id="player"]
@@ -25,6 +27,8 @@ entity_scenes = Dictionary[StringName, PackedScene]({
 &"brick_alternate": ExtResource("9_alternate"),
 &"coin": ExtResource("coin"),
 &"flagpole": ExtResource("flagpole"),
+&"goomba_pair_spawner": ExtResource("goomba_pair"),
+&"goomba_spawner": ExtResource("goomba"),
 &"hidden_question_block": ExtResource("hidden_question"),
 &"one_up_spawner": ExtResource("one_up"),
 &"pipe_entrance": ExtResource("13_pipe"),

@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scenes/levels/base/level_layouts.gd" id="2"]
 [ext_resource type="Script" path="res://scenes/components/presentation/level_camera.gd" id="3"]
 [ext_resource type="Script" path="res://scenes/levels/areas/area_endpoint.gd" id="4"]
+[ext_resource type="TileSet" path="res://assets/tileset/enemy_layout.tres" id="5_enemies"]
 [node name="BaseArea" type="Node2D" unique_id=1128361088]
 script = ExtResource("1")
 [node name="Layouts" type="Node2D" parent="." unique_id=1417906807]
@@ -16,6 +17,11 @@ texture_filter = 1
 [node name="EntityLayout" type="TileMapLayer" parent="Layouts" unique_id=257943121]
 collision_enabled = false
 navigation_enabled = false
+[node name="EnemyLayout" type="TileMapLayer" parent="Layouts" unique_id=1742010551]
+texture_filter = 1
+collision_enabled = false
+navigation_enabled = false
+tile_set = ExtResource("5_enemies")
 [node name="WorldObjects" type="Node2D" parent="." unique_id=827174942]
 [node name="Arrival" type="Marker2D" parent="." unique_id=1254188347]
 script = ExtResource("4")

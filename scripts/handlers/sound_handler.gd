@@ -24,6 +24,12 @@ func _ready() -> void:
 		0x0fe, [3, 5, 32], [0x82, 0x5f, 0x48], [0xa7, 0xf6, 0xbc]
 	)
 	_sounds[&"bump"] = _build_swept_pulse(0x23a, [4, 6], [0x9e, 0x9e], [0x93, 0xbb])
+	# The NES counts this envelope down and writes the timer low byte on frame 8.
+	_sounds[&"stomp"] = _build_swept_pulse(
+		0xfe, [14], [0x9e], [0x9c],
+		[0x92, 0x93, 0x95, 0x97, 0x9a, 0x90, 0x90, 0x92, 0x94, 0x95, 0x96, 0x98, 0x9b, 0x9f],
+		{8: 0x9e}
+	)
 
 	_sounds[&"flagpole"] = _build_swept_pulse(0x1fc, [64], [0x99], [0xbc])
 	var pipe_data := PackedByteArray()
@@ -99,7 +105,12 @@ static func _build_pulse(
 
 # Render Square 1 control and sweep changes on a nominal 60 Hz clock.
 static func _build_swept_pulse(
-	period: int, frames: Array[int], controls: Array[int], sweeps: Array[int]
+	period: int,
+	frames: Array[int],
+	controls: Array[int],
+	sweeps: Array[int],
+	frame_controls: Array[int] = [],
+	period_low_byte_writes: Dictionary[int, int] = {}
 ) -> AudioStreamWAV:
 	const SAMPLE_RATE := 44100
 	const SAMPLES_PER_FRAME := 735
@@ -118,6 +129,13 @@ static func _build_swept_pulse(
 		pcm.resize(offset + sample_count * 2)
 		var previous_clock := 0
 		for sample in range(sample_count):
+			if sample % SAMPLES_PER_FRAME == 0:
+				var frame := floori(float((offset >> 1) + sample) / SAMPLES_PER_FRAME)
+				if frame < frame_controls.size():
+					control = frame_controls[frame]
+					duty = 0.5 if (control & 0xc0) == 0x80 else 0.25
+				if period_low_byte_writes.has(frame):
+					period = (period & ~0xff) | period_low_byte_writes[frame]
 			var clock := floori(sample * 2.0 / SAMPLES_PER_FRAME)
 			if clock != previous_clock and clock % sweep_interval == 0:
 				var change := period >> shift

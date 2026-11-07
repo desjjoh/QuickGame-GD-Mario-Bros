@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="1_entity"]
 [ext_resource type="Script" path="res://scenes/entities/blocks/base/base_block.gd" id="2_script"]
 
 [ext_resource type="Script" path="res://scenes/components/presentation/block_bounce.gd" id="3_bounce"]
+[ext_resource type="Script" path="res://scenes/components/interactions/block_impact.gd" id="4_impact"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_block"]
 size = Vector2(16, 16)
@@ -26,3 +27,7 @@ position = Vector2(8, 8)
 
 [node name="Bounce" type="Node" parent="Presentation"]
 script = ExtResource("3_bounce")
+
+[node name="BlockImpact" type="Node2D" parent="."]
+position = Vector2(8, 0)
+script = ExtResource("4_impact")

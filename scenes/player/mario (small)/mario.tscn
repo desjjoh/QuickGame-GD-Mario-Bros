@@ -34,6 +34,8 @@ _data = {
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_small_mario"]
 size = Vector2(11, 14)
 
+[sub_resource type="RectangleShape2D" id="enemy_hurtbox"]
+size = Vector2(10, 12)
 
 [node name="Mario" unique_id=1612993165 node_paths=PackedStringArray("flagpole_ending_state", "climb_state", "death_state", "pipe_enter_state", "sprite") instance=ExtResource("1_base")]
 flagpole_ending_state = NodePath("StateMachine/FlagpoleEnding")
@@ -89,6 +91,15 @@ shape = SubResource("RectangleShape2D_small_mario")
 [node name="Sprite2D" type="Sprite2D" parent="Body" index="1" unique_id=432554422]
 position = Vector2(0, -7)
 texture = ExtResource("6_nrfpf")
+
+[node name="EnemyHurtbox" type="Area2D" parent="Body"]
+position = Vector2(0, -6)
+collision_layer = 1024
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/EnemyHurtbox"]
+shape = SubResource("enemy_hurtbox")
 
 [node name="AnimationPlayer" parent="Body" index="2"]
 callback_mode_process = 0

@@ -16,7 +16,10 @@ func receive_hit(hit: EntityHit) -> bool:
 		or not state_machine.current_state is EntityState
 	):
 		return false
-	return (state_machine.current_state as EntityState).receive_hit(hit)
+	if not (state_machine.current_state as EntityState).receive_hit(hit):
+		return false
+	$BlockImpact.strike(self, hit.attacker)
+	return true
 
 
 var _restored_state: StringName = &""

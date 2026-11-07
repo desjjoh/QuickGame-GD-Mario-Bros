@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bleoif3h1w3iw" path="res://assets/tileset/underground/previews/castle.png" id="castle"]
 [ext_resource type="Texture2D" uid="uid://ey7pbemvbc8v" path="res://assets/palettes/underground/tileset/Palette 4 (Coins and Interactibles).png" id="coin"]
 [ext_resource type="Texture2D" uid="uid://cthv5vxf3t1mv" path="res://assets/tileset/underground/previews/flagpole.png" id="flagpole"]
+[ext_resource type="Texture2D" uid="uid://bgnjr3mgkl3nx" path="res://assets/palettes/underground/enemies/goomba.png" id="goomba"]
 [ext_resource type="Texture2D" uid="uid://dy6q3mjh18ndw" path="res://assets/palettes/overworld/tileset/Palette 4 (Coins and Interactibles).png" id="hidden_art"]
 [ext_resource type="Texture2D" uid="uid://djwa8a77btioc" path="res://assets/palettes/underground/misc/green-mushroom.png" id="one_up"]
 [ext_resource type="Texture2D" uid="uid://dnvspcge3gjbk" path="res://assets/tileset/underground/previews/sideways_pipe_entrance.png" id="side"]
@@ -21,6 +22,12 @@ resource_name = "Question block entity"
 texture = ExtResource("coin")
 0:0/0 = 0
 0:0/0/custom_data_0 = "question_block"
+
+[sub_resource type="TileSetAtlasSource" id="goomba"]
+resource_name = "Goomba Spawner"
+texture = ExtResource("goomba")
+0:0/0 = 0
+0:0/0/custom_data_0 = "goomba_spawner"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_alternate"]
 resource_name = "Alternate brick entity"
@@ -94,3 +101,4 @@ sources/6 = SubResource("castle")
 sources/7 = SubResource("coin")
 sources/8 = SubResource("one_up")
 sources/9 = SubResource("hidden_question")
+sources/10 = SubResource("goomba")

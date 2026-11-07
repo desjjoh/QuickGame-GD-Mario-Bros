@@ -278,7 +278,7 @@ func update_camera_activity() -> void:
 			_activity_entities.erase(id)
 			continue
 		var bounds := entity.get_activity_rect()
-		if entity is PowerUp and not sleep_region.intersects(bounds):
+		if entity is SpawnableEntity and not sleep_region.intersects(bounds):
 			entity.remove_offscreen()
 			continue
 		var region := wake_region if entity.activity_suspended else sleep_region

@@ -11,6 +11,8 @@
 
 [ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 4 (Coins and Interactibles).png" id="hidden_art"]
 
+[ext_resource type="Texture2D" path="res://assets/palettes/castle/enemies/goomba.png" id="goomba"]
+
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_brick"]
 resource_name = "Brick entity"
 texture = ExtResource("3_alternate")
@@ -83,6 +85,12 @@ margins = Vector2i(48, 32)
 0:0/0 = 0
 0:0/0/custom_data_0 = "hidden_question_block"
 
+[sub_resource type="TileSetAtlasSource" id="goomba"]
+resource_name = "Goomba Spawner"
+texture = ExtResource("goomba")
+0:0/0 = 0
+0:0/0/custom_data_0 = "goomba_spawner"
+
 [resource]
 custom_data_layer_0/name = "entity_id"
 custom_data_layer_0/type = 4
@@ -96,3 +104,4 @@ sources/6 = SubResource("castle")
 sources/7 = SubResource("coin")
 sources/8 = SubResource("one_up")
 sources/9 = SubResource("hidden_question")
+sources/10 = SubResource("goomba")

@@ -1,0 +1,37 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/enemies/base/base_enemy.gd" id="enemy"]
+[ext_resource type="PackedScene" path="res://scenes/components/interactions/block_hit_receiver.tscn" id="hits"]
+
+[sub_resource type="RectangleShape2D" id="body_shape"]
+size = Vector2(14, 16)
+
+[node name="BaseEnemy" node_paths=PackedStringArray("sprite", "animation_player") instance=ExtResource("base")]
+script = ExtResource("enemy")
+persist_progress = false
+sprite = NodePath("Body/Sprite2D")
+animation_player = NodePath("AnimationPlayer")
+
+[node name="Body" type="CharacterBody2D" parent="."]
+position = Vector2(8, 8)
+collision_layer = 0
+floor_snap_length = 0.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
+shape = SubResource("body_shape")
+
+[node name="Sprite2D" type="Sprite2D" parent="Body"]
+texture_filter = 1
+
+[node name="EnemyContact" type="Area2D" parent="Body"]
+collision_layer = 256
+collision_mask = 256
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/EnemyContact"]
+shape = SubResource("body_shape")
+
+[node name="BlockHitReceiver" parent="Body" instance=ExtResource("hits")]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+callback_mode_process = 0

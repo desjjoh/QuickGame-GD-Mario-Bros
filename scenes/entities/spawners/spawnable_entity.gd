@@ -7,3 +7,8 @@ signal consumed
 
 func report_consumed() -> void:
 	consumed.emit()
+
+
+func remove_offscreen() -> void:
+	if not is_shutdown and not gameplay_suspended:
+		queue_free()

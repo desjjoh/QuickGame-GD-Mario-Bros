@@ -8,6 +8,7 @@ signal death_presentation_finished
 
 var is_dead: bool = false
 var _death_finished: bool = false
+var last_enemy_stomp_tick := -1
 
 @export_group("Transitions")
 @export var flagpole_ending_state: PlayerFlagpoleEndingState
@@ -24,6 +25,7 @@ var _death_finished: bool = false
 @onready var bonk_action: BonkAction = $Actions/Bonk
 @onready var body: CharacterBody2D = $Body
 @onready var collision_shape: CollisionShape2D = $Body/CollisionShape2D
+@onready var enemy_hurtbox := get_node_or_null("Body/EnemyHurtbox") as Area2D
 @onready var horizontal_movement: HorizontalMovementComponent = $Motion/HorizontalMovement
 @onready var run_action: RunAction = $Actions/Run
 @onready var slide_action: SlideAction = $Actions/Slide

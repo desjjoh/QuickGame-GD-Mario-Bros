@@ -22,7 +22,7 @@ Hold Jump for a higher jump. Press the opposite direction while moving to skid. 
 
 ## Edit a level
 
-Open `scenes/levels/worlds/world 1/1-1.tscn`. Expand **Areas → MainArea → Layouts**. Use **GroundLayout** for solid terrain, **DecorationLayout** for scenery, and **EntityLayout** for entity stamps. Each layer uses the same 16×16 grid. Keep nested areas editable so scene overrides survive saving.
+Open `scenes/levels/worlds/world 1/1-1.tscn`. Expand **Areas → MainArea → Layouts**. Use **GroundLayout** for solid terrain, **DecorationLayout** for scenery, **EntityLayout** for blocks and other entity stamps, and **EnemyLayout** for single or paired Goomba spawners. EnemyLayout uses an 8×8 grid. The other layers use 16×16. Keep nested areas editable so scene overrides survive saving.
 
 Paint question blocks on **EntityLayout**. Each placed block contains one coin.
 

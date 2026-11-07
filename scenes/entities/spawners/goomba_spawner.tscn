@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/spawners/entity_spawner.gd" id="spawner"]
+[ext_resource type="PackedScene" path="res://scenes/entities/enemies/goomba/goomba.tscn" id="goomba"]
+
+[node name="GoombaSpawner" instance=ExtResource("base")]
+script = ExtResource("spawner")
+actor_scene = ExtResource("goomba")
+spawn_category = &"enemy"
+persist_progress = false

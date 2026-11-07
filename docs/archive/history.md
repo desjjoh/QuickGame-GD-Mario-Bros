@@ -872,3 +872,41 @@ Added a brush to addons/block_rewards. Authors choose 1-Up or Coin and click the
 ## 2026-11-06 - Outlined hidden question blocks
 
 Added a Hidden Question Block stamp to all three EntityLayout palettes and painted one at (8, 8) in TestLevel. The scene uses the bottom-right atlas outline, an underside query, and the regular question-block bounce, rewards, and used state. The reward brush accepts both block stamps. Godot 4.7.2 headless editor import and the bonk regression passed. The regression compared stopping position and vertical response with a regular bonk, verified side and top pass-through, and landed on the used block. The test reported ObjectDB leak warnings at exit. Rendered playtesting remains open.
+
+## 2026-11-06 - Goomba movement foundation
+
+Added BaseEnemy and Goomba scenes under scenes/entities/enemies, the shared walking state under scripts/states/enemies, and theme overrides for the supplied artwork. A temporary Godot 4.7.2 headless fixture verified Walking, animation, themed art, terrain landing, and wall reversal. The area-theme regression passed. Painted spawners, enemy cleanup, stomp and side contact remain separate steps.
+
+## 2026-11-06 - Painted Goomba spawners
+
+Added the Goomba Spawner stamp to all three entity palettes and painted a sandbox example at (11, 12). Both enemy spawn paths use the same level limit. SpawnableEntity now owns shared offscreen removal. Godot 4.7.2 headless editor import, enemy_spawn_test, entity_activity_test and one_up_test passed. The spawn fixture verifies five active enemies, independent power-up capacity, bottom-edge cleanup, and no delayed spawn for either blocked placement type. In-game enemy contact remains a later step.
+
+## 2026-11-06 - Goomba movement and enemy contact
+
+Checked the Goomba walking speed and gravity against the NES disassembly and retained 30 px/s walking speed, about 858 px/s² gravity and a nominal 180 px/s fall cap. Added enemy overlap handling in BaseEnemy and reversal in the shared Walking state. Godot 4.7.2 headless enemy spawn, entity activity and 1-Up checks passed. The enemy test verified both Goombas turned on contact and stayed grounded. Godot collision and fixed-point NES behavior have not been compared frame by frame in Mesen.
+
+## 2026-11-06 - Goomba placements in 1-1
+
+Painted four individual Goombas and six two-Goomba groups on the MainArea EntityLayout in 1-1. The placements come from E_GroundArea6. Individual markers use the encoded columns and rows. Pair markers use the nominal camera-right position, 48 pixels before the encoded trigger column, and spawn members 24 pixels apart in one activation pass. The area still uses the project camera buffer and five-enemy cap, so activation timing and slot availability can differ from the original. Defeat persistence for pair members remains a later step.
+
+Godot 4.7.2 headless enemy spawn, scene hierarchy, and 1-Up checks passed. The enemy check verified the authored counts and pair spacing. In-game timing has not been compared in Mesen.
+
+## 2026-11-06 - Goomba interactions and enemy placement grid
+
+Moved the painted Goombas in TestLevel and 1-1 to EnemyLayout, added stomp and harmful contact, and shared block-hit detection between Goombas and mushrooms. Goomba defeat frees the actor after its presentation and is never saved. Added the defeat event and hit handlers for future shell, fireball and star sources. The enemy spawn, bonk contact, question block, 1-Up, scene hierarchy, area theme, death and jump benchmark scenes emitted PASS in Godot 4.7.2 headless. Several scenes reported ObjectDB leaks at exit. Rendered feel and NES frame timing remain unverified.
+
+## 2026-11-06 - Stomp sound and block-bump defeat
+
+The stomp synthesis now follows the NES per-frame volume sequence and writes the pitch timer low byte on frame 8 while retaining the original sweep setting. A block-bumped Goomba flips, moves away from Mario, and falls through terrain until offscreen cleanup. The previous half-second deletion timer now applies only to the squash. Enemy spawn, sound mix and question block checks emitted PASS. The enemy and question block checks reported ObjectDB leaks at exit. In-game listening and frame comparison in Mesen remain open.
+
+## 2026-11-06 - Goomba combat bounds and Mario rebound
+
+Separated Mario contact from Goomba terrain and enemy contact. The Goomba combat area is 10×6 and small Mario has a 10×12 enemy hurtbox. These sizes follow the NES bounding-box offsets. The enemy checks player contact every other physics tick. A descending overlap squashes the Goomba and sets Mario's Y speed to -240 px/s without changing X speed or position. The enemy regression verifies a harmless graze and the exact rebound. Death and 1-Up checks also emitted PASS. Godot overlap timing has not been frame-matched against Mesen.
+
+## 2026-11-06 - Enemy marker alignment and spawn clearance
+
+Corrected EnemyLayout texture_origin from (4, 4) to (-4, -4), aligning each 16×16 preview with its 8×8 placement cell's top-left. Moved 1-1's enemy markers down one 8-pixel row so all sixteen live Goombas start with an 8-pixel gap to their supporting surface. Horizontal positions and pair spacing remain as authored. The enemy regression queried actual terrain and pipe colliders for every member and verified no initial overlap and the 8-pixel gap. Enemy spawn and scene hierarchy checks emitted PASS headlessly. The enemy check reported two ObjectDB leaks. Editor screenshot comparison was not performed.
+
+## 2026-11-06 - Mushroom pickup bounds and block bump
+
+Changed the mushroom pickup to a 12×12 rectangle one pixel above sprite center, following the NES power-up box offsets. Pickup uses Mario's separate contact area. Terrain still uses the 14×16 Godot body. A block hit launches the mushroom at -180 px/s and sends it away from Mario at its walk speed. The 1-Up, enemy spawn and question-block checks emitted PASS. The question-block check reported ObjectDB leaks at exit. Exact terrain probe and edge-contact timing remain unverified in Mesen.
