@@ -67,7 +67,7 @@ func toggle() -> bool:
 	ControllerHandler.consume_menu_confirmation()
 	get_tree().paused = paused
 	_lockout = 43.0 / 60.0
-	GameHandler.pause_changed.emit(paused)
+	GameHandler.notify_pause_changed(paused)
 	SoundHandler.play_pause()
 	return true
 
@@ -88,4 +88,4 @@ func clear() -> void:
 	SoundHandler.stop_pause()
 	if was_paused:
 		ControllerHandler.consume_menu_confirmation()
-		GameHandler.pause_changed.emit(false)
+		GameHandler.notify_pause_changed(false)

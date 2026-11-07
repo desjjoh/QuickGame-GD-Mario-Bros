@@ -92,6 +92,10 @@ func request_pause_toggle() -> bool:
 	return pause_controller.toggle()
 
 
+func notify_pause_changed(value: bool) -> void:
+	pause_changed.emit(value)
+
+
 func attach_game(game: Node, level_container: Node2D) -> void:
 	current_game = game
 	_level_container = level_container
