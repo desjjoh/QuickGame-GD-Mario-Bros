@@ -1,6 +1,6 @@
 @tool
 extends Node2D
-## One fixed authoring grid for every level layout, in editor and runtime.
+## Enemy placements use a finer grid than terrain and other entity stamps.
 
 const CELL_SIZE := Vector2i(16, 16)
 
@@ -24,7 +24,8 @@ func enforce_grid() -> void:
 			layer.transform = Transform2D.IDENTITY
 		if layer.tile_set == null:
 			continue
-		if layer.tile_set.tile_size != CELL_SIZE:
-			layer.tile_set.tile_size = CELL_SIZE
+		var cell_size := Vector2i(8, 8) if layer.name == &"EnemyLayout" else CELL_SIZE
+		if layer.tile_set.tile_size != cell_size:
+			layer.tile_set.tile_size = cell_size
 		if layer.tile_set.tile_shape != TileSet.TILE_SHAPE_SQUARE:
 			layer.tile_set.tile_shape = TileSet.TILE_SHAPE_SQUARE

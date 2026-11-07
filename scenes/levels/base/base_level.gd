@@ -3,7 +3,7 @@ extends CanvasGroup
 
 ## Shared foundation for playable levels.
 
-const SPAWN_LIMITS := {&"power_up": 1}
+const SPAWN_LIMITS := {&"power_up": 1, &"enemy": 5}
 
 enum CompletionMode { NORMAL, WARP }
 
@@ -144,11 +144,17 @@ func spawn_layout_entities() -> void:
 
 
 func _spawn_area_entities(area: BaseLevelArea, saved_entities: Dictionary) -> void:
-	var layout := area.get_node("Layouts/EntityLayout") as TileMapLayer
+	area.entity_persistence.clear()
+	_spawn_layout_entities(area, area.get_node("Layouts/EntityLayout"), saved_entities)
+	_spawn_layout_entities(area, area.get_node("Layouts/EnemyLayout"), {})
+
+
+func _spawn_layout_entities(
+	area: BaseLevelArea, layout: TileMapLayer, saved_entities: Dictionary
+) -> void:
 	var objects := area.get_node("WorldObjects") as Node2D
 	# Markers remain editable in the scene, but only entities render at runtime.
 	layout.hide()
-	area.entity_persistence.clear()
 	if layout.tile_set == null:
 		return
 	if layout.tile_set.get_custom_data_layer_by_name("entity_id") < 0:

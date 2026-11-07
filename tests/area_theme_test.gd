@@ -170,7 +170,7 @@ func _ready() -> void:
 	)
 	assert(main.theme.resolve_texture(original_texture) == original_texture)
 	# Every supplied counterpart is mapped, including all question animation frames.
-	assert(lower.theme.texture_overrides.size() == 24)
+	assert(lower.theme.texture_overrides.size() == 25)
 	for source_path: String in lower.theme.texture_overrides:
 		var replacement := lower.theme.resolve_texture(load(source_path))
 		assert(

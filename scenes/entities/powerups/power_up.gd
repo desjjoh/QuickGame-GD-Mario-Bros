@@ -20,7 +20,7 @@ func _ready() -> void:
 		sprite.hide()
 		SoundHandler.play_reward(&"power_up_reveal")
 	set_process(false)
-	pickup.body_entered.connect(_on_body_entered)
+	pickup.area_entered.connect(_on_pickup_overlap)
 
 
 ## Configure before entering the tree so pickup starts disabled.
@@ -64,23 +64,16 @@ func _advance_available(_delta: float) -> void:
 	pass
 
 
-func remove_offscreen() -> void:
-	if _removing or is_shutdown or gameplay_suspended:
-		return
-	_removing = true
-	queue_free()
-
-
-func _on_body_entered(body: Node2D) -> void:
+func _on_pickup_overlap(area: Area2D) -> void:
 	if (
 		_removing or is_queued_for_deletion() or _emergence_remaining > 0.0
 		or is_shutdown or gameplay_suspended or activity_suspended
 	):
 		return
-	var player := body.get_parent() as BasePlayer
+	var player := area.get_parent().get_parent() as BasePlayer
 	if (
 		player == null
-		or body != player.body
+		or area != player.enemy_hurtbox
 		or player.is_dead
 		or player.is_shutdown
 		or player.gameplay_suspended

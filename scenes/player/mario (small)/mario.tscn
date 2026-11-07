@@ -23,8 +23,6 @@
 [ext_resource type="Animation" path="res://scenes/player/mario (small)/animations/climb.tres" id="climb_animation"]
 [ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-climb-1.tres" id="climb_sprite"]
 
-[ext_resource type="Script" path="res://scripts/states/player/flagpole_ending_state.gd" id="flagpole_state"]
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_mario"]
 _data = {
 &"climb": ExtResource("climb_animation"),
@@ -34,9 +32,10 @@ _data = {
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_small_mario"]
 size = Vector2(11, 14)
 
+[sub_resource type="RectangleShape2D" id="enemy_hurtbox"]
+size = Vector2(10, 12)
 
-[node name="Mario" unique_id=1612993165 node_paths=PackedStringArray("flagpole_ending_state", "climb_state", "death_state", "pipe_enter_state", "sprite") instance=ExtResource("1_base")]
-flagpole_ending_state = NodePath("StateMachine/FlagpoleEnding")
+[node name="Mario" unique_id=1612993165 node_paths=PackedStringArray("climb_state", "death_state", "pipe_enter_state", "sprite") instance=ExtResource("1_base")]
 climb_state = NodePath("StateMachine/Climb")
 death_state = NodePath("StateMachine/Dead")
 pipe_enter_state = NodePath("StateMachine/PipeEnter")
@@ -90,6 +89,15 @@ shape = SubResource("RectangleShape2D_small_mario")
 position = Vector2(0, -7)
 texture = ExtResource("6_nrfpf")
 
+[node name="EnemyHurtbox" type="Area2D" parent="Body"]
+position = Vector2(0, -6)
+collision_layer = 1024
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/EnemyHurtbox"]
+shape = SubResource("enemy_hurtbox")
+
 [node name="AnimationPlayer" parent="Body" index="2"]
 callback_mode_process = 0
 libraries/ = SubResource("AnimationLibrary_mario")
@@ -131,13 +139,3 @@ animation_name = &"climb"
 sprite_texture = ExtResource("climb_sprite")
 stop_animation_on_enter = true
 frame_updates_enabled = false
-
-[node name="FlagpoleEnding" type="Node" parent="StateMachine" node_paths=PackedStringArray("walk_cadence")]
-script = ExtResource("flagpole_state")
-animation_name = &"climb"
-sprite_texture = ExtResource("climb_sprite")
-walk_cadence = NodePath("../../Presentation/WalkAnimation")
-controls_enabled = false
-input_enabled = false
-frame_updates_enabled = false
-stop_animation_on_enter = true

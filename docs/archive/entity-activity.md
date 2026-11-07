@@ -43,3 +43,17 @@ entity_activity_test checks actual callback counts, input availability, hysteres
 The 1-Up Spawner stamp creates an EntitySpawner when the area loads. On its first eligible camera activation, the spawner attempts to claim a power-up slot from BaseLevel. The level currently allows one live power-up. If two markers activate in the same camera pass, the first checked claims the slot. A blocked or failed attempt spends that placement's attempt for the current area load. Clearing the slot or moving the camera away and back cannot trigger a late spawn.
 
 Collection and offscreen disposal free the mushroom and release its slot on tree exit. Only collection records consumption, subject to the placement and level progress rules. An area reload creates a fresh placement unless saved progress marks it consumed. The separate EnemySpawner still follows its own reentry policy. Enemy and fireball limits and question-block power-up release remain future work.
+
+## Painted Goomba spawners
+
+The Goomba stamp uses EntitySpawner with the enemy category. It attempts once when its marker enters the camera activation region. Five live enemy slots are shared with EnemySpawner and are independent of the power-up slot. If an attempt fails, the marker stays empty for the rest of the area load. Live Goombas free themselves after their full bounds leave the cleanup region. A successful legacy EnemySpawner can still rearm according to its authored reentry policy.
+
+## Goomba pairs in 1-1
+
+The Overworld EntityLayout includes Goomba Pair Spawner. A pair uses one marker and attempts both members in the same camera pass, 24 pixels apart. Each Goomba takes one enemy slot. If only one slot is free, the second member is skipped for that area load.
+
+When the pair marker activates, both members start walking together as long as their bounds intersect the outer camera buffer. This keeps the rear Goomba from waiting for its own bounds to enter the inner activation buffer.
+
+## EnemyLayout and defeat
+
+Paint enemies in EnemyLayout on its 8×8 grid. The migrated markers in TestLevel and 1-1 retain their world positions. The marker uses the same activation boundary and cap as before. Defeat and offscreen cleanup both release the live slot when the actor exits. Enemy defeats are not saved, so enemy placements get a fresh attempt on area reload or death restart.

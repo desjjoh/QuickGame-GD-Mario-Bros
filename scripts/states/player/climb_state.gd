@@ -21,12 +21,17 @@ func enter() -> void:
 
 
 func process_physics(delta: float) -> BaseState:
-	var player := get_player()
-	var before := player.body.global_position
-	var axis := get_movement_axis()
-	if not player.climbing.step(player, axis, delta):
+	if not advance_climb(get_movement_axis(), delta):
 		# step exits before integrating; Move consumes this tick once on release.
 		return continue_physics(move_state, delta)
+	return null
+
+
+func advance_climb(axis: Vector2, delta: float) -> bool:
+	var player := get_player()
+	var before := player.body.global_position
+	if not player.climbing.step(player, axis, delta):
+		return false
 	if player.animation_player != null and animation_name != &"":
 		if not is_equal_approx(before.y, player.body.global_position.y):
 			player.animation_player.speed_scale = (
@@ -35,9 +40,15 @@ func process_physics(delta: float) -> BaseState:
 			player.animation_player.play(animation_name)
 		else:
 			# Neutral/blocked climbing always uses its initial idle pose.
-			player.animation_player.seek(0.0, true)
-			player.animation_player.pause()
-	return null
+			hold_pose()
+	return true
+
+
+func hold_pose() -> void:
+	var animation := get_player().animation_player
+	if animation != null:
+		animation.seek(0.0, true)
+		animation.pause()
 
 
 func exit() -> void:

@@ -30,6 +30,8 @@
 [ext_resource type="Texture2D" uid="uid://clblmsvsl46nd" path="res://assets/palettes/underground/ui/start-cursor.png" id="title_cursor"]
 [ext_resource type="Texture2D" uid="uid://bs8mp6mky012v" path="res://assets/palettes/underground/interactibles/items/coins.tres" id="world_coin"]
 
+[ext_resource type="Texture2D" path="res://assets/palettes/underground/enemies/goomba.png" id="goomba"]
+
 [resource]
 script = ExtResource("1")
 display_name = "Underground"
@@ -38,6 +40,7 @@ terrain = ExtResource("2")
 decorations = ExtResource("3")
 entity_markers = ExtResource("4")
 texture_overrides = Dictionary[String, Texture2D]({
+"res://assets/palettes/overworld/enemies/goomba.png": ExtResource("goomba"),
 "res://assets/palettes/overworld/interactibles/blocks/brick-alternate.tres": ExtResource("art_0"),
 "res://assets/palettes/overworld/interactibles/blocks/brick.tres": ExtResource("art_1"),
 "res://assets/palettes/overworld/interactibles/blocks/question-block-2.tres": ExtResource("art_2"),

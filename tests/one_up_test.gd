@@ -28,6 +28,9 @@ func _ready() -> void:
 	area.update_camera_activity()
 	area.update_camera_activity()
 	var mushroom := spawner.get_node("OneUpMushroom") as Mushroom
+	var pickup_shape := mushroom.pickup.get_node("CollisionShape2D") as CollisionShape2D
+	assert((pickup_shape.shape as RectangleShape2D).size == Vector2(12, 12))
+	assert(mushroom.pickup.position == Vector2(0, -1))
 	assert(level.player.body in mushroom.body.get_collision_exceptions())
 	assert(mushroom.sprite.texture.resource_path.ends_with("/underground/misc/green-mushroom.png"))
 	assert(mushroom.global_position == Vector2(128, 192))

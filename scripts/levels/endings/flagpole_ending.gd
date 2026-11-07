@@ -28,7 +28,9 @@ var _player: BasePlayer
 var _pole: FlagpoleEntity
 var _castle: CastleEntity
 var _camera: LevelCamera
-var _state: PlayerFlagpoleEndingState
+var _descent_stop_y: float
+var _walk_endpoint: Vector2
+var _dismount_ticks: int
 var _audio: AudioStreamPlayer
 var _pulse_audio: AudioStreamPlayer
 var _wait_frames: int = 0
@@ -59,7 +61,7 @@ func bind_entity(entity: BaseEntity, cell: Vector2i, area: BaseLevelArea) -> voi
 
 
 func _on_attached(player: BasePlayer, pole: FlagpoleEntity) -> void:
-	if active or player.state_machine.current_state == player.flagpole_ending_state:
+	if active:
 		return
 	var ancestor := get_parent()
 	while ancestor != null and not ancestor is BaseLevel:
@@ -75,7 +77,9 @@ func start(level: BaseLevel, player: BasePlayer, source: BaseEntity) -> bool:
 		or not source is FlagpoleEntity
 		or not is_instance_valid(_castle)
 		or _castle.is_shutdown
-		or player.flagpole_ending_state == null
+		or player.climb_state == null
+		or player.climb_state.move_state == null
+		or player.scripted_motion_step.is_valid()
 	):
 		return false
 	_level = level
@@ -109,23 +113,69 @@ func start(level: BaseLevel, player: BasePlayer, source: BaseEntity) -> bool:
 	_set_phase(Phase.DESCEND)
 	if not _valid():
 		return false
-	_state = player.flagpole_ending_state
-	_state.configure(_pole, _castle.doorway.global_position)
-	if not _state.endpoint_reached.is_connected(_on_endpoint):
-		_state.endpoint_reached.connect(_on_endpoint)
-	_install_state.call_deferred(_generation)
+	_walk_endpoint = _castle.doorway.global_position
+	_dismount_ticks = 0
+	_install_motion.call_deferred(_generation)
 	set_physics_process(true)
 	return true
 
 
-func _install_state(generation: int) -> void:
+func _install_motion(generation: int) -> void:
 	if not _valid() or generation != _generation:
 		return
 	if not is_instance_valid(_pole) or _pole.is_shutdown:
 		_level.cancel_ending()
 		return
-	if not _player.state_machine.change_state(_state):
+	if not _player.state_machine.change_state(_player.climb_state):
 		_level.cancel_ending()
+		return
+	_player.climbing.attach(_player, _pole)
+	_player.climbing.place_on_side(_player, -1.0)
+	_player.run_action.apply(_player.motion_values, false)
+	_player.run_action.remaining_ticks = 0
+	_player.run_action.running_history = false
+	_player.motion_values.remove_modifier(&"ground_neutral")
+	_player.climb_state.hold_pose()
+	_player.scripted_motion_step = _advance_player_motion
+	_descent_stop_y = maxf(
+		_player.body.global_position.y, _pole.climb_bottom.global_position.y - 2.0
+	)
+
+
+## Called on the player's physics tick, before this presentation advances the flag.
+func _advance_player_motion(delta: float) -> void:
+	if not _valid() or not is_instance_valid(_player):
+		return
+	var body := _player.body
+	if phase == Phase.DESCEND:
+		if body.global_position.y < _descent_stop_y:
+			if not _player.climb_state.advance_climb(Vector2.DOWN, delta):
+				_level.cancel_ending()
+				return
+			if body.global_position.y >= _descent_stop_y:
+				body.global_position.y = _descent_stop_y
+				body.velocity = Vector2.ZERO
+				_player.climb_state.hold_pose()
+		return
+	if phase == Phase.DISMOUNT:
+		body.velocity = Vector2.ZERO
+		_player.climb_state.hold_pose()
+		_dismount_ticks -= 1
+		if _dismount_ticks > 0:
+			return
+		# The four-pixel outward nudge clears shaft contact.
+		body.global_position.x += 4.0
+		if not _player.state_machine.change_state(_player.climb_state.move_state):
+			_level.cancel_ending()
+			return
+		body.reset_physics_interpolation()
+	elif phase != Phase.WALK:
+		return
+	_player.advance_scripted_walk(1.0, delta)
+	if body.global_position.x >= _walk_endpoint.x:
+		body.global_position.x = _walk_endpoint.x
+		body.velocity = Vector2.ZERO
+		_on_endpoint()
 
 
 func _valid() -> bool:
@@ -153,16 +203,17 @@ func _physics_process(delta: float) -> void:
 		if not is_instance_valid(_pole) or _pole.is_shutdown:
 			_level.cancel_ending()
 			return
-		if _player.state_machine.current_state != _state:
+		if _player.scripted_motion_step != _advance_player_motion:
 			return
 		if phase == Phase.DESCEND:
 			if _player_reached_descent_cutoff() or _advance_flag_and_popup(delta):
-				_state.begin_dismount()
+				_player.climbing.place_on_side(_player, 1.0)
+				_dismount_ticks = 24
 				GameHandler.add_score(grab_points)
 				if not _valid():
 					return
 				_set_phase(Phase.DISMOUNT)
-		if phase == Phase.DISMOUNT and _state.phase == PlayerFlagpoleEndingState.Phase.WALK:
+		if phase == Phase.DISMOUNT and _dismount_ticks == 0:
 			_set_phase(Phase.WALK)
 		if (
 			phase == Phase.WALK
@@ -277,6 +328,7 @@ func _on_endpoint() -> void:
 	_begin_music_and_unlock()
 	var retired := _player
 	_player = null
+	retired.scripted_motion_step = Callable()
 	retired.climb_state.controls_enabled = _previous_climb_controls
 	retired.shutdown()
 	if _level.player == retired:
@@ -329,8 +381,10 @@ func cancel() -> void:
 		_audio = null
 	if is_instance_valid(_player):
 		_player.climb_state.controls_enabled = _previous_climb_controls
-		if not _player.is_shutdown and _player.state_machine.current_state == _state:
-			_player.state_machine.change_state(_player.state_machine.initial_state)
+		if _player.scripted_motion_step == _advance_player_motion:
+			_player.scripted_motion_step = Callable()
+			if not _player.is_shutdown:
+				_player.state_machine.change_state(_player.state_machine.initial_state)
 	_player = null
 	if is_instance_valid(_pole) and not _pole.is_shutdown:
 		_pole.reset_flag()

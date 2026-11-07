@@ -38,3 +38,7 @@ No world coin entity, pickup logic, counter updates or coin persistence is imple
 ColorRotatePalette/ColorRotation in the [disassembly](https://gist.github.com/1wErt3r/4048722) uses three bright slots followed by medium/dark/medium, advancing every eight frames. This project adapts shared palette timing to independent sprite/texture assets. Continuing the cosmetic clock during death is our chosen policy, not a claim of complete NES update-order equivalence.
 
 animation_clock_test checks exact phase boundaries and wrapping, late joins, Underground artwork, suspension, bounce/used ownership, shutdown/unsubscribe and continuity across area, level and session changes. Its rendered branch spawns a question block in the dark phase and verifies agreement with the HUD during normal rendered updates. Existing HUD, theme, question-block and death checks use global phase assertions where appropriate. See [verification](verification.md) for complete scope.
+
+## Goomba walk cycle
+
+Goombas sample a shared two-frame cycle with eight ticks per frame. Walking subscribes on entry, so newly spawned Goombas and Goombas returning from activity suspension join the current phase immediately. Leaving Walking unsubscribes before the defeat state applies its pose.
