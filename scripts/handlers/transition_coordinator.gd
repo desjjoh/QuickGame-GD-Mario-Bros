@@ -119,6 +119,7 @@ func begin(
 	_id += 1
 	var ticket := _id
 	busy = true
+	GameHandler.pause_controller.clear()
 	phase = &"covering"
 	_replaced_level = false
 	elapsed_frames = 0

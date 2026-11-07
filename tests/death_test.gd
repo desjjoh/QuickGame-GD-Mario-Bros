@@ -14,6 +14,7 @@ func ticks(count: int) -> void:
 
 func make_game() -> Node:
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	game.start_with_title = false
 	game.transitions_enabled = false
 	var fixture := load("res://scenes/levels/worlds/world 1/1-1.tscn").instantiate() as BaseLevel
@@ -46,6 +47,7 @@ func make_game() -> Node:
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	process_physics_priority = 200
 	for reset in [false, true]:
 		GameHandler.clear_session()
@@ -106,6 +108,7 @@ func _ready() -> void:
 		assert(block.gameplay_suspended and not block.is_physics_processing())
 		assert(not block.receive_hit(EntityHit.new(null, &"bonk", Vector2.UP)))
 		assert(camera.global_position == camera_position)
+		await preload("res://tests/fixtures/pause_check.gd").check(level)
 		for frame in range(12):
 			await ticks(1)
 			if GameHandler.current_level != level:

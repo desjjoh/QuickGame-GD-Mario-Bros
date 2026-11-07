@@ -20,6 +20,7 @@ var _level: BaseLevel
 var _level_material: Material
 var _routed_players: Node2D
 var _players_behind_world: bool = false
+var _routed_decorations: TileMapLayer
 
 
 func configure(world: Node2D, screen: Control) -> void:
@@ -148,6 +149,7 @@ func sync_rendering() -> void:
 	RenderingServer.canvas_item_set_draw_index(world_root.get_canvas_item(), 0)
 	RenderingServer.canvas_item_set_draw_index(screen_root.get_canvas_item(), 1)
 	var camera_transform := get_viewport().canvas_transform
+	_sync_decorations(camera_transform)
 	# A transparent border retains offscreen silhouettes that cast into the visible image.
 	var padding := Vector2.ONE * SHADOW_PADDING if _shadow_enabled else Vector2.ZERO
 	var capture_transform := Transform2D(0.0, padding)
@@ -181,6 +183,38 @@ func sync_rendering() -> void:
 	RenderingServer.canvas_item_set_transform(players.get_canvas_item(), render_transform)
 
 
+func _sync_decorations(camera_transform: Transform2D) -> void:
+	var decorations: TileMapLayer
+	if is_instance_valid(_level) and is_instance_valid(_level.active_area):
+		decorations = _level.active_area.get_node_or_null("Layouts/DecorationLayout") as TileMapLayer
+	if _routed_decorations != decorations:
+		_restore_decorations()
+		_routed_decorations = decorations
+	if not is_instance_valid(decorations):
+		return
+	var item := decorations.get_canvas_item()
+	RenderingServer.canvas_item_set_parent(item, get_canvas_item())
+	RenderingServer.canvas_item_set_draw_behind_parent(item, true)
+	RenderingServer.canvas_item_set_interpolated(item, false)
+	RenderingServer.canvas_item_set_transform(
+		item, camera_transform * decorations.global_transform
+	)
+	RenderingServer.canvas_item_set_visible(item, decorations.is_visible_in_tree())
+
+
+func _restore_decorations() -> void:
+	if not is_instance_valid(_routed_decorations):
+		return
+	var item := _routed_decorations.get_canvas_item()
+	RenderingServer.canvas_item_set_parent(
+		item, (_routed_decorations.get_parent() as CanvasItem).get_canvas_item()
+	)
+	RenderingServer.canvas_item_set_draw_behind_parent(item, false)
+	RenderingServer.canvas_item_set_transform(item, _routed_decorations.transform)
+	RenderingServer.canvas_item_set_interpolated(item, _routed_decorations.is_physics_interpolated())
+
+
 func _exit_tree() -> void:
+	_restore_decorations()
 	if RenderingServer.frame_pre_draw.is_connected(sync_rendering):
 		RenderingServer.frame_pre_draw.disconnect(sync_rendering)

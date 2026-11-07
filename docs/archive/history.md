@@ -918,3 +918,15 @@ Moved the descent stop, 24-tick dismount, four-pixel nudge and doorway arrival t
 ## 2026-11-06 - Flagpole presentation phase two
 
 Removed the FlagpoleEnding player state and scene wiring. FlagpoleEndingPresentation now directs the existing Climb and Move states through a scripted physics callback on BasePlayer. Mario supplies his normal walk animation and cadence. The presentation clears the callback at the doorway or on cancellation. Flagpole ending, time score, climbing and level completion emitted PASS in Godot 4.7.2 headless. The flagpole check reported two ObjectDB leaks at exit. Rendered playtesting remains open.
+
+## 2026-11-07 - Gameplay pause and dedicated cue
+
+Added GameHandler-owned PauseController with Start pause/resume, SceneTree freezing, normal-gameplay eligibility, release consumption for Enter's shared Jump binding, and standalone F6 support. SoundHandler generates the reference pause sequence on a dedicated Always-processing, non-positional player at default gain. Shutdown, session reset, and leaving Playing clear pause. No project settings or bindings changed. Affected paths: scripts/handlers/pause_controller.gd, game_handler.gd, sound_handler.gd, scenes/levels/base/base_level.gd, tests/pause_test.*, and the current setup/architecture/testing guides. See pause.md for the walkthrough and deliberate audio-resumption difference from NES behavior.
+
+Godot 4.7.2 headless pause, title, transition, sideways-pipe, and animation-clock regressions reached PASS. Pause reported two ObjectDB leaks, transition two, and animation-clock seven. Focused script formatting completed. Full suite, rendered playtest, physical controller testing, and Mesen listening comparison were not performed.
+
+## 2026-11-07 - Pause during level presentations
+
+Simplified PauseController eligibility at the user's request: only title screens and active TransitionCoordinator operations block pause, with an existing non-shutdown level required. Removed player/death/pipe/completion gates. GameHandler no longer clears pause on Completing flow; accepted screen transitions clear it explicitly. Existing presentation timing already follows pausable processing, so no separate animation pause machinery was introduced. Updated scripts/handlers/{pause_controller,game_handler,transition_coordinator}.gd, pause regression and integration fixtures, and setup/architecture/pause documentation.
+
+Pause, death, sideways-pipe, flagpole-ending, and transition regressions reached PASS headlessly in Godot 4.7.2. Integration checks freeze/resume actual pipe entry and emergence, the death wait, flagpole descent, castle walking, and the score phase. Pause reported two ObjectDB leaks; flagpole ending reported two. Rendered playtesting and the full suite were not performed.

@@ -13,8 +13,10 @@ func ticks(count: int) -> void:
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	process_physics_priority = 200
 	var game = load("res://tests/fixtures/silent_game.tscn").instantiate()
+	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	# Keep pipe-emergence coverage independent of the stage's current return route.
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	fixture.get_node("Areas/MainArea/Layouts/EntityLayout").set_cell(
@@ -81,6 +83,7 @@ func _ready() -> void:
 			entered = true
 			break
 	assert(entered, "Walking into the grounded left-facing mouth must trigger entry.")
+	await preload("res://tests/fixtures/pause_check.gd").check(level)
 	assert(player.body.collision_mask == 0)
 	var start = player.body.global_position
 	assert(player.animation_player.current_animation == &"walk")
@@ -135,6 +138,7 @@ func _ready() -> void:
 	assert(player.body.global_position == end_position + Vector2(0, 96))
 	assert(not player.sprite.visible and not player.sprite.flip_h)
 	var hidden_y = player.body.global_position.y
+	await preload("res://tests/fixtures/pause_check.gd").check(level)
 	await ticks(12)
 	assert(is_equal_approx(player.body.global_position.y, hidden_y - 12.0))
 	assert(not player.sprite.visible)

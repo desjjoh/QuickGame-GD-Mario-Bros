@@ -8,6 +8,7 @@
 | GameHandler | Session flow, stage list, player status, top score, and active-level progress |
 | TitleFlow | Title screen, backdrop suspension, and new-game transition |
 | StageFlow | Restart, TIME UP, Game Over, and stage-handoff operations |
+| PauseController | Gameplay pause eligibility, Start toggle, tree pause, and cleanup |
 | TransitionCoordinator | Covers gameplay, runs the transition operation, and restores presentation and controls |
 | BaseLevel | Player spawn and death, timer lifecycle, camera boundaries, area transport, and level completion |
 | AreaTransport | Destination resolution, trip state, entry and exit callbacks, and cancellation |
@@ -21,6 +22,8 @@
 GameHandler owns the active game, level, session, and flow state. Its TitleFlow and StageFlow children coordinate operations through the shared TransitionCoordinator. The game opens the title over Test Level, then loads 1-1 through the level intro. The HUD reads session values and adopts the active area’s artwork. A shared cosmetic clock keeps question blocks, coins, and the HUD coin synchronized.
 
 ## Area lifecycle and persistence
+
+GameHandler exposes `is_paused`, `pause_changed`, and `request_pause_toggle()`. Its PauseController child applies SceneTree pause to gameplay and level presentations. The listener uses Always processing so Start can resume; ordinary gameplay, audio, and the shared animation clock remain pausable. SoundHandler owns a separate Always-processing pause cue player. The title screen and active transitions block pause. Level shutdown, session reset, entering Title or Detached flow, and accepted transitions clear pause. See the [pause walkthrough](archive/pause.md).
 
 The level scene groups its children under Areas, Players, Systems, and Presentations. Areas and Players remain siblings so pipe travel can change their relative draw order. Systems contains LevelDeath, LevelTimer, and AreaTransport. BaseLevel leaves Presentations empty for derived levels. In 1-1, it contains FlagpoleEnding.
 

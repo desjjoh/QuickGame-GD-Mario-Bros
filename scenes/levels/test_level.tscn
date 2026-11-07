@@ -8,6 +8,7 @@
 [ext_resource type="TileSet" uid="uid://g7pmg7w6xn86" path="res://assets/tileset/underground/terrain.tres" id="10_eaa0b"]
 [ext_resource type="TileSet" uid="uid://cs6ppr1ph7fpm" path="res://assets/tileset/underground/entity_layout.tres" id="11_a5rnb"]
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/pipe_entrance.tscn" id="13_pipe"]
+[ext_resource type="TileSet" uid="uid://b5swkgewllff0" path="res://assets/tileset/underground/enemy_layout.tres" id="18_v6k17"]
 [ext_resource type="PackedScene" uid="uid://wlp13xllihs5" path="res://scenes/levels/base/base_level.tscn" id="base"]
 [ext_resource type="PackedScene" path="res://scenes/entities/coin/coin.tscn" id="coin"]
 [ext_resource type="PackedScene" path="res://scenes/entities/climbables/flagpole/flagpole.tscn" id="flagpole"]
@@ -51,6 +52,9 @@ tile_set = ExtResource("10_eaa0b")
 [node name="EntityLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="2" unique_id=257943121]
 tile_map_data = PackedByteArray("AAAAAAIAAAAAAAAAAAAAAAMAAgAAAAAAAAAAAAQAAgAAAAAAAAAAAAUAAgAAAAAAAAAAAAYAAgAAAAAAAAAAAAcAAgAAAAAAAAAAAAgAAgAAAAAAAAAAAAkAAgAAAAAAAAAAAAoAAgAAAAAAAAAAAAsAAgAAAAAAAAAAAAwAAgAAAAAAAAA=")
 tile_set = ExtResource("11_a5rnb")
+
+[node name="EnemyLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="3" unique_id=1742010551]
+tile_set = ExtResource("18_v6k17")
 
 [node name="Arrival" parent="Areas/MainArea" index="2" unique_id=1254188347]
 position = Vector2(48, 208)

@@ -78,7 +78,10 @@ var world_objects: Node2D:
 
 
 func has_spawn_capacity(category: StringName) -> bool:
-	return not SPAWN_LIMITS.has(category) or _live_spawns.get(category, []).size() < SPAWN_LIMITS[category]
+	return (
+		not SPAWN_LIMITS.has(category)
+		or _live_spawns.get(category, []).size() < SPAWN_LIMITS[category]
+	)
 
 
 ## Claim immediately before adding a new actor to the tree.
@@ -104,6 +107,7 @@ func _release_spawn_slot(category: StringName, actor: Node) -> void:
 
 
 func _ready() -> void:
+	GameHandler.pause_controller.register_level(self)
 	level_timer.expired.connect(_on_timer_expired)
 	death_sequence.presentation_finished.connect(_retire_death_player)
 	death_sequence.finished.connect(_restart_after_death, CONNECT_DEFERRED)
@@ -340,6 +344,7 @@ func shutdown() -> void:
 	if is_shutdown:
 		return
 	is_shutdown = true
+	GameHandler.pause_controller.clear_for_level(self)
 	MusicHandler.stop_area(self)
 	if ending_presentation != null:
 		ending_presentation.cancel()

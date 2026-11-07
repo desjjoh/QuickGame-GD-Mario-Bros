@@ -17,8 +17,11 @@ Open `scenes/levels/test_level.tscn` and press **F6** to run the one-screen sand
 | Run | Left Shift | X / left face button |
 | Enter a vertical pipe | Down | D-pad Down |
 | Start | Enter | Start / Menu |
+| Pause / resume during gameplay | Enter | Start / Menu |
 
 Hold Jump for a higher jump. Press the opposite direction while moving to skid. Sideways pipe entrances activate when you walk into their opening.
+
+Pause keeps the current screen visible and freezes gameplay, animation, and ordinary audio. Release Start, then press it again to resume. A short lockout prevents rapid toggles. Pause is unavailable on the title screen and during active screen transitions. Pipe entry/emergence, death, and level-ending animations remain pausable. Standalone F6 levels also support pause.
 
 ## Edit a level
 

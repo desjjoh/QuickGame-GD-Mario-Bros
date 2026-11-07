@@ -16,6 +16,7 @@ The runner discovers `tests/*_test.tscn` and writes logs under `.godot/validatio
 
 ## Manual checks
 
+- Press Start while jumping, during enemy movement, and while a block releases an item. Check that gameplay and music freeze, the pause cue plays, and a fresh Start resumes without jumping. Repeat in F6. Listen to pause/resume against Mesen.
 - Start 1-1 from the title, enter and exit the secret area, and verify camera, theme, HUD, and music handoffs.
 - Test jumping and running with keyboard and controller. Check pipe and ledge contacts, especially at high refresh rates.
 - Die in a pit and by timeout. Verify life loss, progress policy, restart, and return to title after game over.

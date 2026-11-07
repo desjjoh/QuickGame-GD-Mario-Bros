@@ -436,3 +436,11 @@ Moved descent target, dismount timing, outward nudge and doorway arrival into Fl
 ## 2026-11-06 - Remove the flagpole-specific player state
 
 Completes the flagpole sequence ownership decision. The ending presentation directs movement through BasePlayer's scripted physics callback and the ordinary Climb and Move states. Each character owns its animation. Cancellation and doorway arrival release scripted control.
+
+## 2026-11-07 - Game-owned pause delegation
+
+Status: implemented following user approval of the discussed first pass. GameHandler exposes pause state and requests; its PauseController child handles eligibility, Start, SceneTree pause, and cleanup. The player owns no pause behavior. Only the pause listener and dedicated SoundHandler cue player use Always processing; world simulation, shared animations, and ordinary audio freeze together. This avoids maintaining separate pause flags throughout gameplay. Signals can still run while paused, so lifecycle cleanup explicitly clears pause. First-pass scope excludes transitions, pipe travel, death, and endings, with no overlay or menu. Weak level registration supports F6. Audio resumes preserved playback immediately on unpause, a deliberate difference from the NES sound engine. Details and verification are in pause.md.
+
+## 2026-11-07 - Pause all level presentations
+
+Status: implemented. Supersedes the first-pass eligibility restrictions in Game-owned pause delegation above. Following user direction, only the title screen and active screen transitions block pause; a valid, non-shutdown level is still required. Pipe entry/emergence, death waits, and flagpole ending phases use the existing tree pause without separate animation-specific rules. Completing flow no longer clears pause. Accepted transitions clear pause before their work proceeds. Focused integration checks freeze and resume real pipe, death, and ending sequences.

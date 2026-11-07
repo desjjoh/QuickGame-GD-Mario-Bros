@@ -4,6 +4,11 @@ extends Node
 enum GameFlow { DETACHED, TITLE, STARTING, PLAYING, GAME_OVER, COMPLETING }
 
 signal flow_changed(value: GameFlow)
+signal pause_changed(value: bool)
+var is_paused: bool:
+	get:
+		return pause_controller != null and pause_controller.paused
+var pause_controller: Variant
 var flow: GameFlow = GameFlow.DETACHED
 var _stages: Array[PackedScene] = []
 var current_stage_index: int = -1
@@ -78,6 +83,13 @@ func _ready() -> void:
 	stage_flow = load("res://scripts/handlers/stage_flow.gd").new()
 	stage_flow.name = "StageFlow"
 	add_child(stage_flow)
+	pause_controller = load("res://scripts/handlers/pause_controller.gd").new()
+	pause_controller.name = "PauseController"
+	add_child(pause_controller)
+
+
+func request_pause_toggle() -> bool:
+	return pause_controller.toggle()
 
 
 func attach_game(game: Node, level_container: Node2D) -> void:
@@ -237,6 +249,7 @@ func set_top_score(value: int) -> void:
 
 ## Reset the run; app-session top score and authored configuration survive.
 func clear_session() -> void:
+	pause_controller.clear()
 	SoundHandler.stop_reward()
 	current_stage_index = -1
 	title_flow.starting_stage = null
@@ -301,6 +314,8 @@ func transition_to_level(scene: PackedScene) -> bool:
 
 
 func _set_flow(value: GameFlow) -> void:
+	if value in [GameFlow.TITLE, GameFlow.DETACHED] and pause_controller != null:
+		pause_controller.clear()
 	if flow == value:
 		return
 	flow = value

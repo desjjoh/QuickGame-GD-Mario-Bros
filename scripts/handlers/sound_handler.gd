@@ -4,9 +4,23 @@ signal reward_voice_changed(occupied: bool)
 
 var _sounds: Dictionary[StringName, AudioStream] = {}
 var _square_two := AudioStreamPlayer.new()
+var _pause_voice := AudioStreamPlayer.new()
 
 
 func _ready() -> void:
+	_pause_voice.name = "PauseCue"
+	_pause_voice.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_pause_voice)
+	# NES SoundEngine: offsets $44/$64, 6/6/6/24 frames, control $84.
+	# Each register reload restarts the volume envelope.
+	var pause_pcm := PackedByteArray()
+	for note: Array in [[0x54, 6], [0x6a, 6], [0x54, 6], [0x6a, 24]]:
+		pause_pcm.append_array(_build_pulse([note[0]], [note[1]], 0.5, 5).data)
+	var pause_sound := AudioStreamWAV.new()
+	pause_sound.format = AudioStreamWAV.FORMAT_16_BITS
+	pause_sound.mix_rate = 44100
+	pause_sound.data = pause_pcm
+	_sounds[&"pause"] = pause_sound
 	_square_two.name = "Square2Sfx"
 	add_child(_square_two)
 	_square_two.finished.connect(func(): reward_voice_changed.emit(false))
@@ -26,7 +40,10 @@ func _ready() -> void:
 	_sounds[&"bump"] = _build_swept_pulse(0x23a, [4, 6], [0x9e, 0x9e], [0x93, 0xbb])
 	# The NES counts this envelope down and writes the timer low byte on frame 8.
 	_sounds[&"stomp"] = _build_swept_pulse(
-		0xfe, [14], [0x9e], [0x9c],
+		0xfe,
+		[14],
+		[0x9e],
+		[0x9c],
 		[0x92, 0x93, 0x95, 0x97, 0x9a, 0x90, 0x90, 0x92, 0x94, 0x95, 0x96, 0x98, 0x9b, 0x9f],
 		{8: 0x9e}
 	)
@@ -45,6 +62,15 @@ func _ready() -> void:
 
 func get_sound(cue: StringName) -> AudioStream:
 	return _sounds.get(cue)
+
+
+func play_pause() -> void:
+	_pause_voice.stream = get_sound(&"pause")
+	_pause_voice.play()
+
+
+func stop_pause() -> void:
+	_pause_voice.stop()
 
 
 func play_reward(cue: StringName) -> void:
