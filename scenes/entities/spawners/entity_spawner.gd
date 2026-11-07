@@ -7,6 +7,7 @@ extends BaseEntity
 @export var actor_offsets: Array[Vector2] = [Vector2.ZERO]
 
 var _level: BaseLevel
+var _area: BaseLevelArea
 var _attempted := false
 var _consumed := false
 
@@ -25,6 +26,7 @@ func _ready() -> void:
 			break
 		ancestor = ancestor.get_parent()
 	if area != null:
+		_area = area
 		area.register_spawner(self)
 
 
@@ -54,6 +56,8 @@ func _spawn_actor(offset: Vector2, sleep_region: Rect2, theme: AreaTheme) -> boo
 	actor.visual_theme = theme
 	actor.consumed.connect(_on_actor_consumed.bind(actor), CONNECT_ONE_SHOT)
 	add_child(actor)
+	if is_instance_valid(_area):
+		actor.set_gameplay_suspended(_area.actors_suspended)
 	# A group activates at its marker. Members inside the outer buffer start
 	# together even when an offset puts one beyond the inner wake region.
 	if actor_offsets.size() > 1 and sleep_region.intersects(actor.get_activity_rect()):

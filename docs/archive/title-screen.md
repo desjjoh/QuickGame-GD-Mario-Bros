@@ -74,3 +74,19 @@ A title created during an active transition remains hidden until coordinator com
 ## TitleFlow ownership
 
 TitleFlow owns the title screen and pending new-game destination. GameHandler exposes the public title and start operations and owns session reset, active level replacement, and game flow state. StageFlow handles stage handoff, restart, and Game Over through the shared transition coordinator.
+
+## Superseded backdrop spawner preparation - 2026-11-07
+
+TitleFlow.show_now explicitly calls the active area's prepare_title_backdrop after loading the background and before suspend_background. This creates nearby painted actors during initial entry and transition-covered returns alike, without briefly resuming gameplay. The area method is restricted to the current live title level and reuses normal camera regions, spawn caps, and once-only placement attempts. Repeating preparation cannot duplicate actors.
+
+Ordinary update_camera_activity still blocks new gameplay spawns during transitions or a frozen level. The title-only setup path does not toggle those flags or defer failed spawns. Actors created after the transition coordinator captures its initial snapshots are immediately frozen by TitleFlow; the completion callback retains the existing persistent title suspension policy.
+
+The previous path incidentally spawned initial backdrop enemies during area entry, but a returning backdrop loaded with transition_in_progress and never activated them before suspension. title_backdrop_test now injects isolated painted Goomba/Koopa markers and verifies both initial title and a real completion-transition return, frozen actors, and idempotent preparation. Title-backdrop, title, level-completion, transition, and enemy-spawn checks reached PASS headlessly in Godot 4.7.2. Level-completion and enemy-spawn each reported two ObjectDB leaks. Full suite and rendered playtesting were not performed.
+
+## Shared actor initialization - 2026-11-07
+
+The title-only prepare_title_backdrop method and call described above are removed. Loading an area now creates placements but leaves their activation pending. BaseLevel.initialize_actors(suspended) delegates to the active area, establishes actor suspension, and performs ordinary camera-region activation. TitleFlow requests suspended actors before showing the backdrop; gameplay initialization requests active actors when the level starts. Already-started levels initialize their destination area on transition completion. Uncovered pipe arrivals initialize immediately, and standalone F6 starts actors at initial entry.
+
+BaseLevelArea tracks actors_initialized and actors_suspended without checking title flow. EntitySpawner applies the area suspension policy to each new actor before its first physics tick. Normal activity updates require initialized actors and retain transition/death/completion guards. Capacity checks and once-only spawn attempts are unchanged. Exiting an area clears its initialization state for the next visit. Existing title suspension after transition snapshot restoration remains the title's persistent gameplay policy, not a separate spawning path.
+
+The title-backdrop regression verifies activation is still pending at level_changed, then checks initial title entry and completion-covered return with both Goomba and Koopa. It also verifies idempotence and frozen actor positions. Title-backdrop, title, sideways-pipe, transition, enemy-spawn, level-completion, death, and Koopa-walking regressions reached PASS headlessly. Enemy-spawn reported two ObjectDB leaks and death three. Full suite and rendered playtesting were not performed.

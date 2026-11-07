@@ -139,6 +139,8 @@ func _ready() -> void:
 		camera.reset_target(player.body)
 	if not is_shutdown:
 		active_area.enter_area()
+		if not is_instance_valid(GameHandler.current_game):
+			initialize_actors(false)
 
 
 func spawn_layout_entities() -> void:
@@ -239,11 +241,23 @@ func on_level_start() -> bool:
 	if GameHandler.current_level != self or GameHandler.flow != GameHandler.GameFlow.PLAYING:
 		return false
 	# load_level initialized the value once. Start only the local countdown phase.
+	initialize_actors(false)
 	has_started = true
 	level_timer.start(GameHandler.animation_clock.tick_count)
 	_play_area_music()
 	level_started.emit()
 	return true
+
+
+func initialize_actors(suspended: bool) -> void:
+	if (
+		is_shutdown
+		or death_in_progress
+		or completion_in_progress
+		or not is_instance_valid(active_area)
+	):
+		return
+	active_area.initialize_actors(suspended)
 
 
 func register_reward_timer(block: QuestionBlock) -> void:
@@ -429,6 +443,8 @@ func _commit_area_arrival(
 	if previous_area != area:
 		_unload_area(previous_area)
 	area.enter_area()
+	if not under_cover:
+		initialize_actors(false)
 	_record_active_area()
 	if previous_area != area and not under_cover:
 		_play_area_music()

@@ -1,5 +1,7 @@
 [gd_scene format=3 uid="uid://wlp13xllihs5"]
 
+[ext_resource type="PackedScene" path="res://scenes/entities/spawners/green_koopa_spawner.tscn" id="green_koopa"]
+
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/goomba_pair_spawner.tscn" id="goomba_pair"]
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/goomba_spawner.tscn" id="goomba"]
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/hidden_question_block.tscn" id="hidden_question"]
@@ -22,6 +24,18 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/reward_brick.tscn" id="reward_brick"]
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/alternate_reward_brick.tscn" id="reward_brick_alt"]
 
+[ext_resource type="PackedScene" path="res://scenes/entities/blocks/brick/brick_block.tscn" id="entity_brick"]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/blocks/brick/alternate_brick_block.tscn" id="entity_brick_alternate"]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/castle/castle.tscn" id="entity_castle"]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/pipes/pipe_entrance.tscn" id="entity_pipe_entrance"]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/question_block.tscn" id="entity_question_block"]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/pipes/sideways_pipe_entrance.tscn" id="entity_sideways_pipe_entrance"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_shadow"]
 shader = ExtResource("2_shadow")
 shader_parameter/shadow_offset = Vector2(2, 2)
@@ -36,14 +50,21 @@ clear_margin = 12.0
 script = ExtResource("1_script")
 death_sound = ExtResource("death_sound")
 entity_scenes = Dictionary[StringName, PackedScene]({
-&"reward_brick": ExtResource("reward_brick"),
-&"reward_brick_alternate": ExtResource("reward_brick_alt"),
+&"brick": ExtResource("entity_brick"),
+&"brick_alternate": ExtResource("entity_brick_alternate"),
+&"castle": ExtResource("entity_castle"),
 &"coin": ExtResource("coin"),
-&"goomba_spawner": ExtResource("goomba"),
+&"flagpole": ExtResource("flagpole"),
 &"goomba_pair_spawner": ExtResource("goomba_pair"),
+&"goomba_spawner": ExtResource("goomba"),
+&"green_koopa_spawner": ExtResource("green_koopa"),
 &"hidden_question_block": ExtResource("hidden_question"),
 &"one_up_spawner": ExtResource("one_up"),
-&"flagpole": ExtResource("flagpole")
+&"pipe_entrance": ExtResource("entity_pipe_entrance"),
+&"question_block": ExtResource("entity_question_block"),
+&"reward_brick": ExtResource("reward_brick"),
+&"reward_brick_alternate": ExtResource("reward_brick_alt"),
+&"sideways_pipe_entrance": ExtResource("entity_sideways_pipe_entrance")
 })
 
 [node name="Areas" type="Node2D" parent="." unique_id=638828059]

@@ -2,13 +2,9 @@
 
 [ext_resource type="PackedScene" uid="uid://wlp13xllihs5" path="res://scenes/levels/base/base_level.tscn" id="2_base"]
 [ext_resource type="PackedScene" uid="uid://b5m1vkcrml3t2" path="res://scenes/player/mario (small)/mario.tscn" id="3_player"]
-[ext_resource type="PackedScene" path="res://scenes/entities/blocks/brick/brick_block.tscn" id="4_brick"]
-[ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/question_block.tscn" id="6_question"]
-[ext_resource type="PackedScene" path="res://scenes/entities/blocks/brick/alternate_brick_block.tscn" id="9_alternate"]
 [ext_resource type="PackedScene" path="res://scenes/levels/areas/base_area.tscn" id="10_area"]
 [ext_resource type="Resource" uid="uid://chfcnww7r30v7" path="res://assets/themes/underground.tres" id="12_underground"]
 [ext_resource type="TileSet" uid="uid://g7pmg7w6xn86" path="res://assets/tileset/underground/terrain.tres" id="13_os2yb"]
-[ext_resource type="PackedScene" path="res://scenes/entities/pipes/pipe_entrance.tscn" id="13_pipe"]
 [ext_resource type="TileSet" uid="uid://cs6ppr1ph7fpm" path="res://assets/tileset/underground/entity_layout.tres" id="14_v6k17"]
 [ext_resource type="TileSet" uid="uid://4mdqmclyqcmk" path="res://assets/tileset/underground/decorations.tres" id="16_vda6h"]
 [ext_resource type="Resource" uid="uid://f1lw5jaxr5tn" path="res://assets/themes/overworld.tres" id="18_ukhqk"]
@@ -17,18 +13,8 @@
 [ext_resource type="TileSet" uid="uid://dy01p3ioyfiqi" path="res://assets/tileset/terrain.tres" id="20_nd55p"]
 [ext_resource type="TileSet" uid="uid://css6al2yclqkl" path="res://assets/tileset/entity_layout.tres" id="21_lletq"]
 [ext_resource type="TileSet" uid="uid://b5swkgewllff0" path="res://assets/tileset/underground/enemy_layout.tres" id="28_nd55p"]
-[ext_resource type="PackedScene" path="res://scenes/entities/castle/castle.tscn" id="castle"]
-[ext_resource type="PackedScene" path="res://scenes/entities/coin/coin.tscn" id="coin"]
 [ext_resource type="PackedScene" path="res://scenes/levels/endings/flagpole_ending.tscn" id="ending"]
-[ext_resource type="PackedScene" path="res://scenes/entities/climbables/flagpole/flagpole.tscn" id="flagpole"]
-[ext_resource type="PackedScene" path="res://scenes/entities/spawners/goomba_spawner.tscn" id="goomba"]
-[ext_resource type="PackedScene" path="res://scenes/entities/spawners/goomba_pair_spawner.tscn" id="goomba_pair"]
-[ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/hidden_question_block.tscn" id="hidden_question"]
-[ext_resource type="PackedScene" path="res://scenes/entities/spawners/one_up_spawner.tscn" id="one_up"]
 [ext_resource type="PackedScene" path="res://scenes/entities/powerups/one_up_mushroom.tscn" id="one_up_reward"]
-[ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/reward_brick.tscn" id="reward_brick"]
-[ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/alternate_reward_brick.tscn" id="reward_brick_alt"]
-[ext_resource type="PackedScene" path="res://scenes/entities/pipes/sideways_pipe_entrance.tscn" id="side_pipe"]
 [ext_resource type="Script" uid="uid://cd6coksrndgvl" path="res://scripts/levels/transport_destination.gd" id="transport_destination"]
 [ext_resource type="Script" uid="uid://bw6vhx3gvr1o" path="res://scripts/levels/transport_placement.gd" id="transport_placement"]
 
@@ -68,22 +54,6 @@ destination = SubResource("Destination_start")
 texture_filter = 1
 ending_presentation = NodePath("Presentations/FlagpoleEnding")
 player_scene = ExtResource("3_player")
-entity_scenes = Dictionary[StringName, PackedScene]({
-&"brick": ExtResource("4_brick"),
-&"brick_alternate": ExtResource("9_alternate"),
-&"castle": ExtResource("castle"),
-&"coin": ExtResource("coin"),
-&"flagpole": ExtResource("flagpole"),
-&"goomba_pair_spawner": ExtResource("goomba_pair"),
-&"goomba_spawner": ExtResource("goomba"),
-&"hidden_question_block": ExtResource("hidden_question"),
-&"one_up_spawner": ExtResource("one_up"),
-&"pipe_entrance": ExtResource("13_pipe"),
-&"question_block": ExtResource("6_question"),
-&"reward_brick": ExtResource("reward_brick"),
-&"reward_brick_alternate": ExtResource("reward_brick_alt"),
-&"sideways_pipe_entrance": ExtResource("side_pipe")
-})
 
 [node name="MainArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="0" unique_id=250103957]
 process_physics_priority = 110
@@ -107,7 +77,7 @@ tile_map_data = PackedByteArray("AAAQAAkAAQAAAAAAAAAUAAkAAAAAAAAAAAAWAAkAAAAAAAA
 tile_set = ExtResource("21_lletq")
 
 [node name="EnemyLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="3" unique_id=1742010551]
-tile_map_data = PackedByteArray("AAAsABcAAAAAAAAAAABQABcAAAAAAAAAAACgAAcAAAAAAAAAAACkAAcAAAAAAAAAAABmABcAAQAAAAAAAADCABcAAQAAAAAAAADkABcAAQAAAAAAAAAAARcAAQAAAAAAAABcARcAAQAAAAAAAAD4ABcAAQAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAsABcAAAAAAAAAAABQABcAAAAAAAAAAACgAAcAAAAAAAAAAACkAAcAAAAAAAAAAABmABcAAQAAAAAAAADCABcAAQAAAAAAAADkABcAAQAAAAAAAAAAARcAAQAAAAAAAABcARcAAQAAAAAAAAD4ABcAAQAAAAAAAADWABcAAgAAAAAAAAA=")
 
 [node name="Camera2D" parent="Areas/MainArea" index="3" unique_id=254826152]
 position = Vector2(128, 120)

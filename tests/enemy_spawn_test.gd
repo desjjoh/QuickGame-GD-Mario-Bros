@@ -236,7 +236,7 @@ func _test_enemy_hits() -> void:
 	assert(corner.state_machine.current_state.name == &"Squashed")
 	assert(player.body.global_position == contact_position)
 	assert(player.body.velocity == Vector2(90, -240))
-	assert(GameHandler.player_status.score == score + 200)
+	assert(GameHandler.player_status.score == score + 300)  # Consecutive airborne stomps: 100 + 200.
 	player.set_physics_process(true)
 
 	var knocked := scene.instantiate() as BaseEnemy

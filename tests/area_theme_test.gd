@@ -5,7 +5,9 @@ func _ready() -> void:
 	var castle := load("res://assets/themes/castle.tres") as AreaTheme
 	var underground := load("res://assets/themes/underground.tres") as AreaTheme
 	var overworld := load("res://assets/themes/overworld.tres") as AreaTheme
-	var preview := preload("res://scenes/levels/areas/base_area.tscn").instantiate() as BaseLevelArea
+	var preview := (
+		preload("res://scenes/levels/areas/base_area.tscn").instantiate() as BaseLevelArea
+	)
 	var enemy_layout := preview.get_node("Layouts/EnemyLayout") as TileMapLayer
 	for theme in [overworld, underground, castle]:
 		assert(not theme.entity_markers.has_source(10))
@@ -15,7 +17,11 @@ func _ready() -> void:
 		assert(enemy_layout.tile_set.tile_size == Vector2i(8, 8))
 		for source_id in [0, 1]:
 			var source := enemy_layout.tile_set.get_source(source_id) as TileSetAtlasSource
-			assert(source.texture.resource_path.contains("/%s/enemies/" % theme.display_name.to_lower()))
+			assert(
+				source.texture.resource_path.contains(
+					"/%s/enemies/" % theme.display_name.to_lower()
+				)
+			)
 	preview.free()
 	var flag := load("res://assets/palettes/overworld/misc/flagpole-flag.png") as Texture2D
 	assert(castle.resolve_texture(flag).resource_path.contains("/castle/"))
@@ -185,7 +191,7 @@ func _ready() -> void:
 	)
 	assert(main.theme.resolve_texture(original_texture) == original_texture)
 	# Every supplied counterpart is mapped, including all question animation frames.
-	assert(lower.theme.texture_overrides.size() == 25)
+	assert(lower.theme.texture_overrides.size() == 26)
 	for source_path: String in lower.theme.texture_overrides:
 		var replacement := lower.theme.resolve_texture(load(source_path))
 		assert(

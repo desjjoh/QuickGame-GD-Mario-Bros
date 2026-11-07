@@ -32,6 +32,8 @@
 [ext_resource type="Texture2D" uid="uid://0vk0wefn4b7g" path="res://assets/palettes/castle/ui/start-cursor.png" id="title_cursor"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/interactibles/items/coins.tres" id="world_coin"]
 
+[ext_resource type="Texture2D" path="res://assets/palettes/castle/enemies/koopa.png" id="koopa"]
+
 [resource]
 script = ExtResource("1")
 display_name = "Castle"
@@ -41,6 +43,7 @@ decorations = ExtResource("3")
 entity_markers = ExtResource("4")
 enemy_markers = ExtResource("enemy_markers")
 texture_overrides = Dictionary[String, Texture2D]({
+"res://assets/palettes/overworld/enemies/koopa.png": ExtResource("koopa"),
 "res://assets/palettes/overworld/enemies/goomba.png": ExtResource("goomba"),
 "res://assets/palettes/overworld/interactibles/blocks/brick-alternate.tres": ExtResource("art_0"),
 "res://assets/palettes/overworld/interactibles/blocks/brick.tres": ExtResource("art_1"),

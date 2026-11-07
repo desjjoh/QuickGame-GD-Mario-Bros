@@ -164,7 +164,7 @@ func set_activity_suspended(value: bool) -> void:
 	activity_suspended = value
 	if value:
 		_suspend_frame_branch(self)
-		for child in find_children("*", "Node", true, false):
+		for child in _get_owned_nodes():
 			if not child is AnimationPlayer and not child is AnimatedSprite2D:
 				continue
 			_paused_animations[child.get_instance_id()] = {
@@ -182,8 +182,9 @@ func set_activity_suspended(value: bool) -> void:
 			if is_instance_valid(node):
 				node.set("speed_scale", record.speed)
 		_paused_animations.clear()
-	for synchronized in find_children("*", "SynchronizedAnimation", true, false):
-		synchronized.set_activity_suspended(value)
+	for child in _get_owned_nodes():
+		if child is SynchronizedAnimation:
+			child.set_activity_suspended(value)
 	_sync_suspension()
 
 
@@ -204,6 +205,8 @@ func _sync_suspension() -> void:
 
 
 func _suspend_frame_branch(node: Node) -> void:
+	if node != self and node is BaseEntity:
+		return
 	_suspended_frames[node.get_instance_id()] = {
 		"node": weakref(node), "enabled": node.is_processing()
 	}
@@ -212,10 +215,25 @@ func _suspend_frame_branch(node: Node) -> void:
 		_suspend_frame_branch(child)
 
 
+## Nested entities have independent area activity and suspension ownership.
+func _get_owned_nodes() -> Array[Node]:
+	var result: Array[Node] = []
+	_append_owned_nodes(self, result)
+	return result
+
+
+func _append_owned_nodes(parent: Node, result: Array[Node]) -> void:
+	for child in parent.get_children():
+		if child is BaseEntity:
+			continue
+		result.append(child)
+		_append_owned_nodes(child, result)
+
+
 ## Call again after dynamically adding or replacing geometry.
 func refresh_activity_geometry() -> void:
 	_activity_geometry.clear()
-	for child in find_children("*", "Node2D", true, false):
+	for child in _get_owned_nodes():
 		if child is CollisionShape2D or child is Sprite2D:
 			_activity_geometry.append(weakref(child))
 
@@ -242,6 +260,8 @@ func get_activity_rect() -> Rect2:
 
 
 func _suspend_physics_branch(node: Node) -> void:
+	if node != self and node is BaseEntity:
+		return
 	_suspended_physics[node.get_instance_id()] = {
 		"node": weakref(node), "enabled": node.is_physics_processing()
 	}

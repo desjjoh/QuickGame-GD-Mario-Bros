@@ -950,3 +950,81 @@ Added BlockReward authoring data and Timed Coins to the existing reward brush, w
 The user approved independent timers and the fixed 231-tick window as known NES differences; source timing and superseded proposals remain in timed-coin-research.md. Existing PackedScene 1-Up assignments remain supported by the Resource-valued reward map. Affected paths: scripts/levels/block_reward.gd, QuestionBlock/HiddenQuestionBlock, BaseLevel/BaseLevelArea, addons/block_rewards, the authored 1-1 reward-map value type, tests/timed_coin_test.*, and current/archival documentation. No project settings or new painting layers were added.
 
 Timed-coin, question-block, reward-brick, death, pause, bonk-contact, 1-Up, and area-theme regressions reached PASS in Godot 4.7.2 headless. The final expanded timed-coin run reported five ObjectDB leaks; question-block and pause reported two each, death three, and bonk-contact four. An initial attempted hidden_block_test command referenced a nonexistent scene; actual hidden-block integration coverage passed in bonk_contact_test and timed_coin_test. Full suite and rendered brush/undo playtesting were not performed. See timed-coins.md.
+
+## 2026-11-07 - Reusable enemy hit and contact contracts
+
+Separated hit acceptance from permanent defeat in BaseEnemy. Concrete enemies now explicitly call mark_defeated(hit); Goomba does so only after successfully entering its existing squash/knock-out state. Accepted nonterminal hits remain possible, and a nested-hit guard prevents response reentry. enemy_contact now carries the other BaseEnemy; shared Walking adapts that signal to its existing reversal while retaining the wall-turn path. This prepares shell transitions and future health-bearing enemies without adding either mechanic yet. No Koopa scenes, artwork changes, project settings, collision shapes, or health system were added.
+
+Affected paths: scenes/entities/enemies/{base/base_enemy,goomba/goomba}.gd, scripts/states/enemies/walking_enemy_state.gd, tests/enemy_contract_test.*, tests/fixtures/reactive_enemy.gd, docs/architecture.md, and archive/enemy-contract.md. Enemy-contract, enemy-spawn, death, and pause checks reached PASS in Godot 4.7.2 headless. Enemy-spawn reported two ObjectDB leaks; death reported three. Focused formatting and diff checks passed. Full suite and rendered playtesting were not performed.
+
+## 2026-11-07 - Walking Green Koopa and themed marker
+
+Added BaseEnemy-inherited GreenKoopa with the shared Walking state, global two-frame animation, 12×12 Mario-contact geometry, and feet-aligned 16×32 sprite cells from the supplied sheet. Walking optionally updates facing on turns without changing Goomba's symmetric-art behavior. Added a generic green_koopa_spawner and source-2 marker to each themed EnemyLayout, live Underground/Castle texture overrides, and mappings in BaseLevel/TestLevel/1-1. No authored stage placements changed. Combat is intentionally disabled until shell entry is implemented; winged/shell assets are unused in this step.
+
+Affected paths: scenes/entities/enemies/koopa/green_koopa.tscn, scenes/entities/spawners/green_koopa_spawner.tscn, scripts/states/enemies/walking_enemy_state.gd, theme resources/EnemyLayout palettes, level entity mappings, tests/koopa_walking_test.*, tests/area_theme_test.gd, and setup/architecture/archive documentation. Koopa-walking, enemy-spawn, enemy-contract, and area-theme checks reached PASS in Godot 4.7.2 headless. Enemy-spawn reported two ObjectDB leaks. Formatting and diff checks passed. No full suite, rendered/Mesen comparison, project settings, or import-option changes. See koopa.md.
+
+## 2026-11-07 - Consolidated level entity mappings
+
+Moved all standard entity mappings into scenes/levels/base/base_level.tscn and removed entity_scenes overrides from TestLevel and 1-1. Removed now-unused mapping-only PackedScene references from those derived scenes. Painted tile data and reward configuration were preserved. Updated current architecture/configuration guidance and added tests/entity_registry_test.* for inherited equality, absence of overrides, and complete themed-marker coverage.
+
+Entity-registry, Koopa-walking, question-block, sideways-pipe, and scene-hierarchy regressions reached PASS in Godot 4.7.2 headless. Question-block reported four ObjectDB leaks. Formatting and diff checks passed. Full suite and rendered editor playtesting were not performed. No project settings changed.
+
+## 2026-11-07 - Green Koopa Mario contact and stationary shell
+
+Enabled Walking Koopa side-contact damage through the existing Mario/level path. A descending contact enters ShellIdle, applies the shared -240 px/s rebound and stomp cue, and awards 100 points once. Shell entry preserves the same live enemy/spawn slot and does not emit permanent defeat. ShellIdle derives from shared Walking with zero horizontal speed, retaining falling and terrain handling. It uses the stationary shell pose from the same theme sheet. Extracted the existing enemy score-popup path into BaseEnemy.award_score for Goomba and Koopa reuse. Stationary shells are harmless to Mario until the kicking step; wake timers, moving-shell interactions, block-hit reactions, and winged behavior remain deferred.
+
+Affected paths: scenes/entities/enemies/koopa/{green_koopa.gd,green_koopa.tscn}, scripts/states/enemies/koopa_shell_idle_state.gd, BaseEnemy/Goomba scripts, tests/{koopa_contact,koopa_walking}_test.gd, and setup/architecture/archive/koopa documentation. Koopa-contact, Koopa-walking, enemy-spawn, enemy-contract, pause, and death checks reached PASS in Godot 4.7.2 headless. An initial Koopa-contact run and enemy-spawn reported two ObjectDB leaks each; death reported three. The final expanded Koopa-contact run passed without warnings. Focused formatting/diff checks passed. Full suite and rendered/Mesen comparisons were not performed. No project settings or artwork changed.
+
+## 2026-11-07 - Shared area actor initialization
+
+Replaced the title-only backdrop spawning method with explicit generic BaseLevel/BaseLevelArea actor initialization. Area entry no longer incidentally activates spawners before its caller establishes gameplay policy. Title entry requests suspended actors; normal start and transition release request active actors; F6 and uncovered pipe arrivals initialize directly. New actors inherit that policy before their first physics tick. Removed prepare_title_backdrop and its call, while retaining normal transition spawning restrictions and once-only cap behavior.
+
+Affected paths: BaseLevelArea, BaseLevel, EntitySpawner, GameHandler, TitleFlow, title_backdrop_test, and architecture/title-screen documentation. Title-backdrop, title, sideways-pipe, transition, enemy-spawn, level-completion, death, and Koopa-walking regressions reached PASS in Godot 4.7.2 headless. Enemy-spawn reported two ObjectDB leaks and death three. Focused formatting/diff checks passed. No full suite, rendered playtest, project settings, or authored placement changes.
+
+## 2026-11-07 - Koopa kicking, stopping, and shell combat
+
+Added ShellMoving at 180 px/s using shared shell/Walking movement, kick-away direction, wall rebound with bump audio, stomp stopping, and fresh-overlap Mario damage. BaseEnemy now latches player contacts until separation and provides a contact-response hook for idle-shell kicks. Moving shells deliver EntityHit shell attacks with per-overlap duplicate protection and poll overlaps already present at kick time. Goombas and Koopas enter flipped knock-out; squashed Goomba has an explicit post-defeat shell reaction without a second defeat signal. Chains award 500/800/1000/2000/4000/5000/8000 then repeated 1-Ups, persist through stop/re-kick, and advance only on defeat. Moving-versus-idle shell defeats the idle target; two moving shells mutually defeat with the source chain award plus 1000 for the source. Added the reference-generated non-positional/default-gain enemy-smack cue and reused existing popup/extra-life systems.
+
+Affected paths: BaseEnemy, Goomba, GreenKoopa, green_koopa.tscn, scripts/states/enemies/koopa_shell_{moving,knocked_out}_state.gd, SoundHandler, tests/shell_interaction_test.*, the reactive-enemy fixture, and setup/architecture/enemy-contract/Koopa documentation. Seven focused regressions (shell-interaction, enemy-spawn, enemy-contract, Koopa-contact, Koopa-walking, pause, sound-mix) reached PASS in Godot 4.7.2 headless. Expanded shell-interaction reported four ObjectDB leaks; Koopa-contact two. Formatting and diff checks passed. Waking, near-wake kick bonuses, and full player stomp-combo scoring remain deferred. Full suite, rendered playtest, and Mesen frame/audio comparisons were not performed. No project settings or artwork changed.
+
+
+## 2026-11-07 - Koopa waking and reference 1-1 placement
+
+Added a pause-aware idle-shell countdown, globally synchronized warning poses, and re-emergence into normal walking/contact. Walking rejoins the existing global eight-tick phase immediately. Painted the single reference Green Koopa at world origin (1712,184), EnemyLayout cell (214,23), preserving other markers and existing generic enemy lifecycle rules.
+
+Affected paths: koopa_shell_idle_state.gd, world 1/1-1.tscn, koopa_wake_test, architecture/setup guides, and archive/koopa/decisions. Seven focused regressions reached PASS; the pause test required real-time execution because its audio assertion failed under fixed FPS. ObjectDB exit warnings remain (details in archive/koopa.md). Fixed 336-tick waking deliberately omits NES interval starting-phase variation. Full suite, rendered/Mesen comparison, and manual stage encounter were not run. No project settings, import options, or assets changed in this pass.
+
+
+## 2026-11-07 - Independent suspension for nested entities
+
+Fixed painted spawners recursively stopping live child enemies when the spawner's original location left the activity region. The actor's own activity flag stayed false while its physics callbacks were disabled, preventing it from moving to cleanup. BaseEntity frame/physics suspension now stops at nested BaseEntity roots; animation suspension and refreshed activity geometry use the same ownership boundary. Actor parenting, spawn limits, consumed-attempt rules, and cleanup thresholds are unchanged. No per-enemy handling or project setting changes are needed.
+
+Affected paths: scenes/entities/base/base_entity.gd, tests/nested_entity_activity_test.gd/.tscn, and docs/architecture.md. The new regression verifies a sleeping parent with independently active animation/physics, parent wake respecting child gameplay suspension, real Goomba and rolling Koopa movement through cleanup, slot release, and no repeat spawn. Nested-entity activity, entity activity, enemy spawn, title backdrop, shell interactions, Koopa wake, and pause reached PASS in Godot 4.7.2 headless. ObjectDB warnings occurred in nested activity (2), title backdrop (2), shell interactions (5), Koopa wake (7), and pause (2). Full suite and rendered manual playtesting were not performed.
+
+
+## 2026-11-07 - Consecutive airborne stomp rewards
+
+Added a player-owned chain across accepted Goomba and Koopa stomps, including stopping moving shells. Rewards rise from 100 through 8000, then repeat 1-Ups. Landing and death reset it; rejected hits do not advance it and pause preserves it. Existing enemy popup, score, lives, and audio helpers are reused. Shell defeat chains remain independent. Deliberately omitted the NES short-lived StompTimer award-index modifier; see archive/koopa.md.
+
+Affected paths: BasePlayer, BaseEnemy, Goomba, GreenKoopa, stomp_chain_test, enemy_spawn_test, and architecture/Koopa documentation. Stomp-chain, shell-interaction, Koopa-contact, enemy-spawn, and death regressions reached PASS in Godot 4.7.2 headless. Enemy-spawn's previous flat-score expectation was updated for two consecutive airborne stomps. ObjectDB warnings occurred in stomp chain (6), shell interactions (5), Koopa contact (4), enemy spawn (6), and death (3). Full suite, rendered playtesting, and Mesen comparison were not performed. No settings or assets changed.
+
+
+## 2026-11-07 - Reference shell kick scoring and contact audit
+
+Connected Green Koopa kicks to Mario's airborne chain through BasePlayer, preserving the count. Added near-wake bonus overrides using the existing fixed countdown. Updated shell/stomp test expectations and added shell_kick_score_test. Audited kicked-shell contact against the disassembly and documented remaining post-stomp grace, offscreen, and ordering differences in archive/koopa.md; no contact or movement changes were made.
+
+Affected paths: BasePlayer, GreenKoopa, shell_kick_score_test, shell_interaction_test, stomp_chain_test, architecture guide, and Koopa/decisions archive. Five focused regressions reached PASS; ObjectDB warnings remain (see Koopa archive). Full suite, rendered testing, and Mesen comparison were not performed. No project settings or assets changed.
+
+
+## 2026-11-07 - Individual shell grace and stomp score correction
+
+Added the approved 0.2-second grace timer to each GreenKoopa. It allows a fresh non-descending stop of that same moving shell, refreshes only on accepted stomps, freezes with pause, and clears on waking/permanent defeat. Other enemies remain descending-only. Added 500 and 5000 to the airborne stomp ladder, retaining repeated 1-Ups, landing/death resets, and independent kick/shell defeat rewards.
+
+Affected paths: BaseEnemy contact eligibility hook, GreenKoopa, BasePlayer score table, shell_stomp_grace_test, stomp_chain_test, shell_interaction_test, and architecture/Koopa/decisions documentation. Six focused regressions reached PASS in Godot 4.7.2 headless; ObjectDB exit warnings remain. Full suite, rendered playtesting, and Mesen comparisons were not performed. The shell-local 12-tick reset and omission of the original shared timer's score modifier are documented version differences. No settings or asset changes.
+
+
+## 2026-11-07 - Recoverable Koopa block-hit interactions
+
+Added ShellStunned and upside-down shell presentation shared across idle/moving recovery paths. Block bumps now launch/relaunch Koopas, award 100, and retain their enemy slot. Landing starts recovery; airborne kicks use the existing timer-based awards, including the zero-interval 8000 case. Moving shells remain dangerous after a bump at 60 px/s. Stomping restores upright idle presentation and re-kicking restores 180 px/s.
+
+Affected paths: GreenKoopa script/scene, koopa_shell_stunned_state, shell idle/moving states, koopa_block_bump_test, and architecture/Koopa/decisions documentation. Seven focused regressions reached PASS; final expanded block-hit integration test passed without warnings, other runs retained ObjectDB warnings (detailed in Koopa archive). Full suite, rendered playtesting, and Mesen comparisons were not performed. No project settings or import options changed.

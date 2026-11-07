@@ -328,6 +328,8 @@ func _set_flow(value: GameFlow) -> void:
 
 
 func _on_transition_finished(_id: int, _success: bool) -> void:
+	if flow == GameFlow.PLAYING and is_instance_valid(current_level) and current_level.has_started:
+		current_level.initialize_actors(false)
 	if flow == GameFlow.TITLE:
 		title_flow.reveal()
 	_start_current_level_if_ready()
