@@ -4,6 +4,7 @@
 [ext_resource type="TileSet" uid="uid://dy01p3ioyfiqi" path="res://assets/tileset/terrain.tres" id="2"]
 [ext_resource type="TileSet" uid="uid://58ym0wu30sv7" path="res://assets/tileset/decorations.tres" id="3"]
 [ext_resource type="TileSet" uid="uid://css6al2yclqkl" path="res://assets/tileset/entity_layout.tres" id="4"]
+[ext_resource type="TileSet" uid="uid://mvsib0q06hhk" path="res://assets/tileset/enemy_layout.tres" id="enemy_markers"]
 
 [resource]
 script = ExtResource("1")
@@ -11,3 +12,4 @@ display_name = "Overworld"
 terrain = ExtResource("2")
 decorations = ExtResource("3")
 entity_markers = ExtResource("4")
+enemy_markers = ExtResource("enemy_markers")

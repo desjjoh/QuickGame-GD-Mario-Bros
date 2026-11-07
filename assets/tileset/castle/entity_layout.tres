@@ -5,13 +5,8 @@
 [ext_resource type="Texture2D" uid="uid://c0wlckxrx6c0w" path="res://assets/tileset/castle/previews/castle.png" id="castle"]
 [ext_resource type="Texture2D" uid="uid://cgxilwrkd7fx5" path="res://assets/palettes/castle/tileset/Palette 4 (Coins and Interactibles).png" id="coin"]
 [ext_resource type="Texture2D" uid="uid://cre2hc0wsvd7k" path="res://assets/tileset/castle/previews/flagpole.png" id="flagpole"]
+[ext_resource type="Texture2D" uid="uid://dy6q3mjh18ndw" path="res://assets/palettes/overworld/tileset/Palette 4 (Coins and Interactibles).png" id="hidden_art"]
 [ext_resource type="Texture2D" uid="uid://dwygpw8s4jkf" path="res://assets/tileset/castle/previews/sideways_pipe_entrance.png" id="side"]
-
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/misc/green-mushroom.png" id="one_up"]
-
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 4 (Coins and Interactibles).png" id="hidden_art"]
-
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/enemies/goomba.png" id="goomba"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_brick"]
 resource_name = "Brick entity"
@@ -25,6 +20,20 @@ resource_name = "Question block entity"
 texture = ExtResource("coin")
 0:0/0 = 0
 0:0/0/custom_data_0 = "question_block"
+
+[sub_resource type="TileSetAtlasSource" id="reward_brick"]
+resource_name = "Reward Brick"
+texture = ExtResource("3_alternate")
+margins = Vector2i(16, 0)
+0:0/0 = 0
+0:0/0/custom_data_0 = "reward_brick"
+
+[sub_resource type="TileSetAtlasSource" id="reward_brick_alternate"]
+resource_name = "Reward Brick Alt"
+texture = ExtResource("3_alternate")
+margins = Vector2i(32, 0)
+0:0/0 = 0
+0:0/0/custom_data_0 = "reward_brick_alternate"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_alternate"]
 resource_name = "Alternate brick entity"
@@ -72,24 +81,12 @@ margins = Vector2i(0, 16)
 0:0/0 = 0
 0:0/0/custom_data_0 = "coin"
 
-[sub_resource type="TileSetAtlasSource" id="one_up"]
-resource_name = "1-Up Spawner"
-texture = ExtResource("one_up")
-0:0/0 = 0
-0:0/0/custom_data_0 = "one_up_spawner"
-
 [sub_resource type="TileSetAtlasSource" id="hidden_question"]
 resource_name = "Hidden Question Block"
 texture = ExtResource("hidden_art")
 margins = Vector2i(48, 32)
 0:0/0 = 0
 0:0/0/custom_data_0 = "hidden_question_block"
-
-[sub_resource type="TileSetAtlasSource" id="goomba"]
-resource_name = "Goomba Spawner"
-texture = ExtResource("goomba")
-0:0/0 = 0
-0:0/0/custom_data_0 = "goomba_spawner"
 
 [resource]
 custom_data_layer_0/name = "entity_id"
@@ -102,6 +99,6 @@ sources/4 = SubResource("Side")
 sources/5 = SubResource("flagpole")
 sources/6 = SubResource("castle")
 sources/7 = SubResource("coin")
-sources/8 = SubResource("one_up")
 sources/9 = SubResource("hidden_question")
-sources/10 = SubResource("goomba")
+sources/12 = SubResource("reward_brick")
+sources/13 = SubResource("reward_brick_alternate")

@@ -46,7 +46,7 @@ Collection and offscreen disposal free the mushroom and release its slot on tree
 
 ## Painted Goomba spawners
 
-The Goomba stamp uses EntitySpawner with the enemy category. It attempts once when its marker enters the camera activation region. Five live enemy slots are shared with EnemySpawner and are independent of the power-up slot. If an attempt fails, the marker stays empty for the rest of the area load. Live Goombas free themselves after their full bounds leave the cleanup region. A successful legacy EnemySpawner can still rearm according to its authored reentry policy.
+The Goomba stamp uses EntitySpawner with the enemy category. It attempts once when its marker enters the camera activation region. Ten live enemy slots are shared with EnemySpawner and are independent of the power-up slot. If an attempt fails, the marker stays empty for the rest of the area load. Live Goombas free themselves after their full bounds leave the cleanup region. A successful legacy EnemySpawner can still rearm according to its authored reentry policy.
 
 ## Goomba pairs in 1-1
 
@@ -57,3 +57,5 @@ When the pair marker activates, both members start walking together as long as t
 ## EnemyLayout and defeat
 
 Paint enemies in EnemyLayout on its 8×8 grid. The migrated markers in TestLevel and 1-1 retain their world positions. The marker uses the same activation boundary and cap as before. Defeat and offscreen cleanup both release the live slot when the actor exits. Enemy defeats are not saved, so enemy placements get a fresh attempt on area reload or death restart.
+
+EnemyLayout uses the selected area's themed atlas for both single and pair previews. A squashed Goomba still turns approaching walkers around through the enemy contact area. Its Mario damage is disabled, and airborne knocked-out Goombas do not turn other enemies.

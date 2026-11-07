@@ -3,7 +3,7 @@ extends CanvasGroup
 
 ## Shared foundation for playable levels.
 
-const SPAWN_LIMITS := {&"power_up": 1, &"enemy": 5}
+const SPAWN_LIMITS := {&"power_up": 1, &"enemy": 10}
 
 enum CompletionMode { NORMAL, WARP }
 
@@ -55,6 +55,7 @@ var transition_in_progress: bool = false
 
 var player: BasePlayer
 var is_shutdown: bool = false
+var _reward_timers: Dictionary[int, WeakRef] = {}
 var _spawned_areas: Dictionary[int, bool] = {}
 var _live_spawns: Dictionary[StringName, Array] = {}
 var _progress_key: String
@@ -78,7 +79,10 @@ var world_objects: Node2D:
 
 
 func has_spawn_capacity(category: StringName) -> bool:
-	return not SPAWN_LIMITS.has(category) or _live_spawns.get(category, []).size() < SPAWN_LIMITS[category]
+	return (
+		not SPAWN_LIMITS.has(category)
+		or _live_spawns.get(category, []).size() < SPAWN_LIMITS[category]
+	)
 
 
 ## Claim immediately before adding a new actor to the tree.
@@ -104,6 +108,7 @@ func _release_spawn_slot(category: StringName, actor: Node) -> void:
 
 
 func _ready() -> void:
+	GameHandler.pause_controller.register_level(self)
 	level_timer.expired.connect(_on_timer_expired)
 	death_sequence.presentation_finished.connect(_retire_death_player)
 	death_sequence.finished.connect(_restart_after_death, CONNECT_DEFERRED)
@@ -134,6 +139,8 @@ func _ready() -> void:
 		camera.reset_target(player.body)
 	if not is_shutdown:
 		active_area.enter_area()
+		if not is_instance_valid(GameHandler.current_game):
+			initialize_actors(false)
 
 
 func spawn_layout_entities() -> void:
@@ -187,7 +194,7 @@ func _spawn_layout_entities(
 			continue
 		instance.visual_theme = area.theme
 		if instance is QuestionBlock:
-			instance.power_up_scene = area.question_block_rewards.get(cell)
+			instance.configure_reward(area.question_block_rewards.get(cell))
 		instance.name = entity_name
 		instance.restore_area_state(progress.get("state", {}))
 		# Block/entity marker origins are the top-left of each grid cell.
@@ -206,6 +213,12 @@ func _physics_process(_delta: float) -> void:
 	if death_in_progress:
 		death_sequence.advance(_delta)
 		return
+	for id: int in _reward_timers.keys():
+		var block := _reward_timers[id].get_ref() as QuestionBlock
+		if not is_instance_valid(block) or block.is_shutdown:
+			_reward_timers.erase(id)
+		else:
+			block.advance_reward_timer()
 	if area_transport.advance():
 		return  # Freeze camera/bounds during controlled transport.
 	var camera := get_viewport().get_camera_2d() as LevelCamera
@@ -228,11 +241,27 @@ func on_level_start() -> bool:
 	if GameHandler.current_level != self or GameHandler.flow != GameHandler.GameFlow.PLAYING:
 		return false
 	# load_level initialized the value once. Start only the local countdown phase.
+	initialize_actors(false)
 	has_started = true
 	level_timer.start(GameHandler.animation_clock.tick_count)
 	_play_area_music()
 	level_started.emit()
 	return true
+
+
+func initialize_actors(suspended: bool) -> void:
+	if (
+		is_shutdown
+		or death_in_progress
+		or completion_in_progress
+		or not is_instance_valid(active_area)
+	):
+		return
+	active_area.initialize_actors(suspended)
+
+
+func register_reward_timer(block: QuestionBlock) -> void:
+	_reward_timers[block.get_instance_id()] = weakref(block)
 
 
 func _play_area_music() -> void:
@@ -340,6 +369,7 @@ func shutdown() -> void:
 	if is_shutdown:
 		return
 	is_shutdown = true
+	GameHandler.pause_controller.clear_for_level(self)
 	MusicHandler.stop_area(self)
 	if ending_presentation != null:
 		ending_presentation.cancel()
@@ -413,6 +443,8 @@ func _commit_area_arrival(
 	if previous_area != area:
 		_unload_area(previous_area)
 	area.enter_area()
+	if not under_cover:
+		initialize_actors(false)
 	_record_active_area()
 	if previous_area != area and not under_cover:
 		_play_area_music()

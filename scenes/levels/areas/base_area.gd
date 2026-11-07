@@ -17,10 +17,12 @@ var _runtime_templates: Dictionary[StringName, PackedScene] = {}
 var entity_persistence: Dictionary[String, bool] = {}
 var runtime_loaded: bool = true
 var is_active: bool = false
+var actors_initialized := false
+var actors_suspended := false
 @export var area_id: StringName
 @export var background_music: MusicHandler.Track = MusicHandler.Track.OVERWORLD
 @export var transport_points: Array[TransportPlacement] = []
-@export var question_block_rewards: Dictionary[Vector2i, PackedScene] = {}
+@export var question_block_rewards: Dictionary[Vector2i, Resource] = {}
 var _transport_cells: Dictionary[Vector2i, StringName] = {}
 
 @export var pipe_routes: Array[PipeRoute] = []
@@ -48,6 +50,7 @@ func enter_area() -> void:
 
 func exit_area() -> void:
 	is_active = false
+	actors_initialized = false
 	set_physics_process(false)
 	for reference: WeakRef in _activity_entities.values():
 		var entity := reference.get_ref() as BaseEntity
@@ -65,7 +68,8 @@ func apply_theme() -> void:
 	var assignments := {
 		"GroundLayout": theme.terrain,
 		"DecorationLayout": theme.decorations,
-		"EntityLayout": theme.entity_markers
+		"EntityLayout": theme.entity_markers,
+		"EnemyLayout": theme.enemy_markers
 	}
 	for layer_name: String in assignments:
 		var layer := get_node("Layouts/" + layer_name) as TileMapLayer
@@ -289,7 +293,8 @@ func update_camera_activity() -> void:
 	if (
 		level != null
 		and (
-			level.is_shutdown
+			not actors_initialized
+			or level.is_shutdown
 			or level.death_in_progress
 			or level.completion_in_progress
 			or level.transition_in_progress
@@ -297,6 +302,21 @@ func update_camera_activity() -> void:
 		)
 	):
 		return
+	_activate_spawners(wake_region, sleep_region)
+
+
+## Establish actor policy before the first activation attempt.
+func initialize_actors(suspended: bool) -> void:
+	if not is_active or not runtime_loaded:
+		return
+	actors_suspended = suspended
+	actors_initialized = true
+	for entity in get_node("WorldObjects").find_children("*", "BaseEntity", true, false):
+		(entity as BaseEntity).set_gameplay_suspended(suspended)
+	_activate_spawners(get_activity_region(false), get_activity_region(true))
+
+
+func _activate_spawners(wake_region: Rect2, sleep_region: Rect2) -> void:
 	for id: int in _spawners.keys():
 		var spawner := _spawners[id].get_ref() as Node2D
 		if not is_instance_valid(spawner):

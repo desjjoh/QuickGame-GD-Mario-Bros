@@ -37,6 +37,7 @@ func make_game(manual: bool) -> Node:
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
 	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
+	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	game.initial_level = packed
 	return game
 
@@ -60,6 +61,7 @@ func grab(level: BaseLevel, height: float = 100.0) -> void:
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	process_physics_priority = 200
 	for boundary in [[16, 100, 400], [56, 400, 800], [80, 800, 2000], [126, 2000, 5000]]:
 		assert(FlagpoleEndingPresentation.points_for_grab_height(boundary[0]) == boundary[1])
@@ -83,6 +85,7 @@ func _ready() -> void:
 				assert(not ending._score_popup.is_physics_interpolated())
 	)
 	await grab(level)
+	await preload("res://tests/fixtures/pause_check.gd").check(level)
 	assert(ending.grab_height == 92.0 and ending.remaining_time_at_contact == time_before)
 	assert(ending.grab_points == 2000 and GameHandler.player_status.score == score_before)
 	assert(ending._score_popup.visible and ending._score_popup.region_rect == Rect2(16, 8, 16, 8))
@@ -139,6 +142,7 @@ func _ready() -> void:
 	var retired: WeakRef = weakref(player)
 	assert(ending._walk_endpoint == ending._castle.doorway.global_position)
 	var walk_steps := 0
+	await preload("res://tests/fixtures/pause_check.gd").check(level)
 	for frame in range(400):
 		walk_steps += 1
 		var previous_camera := camera.global_position.x
@@ -243,6 +247,7 @@ func _ready() -> void:
 	ending = level.ending_presentation as FlagpoleEndingPresentation
 	await grab(level, 190.0)
 	await wait_phase(ending, FlagpoleEndingPresentation.Phase.SCORE)
+	await preload("res://tests/fixtures/pause_check.gd").check(level)
 	var stale := ending.score_step.current_ticket
 	var cancelled_popup: WeakRef = weakref(ending._score_popup)
 	level.cancel_ending()

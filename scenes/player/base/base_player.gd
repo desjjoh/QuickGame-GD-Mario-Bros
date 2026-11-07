@@ -8,6 +8,8 @@ signal death_presentation_finished
 
 var is_dead: bool = false
 var _death_finished: bool = false
+const STOMP_CHAIN_POINTS := [100, 200, 400, 500, 800, 1000, 2000, 4000, 5000, 8000]
+var stomp_chain := 0
 var last_enemy_stomp_tick := -1
 var scripted_motion_step: Callable
 
@@ -61,6 +63,26 @@ func _physics_process(delta: float) -> void:
 		_try_attach_climbable(before, body.global_position)
 
 
+## Called only after an enemy accepts a stomp, including nonterminal shell stops.
+func award_enemy_stomp(enemy: BaseEnemy, world_position: Vector2) -> void:
+	if stomp_chain < STOMP_CHAIN_POINTS.size():
+		enemy.award_score(STOMP_CHAIN_POINTS[stomp_chain], world_position)
+	else:
+		enemy.award_extra_life(world_position)
+	stomp_chain = mini(stomp_chain + 1, STOMP_CHAIN_POINTS.size())
+
+
+## Reference score controls 3..10, then clamped to repeated 1-Ups.
+func award_shell_kick(enemy: BaseEnemy, world_position: Vector2, interval: int) -> void:
+	const KICK_POINTS := [400, 500, 800, 1000, 2000, 4000, 5000, 8000]
+	if interval < 3:
+		enemy.award_score([8000, 1000, 500][maxi(interval, 0)], world_position)
+	elif stomp_chain < KICK_POINTS.size():
+		enemy.award_score(KICK_POINTS[stomp_chain], world_position)
+	else:
+		enemy.award_extra_life(world_position)
+
+
 func advance_scripted_walk(direction: float, delta: float) -> void:
 	horizontal_movement.apply(body, motion_values, direction, delta)
 	face_direction(direction)
@@ -111,6 +133,8 @@ func move_body(gravity_after_motion: bool = false) -> void:
 		# The correction already consumed this tick's horizontal displacement.
 		body.velocity.x = 0.0
 	body.move_and_slide()
+	if body.is_on_floor():
+		stomp_chain = 0
 	if gravity_after_motion:
 		# Position uses the current speed; gravity prepares the following tick.
 		# Landing and ceiling response retain authority over the resulting speed.
@@ -147,6 +171,7 @@ func face_direction(direction: float) -> void:
 func begin_death(present: bool = false) -> void:
 	if is_dead or is_shutdown:
 		return
+	stomp_chain = 0
 	is_dead = true
 	state_machine.stop(false)
 	if is_shutdown:

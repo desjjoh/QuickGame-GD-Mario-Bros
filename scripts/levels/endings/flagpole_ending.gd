@@ -336,6 +336,11 @@ func _on_endpoint() -> void:
 	if GameHandler.current_player == retired:
 		GameHandler.current_player = null
 	retired.queue_free()
+	if fireworks_step is CastleFireworksStep:
+		fireworks_step.castle = _castle
+		fireworks_step.count = CastleFireworksStep.count_for_time(
+			GameHandler.time_remaining, _level.timer_enabled
+		)
 	_set_phase(Phase.SCORE)
 	score_step.begin()
 

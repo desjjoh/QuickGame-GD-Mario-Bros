@@ -1,35 +1,41 @@
 extends BaseEnemy
 
-const SCORE_POPUP := preload("res://scenes/components/presentation/score_popup.tscn")
-
 
 func _accept_hit(hit: EntityHit) -> bool:
-	if state_machine.current_state != $StateMachine/Walking:
+	if state_machine.current_state != $StateMachine/Walking and not _accepts_defeated_hit(hit):
 		return false
 	match hit.maneuver:
 		&"stomp":
-			state_machine.change_state($StateMachine/Squashed)
+			if not state_machine.change_state($StateMachine/Squashed):
+				return false
 		&"block_bump", &"shell", &"fireball", &"star":
 			var knocked_out: EnemyDefeatedState = $StateMachine/KnockedOut
-			var attacker_x := body.global_position.x
-			if hit.attacker is BasePlayer:
-				attacker_x = hit.attacker.body.global_position.x
-			elif is_instance_valid(hit.attacker):
-				attacker_x = hit.attacker.global_position.x
-			knocked_out.launch_direction = -1.0 if body.global_position.x < attacker_x else 1.0
-			state_machine.change_state(knocked_out)
+			knocked_out.launch_direction = away_from_attacker(hit)
+			if not state_machine.change_state(knocked_out):
+				return false
 		_:
 			return false
-	if hit.maneuver == &"stomp" or hit.maneuver == &"block_bump":
-		var popup := SCORE_POPUP.instantiate()
-		get_parent().add_child(popup)
-		popup.show_score(100, sprite.global_position)
-		var rise := popup.create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
-		rise.tween_property(popup, "position:y", popup.position.y - 24.0, 0.8)
-		rise.tween_callback(popup.queue_free)
-		GameHandler.add_score(100)
+	mark_defeated(hit)
+	if is_shutdown or is_queued_for_deletion():
+		return true
+	if hit.maneuver == &"stomp":
+		award_stomp(hit, sprite.global_position)
+	elif hit.maneuver == &"block_bump":
+		award_score(100, sprite.global_position)
 	return true
 
 
 func _can_hurt_player() -> bool:
 	return state_machine.current_state == $StateMachine/Walking
+
+
+func _accepts_defeated_hit(hit: EntityHit) -> bool:
+	return (
+		hit != null
+		and hit.maneuver == &"shell"
+		and state_machine.current_state == $StateMachine/Squashed
+	)
+
+
+func _blocks_enemy_contact() -> bool:
+	return super() or state_machine.current_state == $StateMachine/Squashed

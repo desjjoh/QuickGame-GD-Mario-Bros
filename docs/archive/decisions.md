@@ -436,3 +436,72 @@ Moved descent target, dismount timing, outward nudge and doorway arrival into Fl
 ## 2026-11-06 - Remove the flagpole-specific player state
 
 Completes the flagpole sequence ownership decision. The ending presentation directs movement through BasePlayer's scripted physics callback and the ordinary Climb and Move states. Each character owns its animation. Cancellation and doorway arrival release scripted control.
+
+## 2026-11-07 - Game-owned pause delegation
+
+Status: implemented following user approval of the discussed first pass. GameHandler exposes pause state and requests; its PauseController child handles eligibility, Start, SceneTree pause, and cleanup. The player owns no pause behavior. Only the pause listener and dedicated SoundHandler cue player use Always processing; world simulation, shared animations, and ordinary audio freeze together. This avoids maintaining separate pause flags throughout gameplay. Signals can still run while paused, so lifecycle cleanup explicitly clears pause. First-pass scope excludes transitions, pipe travel, death, and endings, with no overlay or menu. Weak level registration supports F6. Audio resumes preserved playback immediately on unpause, a deliberate difference from the NES sound engine. Details and verification are in pause.md.
+
+## 2026-11-07 - Pause all level presentations
+
+Status: implemented. Supersedes the first-pass eligibility restrictions in Game-owned pause delegation above. Following user direction, only the title screen and active screen transitions block pause; a valid, non-shutdown level is still required. Pipe entry/emergence, death waits, and flagpole ending phases use the existing tree pause without separate animation-specific rules. Completing flow no longer clears pause. Accepted transitions clear pause before their work proceeds. Focused integration checks freeze and resume real pipe, death, and ending sequences.
+
+## 2026-11-07 - Castle-owned fireworks animation
+
+Status: implemented after discussion and user approval. CastleEntity owns the art, positions, and tick-based sequence beside its tiny flag. CastleFireworksStep adapts this to the existing ending ticket contract, scoring, and SoundHandler; FlagpoleEndingPresentation chooses the timer-dependent count before conversion. This avoids player-owned presentation and enemy spawn slots while retaining cancellation and pause behavior. One reusable sprite suffices because 24-tick bursts do not overlap 32-tick launches. The existing final ending hold remains pending a Mesen timing comparison; no exact full-sequence parity claim is made. See fireworks.md.
+
+## 2026-11-07 - Independent timed-coin block windows
+
+Status: approved for implementation, not implemented. The user accepted independent block timers and requested this be recorded as a known version difference. The NES uses a shared BrickCoinTimer/start flag, with flag reset during parsing of another multi-coin block. Our planned rewards isolate each block so another block cannot alter its window. Save remaining timing state through area unloads without refilling, freeze it while unloaded, and obey the existing death-reset policy. Exact interval-phase treatment remains an implementation detail to settle; no exact duration or emulator parity is claimed. This replaces the initially unapproved policy proposal in timed-coin-research.md. No gameplay code or settings changed.
+
+## 2026-11-07 - Reward-brick appearances and power-up authoring scope
+
+Status: implemented. Reward Brick and Reward Brick Alt are paintable QuestionBlock scene variants with static initial textures and the same reward brush as normal/hidden question blocks. Their default is one coin; ordinary bricks remain distinct. Removed the standalone green mushroom marker from EntityLayout. The user explicitly deferred a power-up layer after the initial interpretation of their grid request; no PowerUpLayout or new grid configuration remains. Future standalone power-up authoring is unimplemented. Internal spawner scenes and block-emitted 1-Ups retain their behavior.
+
+## 2026-11-07 - Fixed-duration timed reward implementation
+
+Status: implemented after the user approved exactly 231 physics ticks from each block's first hit. Supersedes the unresolved interval-phase detail in Independent timed-coin block windows above. Blocks own independent mutable countdowns; shared BlockReward resources contain configuration only. The existing area reward map accepts Resource values, preserving old PackedScene power-ups while allowing explicit Coin/Timed Coins/Power-Up definitions. BaseLevel advances weak timer registrations separately from camera activity suspension, and existing snapshots preserve running, expired-awaiting-final-hit, and exhausted outcomes. Bounce return state is chosen before award publication to avoid duplicate/deferred depletion. The editor uses stacked regular-coin artwork for timed rewards. This deliberately omits the NES shared timer/start flag and global 21-frame phase. See timed-coins.md.
+
+## 2026-11-07 - Enemy reactions do not imply defeat
+
+Status: implemented following approval of enemy steps 1 and 2. receive_hit retains its accepted/rejected boolean contract; acceptance can mean a surviving reaction. mark_defeated is explicit and idempotent, leaving health, shell transitions, defeat presentation, and rewards with the concrete enemy/state. This supersedes BaseEnemy's unconditional defeat on accepted hits. enemy_contact(other) exposes the actual actor so future states can choose attack or reversal without duplicating overlap detection. Walking preserves Goomba reversal. No speculative health component or shell system is introduced. See enemy-contract.md for the lifecycle and test evidence.
+
+## 2026-11-07 - One inherited entity registry
+
+Status: implemented following the user's request after a missing Koopa mapping in TestLevel. BaseLevel.tscn now owns all 15 standard marker-to-scene mappings, including blocks, pipes, castle, coins, and spawners. Removed TestLevel and 1-1 dictionary overrides and their unused mapping-only resource references. Godot replaces inherited dictionaries instead of merging them; central ownership means future entries propagate through scene inheritance. Derived levels continue owning placements and reward configuration. No runtime fallback registry or per-level merge layer was added. entity_registry_test rejects derived scene overrides and validates every theme palette marker against the shared registry.
+
+## 2026-11-07 - Koopa shell entry remains a surviving reaction
+
+Status: implemented following approval of the next Mario-interaction step. Green Koopa enables BaseEnemy's existing Walking player-contact check and handles a stomp with a ShellIdle state transition rather than mark_defeated. The same actor and enemy slot remain live. ShellIdle extends the shared Walking movement at zero speed, avoiding separate falling physics. The themed sheet supplies its 16x16 stationary pose; terrain and contact shapes remain unchanged. Enemy score-popup presentation is shared through BaseEnemy.award_score. Stationary shell contact is temporarily harmless until kicking is implemented; no wake/health system is introduced. See koopa.md.
+
+## 2026-11-07 - Actor initialization follows area policy
+
+Status: implemented after the user requested a cleaner lifecycle and removal of the title-only workaround. Loading creates placements; BaseLevel.initialize_actors establishes a generic active/suspended area policy and activates nearby actors. Gameplay starts after transition release, title actors initialize suspended, uncovered arrivals and standalone F6 initialize directly. EntitySpawner applies the area policy before actor physics. Removed prepare_title_backdrop and its title-specific gate; no spawning bypass toggles transition flags. Existing spawn caps and skipped-attempt rules remain. Details and evidence are in title-screen.md under Shared actor initialization.
+
+## 2026-11-07 - Shell contact policy and defeat-only chain rewards
+
+Status: implemented after approval to combine kicking/stopping and shell-to-enemy steps. Shared player detection delegates response to the enemy and latches a contact until separation; idle Koopa kicks while walking/moving Koopa uses stomp/damage. ShellMoving retains shared movement and owns attack overlap bookkeeping. Its target receives an ordinary shell EntityHit, allowing surviving reactions; only permanent defeat advances score/life chains. Squashed Goomba explicitly accepts a physical shell reaction after defeat, without reviving or re-emitting defeat. Shell chains persist for the live actor across stop/re-kick, and mutual moving-shell scoring follows the reference's asymmetric source/target awards. Wake bonuses and player stomp combos remain unimplemented. Details and limits are in koopa.md.
+
+
+## 2026-11-07 - Koopa waking and stage placement
+
+Implemented: idle shells use a local 336-physics-tick countdown and an 84-tick warning. Warning artwork and resumed walking sample the existing global animation clock. Reference revival direction follows global tick parity. This completes the earlier deferred wake lifecycle without introducing a separate actor, animation clock, or spawn path. Fixed duration deliberately omits the NES shared 21-frame starting phase; hard-mode timings and near-wake score bonuses remain outside this pass. EnemyLayout source 2 places the single reference 1-1 Koopa at cell (214,23); existing enemy activation, limits, skipped attempts, and reload ownership are reused. See [Koopa walkthrough](koopa.md).
+
+
+## 2026-11-07 - Player-owned airborne stomp scoring
+
+Implemented: BasePlayer owns consecutive stomp reward progression so mixed enemies share one airborne chain. Enemy reactions report accepted stomps through BaseEnemy's reward helper; floor contact and death clear the player count. This replaces the earlier deferred player-stomp scoring decision. The straightforward 100-to-8000-to-repeated-1-Up progression omits the NES StompTimer modifier, while shell defeat scoring remains independent. No additional singleton, per-enemy chain, or session persistence is introduced.
+
+
+## 2026-11-07 - Reference shell kick reward controls
+
+Implemented: kicks read Mario's chain without advancing it and use the reference kick score controls, including 500/5000 and saturation at repeated 1-Ups. Near-wake intervals override chain awards, derived from the approved fixed wake countdown. This replaces the earlier flat-400/deferred bonus policy. Contact audit identified the unimplemented NES post-stomp grace timer; adding it would change damage/contact behavior and remains a separate discussion. Existing simplified stomp scoring and modern offscreen rules are documented differences.
+
+
+## 2026-11-07 - Shell-local grace and complete stomp reward table
+
+Implemented following discussion and explicit user choice: a 12-physics-tick (0.2-second) grace window belongs to the specific Koopa stomped. Accepted stomps refresh it, kicks do not, and other entities remain unaffected. The existing overlap latch still requires separation. This deliberately replaces the prior deferred grace policy without introducing a player/session grace timer. The NES frame timer increment/decrement behavior is documented as distinct from this fixed local window. Stomp scoring now includes 500 and 5000, superseding the shortened ladder; the NES timer-based score-index modifier remains omitted. No project settings changed.
+
+
+## 2026-11-07 - Recoverable Koopa block stun
+
+Implemented after reference investigation and user approval: add ShellStunned as shared Walking physics plus landing-to-idle recovery, with Koopa-owned shell orientation. A moving shell retains ShellMoving and its attack identity when bumped, but uses the 60 px/s block-launch speed. This separates recoverable block stuns from permanent shell-hit defeat and reuses existing BlockHitReceiver, kick/score/cleanup paths. Repeat bumps reapply the launch and award 100. Airborne recovery intervals enable the reference zero-interval 8000 kick before a newly stunned walking Koopa lands. Fixed recovery, local stomp grace, and modern gravity integration remain deliberate differences; see archive/koopa.md.

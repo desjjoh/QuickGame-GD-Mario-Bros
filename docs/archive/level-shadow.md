@@ -35,3 +35,7 @@ shared_shadow_test renders overlapping world, HUD and player shapes, checks fore
 ## Draw-order maintenance
 
 The compositor reasserts world (0), screen UI (1), and foreground players (2) draw indices on each render synchronization. Godot can refresh canvas indices after scene-tree changes even though render-only parents were assigned manually. Reparenting remains cached; this correction does not reparent every frame or modify artwork. Pipe transport remains the sole intentional behind-world route, selected from the level Players/Areas sibling order. Flag contact and ending descent use ordinary foreground player routing.
+
+## Decoration routing preview
+
+F5 gameplay routes the active area's DecorationLayout behind the shared shadow composite. Decorations keep their scene-tree placement and use the same interpolated camera transform. They receive foreground shadows but do not contribute silhouettes to the shared shadow mask. Standalone F6 level rendering still uses the original CanvasGroup shader. The headless shared-shadow regression passed with two ObjectDB leaks at exit. Rendered comparison remains open.

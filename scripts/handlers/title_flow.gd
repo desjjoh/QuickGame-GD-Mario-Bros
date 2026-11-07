@@ -55,6 +55,7 @@ func show_now(first_level: PackedScene) -> bool:
 	if not GameHandler.load_level(screen.background_level):
 		_clear_title()
 		return false
+	GameHandler.current_level.initialize_actors(true)
 	suspend_background()
 	screen.connect(&"start_requested", start_new_game)
 	if GameHandler.transitions.busy:
