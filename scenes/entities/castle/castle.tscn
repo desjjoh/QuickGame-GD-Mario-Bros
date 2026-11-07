@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scenes/entities/castle/castle.gd" id="script"]
 [ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png" id="art"]
 [ext_resource type="Texture2D" path="res://assets/ui/castle-flag.png" id="flag"]
+[ext_resource type="Texture2D" path="res://assets/items/fireworks.png" id="fireworks"]
 
 [node name="Castle" instance=ExtResource("base")]
 script = ExtResource("script")
@@ -18,6 +19,15 @@ texture = ExtResource("flag")
 
 [node name="Doorway" type="Marker2D" parent="."]
 position = Vector2(40, 80)
+
+[node name="Fireworks" type="Node2D" parent="."]
+
+[node name="Burst" type="Sprite2D" parent="Fireworks"]
+visible = false
+centered = false
+texture = ExtResource("fireworks")
+hframes = 3
+physics_interpolation_mode = 2
 
 [node name="Tile_0_2" type="Sprite2D" parent="."]
 position = Vector2(0, 32)

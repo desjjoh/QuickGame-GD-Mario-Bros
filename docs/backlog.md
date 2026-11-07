@@ -4,12 +4,12 @@
 
 - Wire shells, fireballs, and star contact into the enemy hit contract as those mechanics are added.
 - Add breakable bricks and additional power-up forms.
-- Add fireworks scoring and presentation for level endings.
 - Extend climbable behavior to vines and add any vine-specific detach rules.
 - Define standalone level restart behavior for isolated F6 testing.
 
 ## Audio and presentation
 
+- Compare castle fireworks with Mesen, especially first-frame alignment, blast playback, and the final music/hold handoff.
 - Compare generated cues and music against Mesen, including loop seams, pulse takeover, and voice balance.
 - Add more area tracks as stages need them, including Castle and Water.
 - Investigate occasional camera hitching at high refresh rates and reproduce it in a rendered build.

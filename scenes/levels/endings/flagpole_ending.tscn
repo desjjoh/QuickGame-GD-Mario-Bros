@@ -1,6 +1,6 @@
 [gd_scene format=3]
 [ext_resource type="Script" path="res://scripts/levels/endings/flagpole_ending.gd" id="script"]
-[ext_resource type="Script" path="res://scripts/levels/endings/ending_step.gd" id="step"]
+[ext_resource type="Script" path="res://scripts/levels/endings/fireworks_step.gd" id="step"]
 [ext_resource type="Script" path="res://scripts/levels/endings/time_score_step.gd" id="time_score"]
 [ext_resource type="AudioStream" path="res://assets/audio/music/stage_clear.wav" id="music"]
 [ext_resource type="AudioStream" path="res://assets/audio/music/stage_clear_pulse.wav" id="pulse"]

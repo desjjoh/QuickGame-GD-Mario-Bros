@@ -444,3 +444,7 @@ Status: implemented following user approval of the discussed first pass. GameHan
 ## 2026-11-07 - Pause all level presentations
 
 Status: implemented. Supersedes the first-pass eligibility restrictions in Game-owned pause delegation above. Following user direction, only the title screen and active screen transitions block pause; a valid, non-shutdown level is still required. Pipe entry/emergence, death waits, and flagpole ending phases use the existing tree pause without separate animation-specific rules. Completing flow no longer clears pause. Accepted transitions clear pause before their work proceeds. Focused integration checks freeze and resume real pipe, death, and ending sequences.
+
+## 2026-11-07 - Castle-owned fireworks animation
+
+Status: implemented after discussion and user approval. CastleEntity owns the art, positions, and tick-based sequence beside its tiny flag. CastleFireworksStep adapts this to the existing ending ticket contract, scoring, and SoundHandler; FlagpoleEndingPresentation chooses the timer-dependent count before conversion. This avoids player-owned presentation and enemy spawn slots while retaining cancellation and pause behavior. One reusable sprite suffices because 24-tick bursts do not overlap 32-tick launches. The existing final ending hold remains pending a Mesen timing comparison; no exact full-sequence parity claim is made. See fireworks.md.

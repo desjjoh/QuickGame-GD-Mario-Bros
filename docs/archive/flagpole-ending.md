@@ -70,3 +70,7 @@ The finish definition keeps gameplay and HUD hidden for the existing minimum 12 
 ## Verification
 
 flagpole_ending_test covers descent and flag motion, ignored controls/stopped timer, locked camera without unlock catch-up, timed dismount, a real walk to the independent endpoint, player lifecycle removal, independently delayed/stale score/firework hooks, real music after player retirement, covered title return, cancellation recovery, external replacement and source loss. time_score_test covers conversion cadence, HUD values, original timer preservation, disabled/zero timers, exactly-once completion, cancellation/stale callbacks, reentrant replacement and score saturation. Existing level_completion_test retains direct/Warp/next-stage and ownership coverage. See [verification](verification.md) for actual run outcomes.
+
+## Castle fireworks implementation
+
+The former no-op Fireworks hook now uses CastleFireworksStep and CastleEntity's local burst animation. The last timer digit is selected at the doorway before conversion; completed bursts award 500 points and request the blast cue. See [castle fireworks](fireworks.md) for ownership, reference timing, cancellation, verification, and remaining handoff fidelity limits.
