@@ -79,12 +79,16 @@ func _can_hurt_player() -> bool:
 	return false
 
 
+func _blocks_enemy_contact() -> bool:
+	return not _defeated
+
+
 func _on_enemy_contact(area: Area2D) -> void:
 	if _defeated or is_shutdown or is_queued_for_deletion() or gameplay_suspended or activity_suspended:
 		return
 	var other := area.get_parent().get_parent() as BaseEnemy
 	if (
-		other != null and not other._defeated and not other.is_shutdown
+		other != null and other._blocks_enemy_contact() and not other.is_shutdown
 		and not other.is_queued_for_deletion()
 	):
 		enemy_contact.emit()

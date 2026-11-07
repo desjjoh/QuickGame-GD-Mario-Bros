@@ -33,3 +33,7 @@ func _accept_hit(hit: EntityHit) -> bool:
 
 func _can_hurt_player() -> bool:
 	return state_machine.current_state == $StateMachine/Walking
+
+
+func _blocks_enemy_contact() -> bool:
+	return super() or state_machine.current_state == $StateMachine/Squashed

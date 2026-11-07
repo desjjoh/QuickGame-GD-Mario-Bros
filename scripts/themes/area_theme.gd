@@ -9,6 +9,7 @@ extends Resource
 @export var terrain: TileSet
 @export var decorations: TileSet
 @export var entity_markers: TileSet
+@export var enemy_markers: TileSet
 @export var texture_overrides: Dictionary[String, Texture2D] = {}
 
 

@@ -4,6 +4,17 @@ extends Node
 func _ready() -> void:
 	var castle := load("res://assets/themes/castle.tres") as AreaTheme
 	var underground := load("res://assets/themes/underground.tres") as AreaTheme
+	var overworld := load("res://assets/themes/overworld.tres") as AreaTheme
+	var preview := preload("res://scenes/levels/areas/base_area.tscn").instantiate() as BaseLevelArea
+	var enemy_layout := preview.get_node("Layouts/EnemyLayout") as TileMapLayer
+	for theme in [overworld, underground, castle]:
+		preview.theme = theme
+		preview.apply_theme()
+		assert(enemy_layout.tile_set.tile_size == Vector2i(8, 8))
+		for source_id in [0, 1]:
+			var source := enemy_layout.tile_set.get_source(source_id) as TileSetAtlasSource
+			assert(source.texture.resource_path.contains("/%s/enemies/" % theme.display_name.to_lower()))
+	preview.free()
 	var flag := load("res://assets/palettes/overworld/misc/flagpole-flag.png") as Texture2D
 	assert(castle.resolve_texture(flag).resource_path.contains("/castle/"))
 	assert(underground.resolve_texture(flag).resource_path.contains("/underground/"))
@@ -19,6 +30,8 @@ func _ready() -> void:
 		var marker := castle.entity_markers.get_source(source_id) as TileSetAtlasSource
 		assert(marker.texture.resource_path.contains("/castle/"))
 	var level := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	level.get_node("Areas/MainArea").theme = overworld
+	level.get_node("Areas/MainArea").apply_theme()
 	# Editing and saving nested areas must retain each painted layer and camera.
 	var saved_cells: Dictionary = {}
 	for area_name in ["MainArea", "LowerArea"]:

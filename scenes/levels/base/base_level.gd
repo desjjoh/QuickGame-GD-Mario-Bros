@@ -3,7 +3,7 @@ extends CanvasGroup
 
 ## Shared foundation for playable levels.
 
-const SPAWN_LIMITS := {&"power_up": 1, &"enemy": 5}
+const SPAWN_LIMITS := {&"power_up": 1, &"enemy": 10}
 
 enum CompletionMode { NORMAL, WARP }
 

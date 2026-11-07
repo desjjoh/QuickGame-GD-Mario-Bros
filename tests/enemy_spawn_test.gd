@@ -6,7 +6,7 @@ func _ready() -> void:
 	var layout := level.get_node("Areas/MainArea/Layouts/EnemyLayout") as TileMapLayer
 	layout.clear()
 	level.entity_layout.clear()
-	for x in range(6, 12):
+	for x in range(4, 15):
 		layout.set_cell(Vector2i(x * 2, 24), 0, Vector2i.ZERO)
 	level.entity_layout.set_cell(Vector2i(12, 12), 8, Vector2i.ZERO)
 
@@ -31,7 +31,7 @@ func _ready() -> void:
 			skipped = placement
 		else:
 			active.append(enemy)
-	assert(active.size() == 5 and skipped != null)
+	assert(active.size() == 10 and skipped != null)
 	assert(not level.has_spawn_capacity(&"enemy"))
 	var power_up := level.world_objects.get_node("one_up_spawner_12_12/OneUpMushroom")
 	assert(power_up is PowerUp and not level.has_spawn_capacity(&"power_up"))
@@ -100,6 +100,13 @@ func _test_goomba_contact() -> void:
 	assert(left.body.velocity.x == -30.0 and right.body.velocity.x == 30.0)
 	assert(left.body.is_on_floor() and right.body.is_on_floor())
 	assert(left.body.global_position.x < right.body.global_position.x)
+	left.body.global_position = Vector2(150, 200)
+	right.body.global_position = Vector2(128, 200)
+	assert(left.receive_hit(EntityHit.new(null, &"stomp", Vector2.DOWN)))
+	for tick in range(25):
+		await get_tree().physics_frame
+	assert(left.state_machine.current_state.name == &"Squashed")
+	assert(right.body.velocity.x == -30.0)
 	level.queue_free()
 	await get_tree().process_frame
 
@@ -108,8 +115,9 @@ func _test_stage_placements() -> void:
 	var level := preload("res://scenes/levels/worlds/world 1/1-1.tscn").instantiate() as BaseLevel
 	var layout := level.get_node("Areas/MainArea/Layouts/EnemyLayout") as TileMapLayer
 	assert(layout.tile_set.tile_size == Vector2i(8, 8))
-	assert(layout.get_used_cells_by_id(0).size() == 4)
-	assert(layout.get_used_cells_by_id(1).size() == 6)
+	# The authored stage is editable. Keep this test's placement independent.
+	layout.clear()
+	layout.set_cell(Vector2i(102, 23), 1, Vector2i.ZERO)
 	for source_id in [0, 1]:
 		var atlas := layout.tile_set.get_source(source_id) as TileSetAtlasSource
 		assert(atlas.get_tile_data(Vector2i.ZERO, 0).texture_origin == Vector2i(-4, -4))

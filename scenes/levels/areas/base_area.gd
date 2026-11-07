@@ -65,7 +65,8 @@ func apply_theme() -> void:
 	var assignments := {
 		"GroundLayout": theme.terrain,
 		"DecorationLayout": theme.decorations,
-		"EntityLayout": theme.entity_markers
+		"EntityLayout": theme.entity_markers,
+		"EnemyLayout": theme.enemy_markers
 	}
 	for layer_name: String in assignments:
 		var layer := get_node("Layouts/" + layer_name) as TileMapLayer

@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="AreaTheme" format=3]
+[gd_resource type="Resource" script_class="AreaTheme" format=3 uid="uid://cg0b0p2illtvs"]
 
-[ext_resource type="Script" path="res://scripts/themes/area_theme.gd" id="1"]
-[ext_resource type="TileSet" path="res://assets/tileset/castle/terrain.tres" id="2"]
-[ext_resource type="TileSet" path="res://assets/tileset/castle/decorations.tres" id="3"]
-[ext_resource type="TileSet" path="res://assets/tileset/castle/entity_layout.tres" id="4"]
+[ext_resource type="Script" uid="uid://cskir81ip20rf" path="res://scripts/themes/area_theme.gd" id="1"]
+[ext_resource type="TileSet" uid="uid://ieueexne6svp" path="res://assets/tileset/castle/terrain.tres" id="2"]
+[ext_resource type="TileSet" uid="uid://tveve3vh45yd" path="res://assets/tileset/castle/decorations.tres" id="3"]
+[ext_resource type="TileSet" uid="uid://p7ufagqdbq1u" path="res://assets/tileset/castle/entity_layout.tres" id="4"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/interactibles/blocks/brick-alternate.tres" id="art_0"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/interactibles/blocks/brick.tres" id="art_1"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/interactibles/blocks/question-block-2.tres" id="art_2"]
@@ -19,20 +19,18 @@
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/interactibles/pipes/pipe-top-h-1.tres" id="art_14"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/interactibles/pipes/pipe-top-h-2.tres" id="art_15"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/tileset/block.tres" id="art_16"]
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/ui/hud-coin.png" id="hud_coin"]
-[ext_resource type="FontFile" path="res://assets/palettes/castle/ui/alphabet-alt.fnt" id="title_accent"]
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/ui/start-title.png" id="title_card"]
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/ui/start-cursor.png" id="title_cursor"]
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/interactibles/items/coins.tres" id="world_coin"]
-
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/misc/flagpole-top.tres" id="flag_top"]
+[ext_resource type="Texture2D" uid="uid://cg7iopsn3q2hb" path="res://assets/palettes/castle/tileset/Palette 1 (Ground and Stone).png" id="castle_art"]
+[ext_resource type="TileSet" uid="uid://mf4c2d78bbax" path="res://assets/tileset/castle/enemy_layout.tres" id="enemy_markers"]
+[ext_resource type="Texture2D" uid="uid://bmkj4wcy8xcc5" path="res://assets/palettes/castle/misc/flagpole-flag.png" id="flag_banner"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/misc/flagpole-pole.tres" id="flag_pole"]
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/misc/flagpole-flag.png" id="flag_banner"]
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/tileset/Palette 1 (Ground and Stone).png" id="castle_art"]
-
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/misc/green-mushroom.png" id="one_up"]
-
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/enemies/goomba.png" id="goomba"]
+[ext_resource type="Texture2D" path="res://assets/palettes/castle/misc/flagpole-top.tres" id="flag_top"]
+[ext_resource type="Texture2D" uid="uid://ca512sora18x6" path="res://assets/palettes/castle/enemies/goomba.png" id="goomba"]
+[ext_resource type="Texture2D" uid="uid://tt0q4hh8heuf" path="res://assets/palettes/castle/ui/hud-coin.png" id="hud_coin"]
+[ext_resource type="Texture2D" uid="uid://ch6isjg8o2hs1" path="res://assets/palettes/castle/misc/green-mushroom.png" id="one_up"]
+[ext_resource type="FontFile" uid="uid://cb8f3xidb7qhn" path="res://assets/palettes/castle/ui/alphabet-alt.fnt" id="title_accent"]
+[ext_resource type="Texture2D" uid="uid://dgoot5f5wt26o" path="res://assets/palettes/castle/ui/start-title.png" id="title_card"]
+[ext_resource type="Texture2D" uid="uid://0vk0wefn4b7g" path="res://assets/palettes/castle/ui/start-cursor.png" id="title_cursor"]
+[ext_resource type="Texture2D" path="res://assets/palettes/castle/interactibles/items/coins.tres" id="world_coin"]
 
 [resource]
 script = ExtResource("1")
@@ -41,13 +39,9 @@ title_accent_font = ExtResource("title_accent")
 terrain = ExtResource("2")
 decorations = ExtResource("3")
 entity_markers = ExtResource("4")
+enemy_markers = ExtResource("enemy_markers")
 texture_overrides = Dictionary[String, Texture2D]({
 "res://assets/palettes/overworld/enemies/goomba.png": ExtResource("goomba"),
-"res://assets/palettes/overworld/misc/green-mushroom.png": ExtResource("one_up"),
-"res://assets/palettes/overworld/misc/flagpole-top.tres": ExtResource("flag_top"),
-"res://assets/palettes/overworld/misc/flagpole-pole.tres": ExtResource("flag_pole"),
-"res://assets/palettes/overworld/misc/flagpole-flag.png": ExtResource("flag_banner"),
-"res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png": ExtResource("castle_art"),
 "res://assets/palettes/overworld/interactibles/blocks/brick-alternate.tres": ExtResource("art_0"),
 "res://assets/palettes/overworld/interactibles/blocks/brick.tres": ExtResource("art_1"),
 "res://assets/palettes/overworld/interactibles/blocks/question-block-2.tres": ExtResource("art_2"),
@@ -63,6 +57,11 @@ texture_overrides = Dictionary[String, Texture2D]({
 "res://assets/palettes/overworld/interactibles/pipes/pipe-top-2.tres": ExtResource("art_13"),
 "res://assets/palettes/overworld/interactibles/pipes/pipe-top-h-1.tres": ExtResource("art_14"),
 "res://assets/palettes/overworld/interactibles/pipes/pipe-top-h-2.tres": ExtResource("art_15"),
+"res://assets/palettes/overworld/misc/flagpole-flag.png": ExtResource("flag_banner"),
+"res://assets/palettes/overworld/misc/flagpole-pole.tres": ExtResource("flag_pole"),
+"res://assets/palettes/overworld/misc/flagpole-top.tres": ExtResource("flag_top"),
+"res://assets/palettes/overworld/misc/green-mushroom.png": ExtResource("one_up"),
+"res://assets/palettes/overworld/tileset/Palette 1 (Ground and Stone).png": ExtResource("castle_art"),
 "res://assets/palettes/overworld/tileset/block.tres": ExtResource("art_16"),
 "res://assets/palettes/overworld/ui/hud-coin.png": ExtResource("hud_coin"),
 "res://assets/palettes/overworld/ui/start-cursor.png": ExtResource("title_cursor"),
