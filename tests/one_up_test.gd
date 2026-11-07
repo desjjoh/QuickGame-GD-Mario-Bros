@@ -5,17 +5,16 @@ func _ready() -> void:
 	for path in [
 		"res://assets/tileset/entity_layout.tres",
 		"res://assets/tileset/underground/entity_layout.tres",
-		"res://assets/tileset/castle/entity_layout.tres",
+		"res://assets/tileset/castle/entity_layout.tres"
 	]:
 		var tiles := load(path) as TileSet
-		var source := tiles.get_source(8) as TileSetAtlasSource
-		assert(source.get_tile_data(Vector2i.ZERO, 0).get_custom_data("entity_id") == "one_up_spawner")
+		assert(not tiles.has_source(8), "1-Up is no longer an EntityLayout paint marker.")
 	var stage := preload("res://scenes/levels/worlds/world 1/1-1.tscn").instantiate() as BaseLevel
 	assert(stage.entity_scenes.has(&"one_up_spawner"))
 	stage.free()
 
 	var level := preload("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
-	level.entity_layout.set_cell(Vector2i(8, 12), 8, Vector2i.ZERO)
+	add_one_up_placement(level, Vector2i(8, 12))
 	var camera := level.get_node("Areas/MainArea/Camera2D") as LevelCamera
 	var original_position := camera.position
 	camera.position.x = -1000
@@ -32,7 +31,14 @@ func _ready() -> void:
 	assert((pickup_shape.shape as RectangleShape2D).size == Vector2(12, 12))
 	assert(mushroom.pickup.position == Vector2(0, -1))
 	assert(level.player.body in mushroom.body.get_collision_exceptions())
-	assert(mushroom.sprite.texture.resource_path.ends_with("/underground/misc/green-mushroom.png"))
+	assert(
+		(
+			mushroom.sprite.texture
+			== area.theme.resolve_texture(
+				load("res://assets/palettes/overworld/misc/green-mushroom.png")
+			)
+		)
+	)
 	assert(mushroom.global_position == Vector2(128, 192))
 	var spawn_position := mushroom.body.global_position
 	mushroom.body.global_position = Vector2(228, 170)
@@ -69,8 +75,8 @@ func _ready() -> void:
 	await get_tree().process_frame
 
 	level = preload("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
-	level.entity_layout.set_cell(Vector2i(8, 12), 8, Vector2i.ZERO)
-	level.entity_layout.set_cell(Vector2i(10, 12), 8, Vector2i.ZERO)
+	add_one_up_placement(level, Vector2i(8, 12))
+	add_one_up_placement(level, Vector2i(10, 12))
 	add_child(level)
 	area = level.active_area
 	spawner = level.world_objects.get_node("one_up_spawner_8_12") as EntitySpawner
@@ -108,5 +114,14 @@ func _ready() -> void:
 	assert(spawner.get_node_or_null("OneUpMushroom") == null)
 	level.queue_free()
 	await get_tree().process_frame
-	print("PASS: 1-Up activation, movement, collection, popup, cleanup, and one live power-up per level.")
+	print(
+		"PASS: 1-Up activation, movement, collection, popup, cleanup, and one live power-up per level."
+	)
 	get_tree().quit()
+
+
+func add_one_up_placement(level: BaseLevel, cell: Vector2i) -> void:
+	var placement := preload("res://scenes/entities/spawners/one_up_spawner.tscn").instantiate()
+	placement.name = "one_up_spawner_%s_%s" % [cell.x, cell.y]
+	placement.position = Vector2(cell * 16)
+	level.get_node("Areas/MainArea/WorldObjects").add_child(placement)

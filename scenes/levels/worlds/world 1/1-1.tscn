@@ -13,6 +13,7 @@
 [ext_resource type="TileSet" uid="uid://4mdqmclyqcmk" path="res://assets/tileset/underground/decorations.tres" id="16_vda6h"]
 [ext_resource type="Resource" uid="uid://f1lw5jaxr5tn" path="res://assets/themes/overworld.tres" id="18_ukhqk"]
 [ext_resource type="TileSet" uid="uid://58ym0wu30sv7" path="res://assets/tileset/decorations.tres" id="19_qml5n"]
+[ext_resource type="Script" uid="uid://dk22h8rhi7sbc" path="res://scripts/levels/block_reward.gd" id="20_lletq"]
 [ext_resource type="TileSet" uid="uid://dy01p3ioyfiqi" path="res://assets/tileset/terrain.tres" id="20_nd55p"]
 [ext_resource type="TileSet" uid="uid://css6al2yclqkl" path="res://assets/tileset/entity_layout.tres" id="21_lletq"]
 [ext_resource type="TileSet" uid="uid://b5swkgewllff0" path="res://assets/tileset/underground/enemy_layout.tres" id="28_nd55p"]
@@ -25,6 +26,8 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/hidden_question_block.tscn" id="hidden_question"]
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/one_up_spawner.tscn" id="one_up"]
 [ext_resource type="PackedScene" path="res://scenes/entities/powerups/one_up_mushroom.tscn" id="one_up_reward"]
+[ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/reward_brick.tscn" id="reward_brick"]
+[ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/alternate_reward_brick.tscn" id="reward_brick_alt"]
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/sideways_pipe_entrance.tscn" id="side_pipe"]
 [ext_resource type="Script" uid="uid://cd6coksrndgvl" path="res://scripts/levels/transport_destination.gd" id="transport_destination"]
 [ext_resource type="Script" uid="uid://bw6vhx3gvr1o" path="res://scripts/levels/transport_placement.gd" id="transport_placement"]
@@ -45,6 +48,10 @@ script = ExtResource("transport_placement")
 cell = Vector2i(162, 11)
 target_id = &"secret_exit"
 entrance_enabled = false
+
+[sub_resource type="Resource" id="Resource_md070"]
+script = ExtResource("20_lletq")
+kind = 1
 
 [sub_resource type="Resource" id="Destination_start"]
 script = ExtResource("transport_destination")
@@ -73,14 +80,17 @@ entity_scenes = Dictionary[StringName, PackedScene]({
 &"one_up_spawner": ExtResource("one_up"),
 &"pipe_entrance": ExtResource("13_pipe"),
 &"question_block": ExtResource("6_question"),
+&"reward_brick": ExtResource("reward_brick"),
+&"reward_brick_alternate": ExtResource("reward_brick_alt"),
 &"sideways_pipe_entrance": ExtResource("side_pipe")
 })
 
 [node name="MainArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="0" unique_id=250103957]
 process_physics_priority = 110
 transport_points = Array[ExtResource("transport_placement")]([SubResource("Point_entrance"), SubResource("Point_secret_exit")])
-question_block_rewards = Dictionary[Vector2i, PackedScene]({
-Vector2i(64, 8): ExtResource("one_up_reward")
+question_block_rewards = Dictionary[Vector2i, Resource]({
+Vector2i(64, 8): ExtResource("one_up_reward"),
+Vector2i(94, 9): SubResource("Resource_md070")
 })
 theme = ExtResource("18_ukhqk")
 
@@ -93,7 +103,7 @@ tile_map_data = PackedByteArray("AAAAAA0AAAAAAAAAAAAAAA4AAAAAAAAAAAABAA0AAAAAAAA
 tile_set = ExtResource("20_nd55p")
 
 [node name="EntityLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="2" unique_id=257943121]
-tile_map_data = PackedByteArray("AAAQAAkAAQAAAAAAAAAUAAkAAAAAAAAAAAAWAAkAAAAAAAAAAAAXAAkAAQAAAAAAAAAYAAkAAAAAAAAAAABNAAkAAAAAAAAAAABPAAkAAAAAAAAAAABOAAkAAQAAAAAAAABQAAUAAAAAAAAAAABRAAUAAAAAAAAAAABSAAUAAAAAAAAAAABTAAUAAAAAAAAAAABUAAUAAAAAAAAAAABVAAUAAAAAAAAAAABWAAUAAAAAAAAAAABXAAUAAAAAAAAAAABeAAkAAAAAAAAAAABdAAUAAAAAAAAAAABcAAUAAAAAAAAAAABbAAUAAAAAAAAAAABeAAUAAQAAAAAAAABkAAkAAAAAAAAAAABtAAkAAQAAAAAAAABtAAUAAQAAAAAAAABwAAkAAQAAAAAAAAB2AAkAAAAAAAAAAAB5AAUAAAAAAAAAAAB6AAUAAAAAAAAAAAB7AAUAAAAAAAAAAACAAAUAAAAAAAAAAACDAAUAAAAAAAAAAACBAAkAAAAAAAAAAACCAAkAAAAAAAAAAACBAAUAAQAAAAAAAACCAAUAAQAAAAAAAACiAAsAAwAAAAAAAACnAAkAAAAAAAAAAACoAAkAAAAAAAAAAACqAAkAAAAAAAAAAACpAAkAAQAAAAAAAADEAAIABQAAAAAAAADJAAgABgAAAAAAAAAVAAkAAQAAAAAAAAAWAAUAAQAAAAAAAABqAAkAAQAAAAAAAABAAAgACQAAAAAAAABlAAkAAAAAAAAAAAA5AAkAAwAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAQAAkAAQAAAAAAAAAUAAkAAAAAAAAAAAAWAAkAAAAAAAAAAAAXAAkAAQAAAAAAAAAYAAkAAAAAAAAAAABNAAkAAAAAAAAAAABPAAkAAAAAAAAAAABOAAkAAQAAAAAAAABQAAUAAAAAAAAAAABRAAUAAAAAAAAAAABSAAUAAAAAAAAAAABTAAUAAAAAAAAAAABUAAUAAAAAAAAAAABVAAUAAAAAAAAAAABWAAUAAAAAAAAAAABXAAUAAAAAAAAAAABdAAUAAAAAAAAAAABcAAUAAAAAAAAAAABbAAUAAAAAAAAAAABeAAUAAQAAAAAAAABkAAkAAAAAAAAAAABtAAkAAQAAAAAAAABtAAUAAQAAAAAAAABwAAkAAQAAAAAAAAB2AAkAAAAAAAAAAAB5AAUAAAAAAAAAAAB6AAUAAAAAAAAAAAB7AAUAAAAAAAAAAACAAAUAAAAAAAAAAACDAAUAAAAAAAAAAACBAAkAAAAAAAAAAACCAAkAAAAAAAAAAACBAAUAAQAAAAAAAACCAAUAAQAAAAAAAACiAAsAAwAAAAAAAACnAAkAAAAAAAAAAACoAAkAAAAAAAAAAACqAAkAAAAAAAAAAACpAAkAAQAAAAAAAADEAAIABQAAAAAAAADJAAgABgAAAAAAAAAVAAkAAQAAAAAAAAAWAAUAAQAAAAAAAABqAAkAAQAAAAAAAABAAAgACQAAAAAAAAA5AAkAAwAAAAAAAABeAAkADAAAAAAAAABlAAkADAAAAAAAAAA=")
 tile_set = ExtResource("21_lletq")
 
 [node name="EnemyLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="3" unique_id=1742010551]

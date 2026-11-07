@@ -55,6 +55,7 @@ var transition_in_progress: bool = false
 
 var player: BasePlayer
 var is_shutdown: bool = false
+var _reward_timers: Dictionary[int, WeakRef] = {}
 var _spawned_areas: Dictionary[int, bool] = {}
 var _live_spawns: Dictionary[StringName, Array] = {}
 var _progress_key: String
@@ -191,7 +192,7 @@ func _spawn_layout_entities(
 			continue
 		instance.visual_theme = area.theme
 		if instance is QuestionBlock:
-			instance.power_up_scene = area.question_block_rewards.get(cell)
+			instance.configure_reward(area.question_block_rewards.get(cell))
 		instance.name = entity_name
 		instance.restore_area_state(progress.get("state", {}))
 		# Block/entity marker origins are the top-left of each grid cell.
@@ -210,6 +211,12 @@ func _physics_process(_delta: float) -> void:
 	if death_in_progress:
 		death_sequence.advance(_delta)
 		return
+	for id: int in _reward_timers.keys():
+		var block := _reward_timers[id].get_ref() as QuestionBlock
+		if not is_instance_valid(block) or block.is_shutdown:
+			_reward_timers.erase(id)
+		else:
+			block.advance_reward_timer()
 	if area_transport.advance():
 		return  # Freeze camera/bounds during controlled transport.
 	var camera := get_viewport().get_camera_2d() as LevelCamera
@@ -237,6 +244,10 @@ func on_level_start() -> bool:
 	_play_area_music()
 	level_started.emit()
 	return true
+
+
+func register_reward_timer(block: QuestionBlock) -> void:
+	_reward_timers[block.get_instance_id()] = weakref(block)
 
 
 func _play_area_music() -> void:

@@ -6,7 +6,7 @@
 2. Press **F5** to run the game from the title screen.
 3. Press **Enter** or controller **Start** to load 1-1.
 
-Open `scenes/levels/test_level.tscn` and press **F6** to run the one-screen sandbox. The same scene serves as the title backdrop with gameplay disabled. In the sandbox, walk right to intercept the moving 1-Up mushroom to collect an extra life.
+Open `scenes/levels/test_level.tscn` and press **F6** to run the one-screen sandbox. The same scene serves as the title backdrop with gameplay disabled.
 
 ## Controls
 
@@ -27,8 +27,10 @@ Pause keeps the current screen visible and freezes gameplay, animation, and ordi
 
 Open `scenes/levels/worlds/world 1/1-1.tscn`. Expand **Areas → MainArea → Layouts**. Use **GroundLayout** for solid terrain, **DecorationLayout** for scenery, **EntityLayout** for blocks and other entity stamps, and **EnemyLayout** for single or paired Goomba spawners. EnemyLayout uses an 8×8 grid. The other layers use 16×16. Keep nested areas editable so scene overrides survive saving.
 
-Paint question blocks on **EntityLayout**. Each placed block contains one coin.
+Paint question blocks, **Reward Brick**, or **Reward Brick Alt** on **EntityLayout**. Each defaults to one coin. Reward bricks start with a static brick texture and become used blocks after releasing their reward; ordinary bricks remain separate.
 
 Paint a pipe stamp, then configure its destination on the area. To test area switching, enter the vertical pipe in 1-1 and walk into the sideways pipe in the secret area. See [configuration](configuration.md#areas-and-pipe-routes).
 
-In the 2D editor, question blocks show a translucent reward icon. Select EntityLayout and choose **Apply 1-Up Reward** from the 2D toolbar, then click a painted question block. Choose **Apply Coin Reward** to clear an override. Reward edits support undo and redo. Choose **Paint Tiles** to return to normal painting. Reward overrides are keyed by cell, so clear the override before erasing, moving, or replacing a configured block.
+In the 2D editor, question blocks show a translucent reward icon. Select EntityLayout and choose **Apply 1-Up Reward** from the 2D toolbar, then click a painted question block, hidden question block, or reward brick. Choose **Apply Timed Coins Reward** for a 231-tick multi-coin window, shown as a translucent coin stack. Choose **Apply Coin Reward** to clear an override. Reward edits support undo and redo. Choose **Paint Tiles** to return to normal painting. Reward overrides are keyed by cell, so clear the override before erasing, moving, or replacing a configured block.
+
+The green mushroom spawner is no longer in the EntityLayout painting palette. Painting standalone power-ups is deferred; no replacement layer has been added. The 1-Up reward brush still configures block contents.

@@ -39,3 +39,9 @@ Area unload during Bouncing saves its logical Inactive result. Restoration selec
 ## Hidden question blocks
 
 Paint Hidden Question Block on EntityLayout. The unused outline is visible in the editor and in-game for this pass. Mario passes through from the side and above. A rising center-head crossing at the underside triggers the existing bonk response and reward. The block then becomes solid and uses the normal used sprite. The same reward brush applies to both question-block stamps.
+
+## Static reward bricks - 2026-11-07
+
+Reward Brick and Reward Brick Alt inherit question_block.tscn. Their Active state overrides the sprite texture to brick.tres or brick-alternate.tres and clears synchronized_animation, keeping the starter artwork static. Bouncing and Inactive retain the shared used-block presentation. Both variants default to one coin and accept the existing Coin/1-Up reward painting and always-visible translucent overlays. Markers use source IDs 12 and 13 in each themed EntityLayout. Ordinary Brick and Alternate Brick remain separate. Timed Coins uses the same painting workflow; see [timed coin rewards](timed-coins.md).
+
+The standalone 1-Up spawner marker was removed from EntityLayout; no replacement power-up painting layer is included. The internal spawner scene and 1-Up block reward remain available. Deferred standalone power-up authoring is separate from these reward-brick variants.

@@ -17,6 +17,8 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/hidden_question_block.tscn" id="hidden_question"]
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/one_up_spawner.tscn" id="one_up"]
 [ext_resource type="PackedScene" uid="uid://b5m1vkcrml3t2" path="res://scenes/player/mario (small)/mario.tscn" id="player"]
+[ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/reward_brick.tscn" id="reward_brick"]
+[ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/alternate_reward_brick.tscn" id="reward_brick_alt"]
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/sideways_pipe_entrance.tscn" id="side_pipe"]
 
 [node name="TestLevel" unique_id=422508678 instance=ExtResource("base")]
@@ -34,6 +36,8 @@ entity_scenes = Dictionary[StringName, PackedScene]({
 &"one_up_spawner": ExtResource("one_up"),
 &"pipe_entrance": ExtResource("13_pipe"),
 &"question_block": ExtResource("6_question"),
+&"reward_brick": ExtResource("reward_brick"),
+&"reward_brick_alternate": ExtResource("reward_brick_alt"),
 &"sideways_pipe_entrance": ExtResource("side_pipe")
 })
 

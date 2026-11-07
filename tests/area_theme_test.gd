@@ -8,6 +8,8 @@ func _ready() -> void:
 	var preview := preload("res://scenes/levels/areas/base_area.tscn").instantiate() as BaseLevelArea
 	var enemy_layout := preview.get_node("Layouts/EnemyLayout") as TileMapLayer
 	for theme in [overworld, underground, castle]:
+		assert(not theme.entity_markers.has_source(10))
+		assert(not theme.entity_markers.has_source(11))
 		preview.theme = theme
 		preview.apply_theme()
 		assert(enemy_layout.tile_set.tile_size == Vector2i(8, 8))

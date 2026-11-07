@@ -19,6 +19,9 @@
 
 [ext_resource type="Script" path="res://scenes/levels/base/area_transport.gd" id="area_transport"]
 
+[ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/reward_brick.tscn" id="reward_brick"]
+[ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/alternate_reward_brick.tscn" id="reward_brick_alt"]
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_shadow"]
 shader = ExtResource("2_shadow")
 shader_parameter/shadow_offset = Vector2(2, 2)
@@ -33,6 +36,8 @@ clear_margin = 12.0
 script = ExtResource("1_script")
 death_sound = ExtResource("death_sound")
 entity_scenes = Dictionary[StringName, PackedScene]({
+&"reward_brick": ExtResource("reward_brick"),
+&"reward_brick_alternate": ExtResource("reward_brick_alt"),
 &"coin": ExtResource("coin"),
 &"goomba_spawner": ExtResource("goomba"),
 &"goomba_pair_spawner": ExtResource("goomba_pair"),

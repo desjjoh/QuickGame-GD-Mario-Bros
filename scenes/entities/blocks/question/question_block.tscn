@@ -43,7 +43,6 @@ physics_updates_enabled = false
 [node name="Bouncing" type="Node" parent="StateMachine" node_paths=PackedStringArray("return_state")]
 script = ExtResource("7_bouncing")
 return_state = NodePath("../Inactive")
-sprite_texture = ExtResource("4_used")
 stop_animation_on_enter = true
 input_enabled = false
 frame_updates_enabled = false

@@ -8,7 +8,7 @@ func _ready() -> void:
 	level.entity_layout.clear()
 	for x in range(4, 15):
 		layout.set_cell(Vector2i(x * 2, 24), 0, Vector2i.ZERO)
-	level.entity_layout.set_cell(Vector2i(12, 12), 8, Vector2i.ZERO)
+	add_one_up_placement(level, Vector2i(12, 12))
 
 	var camera := level.get_node("Areas/MainArea/Camera2D") as LevelCamera
 	var original_position := camera.position
@@ -36,7 +36,9 @@ func _ready() -> void:
 	var power_up := level.world_objects.get_node("one_up_spawner_12_12/OneUpMushroom")
 	assert(power_up is PowerUp and not level.has_spawn_capacity(&"power_up"))
 
-	var legacy := preload("res://scenes/entities/spawners/enemy_spawner.tscn").instantiate() as EnemySpawner
+	var legacy := (
+		preload("res://scenes/entities/spawners/enemy_spawner.tscn").instantiate() as EnemySpawner
+	)
 	legacy.enemy_scene = preload("res://scenes/entities/enemies/goomba/goomba.tscn")
 	legacy.position = Vector2(180, 192)
 	level.world_objects.add_child(legacy)
@@ -139,7 +141,9 @@ func _test_stage_placements() -> void:
 		for offset in placement.actor_offsets:
 			var origin: Vector2 = placement.global_position + offset
 			query.transform = Transform2D(0, origin + body_offset)
-			assert(space.intersect_shape(query).is_empty(), "Enemy starts inside terrain: %s" % origin)
+			assert(
+				space.intersect_shape(query).is_empty(), "Enemy starts inside terrain: %s" % origin
+			)
 			var feet := origin + body_offset + Vector2(0, shape.get_rect().end.y)
 			var floor_query := PhysicsRayQueryParameters2D.create(
 				feet, feet + Vector2(0, 9), 1, [level.player.body.get_rid()]
@@ -150,7 +154,9 @@ func _test_stage_placements() -> void:
 	var pair := level.world_objects.get_node("goomba_pair_spawner_102_23") as EntitySpawner
 	var camera := level.active_area.get_node("Camera2D") as LevelCamera
 	camera.follow_enabled = false
-	camera.position.x += pair.global_position.x - level.active_area.get_activity_region(false).end.x + 1
+	camera.position.x += (
+		pair.global_position.x - level.active_area.get_activity_region(false).end.x + 1
+	)
 	level.active_area.update_camera_activity()
 	var wake := Rect2(pair.global_position - Vector2.ONE, Vector2(2, 2))
 	var actors: Array[BaseEnemy] = []
@@ -159,13 +165,17 @@ func _test_stage_placements() -> void:
 			actors.append(child)
 	assert(actors.size() == 2)
 	assert(actors[1].global_position - actors[0].global_position == Vector2(24, 0))
-	assert(not level.active_area.get_activity_region(false).intersects(actors[1].get_activity_rect()))
+	assert(
+		not level.active_area.get_activity_region(false).intersects(actors[1].get_activity_rect())
+	)
 	assert(not actors[0].activity_suspended and not actors[1].activity_suspended)
 	var first_x := actors[0].body.global_position.x
 	for tick in range(5):
 		await get_tree().physics_frame
 	assert(actors[0].body.global_position.x < first_x)
-	assert(is_equal_approx(actors[1].body.global_position.x - actors[0].body.global_position.x, 24.0))
+	assert(
+		is_equal_approx(actors[1].body.global_position.x - actors[0].body.global_position.x, 24.0)
+	)
 	assert(not pair.persist_progress)
 	assert(actors[0].receive_hit(EntityHit.new(null, &"fireball", Vector2.RIGHT)))
 	assert(actors[0].state_machine.current_state.name == &"KnockedOut")
@@ -202,7 +212,9 @@ func _test_enemy_hits() -> void:
 			break
 	assert(stomped.state_machine.current_state.name == &"Squashed")
 	assert(stomped.sprite.frame == 2 and player.body.velocity.y < 0.0)
-	assert(GameHandler.player_status.score == score + 100 and GameHandler.player_status.lives == lives)
+	assert(
+		GameHandler.player_status.score == score + 100 and GameHandler.player_status.lives == lives
+	)
 	assert(not stomped.receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)))
 
 	var corner := scene.instantiate() as BaseEnemy
@@ -230,7 +242,9 @@ func _test_enemy_hits() -> void:
 	var knocked := scene.instantiate() as BaseEnemy
 	knocked.position = Vector2(64, 128)
 	level.world_objects.add_child(knocked)
-	var mushroom := preload("res://scenes/entities/powerups/one_up_mushroom.tscn").instantiate() as Mushroom
+	var mushroom := (
+		preload("res://scenes/entities/powerups/one_up_mushroom.tscn").instantiate() as Mushroom
+	)
 	mushroom.position = Vector2(96, 128)
 	level.world_objects.add_child(mushroom)
 	for tick in range(3):
@@ -266,3 +280,10 @@ func _test_enemy_hits() -> void:
 	assert(level.death_in_progress and GameHandler.player_status.lives == lives - 1)
 	level.queue_free()
 	await get_tree().process_frame
+
+
+func add_one_up_placement(level: BaseLevel, cell: Vector2i) -> void:
+	var placement := preload("res://scenes/entities/spawners/one_up_spawner.tscn").instantiate()
+	placement.name = "one_up_spawner_%s_%s" % [cell.x, cell.y]
+	placement.position = Vector2(cell * 16)
+	level.get_node("Areas/MainArea/WorldObjects").add_child(placement)

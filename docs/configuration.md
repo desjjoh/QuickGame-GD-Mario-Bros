@@ -29,3 +29,7 @@ Set **Transport Points** and **Pipe Routes** on the source area to link placed p
 - The Game scene supplies the stage list and the shared shadow toggle. The first stage is 1-1.
 
 Historical setting changes and their approvals are in the [settings record](archive/settings.md).
+
+## Known reference differences
+
+Timed multi-coin rewards use independent, fixed 231-physics-tick windows instead of the NES's shared, phase-dependent timer. Loading or hitting another block cannot alter an existing window. Pause and unloaded areas freeze remaining time; death follows the existing progress-reset policy. See the [reference investigation and version differences](archive/timed-coin-research.md#approved-version-difference).
