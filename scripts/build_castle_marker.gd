@@ -1,27 +1,23 @@
 extends SceneTree
-## Build themed castle paint stamps from the placed castle's sprite layout.
+## Rebuild all themed castle stamps from the authored TileMapLayer.
+const PREVIEW := preload("res://scripts/marker_preview.gd")
 
 
 func _initialize() -> void:
-	var scene := FileAccess.get_file_as_string("res://scenes/entities/castle/castle.tscn")
-	var pattern := RegEx.new()
-	(
-		pattern
-		. compile(
-			"position = Vector2\\((\\d+), (\\d+)\\)(?:(?!\\[node)[\\s\\S])*?region_rect = Rect2\\((\\d+), (\\d+), 16, 16\\)"
-		)
-	)
-	var tiles := pattern.search_all(scene)
-	assert(not tiles.is_empty())
-	for theme: String in ["underground", "castle"]:
-		var folder := "res://assets/palettes/" + theme + "/tileset/"
-		var atlas := load(folder + "Palette 1 (Ground and Stone).png") as Texture2D
-		var art := atlas.get_image()
-		art.convert(Image.FORMAT_RGBA8)
-		var preview := Image.create(80, 80, false, Image.FORMAT_RGBA8)
-		for tile in tiles:
-			var position := Vector2i(tile.get_string(1).to_int(), tile.get_string(2).to_int())
-			var origin := Vector2i(tile.get_string(3).to_int(), tile.get_string(4).to_int())
-			preview.blit_rect(art, Rect2i(origin, Vector2i(16, 16)), position)
-		assert(preview.save_png("res://assets/tileset/" + theme + "/previews/castle.png") == OK)
+	var castle: Node = load("res://scenes/entities/castle/castle.tscn").instantiate()
+	var tiles := castle.get_node("Presentation/Tiles") as TileMapLayer
+	for theme_name: String in ["overworld", "underground", "castle"]:
+		var theme := load("res://assets/themes/" + theme_name + ".tres") as AreaTheme
+		var image := PREVIEW.render_tiles(tiles, theme, Vector2i(80, 80))
+		var prefix := theme_name + "/" if theme_name != "overworld" else ""
+		if not PREVIEW.save_preview(
+			image,
+			"res://assets/tileset/" + prefix + "previews/castle.png",
+			"--check" in OS.get_cmdline_user_args()
+		):
+			castle.free()
+			quit(1)
+			return
+	castle.free()
+	print("Castle marker previews: PASS")
 	quit()

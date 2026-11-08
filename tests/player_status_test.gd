@@ -29,7 +29,7 @@ func _ready() -> void:
 	assert(top_label.get_theme_font(&"font") == hud.get_theme_font(&"font", &"Label"))
 	GameHandler.session_value_changed.connect(record_change)
 	GameHandler.add_score(250)
-	GameHandler.add_coins(7)
+	GameHandler.set_coins(7)
 	GameHandler.set_lives(5)
 	GameHandler.set_player_form(PlayerStatus.PowerupForm.FIRE)
 	assert(hud.get_node("Score").text == " 000250" and hud.get_node("CoinCount").text == "07")
@@ -37,11 +37,9 @@ func _ready() -> void:
 	var count := changes.size()
 	GameHandler.set_score(250)
 	assert(changes.size() == count, "Unchanged status must not emit duplicate updates.")
-	GameHandler.set_session_value(&"score", 12345)
+	GameHandler.set_score(12345)
 	assert(status.score == 12345 and not GameHandler._session.has(&"score"))
-	assert(
-		GameHandler.get_session_value(&"score") == 12345 and hud.get_node("Score").text == " 012345"
-	)
+	assert(GameHandler.player_status.score == 12345 and hud.get_node("Score").text == " 012345")
 	GameHandler.set_top_score(54321)
 	assert(top_label.text == "TOP- 054321")
 	GameHandler.set_score(1000000)
@@ -91,7 +89,7 @@ func _ready() -> void:
 	)
 	assert(GameHandler.top_score == 54321 and hud.get_node("Score").text == " 000000")
 	GameHandler.add_score(100)
-	GameHandler.add_coins(8)
+	GameHandler.set_coins(8)
 	var level := GameHandler.current_level
 	level.set_physics_process(false)
 	level.player.set_physics_process(false)
@@ -115,14 +113,14 @@ func _ready() -> void:
 	# Returning to title promotes the final run score before clearing it.
 	GameHandler.set_score(60000)
 	assert(GameHandler.top_score == 54321, "Promotion belongs to title return, not score mutation.")
-	assert(GameHandler.show_title(game.initial_level))
+	assert(GameHandler.show_title(game.stages[0]))
 	assert(GameHandler.top_score == 60000 and status.score == 0 and status.coins == 0)
 	assert(game.get_node("UI/ScreenContainer/TitleScreen/TopScore").text == "TOP- 060000")
 	# Ties and lower scores preserve the record without emitting a new record update.
 	for final_score in [60000, 1200]:
 		GameHandler.set_score(final_score)
 		changes.clear()
-		assert(GameHandler.show_title(game.initial_level))
+		assert(GameHandler.show_title(game.stages[0]))
 		assert(GameHandler.top_score == 60000 and status.score == 0)
 		assert(not changes.has(&"top_score"))
 		assert(game.get_node("UI/ScreenContainer/TitleScreen/TopScore").text == "TOP- 060000")

@@ -35,6 +35,10 @@
 
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/sideways_pipe_entrance.tscn" id="entity_sideways_pipe_entrance"]
 
+[ext_resource type="Script" path="res://scenes/levels/base/level_area_content.gd" id="area_content"]
+
+[ext_resource type="Script" path="res://scenes/levels/base/level_spawn_registry.gd" id="spawn_registry"]
+
 [node name="BaseLevel" type="CanvasGroup" unique_id=194333981]
 fit_margin = 12.0
 clear_margin = 12.0
@@ -77,6 +81,12 @@ script = ExtResource("level_timer")
 
 [node name="AreaTransport" type="Node" parent="Systems"]
 script = ExtResource("area_transport")
+
+[node name="LevelAreaContent" type="Node" parent="Systems"]
+script = ExtResource("area_content")
+
+[node name="LevelSpawnRegistry" type="Node" parent="Systems"]
+script = ExtResource("spawn_registry")
 
 [node name="Presentations" type="Node" parent="."]
 

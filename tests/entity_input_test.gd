@@ -70,7 +70,7 @@ func _ready() -> void:
 		blocks.append(block)
 		assert(not block.controller_input_enabled and not block.can_read_controller_input())
 	assert(ControllerHandler.input_received.get_connections().size() == baseline)
-	var mario := load("res://scenes/player/mario (small)/mario.tscn").instantiate() as BasePlayer
+	var mario := load("res://scenes/player/mario/mario.tscn").instantiate() as BasePlayer
 	add_child(mario)
 	assert(mario.controller_input_enabled and mario.can_read_controller_input())
 	assert(ControllerHandler.input_received.is_connected(mario.state_machine.process_input))

@@ -31,15 +31,30 @@ Paint question blocks, **Reward Brick**, or **Reward Brick Alt** on **EntityLayo
 
 Paint a pipe stamp, then configure its destination on the area. To test area switching, enter the vertical pipe in 1-1 and walk into the sideways pipe in the secret area. See [configuration](configuration.md#areas-and-pipe-routes).
 
-In the 2D editor, question blocks show a translucent reward icon. Select EntityLayout and choose **Apply 1-Up Reward** from the 2D toolbar, then click a painted question block, hidden question block, or reward brick. Choose **Apply Timed Coins Reward** for a 231-tick multi-coin window, shown as a translucent coin stack. Choose **Apply Coin Reward** to clear an override. Reward edits support undo and redo. Choose **Paint Tiles** to return to normal painting. Reward overrides are keyed by cell, so clear the override before erasing, moving, or replacing a configured block.
+In the 2D editor, question blocks show a translucent reward icon. Select EntityLayout and choose **Apply 1-Up Reward** from the 2D toolbar, then click a painted question block, hidden question block, or reward brick. Choose **Apply Super Mushroom Reward** for growth or **Apply Timed Coins Reward** for a 231-tick multi-coin window, shown as a translucent coin stack. Choose **Apply Coin Reward** to clear an override. Reward edits support undo and redo. Choose **Paint Tiles** to return to normal painting. Reward overrides are keyed by cell, so clear the override before erasing, moving, or replacing a configured block.
 
-The green mushroom spawner is no longer in the EntityLayout painting palette. Painting standalone power-ups is deferred; no replacement layer has been added. The 1-Up reward brush still configures block contents.
+EntityLayout is for interactable world elements. Standalone power-up painting is not enabled; use the reward brush to place 1-Up or Super Mushrooms inside blocks.
 
-Choose **Green Koopa Spawner** on EnemyLayout to try the Green Koopa. It uses the selected area theme, walks and falls, and turns at walls or enemies. Walking contact damages Mario. Stomping rebounds Mario, awards 100 points, and leaves a stationary shell. Touch a stationary shell to kick it away from Mario. Moving shells rebound from walls, defeat enemies, and can be stopped by a stomp. Waking remains deferred. Its feet align with the existing enemy placement origin; taller artwork extends above it.
-
+Choose **Green Koopa Spawner** on EnemyLayout to try the Green Koopa. It uses the selected area theme, walks and falls, and turns at walls or enemies. Walking contact damages Mario. Stomping rebounds Mario, awards 100 points, and leaves a stationary shell. Touch a stationary shell to kick it away from Mario. Moving shells rebound from walls, defeat enemies, and can be stopped by a stomp. A stationary shell warns before waking back into a walking Koopa. Its feet align with the existing enemy placement origin; taller artwork extends above it.
 
 ## Preview Mario forms
 
-Test Level currently starts the existing Mario actor with assets/player/forms/super.tres. Select the TestLevel root and inspect Player Start Configuration to choose Super or Small for F6. Open the existing Mario scene and inspect Starting Form for its default, currently Small; normal 1-1 still starts Small. The form's artwork/contact profile applies without replacing the player scene.
+Test Level and 1-1 currently use the default Small Mario. Set **Player Start Configuration** to `assets/player/forms/super.tres` to preview Super with the same actor. Select the TestLevel root and inspect Player Start Configuration to choose Super or Small for F6. Open the existing Mario scene and inspect Starting Form for its default, currently Small; normal 1-1 still starts Small. The form's artwork/contact profile applies without replacing the player scene.
 
-Super now supports standing probes, crouching, crouch jumping, and reference-style uncrouching push-out. Hold Down alone on the ground to crouch; crouch is retained during a jump even after releasing Down. Grounded Down plus a horizontal button clears crouch and directional input, following the reference. The short physics body supplies floor support while extra probes handle Super's upper collisions. Growth/shrinking, Super damage, and brick breaking remain unfinished. See [Mario form configuration](archive/mario-forms.md).
+Super now supports standing probes, crouching, crouch jumping, and reference-style uncrouching push-out. Hold Down alone on the ground to crouch; crouch is retained during a jump even after releasing Down. Grounded Down plus a horizontal button clears crouch and directional input, following the reference. The short physics body supplies floor support while extra probes handle Super's upper collisions. Super Mushroom collection grows Small Mario; enemy damage shrinks Super and starts damage protection. Super can break ordinary and alternate bricks for debris and 50 points without a score popup. Fire Mario and automatic mushroom/flower tier selection remain unimplemented.
+
+## Rebuild paint-marker previews
+
+Castle and flagpole builders read their authored scene TileMaps; pipe builders use their atlas resources. All three rebuild Overworld, Underground, and Castle previews through `scripts/marker_preview.gd`.
+
+```powershell
+& 'C:/path/to/Godot_console.exe' --headless --path . --script res://scripts/build_castle_marker.gd
+& 'C:/path/to/Godot_console.exe' --headless --path . --script res://scripts/build_flagpole_marker.gd
+& 'C:/path/to/Godot_console.exe' --headless --path . --script res://scripts/build_pipe_marker.gd
+```
+
+Append `-- --check` to compare generated pixels with the saved previews without writing images. Failed checks return a nonzero exit code. Let Godot reimport rebuilt PNGs; marker IDs, tile grids, and placed entities are unchanged.
+
+## Documentation layout
+
+The README and seven guides in `docs/` describe current behavior. Detailed walkthroughs, reference investigations, settings approvals, decisions, and history are kept locally in the top-level `.archive/`, ignored by Git and Godot. Keep current instructions in the public guides and append internal milestone notes to `.archive/history.md`. Required test data belongs in committed `tests/fixtures/`, not the private archive.

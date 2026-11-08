@@ -370,10 +370,7 @@ func _activate_spawners(wake_region: Rect2, sleep_region: Rect2) -> void:
 		if not is_instance_valid(spawner):
 			_spawners.erase(id)
 			continue
-		var enemy_placement: bool = (
-			spawner is EnemySpawner
-			or (spawner is EntitySpawner and spawner.spawn_category == &"enemy")
-		)
+		var enemy_placement: bool = spawner is EntitySpawner and spawner.spawn_category == &"enemy"
 		spawner.update_activity(
 			get_enemy_spawn_region() if enemy_placement else wake_region, sleep_region, theme
 		)

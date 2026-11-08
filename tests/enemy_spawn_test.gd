@@ -36,14 +36,13 @@ func _ready() -> void:
 	var power_up := level.world_objects.get_node("one_up_spawner_12_12/OneUpMushroom")
 	assert(power_up is PowerUp and not level.has_spawn_capacity(&"power_up"))
 
-	var legacy := (
-		preload("res://scenes/entities/spawners/enemy_spawner.tscn").instantiate() as EnemySpawner
+	var blocked := (
+		preload("res://scenes/entities/spawners/goomba_spawner.tscn").instantiate() as EntitySpawner
 	)
-	legacy.enemy_scene = preload("res://scenes/entities/enemies/goomba/goomba.tscn")
-	legacy.position = Vector2(180, 192)
-	level.world_objects.add_child(legacy)
+	blocked.position = Vector2(180, 192)
+	level.world_objects.add_child(blocked)
 	area.update_camera_activity()
-	assert(legacy.actor == null)
+	assert(blocked.get_node_or_null("Goomba") == null)
 
 	var removed := active[0]
 	var cleanup := area.get_activity_region(true)
@@ -59,7 +58,9 @@ func _ready() -> void:
 	assert(level.has_spawn_capacity(&"enemy"))
 	assert(not level.has_spawn_capacity(&"power_up"))
 	area.update_camera_activity()
-	assert(skipped.get_node_or_null("Goomba") == null and legacy.actor == null)
+	assert(
+		skipped.get_node_or_null("Goomba") == null and blocked.get_node_or_null("Goomba") == null
+	)
 
 	camera.position.x = -1000
 	area.update_camera_activity()
@@ -67,7 +68,9 @@ func _ready() -> void:
 	await get_tree().process_frame
 	camera.position = original_position
 	area.update_camera_activity()
-	assert(skipped.get_node_or_null("Goomba") == null and legacy.actor == null)
+	assert(
+		skipped.get_node_or_null("Goomba") == null and blocked.get_node_or_null("Goomba") == null
+	)
 	level.queue_free()
 	await get_tree().process_frame
 	await _test_goomba_contact()

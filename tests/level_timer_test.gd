@@ -39,10 +39,11 @@ func wait_phase(phase: StringName) -> void:
 	assert(false, "Expected timer presentation phase was not reached.")
 
 
-func make_game(starting: int, animated: bool) -> Node:
+func make_game(starting: int, animated: bool, timer_enabled: bool = true) -> Node:
 	var game: Node = load("res://scenes/main/game.tscn").instantiate()
-	var fixture := game.initial_level.instantiate() as BaseLevel
+	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	fixture.starting_time = starting
+	fixture.timer_enabled = timer_enabled
 	fixture.death_sound = null
 	fixture.death_fallback_delay = 0.05
 	fixture.get_node("Areas/MainArea/Layouts/EntityLayout").clear()
@@ -56,8 +57,14 @@ func make_game(starting: int, animated: bool) -> Node:
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
 	assert(ResourceSaver.save(packed, "res://.godot/validation/timer-stage.tscn") == OK)
-	game.initial_level = ResourceLoader.load(
-		"res://.godot/validation/timer-stage.tscn", "PackedScene", ResourceLoader.CACHE_MODE_IGNORE
+	game.stages.assign(
+		[
+			ResourceLoader.load(
+				"res://.godot/validation/timer-stage.tscn",
+				"PackedScene",
+				ResourceLoader.CACHE_MODE_IGNORE
+			)
+		]
 	)
 	game.start_with_title = false
 	game.transitions_enabled = animated
@@ -126,11 +133,8 @@ func _ready() -> void:
 	assert(GameHandler.time_remaining == 3)
 	game.free()
 	await ticks(2)
-	# Disabled TestLevel keeps TIME but hides only its numeric value.
-	game = load("res://scenes/main/game.tscn").instantiate()
-	game.initial_level = load("res://scenes/levels/test_level.tscn")
-	game.start_with_title = false
-	game.transitions_enabled = false
+	# An explicitly disabled timer keeps TIME but hides only its numeric value.
+	game = make_game(400, false, false)
 	add_child(game)
 	var hud := game.get_node("UI/HUD")
 	assert(GameHandler.current_level.has_started and not GameHandler.timer_enabled)

@@ -104,7 +104,7 @@ func _ready() -> void:
 	assert(GameHandler.current_level.request_area_transfer(&"lower"))
 	await get_tree().process_frame
 	assert(clock.tick_count >= tick_before)
-	assert(GameHandler.load_level(game.initial_level))
+	assert(GameHandler.load_level(game.stages[0]))
 	assert(clock.tick_count >= tick_before)
 	var target_coin := game.get_node("UI/HUD/Coin") as AnimatedSprite2D
 	assert(target_coin.frame == cycle.phase_at(clock.tick_count))

@@ -15,7 +15,7 @@ func _ready() -> void:
 	copy.collected_coins.clear()
 	assert(GameHandler.get_area_progress(key, &"probe").collected_coins.size() == 1)
 	assert(GameHandler._area_progress.has(&"probe") and not GameHandler._area_progress.has(key))
-	assert(GameHandler.load_level(game.initial_level))
+	assert(GameHandler.load_level(game.stages[0]))
 	assert(GameHandler.get_area_progress(key, &"probe").used_blocks.size() == 1)
 	var level := GameHandler.current_level
 	level.set_physics_process(false)
@@ -33,7 +33,7 @@ func _ready() -> void:
 	assert(GameHandler.get_area_progress(key, &"probe").is_empty())
 	GameHandler.store_area_progress(key, &"probe", {"stale": true}, previous)
 	assert(GameHandler.get_area_progress(key, &"probe").is_empty())
-	assert(GameHandler.load_level(game.initial_level))
+	assert(GameHandler.load_level(game.stages[0]))
 	assert(
 		(
 			GameHandler._progress_level_key == key
@@ -49,7 +49,7 @@ func _ready() -> void:
 	assert(GameHandler.load_level(load("res://scenes/levels/test_level.tscn")))
 	var test_key := GameHandler.current_level._progress_key
 	GameHandler.store_area_progress(test_key, &"probe", {"used": true}, GameHandler.current_level)
-	assert(GameHandler.show_title(game.initial_level))
+	assert(GameHandler.show_title(game.stages[0]))
 	assert(GameHandler.current_level._progress_key == test_key)
 	assert(GameHandler.get_area_progress(test_key, &"probe").is_empty())
 	game.free()

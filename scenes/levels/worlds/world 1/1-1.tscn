@@ -1,7 +1,7 @@
 [gd_scene format=4 uid="uid://dhytccbi1u2jb"]
 
 [ext_resource type="PackedScene" uid="uid://wlp13xllihs5" path="res://scenes/levels/base/base_level.tscn" id="2_base"]
-[ext_resource type="PackedScene" uid="uid://b5m1vkcrml3t2" path="res://scenes/player/mario (small)/mario.tscn" id="3_player"]
+[ext_resource type="PackedScene" uid="uid://b5m1vkcrml3t2" path="res://scenes/player/mario/mario.tscn" id="3_player"]
 [ext_resource type="PackedScene" path="res://scenes/entities/powerups/super_mushroom.tscn" id="7_msko4"]
 [ext_resource type="PackedScene" path="res://scenes/levels/areas/base_area.tscn" id="10_area"]
 [ext_resource type="Resource" uid="uid://chfcnww7r30v7" path="res://assets/themes/underground.tres" id="12_underground"]

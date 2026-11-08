@@ -1,0 +1,159 @@
+[gd_scene format=3 uid="uid://b5m1vkcrml3t2"]
+
+[ext_resource type="PackedScene" path="res://scenes/player/base/base_player.tscn" id="1_base"]
+[ext_resource type="Script" uid="uid://vritcck12j1n" path="res://scenes/player/mario/mario.gd" id="2_script"]
+[ext_resource type="Script" uid="uid://jyvhxb1qaxku" path="res://scenes/player/mario/states/idle.gd" id="4_idle"]
+[ext_resource type="Script" uid="uid://cqvlw31g7xiwy" path="res://scenes/player/mario/states/move.gd" id="5_move"]
+[ext_resource type="Texture2D" uid="uid://7nfwfahjj5q1" path="res://assets/player/mario (small)/mario-small-idle.png" id="6_nrfpf"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-small-walk-1.tres" id="7_walk"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-small-slide.png" id="8_skid"]
+[ext_resource type="Script" uid="uid://d341vjsd3mmx3" path="res://scenes/player/mario/states/slide.gd" id="6_slide"]
+[ext_resource type="Animation" path="res://scenes/player/mario/animations/walk.tres" id="9_walk_animation"]
+[ext_resource type="PackedScene" path="res://scenes/components/presentation/walk_animation.tscn" id="10_cadence"]
+
+[ext_resource type="Script" path="res://scenes/player/mario/states/jump.gd" id="11_jump"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-small-air.png" id="12_jump_sprite"]
+
+[ext_resource type="Script" path="res://scripts/states/player/pipe_enter_state.gd" id="16_pipe_state"]
+
+[ext_resource type="Script" path="res://scenes/player/mario/states/dead.gd" id="dead_state"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-dead.png" id="dead_sprite"]
+
+[ext_resource type="Script" path="res://scenes/player/mario/states/climb.gd" id="climb_state"]
+[ext_resource type="Animation" path="res://scenes/player/mario/animations/climb.tres" id="climb_animation"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-climb-1.tres" id="climb_sprite"]
+
+[ext_resource type="Script" path="res://scripts/player/mario_form_controller.gd" id="form_controller"]
+[ext_resource type="Script" path="res://scripts/player/mario_form_presentation.gd" id="form_presentation"]
+[ext_resource type="Script" path="res://scripts/player/mario_damage.gd" id="damage"]
+
+[ext_resource type="Script" path="res://scripts/player/mario_terrain.gd" id="mario_terrain"]
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_mario"]
+_data = {
+&"climb": ExtResource("climb_animation"),
+&"walk": ExtResource("9_walk_animation")
+}
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_small_mario"]
+size = Vector2(11, 14)
+
+[sub_resource type="RectangleShape2D" id="enemy_hurtbox"]
+size = Vector2(10, 12)
+
+[node name="Mario" unique_id=1612993165 node_paths=PackedStringArray("climb_state", "death_state", "pipe_enter_state", "sprite") instance=ExtResource("1_base")]
+climb_state = NodePath("StateMachine/Climb")
+death_state = NodePath("StateMachine/Dead")
+pipe_enter_state = NodePath("StateMachine/PipeEnter")
+texture_filter = 1
+script = ExtResource("2_script")
+ceiling_bump_cue = &"bump"
+sprite = NodePath("Body/Sprite2D")
+animation_player = NodePath("Body/AnimationPlayer")
+
+[node name="StateMachine" parent="." index="0" node_paths=PackedStringArray("initial_state")]
+initial_state = NodePath("Idle")
+
+[node name="Idle" type="Node" parent="StateMachine" index="0" unique_id=1299060928 node_paths=PackedStringArray("move_state", "jump_state")]
+script = ExtResource("4_idle")
+sprite_texture = ExtResource("6_nrfpf")
+stop_animation_on_enter = true
+sprite_frame = 0
+move_state = NodePath("../Move")
+jump_state = NodePath("../Jump")
+
+[node name="Move" type="Node" parent="StateMachine" index="1" unique_id=688222756 node_paths=PackedStringArray("idle_state", "slide_state", "jump_state")]
+script = ExtResource("5_move")
+animation_name = &"walk"
+sprite_texture = ExtResource("7_walk")
+idle_state = NodePath("../Idle")
+slide_state = NodePath("../Slide")
+jump_state = NodePath("../Jump")
+
+[node name="Slide" type="Node" parent="StateMachine" index="2" unique_id=1207198049 node_paths=PackedStringArray("move_state", "idle_state", "jump_state")]
+script = ExtResource("6_slide")
+sprite_texture = ExtResource("8_skid")
+stop_animation_on_enter = true
+sprite_frame = 0
+move_state = NodePath("../Move")
+jump_state = NodePath("../Jump")
+idle_state = NodePath("../Idle")
+
+[node name="Jump" type="Node" parent="StateMachine" node_paths=PackedStringArray("idle_state", "move_state")]
+script = ExtResource("11_jump")
+sprite_texture = ExtResource("12_jump_sprite")
+stop_animation_on_enter = true
+sprite_frame = 0
+idle_state = NodePath("../Idle")
+move_state = NodePath("../Move")
+
+[node name="CollisionShape2D" parent="Body" index="0"]
+position = Vector2(-0.5, -7)
+shape = SubResource("RectangleShape2D_small_mario")
+
+[node name="Sprite2D" type="Sprite2D" parent="Body" index="1" unique_id=432554422]
+position = Vector2(0, -7)
+texture = ExtResource("6_nrfpf")
+
+[node name="EnemyHurtbox" type="Area2D" parent="Body"]
+position = Vector2(0, -6)
+collision_layer = 1024
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/EnemyHurtbox"]
+shape = SubResource("enemy_hurtbox")
+
+[node name="AnimationPlayer" parent="Body" index="2"]
+callback_mode_process = 0
+libraries/ = SubResource("AnimationLibrary_mario")
+
+[node name="Presentation" parent="."]
+
+[node name="WalkAnimation" parent="Presentation" unique_id=274353247 instance=ExtResource("10_cadence")]
+
+[node name="Jump" parent="Actions"]
+sound_cue = &"jump_small"
+
+[node name="Bonk" parent="Actions"]
+enabled = true
+
+[node name="PipeEnter" type="Node" parent="StateMachine" node_paths=PackedStringArray("walk_cadence")]
+script = ExtResource("16_pipe_state")
+walk_animation_name = &"walk"
+walk_cadence = NodePath("../../Presentation/WalkAnimation")
+sprite_texture = ExtResource("6_nrfpf")
+stop_animation_on_enter = true
+entry_sound_cue = &"pipe"
+controls_enabled = false
+input_enabled = false
+frame_updates_enabled = false
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("dead_state")
+sprite_texture = ExtResource("dead_sprite")
+stop_animation_on_enter = true
+sprite_frame = 0
+controls_enabled = false
+input_enabled = false
+frame_updates_enabled = false
+
+[node name="Climb" type="Node" parent="StateMachine" node_paths=PackedStringArray("move_state")]
+script = ExtResource("climb_state")
+move_state = NodePath("../Move")
+animation_name = &"climb"
+sprite_texture = ExtResource("climb_sprite")
+stop_animation_on_enter = true
+frame_updates_enabled = false
+
+[node name="Form" type="Node" parent="Status"]
+script = ExtResource("form_controller")
+
+[node name="FormPresentation" type="Node" parent="Presentation"]
+script = ExtResource("form_presentation")
+
+[node name="Damage" type="Node" parent="Status"]
+script = ExtResource("damage")
+
+[node name="MarioTerrain" type="Node" parent="Motion"]
+script = ExtResource("mario_terrain")

@@ -3,7 +3,9 @@ extends CanvasGroup
 
 ## Shared foundation for playable levels.
 
-const SPAWN_LIMITS := {&"power_up": 1, &"enemy": 10}
+const AREA_CONTENT = preload("res://scenes/levels/base/level_area_content.gd")
+
+const SPAWN_REGISTRY = preload("res://scenes/levels/base/level_spawn_registry.gd")
 
 enum CompletionMode { NORMAL, WARP }
 
@@ -59,7 +61,6 @@ var player_presentation: Node
 var is_shutdown: bool = false
 var _reward_timers: Dictionary[int, WeakRef] = {}
 var _spawned_areas: Dictionary[int, bool] = {}
-var _live_spawns: Dictionary[StringName, Array] = {}
 var _progress_key: String
 var _persistent_progress: bool = false
 var active_area: BaseLevelArea
@@ -71,6 +72,8 @@ var active_target_id: StringName = &""
 @onready var death_sequence: LevelDeath = $Systems/LevelDeath
 @onready var level_timer: LevelTimer = $Systems/LevelTimer
 @onready var area_transport: AreaTransport = $Systems/AreaTransport
+@onready var area_content: AREA_CONTENT = $Systems/LevelAreaContent
+@onready var spawn_registry: SPAWN_REGISTRY = $Systems/LevelSpawnRegistry
 var entity_layout: TileMapLayer:
 	get:
 		return get_node_or_null("Areas/MainArea/Layouts/EntityLayout") as TileMapLayer
@@ -81,32 +84,14 @@ var world_objects: Node2D:
 
 
 func has_spawn_capacity(category: StringName) -> bool:
-	return (
-		not SPAWN_LIMITS.has(category)
-		or _live_spawns.get(category, []).size() < SPAWN_LIMITS[category]
-	)
+	return spawn_registry.has_capacity(category)
 
 
 ## Claim immediately before adding a new actor to the tree.
 func try_claim_spawn_slot(category: StringName, actor: Node, replace_oldest := false) -> bool:
 	if is_shutdown:
 		return false
-	if SPAWN_LIMITS.has(category):
-		var live: Array = _live_spawns.get_or_add(category, [])
-		if live.size() >= SPAWN_LIMITS[category]:
-			if not replace_oldest:
-				return false
-			var previous: Node = live.pop_front()
-			previous.queue_free()
-			if previous is CanvasItem:
-				previous.hide()
-		live.append(actor)
-		actor.tree_exited.connect(_release_spawn_slot.bind(category, actor), CONNECT_ONE_SHOT)
-	return true
-
-
-func _release_spawn_slot(category: StringName, actor: Node) -> void:
-	_live_spawns[category].erase(actor)
+	return spawn_registry.try_claim(category, actor, replace_oldest)
 
 
 func _ready() -> void:
@@ -144,68 +129,6 @@ func _ready() -> void:
 		if not is_instance_valid(GameHandler.current_game):
 			initialize_actors(false)
 			_create_standalone_shadow()
-
-
-func spawn_layout_entities() -> void:
-	if is_shutdown or active_area == null or _spawned_areas.has(active_area.get_instance_id()):
-		return
-	_spawn_area_entities(active_area, {})
-	_spawned_areas[active_area.get_instance_id()] = true
-
-
-func _spawn_area_entities(area: BaseLevelArea, saved_entities: Dictionary) -> void:
-	area.entity_persistence.clear()
-	_spawn_layout_entities(area, area.get_node("Layouts/EntityLayout"), saved_entities)
-	_spawn_layout_entities(area, area.get_node("Layouts/EnemyLayout"), {})
-
-
-func _spawn_layout_entities(
-	area: BaseLevelArea, layout: TileMapLayer, saved_entities: Dictionary
-) -> void:
-	var objects := area.get_node("WorldObjects") as Node2D
-	# Markers remain editable in the scene, but only entities render at runtime.
-	layout.hide()
-	if layout.tile_set == null:
-		return
-	if layout.tile_set.get_custom_data_layer_by_name("entity_id") < 0:
-		push_error("EntityLayout TileSet needs an entity_id custom-data layer.")
-		return
-	for cell: Vector2i in layout.get_used_cells():
-		var data := layout.get_cell_tile_data(cell)
-		if data == null:
-			continue
-		var entity_id := StringName(str(data.get_custom_data("entity_id")))
-		var scene: PackedScene = entity_scenes.get(entity_id)
-		if scene == null:
-			push_error("EntityLayout cell %s has unmapped entity_id '%s'." % [cell, entity_id])
-			continue
-		var entity_name := "%s_%s_%s" % [entity_id, cell.x, cell.y]
-		var progress: Dictionary = saved_entities.get(entity_name, {})
-		var instance := scene.instantiate()
-		if not instance is BaseEntity:
-			push_error("EntityLayout scenes must inherit BaseEntity: %s" % entity_id)
-			instance.free()
-			continue
-		area.entity_persistence[entity_name] = instance.persist_progress
-		if not instance.persist_progress:
-			progress = {}
-		elif progress.get("removed", false):
-			instance.free()
-			continue
-		if instance is TransportEntity and not area.configure_transport(instance, cell):
-			instance.free()
-			continue
-		instance.visual_theme = area.theme
-		if instance is QuestionBlock:
-			instance.configure_reward(area.question_block_rewards.get(cell))
-		instance.name = entity_name
-		instance.restore_area_state(progress.get("state", {}))
-		# Block/entity marker origins are the top-left of each grid cell.
-		var local_origin := layout.map_to_local(cell) - Vector2(layout.tile_set.tile_size) / 2.0
-		instance.position = objects.to_local(layout.to_global(local_origin))
-		objects.add_child(instance)
-		if ending_presentation != null:
-			ending_presentation.bind_entity(instance, cell, area)
 
 
 func _physics_process(_delta: float) -> void:
@@ -426,10 +349,6 @@ func request_area_transfer(
 	)
 
 
-func request_pipe_entry(pipe: PipeEntrance) -> bool:
-	return is_instance_valid(pipe) and transport(player, pipe.get_destination(), pipe)
-
-
 func _commit_area_arrival(
 	area: BaseLevelArea, target_id: StringName, arrival: Dictionary, under_cover: bool
 ) -> bool:
@@ -473,10 +392,6 @@ func _record_active_area() -> void:
 		GameHandler.set_session_value(keys[index], values[index])
 
 
-func can_enter_pipe() -> bool:
-	return can_transport()
-
-
 func can_transport() -> bool:
 	return (
 		not is_shutdown
@@ -495,37 +410,12 @@ func _load_area(area: BaseLevelArea) -> void:
 		return
 	var snapshot := GameHandler.get_area_progress(_progress_key, area.area_id)
 	area.load_runtime(snapshot)
-	_spawn_area_entities(area, snapshot.get("entities", {}))
+	area_content.populate(area, snapshot.get("entities", {}))
 	_spawned_areas[area.get_instance_id()] = true
 
 
 func _save_area(area: BaseLevelArea) -> void:
-	var layouts: Dictionary = {}
-	for layer in area.get_node("Layouts").get_children():
-		if layer is TileMapLayer:
-			layouts[str(layer.name)] = layer.tile_map_data.duplicate()
-	var entities: Dictionary = {}
-	var markers := area.get_node("Layouts/EntityLayout") as TileMapLayer
-	var objects := area.get_node("WorldObjects") as Node2D
-	for cell: Vector2i in markers.get_used_cells():
-		var data := markers.get_cell_tile_data(cell)
-		if data == null:
-			continue
-		var id := StringName(str(data.get_custom_data("entity_id")))
-		var entity_name := "%s_%s_%s" % [id, cell.x, cell.y]
-		var entity := objects.get_node_or_null(NodePath(entity_name)) as BaseEntity
-		if entity != null:
-			if not entity.persist_progress:
-				continue
-		elif not area.entity_persistence.get(entity_name, false):
-			continue
-		entities[entity_name] = {
-			"removed": entity == null,
-			"state": entity.capture_area_state() if entity != null else {}
-		}
-	GameHandler.store_area_progress(
-		_progress_key, area.area_id, {"layouts": layouts, "entities": entities}, self
-	)
+	GameHandler.store_area_progress(_progress_key, area.area_id, area_content.capture(area), self)
 
 
 func _unload_area(area: BaseLevelArea) -> void:

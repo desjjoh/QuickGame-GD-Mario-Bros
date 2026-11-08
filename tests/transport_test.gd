@@ -51,10 +51,14 @@ func _ready() -> void:
 	assert(packed.pack(fixture) == OK)
 	assert(ResourceSaver.save(packed, "res://.godot/validation/transport-roundtrip.tscn") == OK)
 	fixture.free()
-	game.initial_level = ResourceLoader.load(
-		"res://.godot/validation/transport-roundtrip.tscn",
-		"PackedScene",
-		ResourceLoader.CACHE_MODE_IGNORE
+	game.stages.assign(
+		[
+			ResourceLoader.load(
+				"res://.godot/validation/transport-roundtrip.tscn",
+				"PackedScene",
+				ResourceLoader.CACHE_MODE_IGNORE
+			)
+		]
 	)
 	add_child(game)
 	var level: BaseLevel = GameHandler.current_level
@@ -95,7 +99,7 @@ func _ready() -> void:
 	# The selected pipe/portal itself supplies arrival geometry, wherever it moves.
 	target.position.x += 16
 	var expected := target.exit_position()
-	GameHandler.set_session_value(&"coins", 17)
+	GameHandler.set_coins(17)
 	player.face_direction(-1.0)
 	assert(level.transport(player, destination, source))
 	assert(player.state_machine.current_state.name == &"TestTravel")
@@ -110,7 +114,7 @@ func _ready() -> void:
 	assert(player.state_machine.current_state != player.state_machine.get_state(&"TestTravel"))
 	assert(not player.sprite.flip_h, "Completed transport must restore right-facing control.")
 	assert(player.body.collision_mask != 0)
-	assert(GameHandler.get_session_value(&"coins") == 17)
+	assert(GameHandler.player_status.coins == 17)
 	await ticks(1)
 	var other := TransportDestination.create(&"main", &"other")
 	assert(

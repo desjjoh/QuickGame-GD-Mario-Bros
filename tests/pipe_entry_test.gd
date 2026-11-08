@@ -16,7 +16,7 @@ func _ready() -> void:
 	var packed := PackedScene.new()
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
-	game.initial_level = packed
+	game.stages.assign([packed])
 	add_child(game)
 	var level := GameHandler.current_level
 	var player := level.player
@@ -45,7 +45,7 @@ func _ready() -> void:
 			if child is AudioStreamPlayer:
 				sounds.append(child)
 	)
-	assert(level.request_pipe_entry(pipe))
+	assert(level.transport(level.player, pipe.get_destination(), pipe))
 	assert(level.players.get_index() < level.get_node("Areas").get_index())
 	# Entry aligns feet to the mouth; floor contact may retain a safe-margin offset.
 	var entry_origin := player.body.global_position
@@ -79,12 +79,12 @@ func _ready() -> void:
 	ControllerHandler.input_right = 0
 	ControllerHandler.input_secondary = false
 	level._physics_process(1.0 / 60.0)
-	assert(level.can_enter_pipe())
+	assert(level.can_transport())
 	pipe.destination_endpoint_id = &"arrival"
 	player.body.global_position.x = 114
 	player.face_direction(1.0)
 	origin = player.body.global_position
-	assert(level.request_pipe_entry(pipe))
+	assert(level.transport(level.player, pipe.get_destination(), pipe))
 	assert(player.body.global_position.x == 114)
 	assert(not player.sprite.flip_h, "Vertical entry must preserve right facing too.")
 	player.state_machine.process_physics(0.1)

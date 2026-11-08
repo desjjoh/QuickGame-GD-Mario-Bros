@@ -12,7 +12,8 @@ func _ready() -> void:
 	var stage := load("res://scenes/levels/worlds/world 1/1-1.tscn").instantiate() as BaseLevel
 	assert(stage.player_start_configuration == null)
 	stage.free()
-	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	level.player_start_configuration = super_form
 	add_child(level)
 	var mario := level.player as Mario
 	mario.set_physics_process(false)
@@ -60,8 +61,8 @@ func _ready() -> void:
 	assert(mario.state_machine.change_state(mario.get_node("StateMachine/Dead")))
 	assert(mario.sprite.texture.resource_path.ends_with("mario-dead.png"))
 	assert(mario.sprite.position == Vector2(0, -7))
-	# A separate default Mario must not inherit the sandbox's resources or overrides.
-	var ordinary := load("res://scenes/player/mario (small)/mario.tscn").instantiate() as Mario
+	# A separate default Mario must not inherit the fixture's resources or overrides.
+	var ordinary := load("res://scenes/player/mario/mario.tscn").instantiate() as Mario
 	add_child(ordinary)
 	assert(ordinary.form_controller.current_form == small)
 	assert(ordinary.get_node("StateMachine/Jump").sprite_texture == small.jump)

@@ -48,7 +48,7 @@ func _ready() -> void:
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
 	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
-	game.initial_level = packed
+	game.stages.assign([packed])
 	add_child(game)
 	var player := GameHandler.current_level.player
 	var pole := (

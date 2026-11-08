@@ -47,7 +47,7 @@ func _ready() -> void:
 	assert(GameHandler.player_status.score == score + 100)
 	assert(GameHandler.player_status.lives == lives and not level.death_in_progress)
 	assert(not koopa._defeated and defeats.is_empty())
-	assert(level._live_spawns[&"enemy"].has(koopa))
+	assert(level.spawn_registry._live_spawns[&"enemy"].has(koopa))
 	assert(koopa.sprite.vframes == 2 and koopa.sprite.frame == 4)
 	assert(koopa.sprite.position == Vector2(0, 2))
 	assert(not koopa.get_node("Presentation/WalkAnimationSync").enabled)

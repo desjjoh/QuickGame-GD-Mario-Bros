@@ -63,26 +63,33 @@ func check(
 		await frames()
 		if DisplayServer.get_name() != "headless":
 			var shot := get_viewport().get_texture().get_image()
-			assert(shot.get_pixel(63, 63).is_equal_approx(Color.RED), "Foreground must stay sharp.")
+			assert(sample(shot, 63, 63).is_equal_approx(Color.RED), "Foreground must stay sharp.")
 			assert(
-				shot.get_pixel(103, 63).is_equal_approx(Color.RED),
-				"Decorations must remain visible."
+				sample(shot, 103, 63).is_equal_approx(Color.RED), "Decorations must remain visible."
 			)
-			var background := shot.get_pixel(140, 100)
+			var background := sample(shot, 140, 100)
 			assert(
-				shot.get_pixel(109, 69).is_equal_approx(background),
+				sample(shot, 109, 69).is_equal_approx(background),
 				"Decorations must not cast shadows."
 			)
 			if style_name == "crisp":
-				assert(shot.get_pixel(69, 69).r < background.r - 0.05)
+				assert(sample(shot, 69, 69).r < background.r - 0.05)
 			elif style_name == "none":
-				assert(shot.get_pixel(69, 69).is_equal_approx(background))
+				assert(sample(shot, 69, 69).is_equal_approx(background))
 			elif style_name == "outer_blur":
-				assert(shot.get_pixel(59, 64).r < background.r - 0.01)
-				assert(absf(shot.get_pixel(59, 64).r - shot.get_pixel(68, 64).r) < 0.02)
+				assert(sample(shot, 59, 64).r < background.r - 0.01)
+				assert(absf(sample(shot, 59, 64).r - sample(shot, 68, 64).r) < 0.02)
 			assert(
 				shot.save_png("res://.godot/validation/" + label + "-" + style_name + ".png") == OK
 			)
+
+
+func sample(shot: Image, x: int, y: int) -> Color:
+	# Sample logical pixel centers in the aspect-fitted, native-resolution capture.
+	var scale := minf(shot.get_width() / 256.0, shot.get_height() / 240.0)
+	var offset := (Vector2(shot.get_size()) - Vector2(256, 240) * scale) / 2
+	var at := offset + (Vector2(x, y) + Vector2(0.5, 0.5)) * scale
+	return shot.get_pixel(int(at.x), int(at.y))
 
 
 func _ready() -> void:
@@ -97,12 +104,12 @@ func _ready() -> void:
 	game.start_with_title = false
 	game.transitions_enabled = false
 	game.shadow_style = null
-	game.initial_level = load("res://scenes/levels/test_level.tscn")
+	game.stages.assign([load("res://scenes/levels/test_level.tscn")])
 	add_child(game)
 	assert(game.get_node("SharedShadow").material == null)
 	await check(GameHandler.current_level, game.get_node("SharedShadow"), "game-style", game)
 	game.shadow_style = load("res://assets/shadows/outer_blur.tres")
-	assert(GameHandler.load_level(game.initial_level))
+	assert(GameHandler.load_level(game.stages[0]))
 	assert(game.get_node("SharedShadow").shadow_style == game.shadow_style)
 	assert(game.get_node("SharedShadow")._level_style.display_name == "Outer Blur")
 	game.free()

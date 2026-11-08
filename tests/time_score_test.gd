@@ -23,7 +23,7 @@ func make_game(timer_enabled: bool = true) -> Node:
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
 	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
-	game.initial_level = packed
+	game.stages.assign([packed])
 	add_child(game)
 	GameHandler.current_level.ending_presentation.flag_sound = null
 	GameHandler.current_level.ending_presentation.music = null

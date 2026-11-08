@@ -99,7 +99,7 @@ func _ready() -> void:
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
 	game.start_with_title = false
 	game.transitions_enabled = false
-	game.initial_level = load("res://scenes/levels/test_level.tscn")
+	game.stages.assign([load("res://scenes/levels/test_level.tscn")])
 	add_child(game)
 	for dimensions in [Vector2i(768, 720), Vector2i(1024, 960), Vector2i(1000, 700)]:
 		get_window().size = dimensions

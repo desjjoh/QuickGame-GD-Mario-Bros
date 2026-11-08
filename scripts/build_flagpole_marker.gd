@@ -1,28 +1,31 @@
 extends SceneTree
-## Rebuild the single 2x11 paint marker from the same source pixels as the scene.
+## Rebuild all flagpole stamps from the authored tiles and flag sprite.
+const PREVIEW := preload("res://scripts/marker_preview.gd")
 
 
 func _initialize() -> void:
-	for theme in ["overworld", "underground", "castle"]:
-		build_marker(theme)
-	quit()
-
-
-func build_marker(theme: String) -> void:
-	var image := Image.create(32, 176, false, Image.FORMAT_RGBA8)
-	var folder := "res://assets/palettes/" + theme + "/misc/"
-	var top := (load(folder + "flagpole-top.tres") as Texture2D).get_image()
-	var pole := (load(folder + "flagpole-pole.tres") as Texture2D).get_image()
-	var flag := (load(folder + "flagpole-flag.png") as Texture2D).get_image()
-	var base := (
-		(load("res://assets/palettes/" + theme + "/tileset/block.tres") as Texture2D).get_image()
+	var flagpole: Node = (
+		load("res://scenes/entities/climbables/flagpole/flagpole.tscn").instantiate()
 	)
-	image.blend_rect(top, Rect2i(0, 0, 16, 16), Vector2i(16, 0))
-	for row in range(1, 10):
-		image.blend_rect(pole, Rect2i(0, 0, 16, 16), Vector2i(16, row * 16))
-	image.blend_rect(flag, Rect2i(0, 0, 16, 16), Vector2i(8, 16))
-	image.blend_rect(base, Rect2i(0, 0, 16, 16), Vector2i(16, 160))
-	var folder_prefix := theme + "/" if theme != "overworld" else ""
-	var output := "res://assets/tileset/" + folder_prefix + "previews/"
-	DirAccess.make_dir_recursive_absolute(output)
-	assert(image.save_png(output + "flagpole.png") == OK)
+	var tiles := flagpole.get_node("Presentation/Tiles") as TileMapLayer
+	var flag := flagpole.get_node("Presentation/Flag") as Sprite2D
+	for theme_name: String in ["overworld", "underground", "castle"]:
+		var theme := load("res://assets/themes/" + theme_name + ".tres") as AreaTheme
+		var image := PREVIEW.render_tiles(tiles, theme, Vector2i(32, 176))
+		var flag_image := PREVIEW.texture_image(theme.resolve_texture(flag.texture))
+		var at := flag.position + flag.offset
+		if flag.centered:
+			at -= Vector2(flag_image.get_size()) / 2.0
+		image.blend_rect(flag_image, Rect2i(Vector2i.ZERO, flag_image.get_size()), Vector2i(at))
+		var prefix := theme_name + "/" if theme_name != "overworld" else ""
+		if not PREVIEW.save_preview(
+			image,
+			"res://assets/tileset/" + prefix + "previews/flagpole.png",
+			"--check" in OS.get_cmdline_user_args()
+		):
+			flagpole.free()
+			quit(1)
+			return
+	flagpole.free()
+	print("Flagpole marker previews: PASS")
+	quit()

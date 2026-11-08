@@ -16,7 +16,7 @@ func _ready() -> void:
 	platform.position = Vector2(72, 88)
 	platform.add_child(collider)
 	add_child(platform)
-	var mario := load("res://scenes/player/mario (small)/mario.tscn").instantiate() as BasePlayer
+	var mario := load("res://scenes/player/mario/mario.tscn").instantiate() as BasePlayer
 	add_child(mario)
 	# Audio playback is covered by jump_test; isolate collision geometry here.
 	mario.ceiling_bump_sound = null

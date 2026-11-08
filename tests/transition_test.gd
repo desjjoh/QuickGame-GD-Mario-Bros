@@ -65,7 +65,7 @@ func _ready() -> void:
 	var packed := PackedScene.new()
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
-	game.initial_level = packed
+	game.stages.assign([packed])
 	add_child(game)
 	var level: BaseLevel
 	var view = game.get_node("UI/ScreenContainer/TransitionScreen")
@@ -214,7 +214,7 @@ func _ready() -> void:
 	Input.action_press(ControllerHandler.down_action)
 	for frame in range(2):
 		await get_tree().physics_frame
-	assert(level.request_pipe_entry(pipe))
+	assert(level.transport(level.player, pipe.get_destination(), pipe))
 	Input.action_release(ControllerHandler.down_action)
 	await wait_until_busy()
 	assert(
@@ -249,7 +249,7 @@ func _ready() -> void:
 	assert(level.active_area == main_area and level.active_target_id == &"player_spawn")
 	assert(music.playing and music.stream == MusicHandler._loops[MusicHandler.Track.OVERWORLD])
 	# Public level transition replaces under cover and unlocks the new player.
-	assert(GameHandler.transition_to_level(game.initial_level))
+	assert(GameHandler.transition_to_level(game.stages[0]))
 	await wait_until_idle()
 	assert(GameHandler.current_level != level)
 	level = GameHandler.current_level
@@ -260,16 +260,14 @@ func _ready() -> void:
 	custom_load.minimum_frames = 1
 	custom_load.allow_level_replacement = true
 	assert(director.register_definition(custom_load))
-	assert(
-		director.begin(level, GameHandler.load_level.bind(game.initial_level), &"test_loading") > 0
-	)
+	assert(director.begin(level, GameHandler.load_level.bind(game.stages[0]), &"test_loading") > 0)
 	await wait_until_idle()
 	assert(GameHandler.current_level != level and ControllerHandler.enabled)
 	level = GameHandler.current_level
 	# External replacement cancels pending work before it can load anything.
 	operation_ran = false
 	assert(director.begin(level, covered_operation.bind(game)) > 0)
-	assert(GameHandler.load_level(game.initial_level))
+	assert(GameHandler.load_level(game.stages[0]))
 	assert(not director.busy)
 	for frame in range(3):
 		await get_tree().process_frame

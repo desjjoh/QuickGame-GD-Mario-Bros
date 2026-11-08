@@ -38,10 +38,14 @@ func make_game() -> Node:
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
 	assert(ResourceSaver.save(packed, "res://.godot/validation/death-fixture.tscn") == OK)
-	game.initial_level = ResourceLoader.load(
-		"res://.godot/validation/death-fixture.tscn",
-		"PackedScene",
-		ResourceLoader.CACHE_MODE_IGNORE
+	game.stages.assign(
+		[
+			ResourceLoader.load(
+				"res://.godot/validation/death-fixture.tscn",
+				"PackedScene",
+				ResourceLoader.CACHE_MODE_IGNORE
+			)
+		]
 	)
 	return game
 
@@ -52,7 +56,7 @@ func _ready() -> void:
 	for reset in [false, true]:
 		GameHandler.clear_session()
 		GameHandler.reset_progress_on_death = reset
-		GameHandler.set_session_value(&"lives", 2)
+		GameHandler.set_lives(2)
 		var game := make_game()
 		add_child(game)
 		await ticks(3)
@@ -131,7 +135,7 @@ func _ready() -> void:
 		assert(
 			fresh_coin.state_machine.current_state.name == (&"Active" if reset else &"Collected")
 		)
-		assert(GameHandler.get_session_value(&"lives") == 1)
+		assert(GameHandler.player_status.lives == 1)
 		assert(fresh.request_area_transfer(&"lower"))
 		await ticks(2)
 		assert(
@@ -208,7 +212,7 @@ func _ready() -> void:
 	assert(not question.gameplay_suspended and question.is_physics_processing())
 	question.free()
 	# Optional visible presentation is retained until explicit completion.
-	var player := load("res://scenes/player/mario (small)/mario.tscn").instantiate() as BasePlayer
+	var player := load("res://scenes/player/mario/mario.tscn").instantiate() as BasePlayer
 	var death_state := load("res://tests/fixtures/death_presentation_state.gd").new() as PlayerState
 	death_state.name = "Death"
 	player.get_node("StateMachine").add_child(death_state)
@@ -268,7 +272,7 @@ func _ready() -> void:
 	level.death_fallback_delay = 5.0
 	assert(level.on_death(level.player))
 	# Stale completion cannot replace another level or clear its progress.
-	assert(GameHandler.load_level(game.initial_level))
+	assert(GameHandler.load_level(game.stages[0]))
 	var replacement := GameHandler.current_level
 	level._restart_after_death()
 	assert(GameHandler.current_level == replacement)
@@ -291,7 +295,7 @@ func reject_reentrant_death(
 
 func replace_on_life_loss(key: StringName, _value: Variant, game: Node) -> void:
 	if key == &"lives":
-		assert(GameHandler.load_level(game.initial_level))
+		assert(GameHandler.load_level(game.stages[0]))
 
 
 func check_life_loss_boundaries() -> void:
@@ -300,7 +304,7 @@ func check_life_loss_boundaries() -> void:
 	add_child(game)
 	var level := GameHandler.current_level
 	var victim := level.player
-	var outsider := load("res://scenes/player/mario (small)/mario.tscn").instantiate() as BasePlayer
+	var outsider := load("res://scenes/player/mario/mario.tscn").instantiate() as BasePlayer
 	add_child(outsider)
 	assert(not level.on_death(outsider) and GameHandler.player_status.lives == 2)
 	outsider.free()

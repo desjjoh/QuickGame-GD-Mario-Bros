@@ -54,7 +54,7 @@ func _ready() -> void:
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
 	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
-	game.initial_level = packed
+	game.stages.assign([packed])
 	add_child(game)
 	var level := GameHandler.current_level
 	level.keep_player_on_screen = false
@@ -126,7 +126,8 @@ func _ready() -> void:
 				)
 			)
 		assert(landed)
-		assert(absf(origin.y - peak - 82.5) < 0.1)
+		# Jump initialization aligns feet to an integer; floor support retains a safe margin.
+		assert(roundf(origin.y) - peak == 83.0, "Full-speed held jump must rise 83 logical pixels.")
 	ControllerHandler.input_right = 0
 	ControllerHandler.input_primary = false
 	ControllerHandler.input_secondary = false

@@ -25,23 +25,34 @@ func wait_phase(phase: StringName) -> void:
 
 func make_game() -> Node:
 	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
-	var fixture := game.initial_level.instantiate() as BaseLevel
+	var fixture := game.stages[0].instantiate() as BaseLevel
 	fixture.death_sound = null
 	fixture.death_fallback_delay = 0.05
 	var packed := PackedScene.new()
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
 	assert(ResourceSaver.save(packed, "res://.godot/validation/game-over-level.tscn") == OK)
-	game.initial_level = load("res://.godot/validation/game-over-level.tscn")
+	game.stages.assign([load("res://.godot/validation/game-over-level.tscn")])
 	return game
+
+
+func assert_composer_unbound(composer: SharedShadowComposer) -> void:
+	assert(composer._level == null)
+	assert(composer._routed_background == null and composer._routed_decorations == null)
+	assert(composer._routed_players == null)
+	composer.sync_rendering()
 
 
 func begin_final_death() -> void:
 	var level := GameHandler.current_level
+	var composer := GameHandler.current_game.get_node("SharedShadow") as SharedShadowComposer
+	# Check during removal, before queue_free can invalidate the old level reference.
+	level.tree_exited.connect(assert_composer_unbound.bind(composer), CONNECT_ONE_SHOT)
 	GameHandler.set_lives(0)
 	assert(level.on_death(level.player))
 	assert(GameHandler.player_status.lives == -1)
 	await wait_phase(&"game_over")
+	assert_composer_unbound(composer)
 
 
 func _ready() -> void:
@@ -142,7 +153,7 @@ func _ready() -> void:
 	await wait_idle()
 	# Cancel by replacing the world: no stale completion may show the title over it.
 	await begin_final_death()
-	assert(GameHandler.load_level(game.initial_level))
+	assert(GameHandler.load_level(game.stages[0]))
 	var replacement := GameHandler.current_level
 	await ticks(3)
 	assert(GameHandler.flow == GameHandler.GameFlow.PLAYING and not director.busy)
