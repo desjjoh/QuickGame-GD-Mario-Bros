@@ -5,6 +5,14 @@ extends Node2D
 signal area_theme_changed(theme: AreaTheme)
 ## Owns area layouts, entities, camera, theme, and entry/exit lifecycle.
 
+@export_group("Background")
+## Transparent preserves the viewport backdrop. Fill never contributes shadow alpha.
+@export var background_color := Color(0, 0, 0, 0):
+	set(value):
+		background_color = value
+		if is_inside_tree():
+			refresh_background()
+
 @export_group("Camera Activity")
 ## Modern hysteresis buffers; not exact NES enemy-specific thresholds.
 @export_range(0.0, 512.0, 16.0) var activation_buffer: float = 64.0
@@ -35,6 +43,8 @@ var _transport_cells: Dictionary[Vector2i, StringName] = {}
 
 
 func _ready() -> void:
+	set_process(Engine.is_editor_hint())
+	refresh_background()
 	apply_theme()
 	process_physics_priority = 110
 	set_physics_process(false)
@@ -367,3 +377,26 @@ func _activate_spawners(wake_region: Rect2, sleep_region: Rect2) -> void:
 		spawner.update_activity(
 			get_enemy_spawn_region() if enemy_placement else wake_region, sleep_region, theme
 		)
+
+
+func _process(_delta: float) -> void:
+	if Engine.is_editor_hint():
+		refresh_background()
+
+
+func refresh_background() -> void:
+	var fill := get_node_or_null("Background") as ColorRect
+	var camera := get_node_or_null("Camera2D") as LevelCamera
+	if fill == null or camera == null:
+		return
+	var height := (
+		(
+			float(ProjectSettings.get_setting("display/window/size/viewport_height", 240))
+			if Engine.is_editor_hint()
+			else get_viewport_rect().size.y
+		)
+		/ maxf(camera.zoom.y, 0.001)
+	)
+	fill.position = to_local(Vector2(camera.world_left, camera.global_position.y - height / 2.0))
+	fill.size = Vector2(maxf(camera.world_right - camera.world_left, 0.0), height)
+	fill.color = background_color

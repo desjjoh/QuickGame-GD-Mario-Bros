@@ -183,6 +183,7 @@ func _arrival_data(area: BaseLevelArea, target_id: StringName, animate: bool) ->
 			return {}
 		return {
 			"position": target.exit_position(),
+			"camera_sprite_x": 56.0,  # NES alternate pipe entrance X ($38).
 			"direction": target.exit_direction(),
 			"distance": target.exit_distance,
 			"state": state if animate else null,

@@ -14,6 +14,7 @@ player_scene = ExtResource("player")
 
 [node name="MainArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="0" unique_id=250103957]
 process_physics_priority = 110
+background_color = Color(0.5803922, 0.5803922, 1, 1)
 background_music = 2
 theme = ExtResource("4_cyt5c")
 

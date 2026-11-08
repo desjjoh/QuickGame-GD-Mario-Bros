@@ -47,6 +47,7 @@ func _ready() -> void:
 	game.transitions_enabled = false
 	add_child(game)
 	var level := GameHandler.current_level
+	level.active_area.background_color = Color(0.3, 0.3, 0.3, 1)
 	level.fall_death_enabled = false
 	var composer := game.get_node("SharedShadow") as SharedShadowComposer
 	assert(level.material == null and composer.material is ShaderMaterial)

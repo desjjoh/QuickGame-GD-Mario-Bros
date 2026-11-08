@@ -36,21 +36,21 @@ cell = Vector2i(162, 11)
 target_id = &"secret_exit"
 entrance_enabled = false
 
-[sub_resource type="Resource" id="Resource_md070"]
-script = ExtResource("20_lletq")
-kind = 1
-
 [sub_resource type="Resource" id="Resource_1qen6"]
 script = ExtResource("20_lletq")
 kind = 2
 power_up_scene = ExtResource("7_msko4")
 
-[sub_resource type="Resource" id="Resource_dfu87"]
+[sub_resource type="Resource" id="Resource_wn7v3"]
 script = ExtResource("20_lletq")
 kind = 2
 power_up_scene = ExtResource("7_msko4")
 
-[sub_resource type="Resource" id="Resource_wn7v3"]
+[sub_resource type="Resource" id="Resource_md070"]
+script = ExtResource("20_lletq")
+kind = 1
+
+[sub_resource type="Resource" id="Resource_dfu87"]
 script = ExtResource("20_lletq")
 kind = 2
 power_up_scene = ExtResource("7_msko4")
@@ -73,6 +73,7 @@ player_scene = ExtResource("3_player")
 
 [node name="MainArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="0" unique_id=250103957]
 process_physics_priority = 110
+background_color = Color(0.5803922, 0.5803922, 1, 1)
 transport_points = Array[ExtResource("transport_placement")]([SubResource("Point_entrance"), SubResource("Point_secret_exit")])
 question_block_rewards = Dictionary[Vector2i, Resource]({
 Vector2i(21, 9): SubResource("Resource_1qen6"),

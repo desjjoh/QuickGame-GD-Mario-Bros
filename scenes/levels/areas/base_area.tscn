@@ -6,6 +6,10 @@
 [ext_resource type="TileSet" path="res://assets/tileset/enemy_layout.tres" id="5_enemies"]
 [node name="BaseArea" type="Node2D" unique_id=1128361088]
 script = ExtResource("1")
+[node name="Background" type="ColorRect" parent="."]
+show_behind_parent = true
+mouse_filter = 2
+color = Color(0, 0, 0, 0)
 [node name="Layouts" type="Node2D" parent="." unique_id=1417906807]
 script = ExtResource("2")
 [node name="DecorationLayout" type="TileMapLayer" parent="Layouts" unique_id=1428866671]

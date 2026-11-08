@@ -21,6 +21,10 @@ Set **Background Music** independently to Overworld, Underground, or None. Overw
 
 Set **Transport Points** and **Pipe Routes** on the source area to link placed pipes to explicit area and destination IDs. A destination pipe supplies its exit pose. The reserved `player_spawn` target returns to the main area’s spawn. Standalone arrival markers are useful where an area needs a separate landing point.
 
+## Area background colour
+
+Select an area such as **Areas → MainArea** and set **Background → Background Color**. Its fill spans the camera's World Left/World Right limits and the camera's visible vertical height, including area offsets and zoom. Alpha zero reveals Game’s black backdrop during F5; standalone F6 retains the viewport default unless an area supplies a colour. Each area owns its colour independently of its theme and music. The fill sits behind decorations, receives foreground shadows, and never casts a shadow itself in F5 or standalone F6.
+
 ## Level rules
 
 - Set camera world bounds on the area camera to define the playable scroll range.

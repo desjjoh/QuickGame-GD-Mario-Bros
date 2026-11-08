@@ -123,7 +123,9 @@ func move_body(gravity_after_motion: bool = false) -> void:
 	var rising := body.velocity.y < 0.0
 	super.move_body(gravity_after_motion)
 	if form_controller.current_form.can_crouch and not is_dead:
+		var before_correction_x := body.global_position.x
 		terrain.resolve(self, before, rising, form_controller.is_crouched)
+		camera_correction_x += body.global_position.x - before_correction_x
 	terrain.collect_coins(
 		self, not form_controller.current_form.can_crouch or form_controller.is_crouched
 	)

@@ -144,6 +144,10 @@ func _on_jump_started() -> void:
 	play_sound_effect(sound)
 
 
+## Accumulated placement/recovery X excluded from camera progress, not from world position.
+var camera_correction_x: float = 0.0
+
+
 func move_body(gravity_after_motion: bool = false) -> void:
 	var next_vertical_speed := body.velocity.y
 	if gravity_after_motion:
@@ -156,10 +160,23 @@ func move_body(gravity_after_motion: bool = false) -> void:
 	var corrected_landing := corner_correction.prepare(
 		body, collision_shape, get_physics_process_delta_time()
 	)
+	var intended_x := horizontal_speed * get_physics_process_delta_time()
+	var prepared_x := body.global_position.x - previous_position.x
+	camera_correction_x += prepared_x - (intended_x if corrected_landing else 0.0)
+	var before_slide_x := body.global_position.x
 	if corrected_landing:
 		# The correction already consumed this tick's horizontal displacement.
 		body.velocity.x = 0.0
 	body.move_and_slide()
+	var slide_x := body.global_position.x - before_slide_x
+	var requested_x := 0.0 if corrected_landing else intended_x
+	var movement_x := clampf(slide_x, minf(0.0, requested_x), maxf(0.0, requested_x))
+	if (
+		is_zero_approx(body.velocity.x)
+		or (body.is_on_wall() and horizontal_speed * body.get_wall_normal().x < 0.0)
+	):
+		movement_x = 0.0
+	camera_correction_x += slide_x - movement_x
 	if body.is_on_floor():
 		stomp_chain = 0
 	if gravity_after_motion:

@@ -445,7 +445,7 @@ func _commit_area_arrival(
 			candidate.get_node("Camera2D").enabled = candidate == area
 	var camera := area.get_node("Camera2D") as LevelCamera
 	camera.make_current()
-	camera.snap_to_arrival(player.body)
+	camera.snap_to_arrival(player.body, arrival.get("camera_sprite_x", -1.0))
 	var previous_area := active_area
 	active_area = area
 	active_target_id = target_id

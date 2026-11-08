@@ -2,6 +2,12 @@ extends Node
 
 
 func _ready() -> void:
+	var camera := LevelCamera.new()
+	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
+	camera.world_left = -1024
+	camera.world_right = 2048
+	camera.position = Vector2(-80, 120)
+	add_child(camera)
 	var platform := StaticBody2D.new()
 	var collider := CollisionShape2D.new()
 	var box := RectangleShape2D.new()
@@ -29,7 +35,19 @@ func _ready() -> void:
 		mario.body.move_and_slide()
 		mario.body.global_position = Vector2(63.75 if side < 0 else 80.25, 110.2)
 		mario.body.velocity = Vector2(0, -240)
+		camera.reset_target(mario.body)
+		var before_scroll := camera.global_position.x
 		mario.move_body()
+		camera.follow_target(mario.body)
+		assert(
+			is_equal_approx(camera.global_position.x, before_scroll),
+			"Head correction must not scroll."
+		)
+		camera.follow_target(mario.body)
+		assert(
+			is_equal_approx(camera.global_position.x, before_scroll),
+			"Correction must not become delayed scroll."
+		)
 		assert(mario.body.velocity.y < 0, "An unobstructed center head probe must pass the corner.")
 		var clearance: float = (mario.body.global_position.x - 0.5 - 72.0) * side
 		assert(clearance >= 13.5 and clearance < 13.85)
@@ -100,6 +118,15 @@ func _ready() -> void:
 	mario.body.velocity = Vector2(0, -240)
 	mario.move_body()
 	assert(is_equal_approx(mario.body.velocity.y, 3.75), "Blocked escape must still bump.")
+	# Actual walking still scrolls after correction offsets have accumulated.
+	mario.body.global_position = Vector2(200, 120)
+	mario.body.velocity = Vector2(120, 0)
+	camera.reset_target(mario.body)
+	var before_scroll := camera.global_position.x
+	mario.move_body()
+	camera.follow_target(mario.body)
+	assert(is_equal_approx(camera.global_position.x - before_scroll, 2.0))
+	camera.free()
 	blocker.free()
 	mario.free()
 	platform.free()

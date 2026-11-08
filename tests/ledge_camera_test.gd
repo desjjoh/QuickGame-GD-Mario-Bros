@@ -110,7 +110,12 @@ func _ready() -> void:
 								failures.append(
 									label + " must reject excessive post-motion penetration"
 								)
-							var camera_expected := displacement if direction > 0 else 0.0
+							# Reference side-collision gating suppresses scroll on blocked contacts.
+							var camera_expected := (
+								displacement
+								if direction > 0 and not player.body.is_on_wall()
+								else 0.0
+							)
 							if (
 								absf(camera.global_position.x - camera_before - camera_expected)
 								> 0.1

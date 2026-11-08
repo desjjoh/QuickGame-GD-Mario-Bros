@@ -102,3 +102,12 @@ Super uses its standing 12x24 EnemyHurtbox and a centered 16x32 sprite at (0,-15
 
 
 Game selects one `ShadowStyle` resource for the title and all stages: Soft, Crisp, Outer Blur, or null. Levels do not expose style overrides. `SharedShadowComposer` owns render routing in both Game (F5) and standalone levels (F6); standalone levels create it under Systems without moving gameplay nodes and read the saved Game style/master toggle without instantiating a second game. Decorations render behind the composite and never enter its silhouette mask. Null styles route contributors directly and disable both offscreen updates. Game's existing master toggle still suppresses any selected style. See [shadow styles](archive/shadow-styles.md).
+
+
+Camera following separates horizontal movement from positional correction. BasePlayer accumulates head-escape and physics-recovery offsets; Mario also records Super terrain push-out. LevelCamera subtracts those offsets when measuring new forward progress, while using the real position for screen thresholds. Blocked side contacts do not contribute scroll; valid ledge movement still does. Pipe destination descriptors request NES sprite-origin screen X=56 (body X=64) at arrival, clamped to camera world bounds. Ordinary endpoint/respawn framing retains its existing follow position. See [camera correction and arrival](archive/camera-correction-arrival-audit.md).
+
+
+BaseLevelArea owns a bounded `Background` ColorRect and exported background_color. Editor refresh derives its rectangle from the area's camera world limits and visible height; runtime render synchronization refreshes the same geometry. SharedShadowComposer routes the active background behind decorations and outside the shadow silhouette capture, preserving scene ownership. Inactive areas unload/recreate the fill through existing runtime templates; the area's colour is reapplied on synchronization. The default is transparent. See [area background](archive/area-background.md).
+
+
+Game owns an input-ignoring, viewport-filling black `Backdrop` ColorRect behind SharedShadow and all gameplay/UI content. It is outside silhouette capture and does not cast shadows. Transparent area backgrounds expose this black fill during F5; standalone F6 retains the engine viewport default where no area colour is supplied. The project clear-colour setting is not overridden.
