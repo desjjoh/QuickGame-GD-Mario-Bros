@@ -1,6 +1,9 @@
 class_name BaseEntity
 extends Node2D
 
+const ACTIVITY = preload("res://scenes/entities/base/entity_activity.gd")
+const THEME_APPLIER = preload("res://scripts/themes/entity_theme_applier.gd")
+
 ## Shared scene root for characters, pickups, and world objects.
 ## Specialized entities own their physics bodies as child nodes.
 
@@ -21,20 +24,16 @@ extends Node2D
 
 @onready var state_machine: EntityStateMachine = $StateMachine
 
-var _activity_geometry: Array[WeakRef] = []
+var _activity := ACTIVITY.new()
 var _controller_input_ready: bool = false
 var _active_sound_effect: AudioStreamPlayer
 var is_shutdown: bool = false
 var gameplay_suspended: bool = false
 var activity_suspended: bool = false
-var _physics_suspended: bool = false
-var _suspended_frames: Dictionary[int, Dictionary] = {}
-var _paused_animations: Dictionary[int, Dictionary] = {}
-var _suspended_physics: Dictionary[int, Dictionary] = {}
 
 
 func _ready() -> void:
-	_apply_visual_theme()
+	THEME_APPLIER.apply(self)
 	if not state_machine.initialize(self):
 		return
 	_controller_input_ready = true
@@ -88,10 +87,7 @@ func shutdown() -> void:
 		_active_sound_effect.stop()
 		_active_sound_effect.queue_free()
 	_active_sound_effect = null
-	_suspended_physics.clear()
-	_suspended_frames.clear()
-	_paused_animations.clear()
-	_activity_geometry.clear()
+	_activity.clear()
 
 
 func get_effects_parent() -> Node2D:
@@ -117,49 +113,6 @@ func resolve_texture(texture: Texture2D) -> Texture2D:
 	return visual_theme.resolve_texture(texture) if visual_theme != null else texture
 
 
-func _apply_visual_theme() -> void:
-	if visual_theme == null:
-		return
-	for child in find_children("*", "Sprite2D", true, false):
-		var child_sprite := child as Sprite2D
-		child_sprite.texture = resolve_texture(child_sprite.texture)
-	for child in find_children("*", "TileMapLayer", true, false):
-		var layer := child as TileMapLayer
-		if layer.tile_set == null:
-			continue
-		# Each actor owns its themed sources; other areas keep their original art.
-		layer.tile_set = layer.tile_set.duplicate() as TileSet
-		var source_ids: Array[int] = []
-		for index in range(layer.tile_set.get_source_count()):
-			source_ids.append(layer.tile_set.get_source_id(index))
-		for source_id in source_ids:
-			var source := layer.tile_set.get_source(source_id) as TileSetAtlasSource
-			if source == null:
-				continue
-			var themed_source := source.duplicate() as TileSetAtlasSource
-			themed_source.texture = resolve_texture(source.texture)
-			layer.tile_set.remove_source(source_id)
-			layer.tile_set.add_source(themed_source, source_id)
-	if animation_player == null or visual_theme.texture_overrides.is_empty():
-		return
-	# Clone animation containers only; never alter another area's shared assets.
-	for library_name in animation_player.get_animation_library_list():
-		var original := animation_player.get_animation_library(library_name)
-		var library := AnimationLibrary.new()
-		for animation_name in original.get_animation_list():
-			var animation := original.get_animation(animation_name).duplicate() as Animation
-			for track in range(animation.get_track_count()):
-				if animation.track_get_type(track) != Animation.TYPE_VALUE:
-					continue
-				for key in range(animation.track_get_key_count(track)):
-					var value = animation.track_get_key_value(track, key)
-					if value is Texture2D:
-						animation.track_set_key_value(track, key, resolve_texture(value))
-			library.add_animation(animation_name, animation)
-		animation_player.remove_animation_library(library_name)
-		animation_player.add_animation_library(library_name, library)
-
-
 func capture_area_state() -> Dictionary:
 	return {}  # Specialized entities opt in to logical progress persistence.
 
@@ -179,117 +132,25 @@ func set_activity_suspended(value: bool) -> void:
 	if is_shutdown or activity_suspended == value:
 		return
 	activity_suspended = value
-	if value:
-		_suspend_frame_branch(self)
-		for child in _get_owned_nodes():
-			if not child is AnimationPlayer and not child is AnimatedSprite2D:
-				continue
-			_paused_animations[child.get_instance_id()] = {
-				"node": weakref(child), "speed": child.speed_scale
-			}
-			child.speed_scale = 0.0
-	else:
-		for record: Dictionary in _suspended_frames.values():
-			var node := (record.node as WeakRef).get_ref() as Node
-			if is_instance_valid(node):
-				node.set_process(record.enabled)
-		_suspended_frames.clear()
-		for record: Dictionary in _paused_animations.values():
-			var node := (record.node as WeakRef).get_ref() as Node
-			if is_instance_valid(node):
-				node.set("speed_scale", record.speed)
-		_paused_animations.clear()
-	for child in _get_owned_nodes():
-		if child is SynchronizedAnimation:
-			child.set_activity_suspended(value)
+	_activity.apply_activity_suspension(self, value)
 	_sync_suspension()
 
 
 func _sync_suspension() -> void:
 	var suspended := gameplay_suspended or activity_suspended
 	state_machine.gameplay_suspended = suspended
-	if suspended != _physics_suspended:
-		_physics_suspended = suspended
-		if suspended:
-			_suspend_physics_branch(self)
-		else:
-			for record: Dictionary in _suspended_physics.values():
-				var node := (record.node as WeakRef).get_ref() as Node
-				if is_instance_valid(node):
-					node.set_physics_process(record.enabled)
-			_suspended_physics.clear()
+	_activity.sync_physics(self, suspended)
 	_sync_controller_input()
-
-
-func _suspend_frame_branch(node: Node) -> void:
-	if node != self and node is BaseEntity:
-		return
-	_suspended_frames[node.get_instance_id()] = {
-		"node": weakref(node), "enabled": node.is_processing()
-	}
-	node.set_process(false)
-	for child in node.get_children():
-		_suspend_frame_branch(child)
-
-
-## Nested entities have independent area activity and suspension ownership.
-func _get_owned_nodes() -> Array[Node]:
-	var result: Array[Node] = []
-	_append_owned_nodes(self, result)
-	return result
-
-
-func _append_owned_nodes(parent: Node, result: Array[Node]) -> void:
-	for child in parent.get_children():
-		if child is BaseEntity:
-			continue
-		result.append(child)
-		_append_owned_nodes(child, result)
 
 
 ## Call again after dynamically adding or replacing geometry.
 func refresh_activity_geometry() -> void:
-	_activity_geometry.clear()
-	for child in _get_owned_nodes():
-		if child is CollisionShape2D or child is Sprite2D or child is TileMapLayer:
-			_activity_geometry.append(weakref(child))
+	_activity.refresh_geometry(self)
 
 
 ## Includes moving child bodies rather than assuming the entity root moves.
 func get_activity_rect() -> Rect2:
-	var bounds := Rect2(global_position, Vector2.ZERO)
-	var found := false
-	for reference: WeakRef in _activity_geometry:
-		var child := reference.get_ref() as Node2D
-		if not is_instance_valid(child):
-			continue
-		var local_rect: Rect2
-		if child is CollisionShape2D and child.shape != null:
-			local_rect = child.shape.get_rect()
-		elif child is Sprite2D and child.texture != null:
-			local_rect = child.get_rect()
-		elif child is TileMapLayer and child.tile_set != null:
-			var cells: Rect2i = (child as TileMapLayer).get_used_rect()
-			local_rect = Rect2(Vector2(cells.position), Vector2(cells.size))
-			local_rect.position *= Vector2(child.tile_set.tile_size)
-			local_rect.size *= Vector2(child.tile_set.tile_size)
-		else:
-			continue
-		var world_rect: Rect2 = child.global_transform * local_rect
-		bounds = bounds.merge(world_rect) if found else world_rect
-		found = true
-	return bounds if found else Rect2(global_position - Vector2.ONE, Vector2(2, 2))
-
-
-func _suspend_physics_branch(node: Node) -> void:
-	if node != self and node is BaseEntity:
-		return
-	_suspended_physics[node.get_instance_id()] = {
-		"node": weakref(node), "enabled": node.is_physics_processing()
-	}
-	node.set_physics_process(false)
-	for child in node.get_children():
-		_suspend_physics_branch(child)
+	return _activity.get_rect(self)
 
 
 func can_read_controller_input() -> bool:

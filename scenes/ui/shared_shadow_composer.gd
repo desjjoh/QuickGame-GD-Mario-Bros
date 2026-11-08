@@ -44,8 +44,9 @@ func configure(world: Node2D, screen: Control) -> void:
 func bind_level(level: BaseLevel) -> void:
 	if level.is_shutdown:
 		return
-	_routed_players = null
+	_unbind_level()
 	_level = level
+	level.tree_exiting.connect(_unbind_level)
 	_set_style()
 	# Capture the foreground only; the level must not apply a nested CanvasGroup effect.
 	level.material = null
@@ -53,6 +54,24 @@ func bind_level(level: BaseLevel) -> void:
 		level.get_canvas_item(), RenderingServer.CANVAS_GROUP_MODE_DISABLED
 	)
 	sync_rendering()
+
+
+func _unbind_level() -> void:
+	_restore_background()
+	_restore_decorations()
+	_routed_background = null
+	_routed_decorations = null
+	if is_instance_valid(_routed_players) and is_instance_valid(_level):
+		var item := _routed_players.get_canvas_item()
+		RenderingServer.canvas_item_set_parent(item, _level.get_canvas_item())
+		RenderingServer.canvas_item_set_transform(item, _routed_players.transform)
+		RenderingServer.canvas_item_set_interpolated(
+			item, _routed_players.is_physics_interpolated()
+		)
+	_routed_players = null
+	if is_instance_valid(_level) and _level.tree_exiting.is_connected(_unbind_level):
+		_level.tree_exiting.disconnect(_unbind_level)
+	_level = null
 
 
 func set_shadow_style(value: ShadowStyle) -> void:
@@ -249,8 +268,7 @@ func _restore_decorations() -> void:
 
 
 func _exit_tree() -> void:
-	_restore_background()
-	_restore_decorations()
+	_unbind_level()
 	if RenderingServer.frame_pre_draw.is_connected(sync_rendering):
 		RenderingServer.frame_pre_draw.disconnect(sync_rendering)
 

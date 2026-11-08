@@ -112,7 +112,7 @@ func _ready() -> void:
 			question.position = Vector2(128, 128)
 			level.world_objects.add_child(question)
 			await get_tree().physics_frame
-			var coins := GameHandler.get_session_value(&"coins") as int
+			var coins := GameHandler.player_status.coins as int
 			var x := 129.0 if direction > 0 else 143.0
 			await step(
 				func():
@@ -132,16 +132,16 @@ func _ready() -> void:
 					p.body.velocity.y == -60 and not question._bounce_reward_claimed,
 					"Phase 3 must skip head bonk"
 				)
-				assert(GameHandler.get_session_value(&"coins") == coins)
+				assert(GameHandler.player_status.coins == coins)
 			else:
 				assert(
 					p.body.velocity.y == 0 and question._bounce_reward_claimed,
 					"Phase 4 must bounce with zero Y speed"
 				)
-				assert(GameHandler.get_session_value(&"coins") == coins + 1)
+				assert(GameHandler.player_status.coins == coins + 1)
 				await step(func(): p.terrain.resolve(p, p.body.global_position, false, false))
 				assert(
-					GameHandler.get_session_value(&"coins") == coins + 1,
+					GameHandler.player_status.coins == coins + 1,
 					"Sustained contact must not award twice"
 				)
 			question.free()

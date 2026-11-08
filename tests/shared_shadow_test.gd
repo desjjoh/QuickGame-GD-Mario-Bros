@@ -63,7 +63,8 @@ func _ready() -> void:
 	level.active_area.get_node("Layouts").hide()
 	level.active_area.get_node("WorldObjects").hide()
 	for child in game.get_node("UI/HUD").get_children():
-		child.hide()
+		if child is CanvasItem:
+			child.hide()
 	box(level, Vector2(64, 80), Vector2(16, 16), Color.RED)
 	box(game.get_node("UI/HUD"), Vector2(72, 88), Vector2(16, 16), Color.WHITE)
 	box(level.player.body, Vector2(-4, -8), Vector2(8, 8), Color.GREEN)
@@ -163,7 +164,7 @@ func _ready() -> void:
 	level.move_child(level.players, level.get_child_count() - 1)
 	composer.sync_rendering()
 	assert(not composer._players_behind_world and level.players.get_parent() == level)
-	assert(GameHandler.load_level(game.initial_level))
+	assert(GameHandler.load_level(game.stages[0]))
 	assert(composer._level == GameHandler.current_level)
 	assert(composer.material == null and GameHandler.current_level.material == null)
 	game.shadow_shader_enabled = true

@@ -33,7 +33,11 @@ func _ready() -> void:
 			assert(mario.receive_damage() if injury else mario.grow())
 			var case_name := ("damage" if injury else "growth") + ("_jump" if jumping else "_run")
 			var trace := FileAccess.open(
-				"res://docs/archive/reference/transformation-mesen-" + case_name + ".csv",
+				(
+					"res://tests/fixtures/transformation_reference/transformation-mesen-"
+					+ case_name
+					+ ".csv"
+				),
 				FileAccess.READ
 			)
 			trace.get_csv_line()

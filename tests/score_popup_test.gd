@@ -4,7 +4,9 @@ const POPUP := preload("res://scenes/components/presentation/score_popup.tscn")
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	var world := Node2D.new()
+	world.process_mode = Node.PROCESS_MODE_PAUSABLE
 	world.position = Vector2(19, 31)
 	add_child(world)
 	var rows := [[100, 1000], [200, 2000], [400, 4000], [500, 5000], [800, 8000]]
@@ -26,9 +28,40 @@ func _ready() -> void:
 	assert(extra_life.global_position == Vector2(130, 128))
 	assert(not extra_life.show_score(300, Vector2.ZERO) and not extra_life.visible)
 	extra_life.show_one_up(Vector2(120, 128))
+	var score_before := GameHandler.player_status.score
+	var lives_before := GameHandler.player_status.lives
+	var animated = POPUP.instantiate()
+	world.add_child(animated)
+	assert(animated.show_score(1000, Vector2(100, 100)))
+	animated.rise_and_free()
+	for tick in range(12):
+		await get_tree().physics_frame
+	assert(animated.global_position.y < 100.0 and animated.global_position.y > 76.0)
+	get_tree().paused = true
+	var paused_position: Vector2 = animated.global_position
+	for tick in range(4):
+		await get_tree().process_frame
+	assert(animated.global_position == paused_position)
+	get_tree().paused = false
+	for tick in range(48):
+		await get_tree().physics_frame
+	assert(not is_instance_valid(animated), "The opted-in rise must free its popup")
+	assert(
+		is_instance_valid(extra_life) and extra_life.global_position == Vector2(120, 128),
+		"Display-only popups must not animate or expire automatically"
+	)
+	assert(
+		(
+			GameHandler.player_status.score == score_before
+			and GameHandler.player_status.lives == lives_before
+		),
+		"Popup presentation must never grant rewards"
+	)
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
 		var frame := get_viewport().get_texture().get_image()
 		assert(frame.save_png("res://.godot/validation/score-popup.png") == OK)
-	print("PASS: ten score tiles, 1 UP, world-space placement and unsupported amounts.")
+	print(
+		"PASS: score artwork/placement, opt-in rise and cleanup, pause, display-only lifetime and reward separation."
+	)
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

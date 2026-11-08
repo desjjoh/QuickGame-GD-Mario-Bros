@@ -39,7 +39,7 @@ func run_checks() -> void:
 				fixture.set_editable_instance(area, true)
 			assert(packed.pack(fixture) == OK)
 			fixture.free()
-			trial.initial_level = packed
+			trial.stages.assign([packed])
 			get_tree().root.add_child(trial)
 			await tick(5)
 			var mario := GameHandler.current_player

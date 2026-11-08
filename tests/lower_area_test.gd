@@ -22,7 +22,7 @@ func _ready() -> void:
 		fixture.set_editable_instance(area, true)
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
-	game.initial_level = packed
+	game.stages.assign([packed])
 	add_child(game)
 	var level := GameHandler.current_level
 	var room := level.get_node("Areas/LowerArea") as Node2D

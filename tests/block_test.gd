@@ -14,14 +14,19 @@ func _ready() -> void:
 		fixture.set_editable_instance(area, true)
 	assert(fixture_scene.pack(fixture) == OK)
 	fixture.free()
-	game.initial_level = fixture_scene
+	game.stages.assign([fixture_scene])
 	add_child(game)
 	var level := GameHandler.current_level
 	assert(level.world_objects.get_child_count() == 4)
 	assert(not level.entity_layout.visible and not level.entity_layout.collision_enabled)
 	assert(level.entity_layout.tile_set.get_physics_layers_count() == 0)
-	level.spawn_layout_entities()
-	assert(level.world_objects.get_child_count() == 4, "Generation must not duplicate entities.")
+	var original_blocks := level.world_objects.get_children()
+	level._load_area(level.active_area)
+	assert(level.world_objects.get_child_count() == 4, "Area loading must not duplicate entities.")
+	assert(
+		level.world_objects.get_children() == original_blocks,
+		"An already-loaded area must retain its entities."
+	)
 	var block := level.get_node("Areas/MainArea/WorldObjects/brick_4_9") as BaseBlock
 	assert(block.body is StaticBody2D and block.sprite.texture != null)
 	assert(block.state_machine.current_state.name == &"Active")

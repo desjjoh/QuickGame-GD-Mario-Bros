@@ -38,10 +38,14 @@ func _ready() -> void:
 	assert(packed.pack(fixture) == OK)
 	assert(ResourceSaver.save(packed, "res://.godot/validation/pipe-routes-roundtrip.tscn") == OK)
 	fixture.free()
-	game.initial_level = ResourceLoader.load(
-		"res://.godot/validation/pipe-routes-roundtrip.tscn",
-		"PackedScene",
-		ResourceLoader.CACHE_MODE_IGNORE
+	game.stages.assign(
+		[
+			ResourceLoader.load(
+				"res://.godot/validation/pipe-routes-roundtrip.tscn",
+				"PackedScene",
+				ResourceLoader.CACHE_MODE_IGNORE
+			)
+		]
 	)
 	add_child(game)
 	var level := GameHandler.current_level
@@ -75,7 +79,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 	assert(level.active_area == main)
 	# Same area, different endpoint: camera must reveal the selected exit.
-	GameHandler.set_session_value(&"coins", 11)
+	GameHandler.set_coins(11)
 	assert(level.request_area_transfer(pipe_b.destination_area_id, pipe_b.destination_endpoint_id))
 	await get_tree().process_frame
 	assert(level.active_endpoint == main.resolve_endpoint(&"near_end"))
@@ -88,11 +92,11 @@ func _ready() -> void:
 	level.clamp_player_to_camera()
 	assert(level.player.body.global_position == arrival_position)
 	assert(GameHandler.get_session_value(&"current_endpoint_id") == &"near_end")
-	assert(GameHandler.get_session_value(&"coins") == 11)
-	assert(not level.can_enter_pipe())
+	assert(GameHandler.player_status.coins == 11)
+	assert(not level.can_transport())
 	ControllerHandler.input_down = 0
 	level._physics_process(1.0 / 60.0)
-	assert(level.can_enter_pipe())
+	assert(level.can_transport())
 	assert(level.request_area_transfer(pipe_a.destination_area_id, pipe_a.destination_endpoint_id))
 	await get_tree().process_frame
 	assert(level.active_endpoint == main.resolve_endpoint(&"near_start"))

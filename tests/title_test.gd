@@ -281,7 +281,7 @@ func run_checks() -> void:
 		Input.action_release(ControllerHandler.select_action)
 		await tick(2)
 		assert(title.cursor.position == Vector2(72, 144))
-		GameHandler.set_session_value(&"score", 999)
+		GameHandler.set_score(999)
 		if keyboard:
 			enter_key(true)
 		else:
@@ -298,12 +298,12 @@ func run_checks() -> void:
 				== "res://scenes/levels/worlds/world 1/1-1.tscn"
 			)
 		)
-		assert(GameHandler.title_flow.first_stage == game.initial_level)
+		assert(GameHandler.title_flow.first_stage == game.stages[0])
 		assert(GameHandler.current_level != background)
 		assert(background.is_shutdown if is_instance_valid(background) else true)
 		assert(GameHandler.current_player.body.is_on_floor())
 		assert(not GameHandler.current_player.gameplay_suspended)
-		assert(GameHandler.get_session_value(&"score", 0) == 0)
+		assert(GameHandler.player_status.score == 0)
 		assert(GameHandler.title_flow.screen == null)
 		# Holding Enter across reveal cannot become an immediate Jump.
 		assert(not ControllerHandler.input_primary_just_pressed)
@@ -334,7 +334,7 @@ func run_checks() -> void:
 	assert(GameHandler.start_new_game(load("res://scenes/levels/test_level.tscn")))
 	await wait_for_play()
 	assert(GameHandler.current_level.scene_file_path == "res://scenes/levels/test_level.tscn")
-	assert(GameHandler.title_flow.first_stage == alternate.initial_level)
+	assert(GameHandler.title_flow.first_stage == alternate.stages[0])
 	assert(not GameHandler.current_player.gameplay_suspended)
 	alternate.free()
 	await tick(2)

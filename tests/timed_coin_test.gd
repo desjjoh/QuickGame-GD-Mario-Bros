@@ -31,10 +31,14 @@ func _ready() -> void:
 	assert(ResourceSaver.save(packed, "res://.godot/validation/timed-coin-fixture.tscn") == OK)
 	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
-	game.initial_level = ResourceLoader.load(
-		"res://.godot/validation/timed-coin-fixture.tscn",
-		"PackedScene",
-		ResourceLoader.CACHE_MODE_IGNORE
+	game.stages.assign(
+		[
+			ResourceLoader.load(
+				"res://.godot/validation/timed-coin-fixture.tscn",
+				"PackedScene",
+				ResourceLoader.CACHE_MODE_IGNORE
+			)
+		]
 	)
 	add_child(game)
 	await ticks(3)
@@ -143,10 +147,10 @@ func _ready() -> void:
 	await ticks(30)
 	assert(not bonk(last))
 	# Existing progress-reset policy applies to timed state on level recreation.
-	assert(GameHandler.load_level(game.initial_level))
+	assert(GameHandler.load_level(game.stages[0]))
 	last = GameHandler.current_level.world_objects.get_node("question_block_8_9") as QuestionBlock
 	assert(last.state_machine.current_state.name == &"Inactive")
-	assert(GameHandler.load_level(game.initial_level, true))
+	assert(GameHandler.load_level(game.stages[0], true))
 	last = GameHandler.current_level.world_objects.get_node("question_block_8_9") as QuestionBlock
 	assert(not last.reward_started and last.reward_ticks_remaining == 0)
 	assert(bonk(last) and last.reward_ticks_remaining == 231)

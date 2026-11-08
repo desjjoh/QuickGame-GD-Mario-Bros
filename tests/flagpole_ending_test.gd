@@ -40,7 +40,7 @@ func make_game(manual: bool) -> Node:
 	fixture.free()
 	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
-	game.initial_level = packed
+	game.stages.assign([packed])
 	return game
 
 

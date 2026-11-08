@@ -21,7 +21,7 @@ func make_game() -> Node:
 		level.set_editable_instance(area, true)
 	assert(packed.pack(level) == OK)
 	level.free()
-	game.initial_level = packed
+	game.stages.assign([packed])
 	return game
 
 

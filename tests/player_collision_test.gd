@@ -13,7 +13,7 @@ func solid(center: Vector2, size: Vector2) -> void:
 
 
 func _ready() -> void:
-	var mario := load("res://scenes/player/mario (small)/mario.tscn").instantiate() as BasePlayer
+	var mario := load("res://scenes/player/mario/mario.tscn").instantiate() as BasePlayer
 	add_child(mario)
 	mario.set_physics_process(false)
 	# A 16-pixel vertical gap between two solid walls.

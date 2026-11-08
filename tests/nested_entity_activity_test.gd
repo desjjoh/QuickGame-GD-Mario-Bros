@@ -66,7 +66,7 @@ func check_actor(source: int, marker: String, actor_name: String) -> void:
 		await ticks(1)
 	assert(reference.get_ref() == null)
 	assert(level.has_spawn_capacity(&"enemy"))
-	assert(level._live_spawns[&"enemy"].is_empty())
+	assert(level.spawn_registry._live_spawns[&"enemy"].is_empty())
 	camera.position = original
 	area.update_camera_activity()
 	assert(spawner.get_node_or_null(actor_name) == null)

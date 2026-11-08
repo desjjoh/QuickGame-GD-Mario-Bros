@@ -6,8 +6,8 @@
 | --- | --- |
 | Main scene | `scenes/main/game.tscn` |
 | Logical viewport | 256×240 |
-| Initial window | 768×720, borderless |
-| Stretch | Viewport mode with integer scaling |
+| Initial window | 768×720, bordered and resizable |
+| Stretch | Window-resolution `canvas_items`, fractional scaling with aspect preserved |
 | Physics interpolation | Enabled |
 | Windows rendering driver | Direct3D 12 |
 
@@ -30,20 +30,30 @@ Select an area such as **Areas → MainArea** and set **Background → Backgroun
 - Set camera world bounds on the area camera to define the playable scroll range.
 - Set the timer limit and enable flag on the level. A disabled timer hides the number and keeps the TIME label.
 - `GameHandler.reset_progress_on_death` controls whether death clears progress. Each entity’s persistence setting applies to both death and area reload.
-- The Game scene supplies the stage list and the shared shadow master toggle. The first stage is 1-1. Open `scenes/main/game.tscn`, select **Game**, and use **Presentation → Shadow Style** to load `assets/shadows/soft.tres`, `crisp.tres`, or `outer_blur.tres`. Clear the field for no shadow effect. Soft is the Game default. One selection applies to the title and every stage; standalone F6 previews read the saved Game selection and master toggle. Decorations remain outside the effect.
-
-Historical setting changes and their approvals are in the [settings record](archive/settings.md).
+- The Game scene supplies the stage list and the shared shadow master toggle. The first stage is 1-1. Open `scenes/main/game.tscn`, select **Game**, and use **Presentation → Shadow Style** to load `assets/shadows/soft.tres`, `crisp.tres`, or `outer_blur.tres`. Clear the field for no shadow effect. Outer Blur is the current authored Game selection. One selection applies to the title and every stage; standalone F6 previews read the saved Game selection and master toggle. Decorations remain outside the effect.
 
 ## Known reference differences
 
 Super Mushroom is available in the existing **EntityLayout** block reward brush: choose **Apply Super Mushroom Reward**, then click a painted question block, hidden question block, reward brick, or alternate reward brick. Its translucent red-mushroom indicator stays visible with the other reward previews. Coin remains the default. This assigns an explicit Super Mushroom, not an automatic mushroom/flower tier.
 
-Super Mushroom always grants 1,000 points. Small Mario grows; already-Super Mario stays Super until Fire is implemented. The latter is the approved temporary difference from the NES's status-based Fire upgrade. See [Super Mushroom](archive/super-mushroom.md).
+Super Mushroom always grants 1,000 points. Small Mario grows; already-Super Mario stays Super until Fire is implemented. The latter is the approved temporary difference from the NES's status-based Fire upgrade.
 
-Timed multi-coin rewards use independent, fixed 231-physics-tick windows instead of the NES's shared, phase-dependent timer. Loading or hitting another block cannot alter an existing window. Pause and unloaded areas freeze remaining time; death follows the existing progress-reset policy. See the [reference investigation and version differences](archive/timed-coin-research.md#approved-version-difference).
+Timed multi-coin rewards use independent, fixed 231-physics-tick windows instead of the NES's shared, phase-dependent timer. Loading or hitting another block cannot alter an existing window. Pause and unloaded areas freeze remaining time; death follows the existing progress-reset policy.
 
 ## Shared entity registry
 
 Add standard marker-to-scene mappings to **BaseLevel: Entity Scenes** in scenes/levels/base/base_level.tscn. TestLevel and 1-1 inherit this registry. Do not create a per-level dictionary override: Godot replaces the inherited dictionary rather than merging entries. Levels own their painted placements and reward overrides.
 
 The game uses 256×240 logical framing with window-resolution canvas_items rendering. The bordered, resizable window starts at 768×720; fractional aspect-preserving scaling fits other sizes with bars as needed. Shader masks can render smoothly while foreground artwork uses nearest sampling.
+
+## Source configuration and ownership
+
+`Game.stages` is the sole ordered gameplay-stage list. The title backdrop is configured separately. Single-stage test fixtures assign `game.stages.assign([scene])`; there is no `initial_level` alias.
+
+Use typed GameHandler methods/properties and `player_status` for score, coins, lives, form, top score, stage label, and timer values. Generic `set_session_value()` / `get_session_value()` are for run metadata such as area/arrival IDs; reserved-key writes are rejected. The existing `session_value_changed` signal carries both typed-value and metadata notifications.
+
+LevelSpawnRegistry keeps ten enemy slots and one independent power-up slot. These are code-defined limits. Ordinary painted spawners attempt once per area load and do not retry after rejection. Reward blocks may explicitly replace the current power-up. Unlisted categories remain unlimited and untracked.
+
+## Deliberate gameplay differences
+
+Enemy stomp scoring omits the NES shared StompTimer score modifier. A stomped Koopa instead has a shell-local 12-tick grace window; a kick does not refresh it. These rules are separate from the independent timed-coin windows above.

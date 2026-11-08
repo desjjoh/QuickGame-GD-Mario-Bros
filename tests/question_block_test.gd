@@ -20,7 +20,7 @@ func _ready() -> void:
 		fixture.set_editable_instance(area, true)
 	assert(fixture_scene.pack(fixture) == OK)
 	fixture.free()
-	game.initial_level = fixture_scene
+	game.stages.assign([fixture_scene])
 	add_child(game)
 	var level := GameHandler.current_level
 	var block := level.world_objects.get_node("question_block_4_9") as BaseBlock
@@ -76,8 +76,8 @@ func _ready() -> void:
 	for frame in range(5):
 		await get_tree().physics_frame
 		await get_tree().process_frame
-	var starting_coins: int = GameHandler.get_session_value(&"coins")
-	var starting_score: int = GameHandler.get_session_value(&"score")
+	var starting_coins: int = GameHandler.player_status.coins
+	var starting_score: int = GameHandler.player_status.score
 	Input.action_press(ControllerHandler.primary_action)
 	var activated := false
 	var moved_sprite := false
@@ -90,16 +90,16 @@ func _ready() -> void:
 		moved_sprite = moved_sprite or block.sprite.position.y < 8.0
 		assert(block.body.global_transform == original_body)
 		if block.state_machine.current_state.name == &"Bouncing":
-			assert(GameHandler.get_session_value(&"coins") == starting_coins + 1)
-			assert(GameHandler.get_session_value(&"score") == starting_score + 200)
+			assert(GameHandler.player_status.coins == starting_coins + 1)
+			assert(GameHandler.player_status.score == starting_score + 200)
 			for object in level.world_objects.get_children():
 				if object is BLOCK_COIN:
 					reward_effect = object
 			assert(not block.receive_hit(EntityHit.new(level.player, &"bonk", Vector2.UP)))
 	Input.action_release(ControllerHandler.primary_action)
 	assert(activated and moved_sprite)
-	assert(GameHandler.get_session_value(&"coins") == starting_coins + 1)
-	assert(GameHandler.get_session_value(&"score") == starting_score + 200)
+	assert(GameHandler.player_status.coins == starting_coins + 1)
+	assert(GameHandler.player_status.score == starting_score + 200)
 	assert(phases == [&"Bouncing", &"Inactive"])
 	assert(events == {"entered": 1, "completed": 1})
 	assert(block.sprite.texture.resource_path.ends_with("question-block-4.tres"))
@@ -107,7 +107,7 @@ func _ready() -> void:
 	assert(not block.animation_player.is_playing())
 	assert(not block.receive_hit(EntityHit.new(level.player, &"bonk", Vector2.UP)))
 	assert(other.state_machine.current_state.name == &"Active")
-	assert(GameHandler.get_session_value(&"coins") == starting_coins + 1)
+	assert(GameHandler.player_status.coins == starting_coins + 1)
 	assert(is_instance_valid(reward_effect))
 	assert(reward_effect.texture == null and reward_effect.get_child_count() == 1)
 	var popup := reward_effect.get_child(0) as Sprite2D
@@ -122,7 +122,9 @@ func _ready() -> void:
 	var lives_before := GameHandler.player_status.lives
 	assert(reward_block.receive_hit(EntityHit.new(level.player, &"bonk", Vector2.UP)))
 	var reveal_voice := SoundHandler.get_node("Square2Sfx") as AudioStreamPlayer
-	assert(reveal_voice.playing and reveal_voice.stream == SoundHandler.get_sound(&"power_up_reveal"))
+	assert(
+		reveal_voice.playing and reveal_voice.stream == SoundHandler.get_sound(&"power_up_reveal")
+	)
 	assert(is_equal_approx(reveal_voice.stream.get_length(), 31.0 / 60.0))
 	assert(previous.is_queued_for_deletion() and not previous.visible)
 	var mushroom: Mushroom

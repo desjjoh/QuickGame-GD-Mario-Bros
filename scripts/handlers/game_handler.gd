@@ -161,51 +161,28 @@ func load_level(
 	return true
 
 
-## Compatibility for existing session consumers; reserved values have one owner.
+## Generic run metadata only. Player and HUD values use their typed owners.
 func set_session_value(key: StringName, value: Variant) -> void:
-	match key:
-		&"score":
-			set_score(int(value))
-		&"coins":
-			set_coins(int(value))
-		&"lives":
-			set_lives(int(value))
-		&"powerup_form":
-			set_player_form(int(value))
-		&"top_score":
-			set_top_score(int(value))
-		&"stage_label":
-			stage_label = str(value)
-		&"time_remaining":
-			time_remaining = int(value)
-		&"timer_enabled":
-			if is_instance_valid(current_level):
-				current_level.timer_enabled = bool(value)
-			else:
-				timer_enabled = bool(value)
-		_:
-			_session[key] = value
-			session_value_changed.emit(key, value)
+	if (
+		key
+		in [
+			&"score",
+			&"coins",
+			&"lives",
+			&"powerup_form",
+			&"top_score",
+			&"stage_label",
+			&"time_remaining",
+			&"timer_enabled"
+		]
+	):
+		push_error("Reserved session value '%s' must use its typed property or method." % key)
+		return
+	_session[key] = value
+	session_value_changed.emit(key, value)
 
 
 func get_session_value(key: StringName, fallback: Variant = null) -> Variant:
-	match key:
-		&"score":
-			return player_status.score
-		&"coins":
-			return player_status.coins
-		&"lives":
-			return player_status.lives
-		&"powerup_form":
-			return player_status.powerup_form
-		&"top_score":
-			return top_score
-		&"stage_label":
-			return stage_label
-		&"time_remaining":
-			return time_remaining
-		&"timer_enabled":
-			return timer_enabled
 	return _session.get(key, fallback)
 
 
@@ -223,10 +200,6 @@ func add_score(amount: int) -> void:
 
 func set_coins(value: int) -> void:
 	player_status.coins = value
-
-
-func add_coins(amount: int) -> void:
-	set_coins(player_status.coins + amount)
 
 
 func award_coin() -> void:

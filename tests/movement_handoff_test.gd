@@ -52,7 +52,7 @@ func run_checks() -> void:
 	var packed := PackedScene.new()
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
-	game.initial_level = packed
+	game.stages.assign([packed])
 	add_child(game)
 	var level: BaseLevel = GameHandler.current_level
 	var player := level.player as Probe

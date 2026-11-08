@@ -27,7 +27,7 @@ func _ready() -> void:
 	var packed := PackedScene.new()
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
-	game.initial_level = packed
+	game.stages.assign([packed])
 	add_child(game)
 	var level := GameHandler.current_level
 	var player := level.player
@@ -51,7 +51,7 @@ func _ready() -> void:
 	)
 	assert(source.get_tile_size_in_atlas(Vector2i.ZERO) == Vector2i(2, 2))
 	assert(source.get_tile_data(Vector2i.ZERO, 0).texture_origin == Vector2i(-8, -8))
-	GameHandler.set_session_value(&"coins", 7)
+	GameHandler.set_coins(7)
 	await ticks(5)
 	assert(player.body.is_on_floor())
 	assert(level.active_area == main_area, "Standing on a pipe alone must not teleport.")
@@ -82,7 +82,7 @@ func _ready() -> void:
 		ControllerHandler.input_right = directions.y
 		pipe._physics_process(1.0 / 60.0)
 		assert(not pipe.can_start_entry(player))
-		assert(not level.request_pipe_entry(pipe))
+		assert(not level.transport(level.player, pipe.get_destination(), pipe))
 		assert(player.state_machine.current_state != player.pipe_enter_state)
 	ControllerHandler.input_left = 0
 	ControllerHandler.input_right = 0
@@ -148,7 +148,7 @@ func _ready() -> void:
 	assert(get_viewport().get_camera_2d() == lower.get_node("Camera2D"))
 	assert(not main_area.runtime_loaded and not main_area.has_node("Camera2D"))
 	assert(GameHandler.get_session_value(&"current_area_id") == &"lower")
-	assert(GameHandler.get_session_value(&"coins") == 7)
+	assert(GameHandler.player_status.coins == 7)
 	assert(player.state_machine.current_state == player.state_machine.initial_state)
 	assert(not level.request_area_transfer(&"lower"))
 	ControllerHandler.input_down = 0

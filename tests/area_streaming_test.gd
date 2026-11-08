@@ -35,7 +35,7 @@ func _ready() -> void:
 	assert(packed.pack(fixture) == OK)
 	assert(ResourceSaver.save(packed, "res://.godot/validation/streaming-persistence.tscn") == OK)
 	fixture.free()
-	game.initial_level = load("res://.godot/validation/streaming-persistence.tscn")
+	game.stages.assign([load("res://.godot/validation/streaming-persistence.tscn")])
 	add_child(game)
 	await ticks(5)
 	var level := GameHandler.current_level
@@ -64,7 +64,7 @@ func _ready() -> void:
 	removed.shutdown()
 	removed.free()
 	main.get_node("Layouts/GroundLayout").erase_cell(Vector2i(10, 13))
-	GameHandler.set_session_value(&"coins", 13)
+	GameHandler.set_coins(13)
 	assert(level.request_area_transfer(&"lower"))
 	await ticks(2)
 	assert(not main.runtime_loaded and lower.runtime_loaded)
@@ -94,7 +94,7 @@ func _ready() -> void:
 		assert(main.get_node("Layouts/GroundLayout").get_cell_source_id(Vector2i(10, 13)) == -1)
 		assert(main.get_node("WorldObjects").get_child_count() == 3)
 		assert(main.get_node("WorldObjects/pipe_entrance_6_11/Presentation").get_child_count() == 4)
-		assert(GameHandler.get_session_value(&"coins") == 13)
+		assert(GameHandler.player_status.coins == 13)
 		assert(level.request_area_transfer(&"lower"))
 		await ticks(2)
 		assert(not main.runtime_loaded and lower.runtime_loaded)
@@ -106,7 +106,7 @@ func _ready() -> void:
 	assert(not GameHandler.get_area_progress(progress_key, &"main").is_empty())
 	# The handler also owns progress across replacing the level instance.
 	game = load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
-	game.initial_level = load("res://.godot/validation/streaming-persistence.tscn")
+	game.stages.assign([load("res://.godot/validation/streaming-persistence.tscn")])
 	add_child(game)
 	level = GameHandler.current_level
 	question = level.world_objects.get_node("question_block_4_9") as BaseBlock

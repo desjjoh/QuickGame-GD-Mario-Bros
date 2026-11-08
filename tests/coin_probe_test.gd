@@ -24,7 +24,7 @@ func make_coin(at: Vector2) -> WorldCoin:
 
 
 func _ready() -> void:
-	mario = load("res://scenes/player/mario (small)/mario.tscn").instantiate() as Mario
+	mario = load("res://scenes/player/mario/mario.tscn").instantiate() as Mario
 	add_child(mario)
 	mario.set_physics_process(false)
 	ControllerHandler.set_physics_process(false)

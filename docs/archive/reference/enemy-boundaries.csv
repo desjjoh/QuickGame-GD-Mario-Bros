@@ -1,3 +1,0 @@
-frame,event,slot,id,enemy_x,left,right,from_left,from_right
-411,spawn,0,6,352,49,304,303,48
-614,removed,0,6,251,324,579,-73,-328

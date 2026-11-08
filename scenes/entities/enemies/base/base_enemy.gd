@@ -124,9 +124,7 @@ func award_score(points: int, world_position: Vector2) -> void:
 	var popup := SCORE_POPUP.instantiate()
 	get_parent().add_child(popup)
 	popup.show_score(points, world_position)
-	var rise := popup.create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
-	rise.tween_property(popup, "position:y", popup.position.y - 24.0, 0.8)
-	rise.tween_callback(popup.queue_free)
+	popup.rise_and_free()
 	GameHandler.add_score(points)
 
 
@@ -155,9 +153,7 @@ func award_extra_life(world_position: Vector2) -> void:
 	var popup := SCORE_POPUP.instantiate()
 	get_parent().add_child(popup)
 	popup.show_one_up(world_position)
-	var rise := popup.create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
-	rise.tween_property(popup, "position:y", popup.position.y - 24.0, 0.8)
-	rise.tween_callback(popup.queue_free)
+	popup.rise_and_free()
 	GameHandler.set_lives(GameHandler.player_status.lives + 1)
 	SoundHandler.play_reward(&"extra_life")
 

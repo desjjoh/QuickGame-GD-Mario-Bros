@@ -3,15 +3,6 @@ extends Node
 
 ## Ordered gameplay stages; the title background is configured separately.
 @export var stages: Array[PackedScene] = []
-## Compatibility for code/fixtures; Inspector authoring has one source of truth.
-var initial_level: PackedScene:
-	get:
-		return stages[0] if not stages.is_empty() else null
-	set(value):
-		var configured: Array[PackedScene] = []
-		if value != null:
-			configured.append(value)
-		stages = configured
 @export var start_with_title: bool = true
 @export var transitions_enabled: bool = true
 
@@ -50,7 +41,7 @@ func _ready() -> void:
 		push_error("Game needs a nonempty Stages list without empty entries.")
 		return
 
-	if not GameHandler.start_game_flow(initial_level, start_with_title):
+	if not GameHandler.start_game_flow(stages[0], start_with_title):
 		push_error("Game startup could not create its initial screen.")
 
 

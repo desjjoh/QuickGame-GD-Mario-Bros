@@ -57,7 +57,7 @@ func _ready() -> void:
 								block.get_node("StateMachine/Inactive")
 							)
 					await get_tree().physics_frame
-					var coins: int = GameHandler.get_session_value(&"coins")
+					var coins: int = GameHandler.player_status.coins
 					await step(
 						func():
 							player.bonk_action.reset_reaction_gate()
@@ -120,7 +120,7 @@ func _ready() -> void:
 						await step(func(): player._physics_process(1.0 / 60.0))
 					assert(
 						(
-							GameHandler.get_session_value(&"coins")
+							GameHandler.player_status.coins
 							== coins + (1 if bounce and kind == "question" else 0)
 						),
 						"Reward must occur exactly once: " + context

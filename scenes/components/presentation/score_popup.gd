@@ -15,6 +15,7 @@ const SCORE_CELLS := {
 	8000: Vector2i(1, 4),
 }
 const ONE_UP_CELL := Vector2i(1, 5)
+var _rise_tween: Tween
 
 
 func show_score(amount: int, world_position: Vector2) -> bool:
@@ -27,6 +28,15 @@ func show_score(amount: int, world_position: Vector2) -> bool:
 
 func show_one_up(world_position: Vector2) -> void:
 	_show_cell(ONE_UP_CELL, world_position)
+
+
+## Opt-in standard motion. Callers still own all score, life, and sound rewards.
+func rise_and_free(distance: float = 24.0, duration: float = 0.8) -> void:
+	if _rise_tween != null and _rise_tween.is_valid():
+		_rise_tween.kill()
+	_rise_tween = create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
+	_rise_tween.tween_property(self, "position:y", position.y - distance, duration)
+	_rise_tween.tween_callback(queue_free)
 
 
 func _show_cell(cell: Vector2i, world_position: Vector2) -> void:

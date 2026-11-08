@@ -14,3 +14,11 @@ export_credentials.cfg
 .mono/
 data_*/
 mono_crash.*.json
+
+# Generated Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Local research, walkthroughs, and development history
+/.archive/

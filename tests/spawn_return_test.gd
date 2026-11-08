@@ -10,7 +10,7 @@ func ticks(count: int) -> void:
 func _ready() -> void:
 	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	# Keep PlayerSpawn-target coverage independent of the authored stage route.
-	var fixture := game.initial_level.instantiate() as BaseLevel
+	var fixture := game.stages[0].instantiate() as BaseLevel
 	var lower_fixture := fixture.get_node("Areas/LowerArea") as BaseLevelArea
 	var route := lower_fixture.transport_points[0].duplicate(true) as TransportPlacement
 	route.destination = TransportDestination.create(&"main", &"player_spawn")
@@ -19,7 +19,7 @@ func _ready() -> void:
 	var packed := PackedScene.new()
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
-	game.initial_level = packed
+	game.stages.assign([packed])
 	add_child(game)
 	var level: BaseLevel = GameHandler.current_level
 	var main := level.active_area

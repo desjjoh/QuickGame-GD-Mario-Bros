@@ -38,7 +38,7 @@ func _ready() -> void:
 	var packed := PackedScene.new()
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
-	game.initial_level = packed
+	game.stages.assign([packed])
 	add_child(game)
 	var level: BaseLevel = GameHandler.current_level
 	assert(level.request_area_transfer(&"lower"))
@@ -175,7 +175,7 @@ func _ready() -> void:
 	Input.action_release(ControllerHandler.left_action)
 	Input.action_release(ControllerHandler.primary_action)
 	await ticks(1)
-	assert(level.can_enter_pipe())
+	assert(level.can_transport())
 	assert(GameHandler.get_session_value(&"current_area_id") == &"main")
 	game.free()
 	await ticks(6)

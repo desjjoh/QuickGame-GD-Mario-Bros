@@ -43,7 +43,7 @@ func make_game(direction: float, phase: float) -> Node:
 	var packed := PackedScene.new()
 	assert(packed.pack(fixture) == OK)
 	fixture.free()
-	game.initial_level = packed
+	game.stages.assign([packed])
 	return game
 
 

@@ -44,7 +44,7 @@ func _ready() -> void:
 	assert(enemy.body.global_position == before + Vector2(0, -2))
 	assert(enemy.body.velocity == Vector2(60, -180))
 	assert(enemy.sprite.flip_v and enemy.sprite.frame == 4)
-	assert(not enemy._defeated and level._live_spawns[&"enemy"].has(enemy))
+	assert(not enemy._defeated and level.spawn_registry._live_spawns[&"enemy"].has(enemy))
 	assert(GameHandler.player_status.score == score + 100)
 	assert(enemy.get_node("StateMachine/ShellIdle").wake_ticks_remaining == 0)
 	# Repeat bumps reapply the impulse and award once each, including opposite direction.

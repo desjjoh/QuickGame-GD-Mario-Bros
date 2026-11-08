@@ -3,26 +3,21 @@ extends Control
 
 const DEFAULT_COIN = preload("res://assets/palettes/overworld/ui/hud-coin.png")
 
-var _theme_area: BaseLevelArea
+const THEME_BINDING := preload("res://scripts/themes/area_theme_binding.gd")
+@onready var theme_binding: THEME_BINDING = $AreaThemeBinding
 
 @onready var coin: AnimatedSprite2D = $Coin
 
 
 func _ready() -> void:
 	coin.sprite_frames = coin.sprite_frames.duplicate(true)
-	GameHandler.level_changed.connect(_on_level_changed)
 	GameHandler.session_value_changed.connect(_on_session_value_changed)
-	_bind_area_theme()
+	theme_binding.theme_changed.connect(_apply_area_theme)
+	theme_binding.start()
 	_refresh_values()
 
 
-func _on_level_changed(_level: BaseLevel) -> void:
-	_bind_area_theme()
-
-
 func _on_session_value_changed(key: StringName, _value: Variant) -> void:
-	if key == &"current_area_id":
-		_bind_area_theme()
 	if key in [&"score", &"coins", &"stage_label", &"time_remaining", &"timer_enabled"]:
 		_refresh_values()
 
@@ -35,35 +30,10 @@ func _refresh_values() -> void:
 	$TimeValue.visible = GameHandler.timer_enabled
 
 
-func _bind_area_theme() -> void:
-	if (
-		is_instance_valid(_theme_area)
-		and _theme_area.area_theme_changed.is_connected(_on_area_theme_changed)
-	):
-		_theme_area.area_theme_changed.disconnect(_on_area_theme_changed)
-
-	_theme_area = null
-	var level := GameHandler.current_level
-	if is_instance_valid(level) and is_instance_valid(level.active_area):
-		_theme_area = level.active_area
-		_theme_area.area_theme_changed.connect(_on_area_theme_changed)
-
-	_refresh_theme()
-
-
-func _on_area_theme_changed(_theme: AreaTheme) -> void:
-	_refresh_theme()
-
-
-func _refresh_theme() -> void:
+func _apply_area_theme(area_theme: AreaTheme) -> void:
 	var texture: Texture2D = DEFAULT_COIN
-	var level := GameHandler.current_level
-	if (
-		is_instance_valid(level)
-		and is_instance_valid(level.active_area)
-		and level.active_area.theme != null
-	):
-		texture = level.active_area.theme.resolve_texture(DEFAULT_COIN)
+	if area_theme != null:
+		texture = area_theme.resolve_texture(DEFAULT_COIN)
 	# Changing atlas artwork preserves the selected shared-clock frame.
 	for index in range(coin.sprite_frames.get_frame_count(&"default")):
 		var atlas := coin.sprite_frames.get_frame_texture(&"default", index) as AtlasTexture
@@ -71,12 +41,5 @@ func _refresh_theme() -> void:
 
 
 func _exit_tree() -> void:
-	if (
-		is_instance_valid(_theme_area)
-		and _theme_area.area_theme_changed.is_connected(_on_area_theme_changed)
-	):
-		_theme_area.area_theme_changed.disconnect(_on_area_theme_changed)
-	if GameHandler.level_changed.is_connected(_on_level_changed):
-		GameHandler.level_changed.disconnect(_on_level_changed)
 	if GameHandler.session_value_changed.is_connected(_on_session_value_changed):
 		GameHandler.session_value_changed.disconnect(_on_session_value_changed)

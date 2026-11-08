@@ -1,5 +1,7 @@
 extends SceneTree
 
+const PREVIEW := preload("res://scripts/marker_preview.gd")
+
 
 ## Pack exact source pixels into the two paintable 2x2 marker previews.
 func _initialize() -> void:
@@ -12,16 +14,20 @@ func _initialize() -> void:
 		var output := (
 			"res://assets/tileset/" + (theme + "/" if theme != "overworld" else "") + "previews/"
 		)
-		DirAccess.make_dir_recursive_absolute(output)
 		for preview: String in previews:
 			var image := Image.create(32, 32, false, Image.FORMAT_RGBA8)
 			for index in range(4):
-				var part := (
-					(load(folder + previews[preview][index] + ".tres") as Texture2D).get_image()
+				var part := PREVIEW.texture_image(
+					load(folder + previews[preview][index] + ".tres") as Texture2D
 				)
 				part.convert(Image.FORMAT_RGBA8)
 				image.blit_rect(
 					part, Rect2i(0, 0, 16, 16), Vector2i((index % 2) * 16, (index >> 1) * 16)
 				)
-			assert(image.save_png(output + preview + ".png") == OK)
+			if not PREVIEW.save_preview(
+				image, output + preview + ".png", "--check" in OS.get_cmdline_user_args()
+			):
+				quit(1)
+				return
+	print("Pipe marker previews: PASS")
 	quit()

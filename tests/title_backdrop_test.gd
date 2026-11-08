@@ -28,7 +28,7 @@ func inject_markers(level: BaseLevel) -> void:
 	layout.set_cell(Vector2i(12, 12), 0, Vector2i.ZERO)
 	layout.set_cell(Vector2i(14, 12), 2, Vector2i.ZERO)
 	level.active_area.get_node("Layouts").add_child(layout)
-	level._spawn_layout_entities(level.active_area, layout, {})
+	level.area_content.populate_layout(level.active_area, layout, {})
 	layout.free()
 	assert(level.world_objects.get_node("goomba_spawner_12_12").get_node_or_null("Goomba") == null)
 	assert(
@@ -49,7 +49,7 @@ func check_backdrop() -> void:
 		assert(entity.gameplay_suspended and not entity.is_physics_processing())
 	var positions := [goomba.body.global_position, koopa.body.global_position]
 	level.initialize_actors(true)
-	assert(level._live_spawns[&"enemy"].size() == 2)
+	assert(level.spawn_registry._live_spawns[&"enemy"].size() == 2)
 	await ticks(10)
 	assert([goomba.body.global_position, koopa.body.global_position] == positions)
 	assert(not level.death_in_progress)

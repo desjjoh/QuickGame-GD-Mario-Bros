@@ -1,81 +1,85 @@
 # Testing
 
-## Run regression scenes
+## Focused headless regressions
 
-From the project root in PowerShell, run:
-
-```powershell
-./scripts/run_tests.ps1 -GodotPath 'C:\path\to\Godot_console.exe'
-```
-
-The runner discovers `tests/*_test.tscn` and writes logs under `.godot/validation`. It requires a PASS marker and a successful exit, and treats errors and warnings as failures. To investigate one scenario, run its scene directly with the Godot console executable:
+Run tests from the project root with a Godot 4.7 console executable. Local qualification uses Godot 4.7.2.
 
 ```powershell
-& 'C:\path\to\Godot_console.exe' --headless --path . res://tests/transition_test.tscn --max-fps 60 --quit-after 1800
+./scripts/run_tests.ps1 -GodotPath 'C:/path/to/Godot_console.exe' -TestName @('block_test', 'area_streaming_test')
 ```
 
-## Manual checks
+Names must match `tests/*_test.tscn` basenames. Logs go to `.godot/validation`. The runner requires exit code zero, a `PASS:` or `<scene>_test: PASS` marker, and no engine errors or warnings. A printed PASS does not override an earlier assertion or engine error.
 
-- Press Start while jumping, during enemy movement, and while a block releases an item. Check that gameplay and music freeze, the pause cue plays, and a fresh Start resumes without jumping. Repeat in F6. Listen to pause/resume against Mesen.
-- Start 1-1 from the title, enter and exit the secret area, and verify camera, theme, HUD, and music handoffs.
-- Test jumping and running with keyboard and controller. Check pipe and ledge contacts, especially at high refresh rates.
-- Die in a pit and by timeout. Verify life loss, progress policy, restart, and return to title after game over.
-- Bonk a painted question block in-game and check the immediate HUD reward, coin arc, and floating 200. Revisit the used block and verify it grants no second reward.
-- Finish at the flagpole. Check the score popup, time conversion, music, and castle flag.
-- Finish with timer endings 1, 3, and 6 and check the corresponding castle bursts, blast sounds, and 500 points per burst. Other final digits produce none. Pause during a burst and verify its frame and score remain frozen.
-- Compare generated audio with Mesen at the same playback level. Check note period, duty cycle, attack, decay, cutoff, and retrigger timing before changing pitch or gain. Area loops and jingles use different envelope rules.
+For direct diagnosis:
 
-Headless regressions check playback routing and lifecycle. Use a rendered run and listening comparison for frame pacing and audio fidelity. See [backlog](backlog.md) for known verification gaps.
+```powershell
+& 'C:/path/to/Godot_console.exe' --headless --path . res://tests/transition_test.tscn --max-fps 60 --quit-after 1800
+```
 
+Run tests for changed behavior and affected integrations. Omitting `-TestName` discovers every regression scene; use that only for an explicitly requested full-suite run. The full suite has not been requalified after the cleanup. `window_render_test` requires a display and explicitly skips headless execution; the current runner treats that skip as a failure because it requires PASS. Run rendered-only checks separately.
 
-For Super Mario integration, run super_mario_movement_test and mario_form_test. The pipe_entry, pipe_transfer, sideways_pipe, climbing, and flagpole_ending scenes also accept `-- --super` after the scene path to exercise their existing checks with Super configuration. Original-game trace reproduction and evidence boundaries are recorded in [Super movement and posture](archive/super-mario-movement.md).
+## Rendered checks
 
+Run a scene without `--headless` to exercise its image assertions. The project defaults to D3D12 Forward+ on Windows. OpenGL Compatibility is an additional useful check:
+
+```powershell
+& 'C:/path/to/Godot_console.exe' --path . res://tests/shadow_style_test.tscn --max-fps 60 --quit-after 1800
+& 'C:/path/to/Godot_console.exe' --path . res://tests/window_render_test.tscn --rendering-method gl_compatibility --rendering-driver opengl3 --max-fps 60 --quit-after 1800
+```
+
+`shadow_style_test` checks Game and standalone Soft/Crisp/Outer Blur/null composition, replacement, bypass, and restoration. Its image reads map logical pixel centers into the actual fitted image. `window_render_test` checks fitted dimensions and all styles at 768×720, 1024×960, and 1000×700. Both pass their focused rendered checks on OpenGL Compatibility and D3D12 Forward+.
+
+`koopa_shadow_test` compares both walking poses at integer placements; headless execution skips its image checks. Fractional-position rasterization differences and the natural moving-Koopa pixel report remain open. Rendered checks and listening comparisons are required for visual/audio fidelity; headless playback assertions alone do not establish it.
+
+## Fixtures and ownership boundaries
+
+Configure single-stage fixtures through `game.stages.assign([scene])` and reload through `game.stages[0]`. There is no `initial_level` alias. Assign timer settings and `player_start_configuration` before adding a fixture to the tree. `level_timer_test` explicitly selects enabled/disabled timer behavior, and `mario_form_test` explicitly selects Super; neither assumes the sandbox's defaults.
+
+Use typed GameHandler setters such as `set_score()`, `set_coins()`, and `set_lives()`, with reads through `player_status`. Generic session access is for area/arrival IDs and custom run metadata. `state_machine_test`, `level_completion_test`, and `transport_lifecycle_test` cover metadata retention/reset and synchronous observer replacement.
+
+The four Mesen transformation datasets used by `growth_handoff_test` are committed as `tests/fixtures/transformation_reference/transformation-mesen-*.csv`. They cover growth/damage while running/jumping, with the same bytes as the original captures. The fixture subfolder has a `.gdignore` so Godot does not import raw captures as translation tables; FileAccess reads them directly. Tests must not depend on ignored local research folders.
+
+| Boundary | Focused checks |
+| --- | --- |
+| Area content and progress | `block_test`, `level_progress_test`, `area_streaming_test`, `layout_grid_test`, `area_theme_test` |
+| Spawn registry and policy | `enemy_spawn_test`, `one_up_test`, `super_mushroom_test`, `question_block_test`, `nested_entity_activity_test` |
+| Entity theme application | `area_theme_test`, `mario_form_test`, `climbing_test`, `fireworks_test`, `animation_clock_test` |
+| Entity activity and input | `entity_activity_test`, `nested_entity_activity_test`, `entity_input_test`, `enemy_contract_test` |
+| UI theme binding | `area_theme_binding_test`, `hud_test`, `hud_scroll_test`, `title_test`, `player_status_test` |
+| Lifecycle and presentation | `death_test`, `game_over_test`, `level_timer_test`, `transition_test`, `title_backdrop_test`, `mario_form_presentation_test` |
+| Authored scene structure | `scene_hierarchy_test`, `entity_registry_test` |
+
+BaseLevel owns area lifecycle and progress storage calls. `block_test` re-enters `_load_area(active_area)` and checks count plus original entity identity. `title_backdrop_test` injects markers through `level.area_content.populate_layout()`; ordinary runtime population stays behind BaseLevel's loaded-area guard. Slot assertions inspect `level.spawn_registry` while normal capacity/claim calls stay on BaseLevel.
+
+Activity tests check both suspension orders, preservation of collision/state, processing restoration, and animation resynchronization. Nested tests verify that sleeping placements do not stop their live Goombas/shells, parent wake does not override child suspension, and cleanup releases spawn capacity. `AreaThemeBinding` checks cover idempotent startup, missing-theme fallback, instance-resource isolation, preserved HUD animation phase, old-area disconnection, and full subscription cleanup.
+
+## Movement, contact, and rewards
+
+- `jump_benchmark_test` checks six takeoff positions, launch displacement/speed, exact 83-pixel logical rise from the rounded takeoff baseline, and expected reach/miss outcomes.
+- `landing_rejump_test` compares 20 Small/Super, both-direction flat-ground cases with recorded reference data: immediate/delayed re-jumps, tapped/held Jump, contact-frame rejection, initial velocity, early horizontal samples, apex tolerance, and one integration per tick. It does not establish all-terrain parity or input buffering.
+- `down_direction_test` checks grounded Down/direction filtering and coasting, low-speed stop rules, crouch release, jump eligibility, and airborne steering. `super_mario_movement_test` retains crouch-jump/landing coverage.
+- `canvas_terrain_test`, `super_mario_corner_test`, and `enemy_canvas_test` exercise head/side contact, block/ground response, real hurtbox overlaps, and block-hit shape queries across canvas hierarchies.
+- `vertical_fraction_test` compares 313 captured arithmetic steps exactly. `vertical_jump_reference_test` checks a natural stationary jump/break sequence. `brick_seam_reference_test` compares 182 post-break vertical samples from 14 running/seam routes while replaying recorded horizontal positions; it does not independently verify horizontal integration.
+- `brick_neighbor_test` checks 20 full-jump cases, reaction gating, and directional outcomes. `brick_break_test` / `brick_debris_test` cover capability selection, temporary collision, scoring, theme, pause, and effect cleanup. Coin-above and shatter-victim work remains in the backlog.
+- `enemy_boundary_test` covers activation-column rounding, cleanup thresholds, and simultaneous paired movement. `shell_spawn_contact_test` verifies retry after rejected overlap and exactly-once accepted chain rewards; the natural pair-entry report remains unconfirmed.
+- `score_popup_test` checks placement, optional rise/cleanup, pause, display-only lifetime, and absence of reward side effects. Entity callers retain reward ownership; flagpole and block-coin lifetimes remain separate.
+- `camera_arrival_test`, `corner_correction_test`, and `area_background_test` cover return-pipe framing, correction-excluded camera progress, background bounds, and shadow routing.
+
+Pipe entry/transfer, sideways-pipe, climbing, and flagpole-ending tests also accept `-- --super` for their Super configuration. Their timing/contact assertions should remain meaningful when fixtures are isolated from authored stage settings.
 
 ## Deterministic audio teardown
 
-Successful regression exits call `await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())` after their assertions and normal scene cleanup. The helper stops remaining non-positional audio players and waits for two observed AudioServer mix boundaries, with a one-second timeout. Fixed-FPS scene frames are not evidence that the independent audio thread has advanced. A one-millisecond cooperative pacing step prevents accelerated tests from exhausting their frame limit during the wait. Timeout reports an error and exits unsuccessfully; warnings are not filtered or suppressed. The helper quiesces test callbacks and pauses the test tree during final teardown only; shipped gameplay and exit behavior are unchanged.
+Successful scenes call `await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())` after assertions and ordinary cleanup. This stops remaining non-positional audio and waits for two observed AudioServer mix boundaries, with a one-second timeout. A cooperative one-millisecond pacing step prevents accelerated frames from exhausting the test limit while the audio thread waits. Timeout fails the test; warnings are not suppressed. Only final test teardown pauses the test tree.
 
-Run a selected set without invoking the full suite:
+`audio_shutdown_test` verifies stopped stream/playback weak references become invalid. This addresses the isolated deferred-audio cleanup warnings; native shutdown failures still need investigation if reproducible.
 
-```powershell
-./scripts/run_tests.ps1 -GodotPath 'C:\path\to\Godot_console.exe' -TestName @('audio_shutdown_test', 'shell_kick_score_test', 'sound_mix_test')
-```
+## Manual play and listening
 
-Names must match scene basenames. The runner accepts both `PASS:` and `<scene>_test: PASS` markers and still requires a successful process exit with no errors or warnings. The audio_shutdown regression verifies that weak references to stopped streams and playback objects actually become invalid. See the [shutdown investigation](archive/shutdown-investigation.md) for the reproduction, evidence, and remaining native-failure scope.
-
-
-`down_direction_test` covers both forms and both horizontal directions: grounded diagonal cancellation, stationary holds, momentum with and without Run, opposing-direction and Down-only low-speed stops, crouch release, jump availability, and airborne steering. `super_mario_movement_test` retains crouch-jump/release/landing coverage.
-
-
-`enemy_boundary_test` checks enemy activation column rounding and one-pixel thresholds, left/right anchor cleanup, actual actor disposal, and simultaneous 24-pixel-spaced group activation/movement. `enemy_spawn_test` retains cap/skipped-attempt and area-reload checks; `nested_entity_activity_test` covers moving actors and shells independently of sleeping placements.
-
-
-`shell_spawn_contact_test` exercises a right-edge pair with a temporarily unavailable target: rejected shell hits remain retryable, accepted hits award once, and overlap cannot duplicate chain points. This is a controlled rejection fixture; the reported natural pair-entry failure remains unconfirmed. See [contact investigation](archive/shell-entry-contact-audit.md).
-
-
-`shadow_style_test` checks Game-wide Soft/Crisp/Outer Blur/null selection, persistence through level replacement, and standalone preview composition, including blank startup, restoration, buffer bypass, and unchanged decoration ownership. Standalone startup checks the authored Game default. Run it with a display to verify foreground sharpness, decoration exclusion, crisp offset, and symmetric outer blur pixels. `koopa_shadow_test` is a rendered-only comparison of both walking poses at integer positions across all styles; its headless path skips image assertions. A half-pixel compositor/direct rasterization discrepancy remains an investigation item; see [shadow styles](archive/shadow-styles.md).
-
-
-`camera_arrival_test` runs an actual 1-1 lower-area-to-overworld animated pipe return and asserts NES sprite-origin X=56/body X=64, idle stability, and no delayed scroll after a recorded placement correction. `corner_correction_test` checks that real head escapes do not move the camera and subsequent walking still does. Super movement checks account for stationary push-out; camera wall-hop and ledge matrices cover blocked contacts versus valid landing motion.
-
-
-`area_background_test` checks standalone preview colour, camera-bound fill geometry, transparent fallback, offset-area loading/routing, and disabled-shadow behavior. Its rendered checks also verify visible bounds, foreground order, and shadows landing on the fill without the fill casting its own shadow.
-
-
-`landing_rejump_test` compares 20 flat-ground cases with a fresh Mesen-derived fixture: Small/Super, both travel directions, immediate versus one-ground-tick-delayed re-jumps, tapped/held Jump, and landing-contact press/hold rejection. It checks initial velocity, takeoff tick, early horizontal samples, apex within 1.1 pixels, and one integration per tick. See [phase 2 evidence](archive/base-movement-audit.md). No modern input buffering is expected.
-
-`super_mario_corner_test` covers standing head penetration during diagonal apex entry in both directions, the last upward step before gravity reverses velocity, and thin upper obstructions. See [corner investigation and audit](archive/super-mario-corner-investigation.md) for verification limits.
-
-`canvas_terrain_test` runs 48 seeded trajectories across default/game-canvas hierarchies, both directions, ground/brick/active-question/used-question fixtures, and three contact heights. It checks head gating, sideways stop versus head-only travel, distinct bounce/solid response, no Y snap, natural clearance, and exactly-once coin rewards. The terrain fixture clears inherited floating geometry before placing its floor.
-
-`window_render_test` requires a rendered window and explicitly skips headless execution. It verifies all shadow styles and aspect-fitted image dimensions at 768×720, 1024×960, and 1000×700.
-
-`enemy_canvas_test` verifies real Super hurtbox overlaps and block-to-Goomba/Koopa shape-query hits under both default and game-style canvases. Evidence and the separate existing block-bump test failure are recorded in [enemy canvas audit](archive/enemy-canvas-audit.md).
-
-`brick_neighbor_test` uses 20 full grounded-jump cases with original-game break-event data. It compares recorded post-break integer heights/speed and directional outcomes, prevents repeated reactions for 16 physics ticks, and verifies gate expiry. It uses earlier controlled-court event data.
-
-`vertical_fraction_test` compares 313 captured Mesen integration steps exactly across integer Y, speed, speed fraction and position fraction. `vertical_jump_reference_test` verifies the six-frame normal Super jump approach and its fractions against the controller-only trace, under a CanvasLayer, including the recorded shatter continuation and descent. See [vertical arithmetic verification](archive/vertical-movement-component.md).
-
-`brick_seam_reference_test` checks 182 frames from 14 controller-only Mesen running/seam shatters, with exact logical Y, integer speed and both fractions. It replays observed horizontal positions to isolate vertical/collision behavior; horizontal simulation is checked separately by the full-jump neighbor regression.
-
-`brick_debris_test` checks all three themed fragment atlases, initial two-pair trajectories, the 32-frame non-positional shatter cue at default gain/pitch, pause, and cleanup below the visible screen. `brick_break_test` checks the direct 50-point award and duplicate-hit rejection; brick debris creates no score popup. Compare fragment appearance and the combined bonk/shatter sound in a rendered playtest before claiming visual/audio parity.
+- Exercise keyboard/controller movement, quick reversals, landing/re-jumps, and pipe/ledge contact at different window sizes and refresh rates.
+- Pause during jumps, item release, pipe animation, death, and endings. Verify frozen world/audio, the pause cue, and fresh-press resume; repeat in F6.
+- Travel through 1-1's secret area and return. Check camera, artwork, HUD, music, and retained rewards.
+- Test Super growth/shrink while running and airborne, crouch release inside terrain, damage protection, and subsequent collection.
+- Verify question/hidden/reward-brick contents, coin rollover, depletion, ordinary brick debris and 50 points, then revisit the area.
+- Verify life loss by enemy/pit/timeout, restart, and final-life return to a clean title.
+- Finish with timer endings 1, 3, and 6; check fireworks, 500 points per burst, pause, score conversion, and music handoff.
+- Compare audio with Mesen at the same playback level. Investigate note period, envelope, cutoff, retrigger, and channel interaction before changing pitch or amplitude.

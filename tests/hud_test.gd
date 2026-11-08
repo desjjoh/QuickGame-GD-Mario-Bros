@@ -76,7 +76,7 @@ func _ready() -> void:
 			)
 		)
 	var previous_area := GameHandler.current_level.active_area
-	assert(previous_area.area_theme_changed.is_connected(hud._on_area_theme_changed))
+	assert(previous_area.area_theme_changed.is_connected(hud.theme_binding._on_area_theme_changed))
 	var underground_theme := previous_area.theme
 	GameHandler.current_level.active_area.theme = AreaTheme.new()
 	assert(
@@ -100,8 +100,10 @@ func _ready() -> void:
 		)
 	)
 	untouched.free()
-	assert(GameHandler.load_level(game.initial_level))
-	assert(not previous_area.area_theme_changed.is_connected(hud._on_area_theme_changed))
+	assert(GameHandler.load_level(game.stages[0]))
+	assert(
+		not previous_area.area_theme_changed.is_connected(hud.theme_binding._on_area_theme_changed)
+	)
 	assert(
 		(
 			(coin.sprite_frames.get_frame_texture(&"default", 0) as AtlasTexture)
@@ -111,7 +113,7 @@ func _ready() -> void:
 		)
 	)
 	assert(game.get_node("UI/HUD") == hud)
-	GameHandler.set_session_value(&"score", 12345)
+	GameHandler.set_score(12345)
 	assert(hud.get_node("Score").text == " 012345")
 	for name in values:
 		if name != &"Score":

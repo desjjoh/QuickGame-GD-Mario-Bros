@@ -89,7 +89,7 @@ func _ready() -> void:
 		)
 	)
 	assert(sync.enabled and not sync.activity_suspended)
-	# Enemy scene with a moving child body: root position alone must not drive disposal.
+	# Resident fixture with a moving child body; authored residents must retain identity.
 	var template := load("res://scenes/entities/base/base_entity.tscn").instantiate() as BaseEntity
 	template.set_script(load("res://tests/fixtures/activity_enemy.gd"))
 	var body := CharacterBody2D.new()
@@ -126,29 +126,42 @@ func _ready() -> void:
 	await ticks()
 	assert(resident.physics_ticks == old_ticks and not resident.can_read_controller_input())
 	var spawner := (
-		load("res://scenes/entities/spawners/enemy_spawner.tscn").instantiate() as EnemySpawner
+		load("res://scenes/entities/spawners/goomba_spawner.tscn").instantiate() as EntitySpawner
 	)
-	spawner.enemy_scene = packed
 	spawner.position = Vector2(600, 120)
 	area.get_node("WorldObjects").add_child(spawner)
 	area.update_camera_activity()
-	assert(is_instance_valid(spawner.actor))
-	var first_actor: WeakRef = weakref(spawner.actor)
+	var actor := spawner.get_node("Goomba") as BaseEnemy
+	var first_actor: WeakRef = weakref(actor)
+	var first_position := actor.body.global_position
 	await ticks()
-	assert(spawner.actor.physics_ticks > 0)
-	spawner.actor.get_node("Body").position.x = 1000
+	assert(
+		actor.body.global_position != first_position,
+		"Spawned actors process physics independently."
+	)
+	actor.body.position.x = 1000
 	area.update_camera_activity()
-	assert(spawner.actor == null)
+	assert(actor.is_queued_for_deletion())
 	await ticks()
 	assert(first_actor.get_ref() == null)
 	area.update_camera_activity()
-	assert(spawner.actor == null, "Do not respawn every tick while the spawn point remains nearby.")
+	assert(spawner.get_node_or_null("Goomba") == null)
 	camera.position.x = 128
 	area.update_camera_activity()
 	camera.position.x = 500
 	area.update_camera_activity()
-	assert(is_instance_valid(spawner.actor))
-	var last_actor: WeakRef = weakref(spawner.actor)
+	assert(
+		spawner.get_node_or_null("Goomba") == null,
+		"An attempted placement stays spent until area reload."
+	)
+	# A fresh placement supplies a live actor to verify area-unload cleanup.
+	var fresh := (
+		load("res://scenes/entities/spawners/goomba_spawner.tscn").instantiate() as EntitySpawner
+	)
+	fresh.position = spawner.position
+	area.get_node("WorldObjects").add_child(fresh)
+	area.update_camera_activity()
+	var last_actor: WeakRef = weakref(fresh.get_node("Goomba"))
 	area.exit_area()
 	assert(block.activity_suspended and not block.is_physics_processing())
 	area.enter_area()
@@ -189,28 +202,27 @@ func _ready() -> void:
 	level.set_physics_process(false)
 	level.player.set_physics_process(false)
 	var gated_spawner := (
-		load("res://scenes/entities/spawners/enemy_spawner.tscn").instantiate() as EnemySpawner
+		load("res://scenes/entities/spawners/goomba_spawner.tscn").instantiate() as EntitySpawner
 	)
-	gated_spawner.enemy_scene = packed
 	gated_spawner.position = Vector2(120, 120)
 	level.active_area.get_node("WorldObjects").add_child(gated_spawner)
 	level.active_area.update_camera_activity()
-	assert(gated_spawner.actor == null)
+	assert(gated_spawner.get_node_or_null("Goomba") == null)
 	level.set_physics_process(true)
 	level.death_in_progress = true
 	level.active_area.update_camera_activity()
-	assert(gated_spawner.actor == null)
+	assert(gated_spawner.get_node_or_null("Goomba") == null)
 	level.death_in_progress = false
 	level.transition_in_progress = true
 	level.active_area.update_camera_activity()
-	assert(gated_spawner.actor == null)
+	assert(gated_spawner.get_node_or_null("Goomba") == null)
 	level.transition_in_progress = false
 	level.active_area.update_camera_activity()
-	assert(is_instance_valid(gated_spawner.actor))
+	assert(gated_spawner.get_node_or_null("Goomba") != null)
 	level.shutdown()
 	level.free()
 	await ticks()
 	print(
-		"PASS: area-owned activity, hysteresis, resident identity/collision, suspension ownership, cosmetic sleep, enemy disposal/reentry and unload cleanup"
+		"PASS: area-owned activity, hysteresis, resident identity/collision, suspension ownership, cosmetic sleep, enemy cleanup, once-per-area activation and unload cleanup"
 	)
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
