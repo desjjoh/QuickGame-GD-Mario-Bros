@@ -1,6 +1,6 @@
 class_name SlideAction
 extends Node
-## Ground reversal/skid, not a crouching slide. Braking never crosses zero.
+## Ground reversal: select friction before facing changes; reset before acceleration.
 
 @export var minimum_speed: float = 41.25
 @export var stop_speed: float = 41.25
@@ -20,9 +20,11 @@ func can_start(body: CharacterBody2D, direction: float) -> bool:
 	return is_opposing(body, direction) and absf(body.velocity.x) >= minimum_speed
 
 
-func begin(values: MotionValues) -> void:
+func begin(values: MotionValues, running_history: bool = false) -> void:
 	var friction := (
-		fast_friction if absf(values.velocity.x) >= fast_speed_threshold else normal_friction
+		fast_friction
+		if running_history or absf(values.velocity.x) >= fast_speed_threshold
+		else normal_friction
 	)
 	(
 		values
@@ -39,15 +41,20 @@ func begin(values: MotionValues) -> void:
 	)
 
 
-func apply(values: MotionValues, delta: float) -> bool:
+func apply(values: MotionValues, delta: float, direction: float, previous_facing: float) -> bool:
 	var velocity := values.velocity
-	velocity.x = move_toward(
-		velocity.x, 0.0, values.acceleration * values.reversal_multiplier * delta
-	)
-	if absf(velocity.x) < stop_speed:
-		velocity.x = 0.0
+	var moving_direction := signf(velocity.x)
+	var rate := values.acceleration
+	if not is_zero_approx(moving_direction) and moving_direction != previous_facing:
+		rate *= values.reversal_multiplier
+	# GetPlayerAnimSpeed resets low speed before ImposeFriction runs.
+	var reset := absf(velocity.x) < stop_speed
+	if reset:
+		velocity.x = direction * rate * delta
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, rate * delta)
 	values.velocity = velocity
-	return is_zero_approx(velocity.x)
+	return reset
 
 
 func end(values: MotionValues) -> void:

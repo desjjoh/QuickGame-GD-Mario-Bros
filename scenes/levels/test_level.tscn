@@ -9,7 +9,6 @@
 
 [node name="TestLevel" unique_id=422508678 instance=ExtResource("base")]
 texture_filter = 1
-timer_enabled = false
 player_scene = ExtResource("player")
 
 [node name="MainArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="0" unique_id=250103957]
@@ -17,6 +16,11 @@ process_physics_priority = 110
 background_color = Color(0.5803922, 0.5803922, 1, 1)
 background_music = 2
 theme = ExtResource("4_cyt5c")
+
+[node name="Background" parent="Areas/MainArea" index="0"]
+offset_right = 256.0
+offset_bottom = 240.0
+color = Color(0.5803922, 0.5803922, 1, 1)
 
 [node name="DecorationLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="0" unique_id=1428866671]
 tile_map_data = PackedByteArray("AAAAAAwAAwAAAAMAAAABAAsAAwAAAAMAAAABAAwAAwABAAMAAAACAAsAAwABAAMAAAACAAwAAwACAAMAAAADAAsAAwAEAAMAAAADAAwAAwADAAMAAAAEAAwAAwAEAAMAAAALAAwAAAAAAAEAAAAMAAwAAAABAAEAAAANAAwAAAABAAEAAAAOAAwAAAABAAEAAAAPAAwAAAACAAEAAAACAAoAAwACAAIAAAA=")
@@ -29,10 +33,10 @@ tile_set = ExtResource("6_hfwtw")
 [node name="EntityLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="2" unique_id=257943121]
 tile_set = ExtResource("7_2mu0v")
 
-[node name="Arrival" parent="Areas/MainArea" index="2" unique_id=1254188347]
+[node name="Arrival" parent="Areas/MainArea" index="3" unique_id=1254188347]
 position = Vector2(48, 208)
 
-[node name="Camera2D" parent="Areas/MainArea" index="3" unique_id=254826152]
+[node name="Camera2D" parent="Areas/MainArea" index="4" unique_id=254826152]
 position = Vector2(128, 120)
 follow_enabled = false
 world_left = 0.0

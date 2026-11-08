@@ -77,7 +77,7 @@ func run_checks() -> void:
 		{"from": &"Slide", "to": &"Move", "speed": 90.0, "axis": 0.0, "ground": false},
 		{"from": &"Jump", "to": &"Move", "speed": 90.0, "axis": 1.0, "ground": false, "land": true},
 		{"from": &"Move", "to": &"Idle", "speed": 0.0, "axis": 0.0, "ground": true},
-		{"from": &"Slide", "to": &"Idle", "speed": 42.0, "axis": 0.0, "ground": true},
+		{"from": &"Slide", "to": &"Idle", "speed": 40.0, "axis": 0.0, "ground": true},
 		{"from": &"Idle", "to": &"Jump", "speed": 90.0, "axis": 1.0, "ground": true, "jump": true}
 	]
 	for direction in [-1.0, 1.0]:

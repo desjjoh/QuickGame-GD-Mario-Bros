@@ -10,8 +10,7 @@ extends PlayerState
 
 func enter() -> void:
 	var player := get_player()
-	player.slide_action.begin(player.motion_values)
-	player.face_direction(get_movement_axis().x)
+	player.slide_action.begin(player.motion_values, player.run_action.running_history)
 
 
 func exit() -> void:
@@ -34,8 +33,11 @@ func process_physics(delta: float) -> BaseState:
 		and not player.slide_action.is_opposing(player.body, direction)
 	):
 		return continue_physics(move_state, delta)
+	var previous_facing := -1.0 if player.sprite.flip_h else 1.0
 	player.face_direction(direction)
-	var stopped := player.slide_action.apply(player.motion_values, delta)
+	var stopped := player.slide_action.apply(
+		player.motion_values, delta, direction, previous_facing
+	)
 	player.gravity_component.apply(player.motion_values, delta)
 	player.move_body()
 	# A solid wall stops physical velocity immediately, but retain this tick's

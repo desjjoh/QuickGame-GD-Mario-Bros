@@ -1,0 +1,342 @@
+[
+  {
+    "form": "small",
+    "travel": 1,
+    "name": "fast_immediate",
+    "initial_speed": 150,
+    "delay": 0,
+    "hold": 1,
+    "takeoff_step": 2,
+    "takeoff_speed": 300,
+    "apex": 179.0,
+    "first_vx": [
+      146.660156,
+      143.320312,
+      139.980469,
+      136.640625
+    ]
+  },
+  {
+    "form": "small",
+    "travel": 1,
+    "name": "threshold_delayed_tap",
+    "initial_speed": 101.25,
+    "delay": 1,
+    "hold": 1,
+    "takeoff_step": 3,
+    "takeoff_speed": 300,
+    "apex": 179.0,
+    "first_vx": [
+      97.910156,
+      95.683594,
+      89.003906,
+      84.550781
+    ]
+  },
+  {
+    "form": "small",
+    "travel": 1,
+    "name": "threshold_delayed_hold",
+    "initial_speed": 101.25,
+    "delay": 1,
+    "hold": 20,
+    "takeoff_step": 3,
+    "takeoff_speed": 300,
+    "apex": 133.0,
+    "first_vx": [
+      97.910156,
+      95.683594,
+      89.003906,
+      84.550781
+    ]
+  },
+  {
+    "form": "small",
+    "travel": 1,
+    "name": "contact_press",
+    "initial_speed": 90,
+    "delay": 0,
+    "hold": 1,
+    "takeoff_step": 0,
+    "takeoff_speed": 0,
+    "apex": 208.0,
+    "first_vx": [
+      87.773438,
+      85.546875,
+      81.09375,
+      76.640625
+    ]
+  },
+  {
+    "form": "small",
+    "travel": 1,
+    "name": "contact_hold",
+    "initial_speed": 90,
+    "delay": 0,
+    "hold": 1,
+    "takeoff_step": 0,
+    "takeoff_speed": 0,
+    "apex": 208.0,
+    "first_vx": [
+      87.773438,
+      85.546875,
+      81.09375,
+      76.640625
+    ]
+  },
+  {
+    "form": "small",
+    "travel": -1,
+    "name": "fast_immediate",
+    "initial_speed": 150,
+    "delay": 0,
+    "hold": 1,
+    "takeoff_step": 2,
+    "takeoff_speed": 300,
+    "apex": 179.0,
+    "first_vx": [
+      -146.660156,
+      -143.320312,
+      -139.980469,
+      -136.640625
+    ]
+  },
+  {
+    "form": "small",
+    "travel": -1,
+    "name": "threshold_delayed_tap",
+    "initial_speed": 101.25,
+    "delay": 1,
+    "hold": 1,
+    "takeoff_step": 3,
+    "takeoff_speed": 300,
+    "apex": 179.0,
+    "first_vx": [
+      -97.910156,
+      -95.683594,
+      -89.003906,
+      -84.550781
+    ]
+  },
+  {
+    "form": "small",
+    "travel": -1,
+    "name": "threshold_delayed_hold",
+    "initial_speed": 101.25,
+    "delay": 1,
+    "hold": 20,
+    "takeoff_step": 3,
+    "takeoff_speed": 300,
+    "apex": 133.0,
+    "first_vx": [
+      -97.910156,
+      -95.683594,
+      -89.003906,
+      -84.550781
+    ]
+  },
+  {
+    "form": "small",
+    "travel": -1,
+    "name": "contact_press",
+    "initial_speed": 90,
+    "delay": 0,
+    "hold": 1,
+    "takeoff_step": 0,
+    "takeoff_speed": 0,
+    "apex": 208.0,
+    "first_vx": [
+      -87.773438,
+      -85.546875,
+      -81.09375,
+      -76.640625
+    ]
+  },
+  {
+    "form": "small",
+    "travel": -1,
+    "name": "contact_hold",
+    "initial_speed": 90,
+    "delay": 0,
+    "hold": 1,
+    "takeoff_step": 0,
+    "takeoff_speed": 0,
+    "apex": 208.0,
+    "first_vx": [
+      -87.773438,
+      -85.546875,
+      -81.09375,
+      -76.640625
+    ]
+  },
+  {
+    "form": "super",
+    "travel": 1,
+    "name": "fast_immediate",
+    "initial_speed": 150,
+    "delay": 0,
+    "hold": 1,
+    "takeoff_step": 2,
+    "takeoff_speed": 300,
+    "apex": 179.0,
+    "first_vx": [
+      146.660156,
+      143.320312,
+      139.980469,
+      136.640625
+    ]
+  },
+  {
+    "form": "super",
+    "travel": 1,
+    "name": "threshold_delayed_tap",
+    "initial_speed": 101.25,
+    "delay": 1,
+    "hold": 1,
+    "takeoff_step": 3,
+    "takeoff_speed": 300,
+    "apex": 179.0,
+    "first_vx": [
+      97.910156,
+      95.683594,
+      89.003906,
+      84.550781
+    ]
+  },
+  {
+    "form": "super",
+    "travel": 1,
+    "name": "threshold_delayed_hold",
+    "initial_speed": 101.25,
+    "delay": 1,
+    "hold": 20,
+    "takeoff_step": 3,
+    "takeoff_speed": 300,
+    "apex": 133.0,
+    "first_vx": [
+      97.910156,
+      95.683594,
+      89.003906,
+      84.550781
+    ]
+  },
+  {
+    "form": "super",
+    "travel": 1,
+    "name": "contact_press",
+    "initial_speed": 90,
+    "delay": 0,
+    "hold": 1,
+    "takeoff_step": 0,
+    "takeoff_speed": 0,
+    "apex": 208.0,
+    "first_vx": [
+      87.773438,
+      85.546875,
+      81.09375,
+      76.640625
+    ]
+  },
+  {
+    "form": "super",
+    "travel": 1,
+    "name": "contact_hold",
+    "initial_speed": 90,
+    "delay": 0,
+    "hold": 1,
+    "takeoff_step": 0,
+    "takeoff_speed": 0,
+    "apex": 208.0,
+    "first_vx": [
+      87.773438,
+      85.546875,
+      81.09375,
+      76.640625
+    ]
+  },
+  {
+    "form": "super",
+    "travel": -1,
+    "name": "fast_immediate",
+    "initial_speed": 150,
+    "delay": 0,
+    "hold": 1,
+    "takeoff_step": 2,
+    "takeoff_speed": 300,
+    "apex": 179.0,
+    "first_vx": [
+      -146.660156,
+      -143.320312,
+      -139.980469,
+      -136.640625
+    ]
+  },
+  {
+    "form": "super",
+    "travel": -1,
+    "name": "threshold_delayed_tap",
+    "initial_speed": 101.25,
+    "delay": 1,
+    "hold": 1,
+    "takeoff_step": 3,
+    "takeoff_speed": 300,
+    "apex": 179.0,
+    "first_vx": [
+      -97.910156,
+      -95.683594,
+      -89.003906,
+      -84.550781
+    ]
+  },
+  {
+    "form": "super",
+    "travel": -1,
+    "name": "threshold_delayed_hold",
+    "initial_speed": 101.25,
+    "delay": 1,
+    "hold": 20,
+    "takeoff_step": 3,
+    "takeoff_speed": 300,
+    "apex": 133.0,
+    "first_vx": [
+      -97.910156,
+      -95.683594,
+      -89.003906,
+      -84.550781
+    ]
+  },
+  {
+    "form": "super",
+    "travel": -1,
+    "name": "contact_press",
+    "initial_speed": 90,
+    "delay": 0,
+    "hold": 1,
+    "takeoff_step": 0,
+    "takeoff_speed": 0,
+    "apex": 208.0,
+    "first_vx": [
+      -87.773438,
+      -85.546875,
+      -81.09375,
+      -76.640625
+    ]
+  },
+  {
+    "form": "super",
+    "travel": -1,
+    "name": "contact_hold",
+    "initial_speed": 90,
+    "delay": 0,
+    "hold": 1,
+    "takeoff_step": 0,
+    "takeoff_speed": 0,
+    "apex": 208.0,
+    "first_vx": [
+      -87.773438,
+      -85.546875,
+      -81.09375,
+      -76.640625
+    ]
+  }
+]

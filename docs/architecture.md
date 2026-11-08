@@ -111,3 +111,6 @@ BaseLevelArea owns a bounded `Background` ColorRect and exported background_colo
 
 
 Game owns an input-ignoring, viewport-filling black `Backdrop` ColorRect behind SharedShadow and all gameplay/UI content. It is outside silhouette capture and does not cast shadows. Transparent area backgrounds expose this black fill during F5; standalone F6 retains the engine viewport default where no area colour is supplied. The project clear-colour setting is not overridden.
+
+
+Ground reversal chooses friction using Mario's previous facing before updating his facing for the tick. Slide checks low speed before braking, resets qualifying momentum, and accelerates in the requested direction during the same movement step. This matches the audited ordinary reversal curves without adding another body integration. Landing/re-jump profile selection is qualified by 20 reference-derived flat-ground cases across Small/Super and both directions, including immediate/delayed takeoff and landing-contact input gates. See [the movement audit](archive/base-movement-audit.md).

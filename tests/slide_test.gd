@@ -22,25 +22,32 @@ func run_checks() -> void:
 	assert(not action.can_start(body, 0.0) and not action.can_start(body, 1.0))
 	action.begin(values)
 	assert(is_equal_approx(values.acceleration * values.reversal_multiplier, 267.1875))
-	assert(not action.apply(values, 1.0 / 60.0))
+	assert(not action.apply(values, 1.0 / 60.0, -1.0, -1.0))
 	assert(is_equal_approx(body.velocity.x, 85.546875) and body.velocity.y == 7.0)
+	action.end(values)
+	body.velocity.x = 90.0
+	action.begin(values)
+	assert(not action.apply(values, 1.0 / 60.0, -1.0, 1.0))
+	assert(is_equal_approx(body.velocity.x, 87.7734375))
 	action.end(values)
 	body.velocity.x = 150.0
 	run.apply(values, true)
 	action.begin(values)
 	assert(is_equal_approx(values.acceleration * values.reversal_multiplier, 365.625))
 	assert(values.max_speed == 90.0 and body.velocity.x == 150.0)
-	action.apply(values, 1.0 / 60.0)
+	action.apply(values, 1.0 / 60.0, -1.0, -1.0)
 	assert(is_equal_approx(body.velocity.x, 143.90625))
 	action.end(values)
 	assert(values.max_speed == 150.0)
 	body.velocity.x = -90.0
 	action.begin(values)
-	action.apply(values, 1.0 / 60.0)
+	action.apply(values, 1.0 / 60.0, 1.0, 1.0)
 	assert(is_equal_approx(body.velocity.x, -85.546875))
 	body.velocity.x = 42.0
-	assert(action.apply(values, 1.0 / 60.0))
-	assert(body.velocity == Vector2(0, 7))
+	assert(not action.apply(values, 1.0 / 60.0, -1.0, -1.0))
+	assert(is_equal_approx(body.velocity.x, 37.546875))
+	assert(action.apply(values, 1.0 / 60.0, -1.0, -1.0))
+	assert(is_equal_approx(body.velocity.x, -4.453125) and body.velocity.y == 7)
 	body.velocity.x = 40.0
 	assert(not action.can_start(body, -1.0))
 	body.velocity.x = 90.0

@@ -1,0 +1,5 @@
+[gd_scene format=3]
+[ext_resource type="PackedScene" path="res://scenes/player/mario (small)/mario.tscn" id="base"]
+[ext_resource type="Script" path="res://tests/fixtures/movement_probe.gd" id="probe"]
+[node name="MovementProbe" instance=ExtResource("base")]
+script = ExtResource("probe")

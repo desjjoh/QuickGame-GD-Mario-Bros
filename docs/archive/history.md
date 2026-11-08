@@ -1177,3 +1177,24 @@ Focused area_streaming_test, scene_hierarchy_test, shadow_style_test, and area_b
 At the user's request, removed the recently approved default-clear-colour override and added Game/Backdrop behind all composition, leaving unrelated project edits intact. The viewport-filling ColorRect ignores input and stays outside shadow capture. Per-area colours continue to overlay it; standalone levels retain the engine default for transparent gaps.
 
 Rendered area-background, shadow-style, and shared-shadow regressions passed on D3D12 without errors or warnings. Updated contrast fixtures and black fallback assertions. No full suite was run; see [settings reversal](settings.md) and [area background](area-background.md).
+
+
+## 2026-11-08 — Mario landing/reversal/re-jump audit (investigation only)
+
+At the user's request, audited base movement without changing gameplay or test code. Eight focused regressions passed. Compared 11 controlled 48-frame cases per engine using temporary Godot diagnostics and Mesen RAM/input fixtures. Confirmed reversal friction/facing ordering and skid-reset differences; a delayed landing-turn re-jump crosses the fast-jump threshold differently and reaches about 13 pixels less height in the tested held-jump fixture. Landing-contact jump presses/holds and immediate fresh grounded re-jumps matched their reference eligibility.
+
+Recorded evidence, normalized CSVs, limitations, and proposed correction order in [base movement audit](base-movement-audit.md). No full suite or new rendered movement comparison was performed. Only documentation/evidence files were added or updated; no movement fixes or modern enhancements were implemented.
+
+
+## 2026-11-08 — Movement phase 1: reversal order and skid completion
+
+Implemented the first of the user's two phases: Slide uses previous facing for friction, retains running history, and checks low-speed reset before applying same-tick reverse acceleration. Removed the extra forced-zero transition tick while preserving one integration and collision/neutral handoffs. Changed SlideAction, MarioSlideState, and focused slide/handoff assertions; jump and gravity tuning are unchanged.
+
+Four focused scenes passed without errors or warnings. A temporary replay matched all 48 VX samples in each of three reference reversal curves to CSV rounding precision. Preserved baseline data and added phase-1 evidence in [the movement audit](base-movement-audit.md). No full suite or rendered playtest was performed. Phase 2 remains pending for landing/re-jump profile coverage. No settings changed.
+
+
+## 2026-11-08 — Movement phase 2: landing/re-jump reference coverage
+
+Verified that phase 1 restores the correct fast-jump profile after landing and turning, without additional production movement or jump/gravity changes. Added landing_rejump_test, an inherited movement-probe fixture scene, and golden reference data from a fresh 20-case/960-frame Mesen flat-court capture. Both Small/Super and both reversal directions cover immediate/delayed jumps, tap/hold, and landing-contact input gating.
+
+Five focused scenes passed without engine errors or warnings, including the new case matrix and existing handoff, held-Run landing, jump, and falling-gravity checks. Golden checks cover exact takeoff, first velocity samples, apex tolerance, no automatic buffered jump, and one integration per tick. Corrected initial reference-fixture terrain contamination and a test-edit indentation error before final reruns. No full suite or rendered interactive comparison was performed. Source data, limits, and pending broader coverage are in [the movement audit](base-movement-audit.md). No settings changed.

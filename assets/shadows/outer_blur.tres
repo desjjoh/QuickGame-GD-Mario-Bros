@@ -8,7 +8,7 @@
 shader = ExtResource("composite")
 shader_parameter/shadow_offset = Vector2(0, 0)
 shader_parameter/blur_radius = 4.5
-shader_parameter/shadow_color = Color(0, 0, 0, 0.38)
+shader_parameter/shadow_color = Color(0, 0, 0, 0.45)
 shader_parameter/shadow_enabled = true
 
 [resource]

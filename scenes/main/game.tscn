@@ -2,18 +2,17 @@
 
 [ext_resource type="Script" uid="uid://36rfkvfhxeae" path="res://scenes/main/game.gd" id="1_script"]
 [ext_resource type="PackedScene" uid="uid://dhytccbi1u2jb" path="res://scenes/levels/worlds/world 1/1-1.tscn" id="2_level"]
+[ext_resource type="Resource" uid="uid://bdfh0q6c0lfjj" path="res://assets/shadows/outer_blur.tres" id="3_gf1f2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ui.tscn" id="3_ui"]
 [ext_resource type="Script" uid="uid://bxsgrgah547n1" path="res://scenes/ui/shared_shadow_composer.gd" id="4_composer"]
-[ext_resource type="Resource" uid="uid://c5xdxe54urchj" path="res://assets/shadows/soft.tres" id="shadow_style"]
 
 [node name="Game" type="CanvasLayer" unique_id=445540570]
 layer = 0
 script = ExtResource("1_script")
 stages = Array[PackedScene]([ExtResource("2_level")])
-shadow_style = ExtResource("shadow_style")
-shadow_shader_enabled = false
+shadow_style = ExtResource("3_gf1f2")
 
-[node name="Backdrop" type="ColorRect" parent="."]
+[node name="Backdrop" type="ColorRect" parent="." unique_id=1548777008]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

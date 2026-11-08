@@ -60,3 +60,6 @@ Names must match scene basenames. The runner accepts both `PASS:` and `<scene>_t
 
 
 `area_background_test` checks standalone preview colour, camera-bound fill geometry, transparent fallback, offset-area loading/routing, and disabled-shadow behavior. Its rendered checks also verify visible bounds, foreground order, and shadows landing on the fill without the fill casting its own shadow.
+
+
+`landing_rejump_test` compares 20 flat-ground cases with a fresh Mesen-derived fixture: Small/Super, both travel directions, immediate versus one-ground-tick-delayed re-jumps, tapped/held Jump, and landing-contact press/hold rejection. It checks initial velocity, takeoff tick, early horizontal samples, apex within 1.1 pixels, and one integration per tick. See [phase 2 evidence](archive/base-movement-audit.md). No modern input buffering is expected.
