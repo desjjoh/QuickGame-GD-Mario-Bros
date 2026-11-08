@@ -25,7 +25,7 @@ Pause keeps the current screen visible and freezes gameplay, animation, and ordi
 
 ## Edit a level
 
-Open `scenes/levels/worlds/world 1/1-1.tscn`. Expand **Areas → MainArea → Layouts**. Use **GroundLayout** for solid terrain, **DecorationLayout** for scenery, **EntityLayout** for blocks and other entity stamps, and **EnemyLayout** for single/paired Goomba spawners and Green Koopa spawners. EnemyLayout uses an 8×8 grid. The other layers use 16×16. Keep nested areas editable so scene overrides survive saving. 1-1 has its reference Green Koopa at EnemyLayout cell (214, 23), world origin (1712, 184).
+Open `scenes/levels/worlds/world 1/1-1.tscn`. Expand **Areas → MainArea → Layouts**. Use **GroundLayout** for solid terrain, **DecorationLayout** for scenery, **EntityLayout** for blocks and other entity stamps, and **EnemyLayout** for single/paired Goomba spawners and Green Koopa spawners. EnemyLayout and the other layout layers use 16×16 grids. Paint ground enemies in the cell immediately above their supporting terrain; their feet start on its top surface. Keep nested areas editable so scene overrides survive saving. 1-1 has its reference Green Koopa at EnemyLayout cell (107, 12), world origin (1712, 192).
 
 Paint question blocks, **Reward Brick**, or **Reward Brick Alt** on **EntityLayout**. Each defaults to one coin. Reward bricks start with a static brick texture and become used blocks after releasing their reward; ordinary bricks remain separate.
 
@@ -36,3 +36,10 @@ In the 2D editor, question blocks show a translucent reward icon. Select EntityL
 The green mushroom spawner is no longer in the EntityLayout painting palette. Painting standalone power-ups is deferred; no replacement layer has been added. The 1-Up reward brush still configures block contents.
 
 Choose **Green Koopa Spawner** on EnemyLayout to try the Green Koopa. It uses the selected area theme, walks and falls, and turns at walls or enemies. Walking contact damages Mario. Stomping rebounds Mario, awards 100 points, and leaves a stationary shell. Touch a stationary shell to kick it away from Mario. Moving shells rebound from walls, defeat enemies, and can be stopped by a stomp. Waking remains deferred. Its feet align with the existing enemy placement origin; taller artwork extends above it.
+
+
+## Preview Mario forms
+
+Test Level currently starts the existing Mario actor with assets/player/forms/super.tres. Select the TestLevel root and inspect Player Start Configuration to choose Super or Small for F6. Open the existing Mario scene and inspect Starting Form for its default, currently Small; normal 1-1 still starts Small. The form's artwork/contact profile applies without replacing the player scene.
+
+Super now supports standing probes, crouching, crouch jumping, and reference-style uncrouching push-out. Hold Down alone on the ground to crouch; crouch is retained during a jump even after releasing Down. Grounded Down plus a horizontal button clears crouch and directional input, following the reference. The short physics body supplies floor support while extra probes handle Super's upper collisions. Growth/shrinking, Super damage, and brick breaking remain unfinished. See [Mario form configuration](archive/mario-forms.md).

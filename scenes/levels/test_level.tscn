@@ -1,10 +1,9 @@
 [gd_scene format=4 uid="uid://cdk8de34c4pg4"]
 
-[ext_resource type="Resource" uid="uid://chfcnww7r30v7" path="res://assets/themes/underground.tres" id="8_jmx14"]
-[ext_resource type="TileSet" uid="uid://4mdqmclyqcmk" path="res://assets/tileset/underground/decorations.tres" id="9_jmx14"]
-[ext_resource type="TileSet" uid="uid://g7pmg7w6xn86" path="res://assets/tileset/underground/terrain.tres" id="10_eaa0b"]
-[ext_resource type="TileSet" uid="uid://cs6ppr1ph7fpm" path="res://assets/tileset/underground/entity_layout.tres" id="11_a5rnb"]
-[ext_resource type="TileSet" uid="uid://b5swkgewllff0" path="res://assets/tileset/underground/enemy_layout.tres" id="18_v6k17"]
+[ext_resource type="Resource" uid="uid://f1lw5jaxr5tn" path="res://assets/themes/overworld.tres" id="4_cyt5c"]
+[ext_resource type="TileSet" uid="uid://58ym0wu30sv7" path="res://assets/tileset/decorations.tres" id="5_7x1jh"]
+[ext_resource type="TileSet" uid="uid://dy01p3ioyfiqi" path="res://assets/tileset/terrain.tres" id="6_hfwtw"]
+[ext_resource type="TileSet" uid="uid://css6al2yclqkl" path="res://assets/tileset/entity_layout.tres" id="7_2mu0v"]
 [ext_resource type="PackedScene" uid="uid://wlp13xllihs5" path="res://scenes/levels/base/base_level.tscn" id="base"]
 [ext_resource type="PackedScene" uid="uid://b5m1vkcrml3t2" path="res://scenes/player/mario (small)/mario.tscn" id="player"]
 
@@ -16,21 +15,18 @@ player_scene = ExtResource("player")
 [node name="MainArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="0" unique_id=250103957]
 process_physics_priority = 110
 background_music = 2
-theme = ExtResource("8_jmx14")
+theme = ExtResource("4_cyt5c")
 
 [node name="DecorationLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="0" unique_id=1428866671]
-tile_set = ExtResource("9_jmx14")
+tile_map_data = PackedByteArray("AAAAAAwAAwAAAAMAAAABAAsAAwAAAAMAAAABAAwAAwABAAMAAAACAAsAAwABAAMAAAACAAwAAwACAAMAAAADAAsAAwAEAAMAAAADAAwAAwADAAMAAAAEAAwAAwAEAAMAAAALAAwAAAAAAAEAAAAMAAwAAAABAAEAAAANAAwAAAABAAEAAAAOAAwAAAABAAEAAAAPAAwAAAACAAEAAAACAAoAAwACAAIAAAA=")
+tile_set = ExtResource("5_7x1jh")
 
 [node name="GroundLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="1" unique_id=1683492195]
-tile_map_data = PackedByteArray("AAAAAA0AAAAAAAAAAAAAAA4AAAAAAAAAAAABAA0AAAAAAAAAAAABAA4AAAAAAAAAAAACAA0AAAAAAAAAAAACAA4AAAAAAAAAAAADAA0AAAAAAAAAAAADAA4AAAAAAAAAAAAEAA0AAAAAAAAAAAAEAA4AAAAAAAAAAAAFAA0AAAAAAAAAAAAFAA4AAAAAAAAAAAAGAA0AAAAAAAAAAAAGAA4AAAAAAAAAAAAHAA0AAAAAAAAAAAAHAA4AAAAAAAAAAAAIAA0AAAAAAAAAAAAIAA4AAAAAAAAAAAAJAA0AAAAAAAAAAAAJAA4AAAAAAAAAAAAKAA0AAAAAAAAAAAAKAA4AAAAAAAAAAAALAA0AAAAAAAAAAAALAA4AAAAAAAAAAAAMAA0AAAAAAAAAAAAMAA4AAAAAAAAAAAANAA0AAAAAAAAAAAANAA4AAAAAAAAAAAAOAA0AAAAAAAAAAAAOAA4AAAAAAAAAAAAPAA0AAAAAAAAAAAAPAA4AAAAAAAAAAAAPAAsAAQAHAAIAAAAPAAwAAQAHAAMAAAANAAsAAQAFAAIAAAANAAwAAQAFAAMAAAAOAAsAAQAGAAIAAAAOAAwAAQAGAAMAAAAPAAIAAQAHAAEAAAAPAAMAAQAHAAEAAAAPAAQAAQAHAAEAAAAPAAUAAQAHAAEAAAAPAAYAAQAHAAEAAAAPAAcAAQAHAAEAAAAPAAgAAQAHAAEAAAAPAAkAAQAHAAEAAAAPAAoAAQAHAAEAAAA=")
-tile_set = ExtResource("10_eaa0b")
+tile_map_data = PackedByteArray("AAAAAA0AAAAAAAAAAAAAAA4AAAAAAAAAAAABAA0AAAAAAAAAAAABAA4AAAAAAAAAAAACAA0AAAAAAAAAAAACAA4AAAAAAAAAAAADAA0AAAAAAAAAAAADAA4AAAAAAAAAAAAEAA0AAAAAAAAAAAAEAA4AAAAAAAAAAAAFAA0AAAAAAAAAAAAFAA4AAAAAAAAAAAAGAA0AAAAAAAAAAAAGAA4AAAAAAAAAAAAHAA0AAAAAAAAAAAAHAA4AAAAAAAAAAAAIAA0AAAAAAAAAAAAIAA4AAAAAAAAAAAAJAA0AAAAAAAAAAAAJAA4AAAAAAAAAAAAKAA0AAAAAAAAAAAAKAA4AAAAAAAAAAAALAA0AAAAAAAAAAAALAA4AAAAAAAAAAAAMAA0AAAAAAAAAAAAMAA4AAAAAAAAAAAANAA0AAAAAAAAAAAANAA4AAAAAAAAAAAAOAA0AAAAAAAAAAAAOAA4AAAAAAAAAAAAPAA0AAAAAAAAAAAAPAA4AAAAAAAAAAAA=")
+tile_set = ExtResource("6_hfwtw")
 
 [node name="EntityLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="2" unique_id=257943121]
-tile_map_data = PackedByteArray("AAAAAAIAAAAAAAAAAAAAAAMAAgAAAAAAAAAAAAQAAgAAAAAAAAAAAAUAAgAAAAAAAAAAAAYAAgAAAAAAAAAAAAcAAgAAAAAAAAAAAAgAAgAAAAAAAAAAAAkAAgAAAAAAAAAAAAoAAgAAAAAAAAAAAAsAAgAAAAAAAAAAAAwAAgAAAAAAAAA=")
-tile_set = ExtResource("11_a5rnb")
-
-[node name="EnemyLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="3" unique_id=1742010551]
-tile_set = ExtResource("18_v6k17")
+tile_set = ExtResource("7_2mu0v")
 
 [node name="Arrival" parent="Areas/MainArea" index="2" unique_id=1254188347]
 position = Vector2(48, 208)

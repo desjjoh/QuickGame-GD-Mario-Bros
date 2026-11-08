@@ -105,4 +105,4 @@ func _ready() -> void:
 	print(
 		"PASS: level replacement during transport session notifications preserves the new level's target/session, player state and collision."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

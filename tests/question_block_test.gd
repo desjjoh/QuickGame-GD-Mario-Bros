@@ -164,4 +164,4 @@ func _ready() -> void:
 	print(
 		"PASS: generated question blocks, palette phase timing, loop wrap, live playback, solid body, and shutdown."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

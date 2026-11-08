@@ -19,6 +19,8 @@ func _ready() -> void:
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	# Keep pipe-emergence coverage independent of the stage's current return route.
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	if "--super" in OS.get_cmdline_user_args():
+		fixture.player_start_configuration = preload("res://assets/player/forms/super.tres")
 	fixture.get_node("Areas/MainArea/Layouts/EntityLayout").set_cell(
 		Vector2i(4, 11), 3, Vector2i.ZERO
 	)
@@ -181,4 +183,4 @@ func _ready() -> void:
 	print(
 		"PASS: sideways pipe activates from walking contact, streams areas, emerges upward and restores collision/control/draw order."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

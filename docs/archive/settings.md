@@ -392,3 +392,23 @@ With explicit user approval, removed the Question Block Contents entry from edit
 ## 2026-11-06 - Enable the Block Rewards preview add-on
 
 With explicit user approval, added res://addons/block_rewards/plugin.cfg to editor_plugins/enabled. The setting was previously absent. This enables the editor-only reward preview on EntityLayout.
+
+
+## 2026-11-07 - Mario starting-form preview (scene/resource configuration)
+
+Scope: scene/resource properties, not Project Settings or Input Map. Approved by the user's request to add Small/Super configuration and let the sandbox start Super. TestLevel.player_start_configuration: previously absent/null, now assets/player/forms/super.tres. Mario.starting_form is a new exported default of assets/player/forms/small.tres; 1-1 has no startup override. Super's configured sprite position (0,-15) preserves current Small artwork's feet convention; standing contact is 12x24 at (0,-12), with the existing 11x14 terrain shape retained. Capability/profile data for future crouching does not enable it. New Super PNG imports were generated using established engine defaults; no existing import options were deliberately changed. See mario-forms.md.
+
+
+## 2026-11-08 — Enemy painting grid resources
+
+User explicitly requested returning the enemy grid to 16×16 and grounding all painted enemies. Changed assets/tileset/enemy_layout.tres and its underground/castle variants: tile_size (8,8) → (16,16), Goomba marker texture_origin (-4,-4) → (0,0), and Koopa marker texture_origin (-4,4) → (0,8). Updated LevelLayouts enforcement and migrated 1-1 EnemyLayout cells to preserve world X and align feet with surfaces. These are authored TileSet resource/grid changes, not project settings, import settings, or engine defaults. No Input Map changes.
+
+
+## 2026-11-08 — Level shadow resource selection
+
+User approved Soft/Crisp/null resource selection and requested Outer Blur. BaseLevel's authored root ShaderMaterial was replaced with Presentation/shadow_style referencing assets/shadows/soft.tres; its default offset (2,2), blur radius 4.5, and black alpha 0.38 are retained in that preset. Added Crisp and zero-offset Outer Blur presets. These are requested scene/resource changes, not Project Settings or import changes. Standalone F6 now uses the shared compositor and excludes decorations. No input, interpolation, pixel-snap, or audio changes.
+
+
+## 2026-11-08 — Move shadow selection to Game
+
+At the user's correction, moved the Shadow Style scene property from BaseLevel to Game in scenes/main/game.tscn, retaining assets/shadows/soft.tres as the default. BaseLevel no longer exposes a style override. Standalone previews read the saved Game property and existing master toggle. This supersedes the level-specific ownership above; no Project Settings or import settings changed.

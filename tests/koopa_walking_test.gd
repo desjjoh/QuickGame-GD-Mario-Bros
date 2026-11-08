@@ -28,7 +28,7 @@ func _ready() -> void:
 	]:
 		var tiles := load(path) as TileSet
 		var marker := tiles.get_source(2) as TileSetAtlasSource
-		assert(tiles.tile_size == Vector2i(8, 8))
+		assert(tiles.tile_size == Vector2i(16, 16))
 		assert(marker.texture_region_size == Vector2i(16, 32))
 		var expected_theme: String = (
 			"overworld"
@@ -36,7 +36,7 @@ func _ready() -> void:
 			else path.get_base_dir().get_file()
 		)
 		assert(marker.texture.resource_path.contains("/%s/enemies/koopa.png" % expected_theme))
-		assert(marker.get_tile_data(Vector2i.ZERO, 0).texture_origin == Vector2i(-4, 4))
+		assert(marker.get_tile_data(Vector2i.ZERO, 0).texture_origin == Vector2i(0, 8))
 		assert(
 			(
 				marker.get_tile_data(Vector2i.ZERO, 0).get_custom_data("entity_id")
@@ -53,18 +53,18 @@ func _ready() -> void:
 		floor.set_cell(Vector2i(0, y), 0, Vector2i.ZERO)
 	var layout := level.get_node("Areas/MainArea/Layouts/EnemyLayout") as TileMapLayer
 	layout.clear()
-	layout.set_cell(Vector2i(16, 23), 2, Vector2i.ZERO)
+	layout.set_cell(Vector2i(8, 12), 2, Vector2i.ZERO)
 	var camera := level.get_node("Areas/MainArea/Camera2D") as LevelCamera
 	var original := camera.position
 	camera.position.x = -1000
 	add_child(level)
-	var spawner := level.world_objects.get_node("green_koopa_spawner_16_23") as EntitySpawner
+	var spawner := level.world_objects.get_node("green_koopa_spawner_8_12") as EntitySpawner
 	assert(spawner.get_node_or_null("GreenKoopa") == null)
 	camera.position = original
 	level.active_area.update_camera_activity()
 	var koopa := spawner.get_node("GreenKoopa") as BaseEnemy
 	assert(spawner.spawn_category == &"enemy" and not koopa.persist_progress)
-	assert(koopa.position == Vector2.ZERO and spawner.position == Vector2(128, 184))
+	assert(koopa.position == Vector2.ZERO and spawner.position == Vector2(128, 192))
 	var walking := koopa.get_node("StateMachine/Walking")
 	assert(walking.walk_speed == 30 and walking.fall_speed_limit == 180)
 	assert(is_equal_approx(walking.gravity, 857.8125))
@@ -113,4 +113,4 @@ func _ready() -> void:
 	level.queue_free()
 	await ticks(2)
 	print("koopa_walking_test: PASS")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

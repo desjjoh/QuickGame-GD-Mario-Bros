@@ -4,17 +4,19 @@
 [ext_resource type="PackedScene" uid="uid://dhytccbi1u2jb" path="res://scenes/levels/worlds/world 1/1-1.tscn" id="2_level"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ui.tscn" id="3_ui"]
 [ext_resource type="Script" uid="uid://bxsgrgah547n1" path="res://scenes/ui/shared_shadow_composer.gd" id="4_composer"]
+[ext_resource type="Resource" uid="uid://c5xdxe54urchj" path="res://assets/shadows/soft.tres" id="shadow_style"]
 
 [node name="Game" type="CanvasLayer" unique_id=445540570]
 layer = 0
 script = ExtResource("1_script")
 stages = Array[PackedScene]([ExtResource("2_level")])
-
-[node name="LevelContainer" type="Node2D" parent="." unique_id=1996731603]
+shadow_style = ExtResource("shadow_style")
 
 [node name="UI" parent="." unique_id=1508061020 instance=ExtResource("3_ui")]
 layout_mode = 3
 anchors_preset = 0
+
+[node name="LevelContainer" type="Node2D" parent="." unique_id=1996731603]
 
 [node name="SharedShadow" type="Node2D" parent="." unique_id=1798374583]
 physics_interpolation_mode = 2

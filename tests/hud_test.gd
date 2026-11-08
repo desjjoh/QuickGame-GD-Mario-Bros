@@ -149,4 +149,4 @@ func _ready() -> void:
 	print(
 		"PASS: 8x8 HUD font/layout, coin cadence, input pass-through, bound values and UI identity across camera/area/level changes and transition overlay."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

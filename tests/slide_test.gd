@@ -178,4 +178,4 @@ func run_checks() -> void:
 	print(
 		"PASS: skid rates, cancellation, release-to-stop skid retention in both directions and speed modes, sprite/facing retention, and modifier cleanup."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

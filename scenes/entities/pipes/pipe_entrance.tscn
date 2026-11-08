@@ -11,18 +11,18 @@ size = Vector2(32, 32)
 script = ExtResource("2")
 controller_input_enabled = true
 texture_filter = 1
-sprite = NodePath("Visuals/TopLeft")
-[node name="Visuals" type="Node2D" parent="."]
-[node name="TopLeft" type="Sprite2D" parent="Visuals"]
+sprite = NodePath("Presentation/TopLeft")
+[node name="Presentation" type="Node2D" parent="."]
+[node name="TopLeft" type="Sprite2D" parent="Presentation"]
 position = Vector2(8, 8)
 texture = ExtResource("3")
-[node name="TopRight" type="Sprite2D" parent="Visuals"]
+[node name="TopRight" type="Sprite2D" parent="Presentation"]
 position = Vector2(24, 8)
 texture = ExtResource("4")
-[node name="BottomLeft" type="Sprite2D" parent="Visuals"]
+[node name="BottomLeft" type="Sprite2D" parent="Presentation"]
 position = Vector2(8, 24)
 texture = ExtResource("5")
-[node name="BottomRight" type="Sprite2D" parent="Visuals"]
+[node name="BottomRight" type="Sprite2D" parent="Presentation"]
 position = Vector2(24, 24)
 texture = ExtResource("6")
 [node name="Body" type="StaticBody2D" parent="."]

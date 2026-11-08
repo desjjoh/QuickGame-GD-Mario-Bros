@@ -71,9 +71,9 @@ func _ready() -> void:
 	await get_tree().process_frame
 	if DisplayServer.get_name() == "headless":
 		print("PASS: fixed screen-space HUD setup; rendered glyph checks skipped in headless mode.")
-		get_tree().quit()
+		await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 		return
 	print(
 		"PASS: HUD foreground glyph pixels remain fixed through physics-driven acceleration/braking at a separate render cadence."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

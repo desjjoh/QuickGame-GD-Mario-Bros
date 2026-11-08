@@ -8,10 +8,10 @@ func ticks(count: int) -> void:
 
 
 func _ready() -> void:
-	await check_actor(0, "goomba_spawner_16_23", "Goomba")
-	await check_actor(2, "green_koopa_spawner_16_23", "GreenKoopa")
+	await check_actor(0, "goomba_spawner_8_12", "Goomba")
+	await check_actor(2, "green_koopa_spawner_8_12", "GreenKoopa")
 	print("nested_entity_activity_test: PASS")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
 func check_actor(source: int, marker: String, actor_name: String) -> void:
@@ -19,7 +19,7 @@ func check_actor(source: int, marker: String, actor_name: String) -> void:
 	level.entity_layout.clear()
 	var layout := level.get_node("Areas/MainArea/Layouts/EnemyLayout") as TileMapLayer
 	layout.clear()
-	layout.set_cell(Vector2i(16, 23), source, Vector2i.ZERO)
+	layout.set_cell(Vector2i(8, 12), source, Vector2i.ZERO)
 	add_child(level)
 	level.player.set_physics_process(false)
 	level.player.body.global_position = Vector2(24, 64)

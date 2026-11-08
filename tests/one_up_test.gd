@@ -14,6 +14,15 @@ func _ready() -> void:
 	stage.free()
 
 	var level := preload("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	level.player_start_configuration = MarioFormPresentation.SMALL
+	level.entity_layout.clear()
+	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
+	var ground := level.get_node("Areas/MainArea/Layouts/GroundLayout") as TileMapLayer
+	ground.clear()
+	for x in range(32):
+		ground.set_cell(Vector2i(x, 13), 0, Vector2i.ZERO)
+	for y in range(9, 13):
+		ground.set_cell(Vector2i(16, y), 0, Vector2i.ZERO)
 	add_one_up_placement(level, Vector2i(8, 12))
 	var camera := level.get_node("Areas/MainArea/Camera2D") as LevelCamera
 	var original_position := camera.position
@@ -117,7 +126,7 @@ func _ready() -> void:
 	print(
 		"PASS: 1-Up activation, movement, collection, popup, cleanup, and one live power-up per level."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
 func add_one_up_placement(level: BaseLevel, cell: Vector2i) -> void:

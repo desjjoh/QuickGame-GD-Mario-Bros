@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ShadowStyle" format=3 uid="uid://bdfh0q6c0lfjj"]
+
+[ext_resource type="Shader" uid="uid://c4i2rgjabi5wv" path="res://scenes/ui/shaders/shadow_composite.gdshader" id="composite"]
+[ext_resource type="Shader" uid="uid://ymsi6d2gw72r" path="res://scenes/ui/shaders/shadow_horizontal.gdshader" id="horizontal"]
+[ext_resource type="Script" uid="uid://bsp0bsqmjtu04" path="res://scripts/resources/shadow_style.gd" id="style"]
+
+[sub_resource type="ShaderMaterial" id="material"]
+shader = ExtResource("composite")
+shader_parameter/shadow_offset = Vector2(0, 0)
+shader_parameter/blur_radius = 4.5
+shader_parameter/shadow_color = Color(0, 0, 0, 0.38)
+shader_parameter/shadow_enabled = true
+
+[resource]
+script = ExtResource("style")
+display_name = "Outer Blur"
+composite_material = SubResource("material")
+horizontal_shader = ExtResource("horizontal")

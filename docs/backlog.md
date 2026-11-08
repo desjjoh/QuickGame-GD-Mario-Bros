@@ -2,8 +2,10 @@
 
 ## Gameplay
 
+
 - Wire shells, fireballs, and star contact into the enemy hit contract as those mechanics are added.
 - Add breakable bricks and additional power-up forms.
+  See [growth, damage, and bricks research](archive/growth-damage-bricks-research.md) for the agreed batches and remaining reference checks.
 - Extend climbable behavior to vines and add any vine-specific detach rules.
 - Define standalone level restart behavior for isolated F6 testing.
 
@@ -16,5 +18,5 @@
 
 ## Verification
 
-- Investigate ObjectDB leak warnings and native engine shutdown failures in headless regressions.
+- Investigate native engine shutdown failures if reproducible. Audio-only ObjectDB exit warnings were isolated to deferred mix-thread cleanup and addressed in regression teardown; the full suite has not been requalified. See [shutdown investigation](archive/shutdown-investigation.md).
 - Investigate the game-over regression’s score and coin reset assertion on return to the title.

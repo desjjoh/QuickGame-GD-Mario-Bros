@@ -108,4 +108,4 @@ func _ready() -> void:
 	print(
 		"PASS: default entity/block input opt-out, player/pipe opt-in, no duplicate subscriptions, live toggles, suspension/resume, polling gates and dead/shutdown cleanup."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

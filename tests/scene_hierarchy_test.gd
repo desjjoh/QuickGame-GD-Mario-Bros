@@ -43,4 +43,4 @@ func _ready() -> void:
 	print(
 		"PASS: native editor-state save/reload preserves nested endpoint parents and all painted area layers across three cycles."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

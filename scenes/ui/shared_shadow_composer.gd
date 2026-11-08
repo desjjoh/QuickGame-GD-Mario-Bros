@@ -7,6 +7,9 @@ const HORIZONTAL_SHADER = preload("res://scenes/ui/shaders/shadow_horizontal.gds
 const COMPOSITE_SHADER = preload("res://scenes/ui/shaders/shadow_composite.gdshader")
 
 var _shadow_enabled: bool = true
+var _requested_enabled: bool = true
+var _level_style: ShadowStyle
+var shadow_style: ShadowStyle
 var _source: SubViewport
 var _horizontal: SubViewport
 var _source_root: Node2D
@@ -38,13 +41,12 @@ func configure(world: Node2D, screen: Control) -> void:
 
 
 func bind_level(level: BaseLevel) -> void:
-	if GameHandler.current_level != level or level.is_shutdown:
+	if level.is_shutdown:
 		return
 	_routed_players = null
 	_level = level
-	_level_material = level.material
-	_apply_shadow_mode()
-	# Capture the foreground only; the level must not composite its standalone shadow.
+	_set_style()
+	# Capture the foreground only; the level must not apply a nested CanvasGroup effect.
 	level.material = null
 	RenderingServer.canvas_item_set_canvas_group_mode(
 		level.get_canvas_item(), RenderingServer.CANVAS_GROUP_MODE_DISABLED
@@ -52,8 +54,14 @@ func bind_level(level: BaseLevel) -> void:
 	sync_rendering()
 
 
+func set_shadow_style(value: ShadowStyle) -> void:
+	shadow_style = value
+	if _source != null:
+		_set_style()
+
+
 func set_shadow_enabled(value: bool) -> void:
-	_shadow_enabled = value
+	_requested_enabled = value
 	_apply_shadow_mode()
 
 
@@ -73,7 +81,7 @@ func _create_passes() -> void:
 	_composite.shader = COMPOSITE_SHADER
 	_composite.set_shader_parameter("foreground_texture", _source.get_texture())
 	_composite.set_shader_parameter("horizontal_texture", _horizontal.get_texture())
-	_apply_shadow_mode()
+	_set_style()
 
 
 func _make_viewport(node_name: String) -> SubViewport:
@@ -95,10 +103,15 @@ func _foreground_parent() -> RID:
 func _apply_shadow_mode() -> void:
 	if _source == null:
 		return
+	_shadow_enabled = _requested_enabled and _level_material != null
 	material = _composite if _shadow_enabled else null
 	var update_mode := SubViewport.UPDATE_ALWAYS if _shadow_enabled else SubViewport.UPDATE_DISABLED
 	_source.render_target_update_mode = update_mode
-	_horizontal.render_target_update_mode = update_mode
+	_horizontal.render_target_update_mode = (
+		update_mode
+		if _level_style != null and _level_style.uses_blur
+		else SubViewport.UPDATE_DISABLED
+	)
 	for root in [world_root, screen_root]:
 		if is_instance_valid(root):
 			RenderingServer.canvas_item_set_parent(root.get_canvas_item(), _foreground_parent())
@@ -106,7 +119,23 @@ func _apply_shadow_mode() -> void:
 	queue_redraw()
 
 
+func _set_style() -> void:
+	_level_style = shadow_style
+	_level_material = (
+		_level_style.composite_material.duplicate()
+		if _level_style != null and _level_style.composite_material != null
+		else null
+	)
+	_parameters.clear()
+	if _level_material is ShaderMaterial:
+		_composite.shader = _level_material.shader
+		_horizontal_rect.material.shader = _level_style.horizontal_shader
+	_apply_shadow_mode()
+
+
 func _sync_passes() -> void:
+	if shadow_style != _level_style:
+		_set_style()
 	var dimensions := Vector2i(get_viewport_rect().size) + Vector2i.ONE * SHADOW_PADDING * 2
 	if dimensions != _render_size:
 		_render_size = dimensions
@@ -186,7 +215,9 @@ func sync_rendering() -> void:
 func _sync_decorations(camera_transform: Transform2D) -> void:
 	var decorations: TileMapLayer
 	if is_instance_valid(_level) and is_instance_valid(_level.active_area):
-		decorations = _level.active_area.get_node_or_null("Layouts/DecorationLayout") as TileMapLayer
+		decorations = (
+			_level.active_area.get_node_or_null("Layouts/DecorationLayout") as TileMapLayer
+		)
 	if _routed_decorations != decorations:
 		_restore_decorations()
 		_routed_decorations = decorations
@@ -196,9 +227,7 @@ func _sync_decorations(camera_transform: Transform2D) -> void:
 	RenderingServer.canvas_item_set_parent(item, get_canvas_item())
 	RenderingServer.canvas_item_set_draw_behind_parent(item, true)
 	RenderingServer.canvas_item_set_interpolated(item, false)
-	RenderingServer.canvas_item_set_transform(
-		item, camera_transform * decorations.global_transform
-	)
+	RenderingServer.canvas_item_set_transform(item, camera_transform * decorations.global_transform)
 	RenderingServer.canvas_item_set_visible(item, decorations.is_visible_in_tree())
 
 
@@ -211,7 +240,9 @@ func _restore_decorations() -> void:
 	)
 	RenderingServer.canvas_item_set_draw_behind_parent(item, false)
 	RenderingServer.canvas_item_set_transform(item, _routed_decorations.transform)
-	RenderingServer.canvas_item_set_interpolated(item, _routed_decorations.is_physics_interpolated())
+	RenderingServer.canvas_item_set_interpolated(
+		item, _routed_decorations.is_physics_interpolated()
+	)
 
 
 func _exit_tree() -> void:

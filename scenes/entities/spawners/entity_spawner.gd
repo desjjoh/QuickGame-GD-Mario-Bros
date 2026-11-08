@@ -31,7 +31,10 @@ func _ready() -> void:
 
 
 func update_activity(wake_region: Rect2, sleep_region: Rect2, theme: AreaTheme) -> void:
-	if is_shutdown or _attempted or _consumed or not wake_region.has_point(global_position):
+	var trigger := global_position
+	if spawn_category == &"enemy" and actor_offsets.size() > 1:
+		trigger.x += 48.0
+	if is_shutdown or _attempted or _consumed or not wake_region.has_point(trigger):
 		return
 	_attempted = true
 	for offset in actor_offsets:
@@ -53,6 +56,8 @@ func _spawn_actor(offset: Vector2, sleep_region: Rect2, theme: AreaTheme) -> boo
 		actor.free()
 		return false
 	actor.position = offset
+	if spawn_category == &"enemy" and actor_offsets.size() > 1 and is_instance_valid(_area):
+		actor.position.x += _area.get_enemy_group_origin_x() - global_position.x
 	actor.visual_theme = theme
 	actor.consumed.connect(_on_actor_consumed.bind(actor), CONNECT_ONE_SHOT)
 	add_child(actor)

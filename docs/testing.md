@@ -26,3 +26,31 @@ The runner discovers `tests/*_test.tscn` and writes logs under `.godot/validatio
 - Compare generated audio with Mesen at the same playback level. Check note period, duty cycle, attack, decay, cutoff, and retrigger timing before changing pitch or gain. Area loops and jingles use different envelope rules.
 
 Headless regressions check playback routing and lifecycle. Use a rendered run and listening comparison for frame pacing and audio fidelity. See [backlog](backlog.md) for known verification gaps.
+
+
+For Super Mario integration, run super_mario_movement_test and mario_form_test. The pipe_entry, pipe_transfer, sideways_pipe, climbing, and flagpole_ending scenes also accept `-- --super` after the scene path to exercise their existing checks with Super configuration. Original-game trace reproduction and evidence boundaries are recorded in [Super movement and posture](archive/super-mario-movement.md).
+
+
+## Deterministic audio teardown
+
+Successful regression exits call `await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())` after their assertions and normal scene cleanup. The helper stops remaining non-positional audio players and waits for two observed AudioServer mix boundaries, with a one-second timeout. Fixed-FPS scene frames are not evidence that the independent audio thread has advanced. A one-millisecond cooperative pacing step prevents accelerated tests from exhausting their frame limit during the wait. Timeout reports an error and exits unsuccessfully; warnings are not filtered or suppressed. The helper quiesces test callbacks and pauses the test tree during final teardown only; shipped gameplay and exit behavior are unchanged.
+
+Run a selected set without invoking the full suite:
+
+```powershell
+./scripts/run_tests.ps1 -GodotPath 'C:\path\to\Godot_console.exe' -TestName @('audio_shutdown_test', 'shell_kick_score_test', 'sound_mix_test')
+```
+
+Names must match scene basenames. The runner accepts both `PASS:` and `<scene>_test: PASS` markers and still requires a successful process exit with no errors or warnings. The audio_shutdown regression verifies that weak references to stopped streams and playback objects actually become invalid. See the [shutdown investigation](archive/shutdown-investigation.md) for the reproduction, evidence, and remaining native-failure scope.
+
+
+`down_direction_test` covers both forms and both horizontal directions: grounded diagonal cancellation, stationary holds, momentum with and without Run, opposing-direction and Down-only low-speed stops, crouch release, jump availability, and airborne steering. `super_mario_movement_test` retains crouch-jump/release/landing coverage.
+
+
+`enemy_boundary_test` checks enemy activation column rounding and one-pixel thresholds, left/right anchor cleanup, actual actor disposal, and simultaneous 24-pixel-spaced group activation/movement. `enemy_spawn_test` retains cap/skipped-attempt and area-reload checks; `nested_entity_activity_test` covers moving actors and shells independently of sleeping placements.
+
+
+`shell_spawn_contact_test` exercises a right-edge pair with a temporarily unavailable target: rejected shell hits remain retryable, accepted hits award once, and overlap cannot duplicate chain points. This is a controlled rejection fixture; the reported natural pair-entry failure remains unconfirmed. See [contact investigation](archive/shell-entry-contact-audit.md).
+
+
+`shadow_style_test` checks Game-wide Soft/Crisp/Outer Blur/null selection, persistence through level replacement, and standalone preview composition, including blank startup, restoration, buffer bypass, and unchanged decoration ownership. Standalone startup checks the authored Game default. Run it with a display to verify foreground sharpness, decoration exclusion, crisp offset, and symmetric outer blur pixels. `koopa_shadow_test` is a rendered-only comparison of both walking poses at integer positions across all styles; its headless path skips image assertions. A half-pixel compositor/direct rasterization discrepancy remains an investigation item; see [shadow styles](archive/shadow-styles.md).

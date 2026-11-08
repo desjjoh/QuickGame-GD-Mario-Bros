@@ -38,4 +38,4 @@ func _ready() -> void:
 	print(
 		"PASS: passive falling freezes the current walk pose and phase; landing resumes playback."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

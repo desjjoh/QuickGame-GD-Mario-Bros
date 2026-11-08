@@ -1,10 +1,15 @@
 extends Node
 
+signal physics_step_finished
+
+
+func _physics_process(_delta: float) -> void:
+	physics_step_finished.emit()
+
 
 func ticks(count: int) -> void:
 	for frame in range(count):
-		await get_tree().physics_frame
-		await get_tree().process_frame
+		await physics_step_finished
 
 
 func spawn(level: BaseLevel) -> BaseEnemy:
@@ -18,12 +23,15 @@ func spawn(level: BaseLevel) -> BaseEnemy:
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_physics_priority = 200
 	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(game)
 	var level: BaseLevel = GameHandler.current_level
 	var player := level.player
-	player.set_physics_process(false)
+	# Freeze the actor and its child state machine during scripted block interactions.
+	player.process_mode = Node.PROCESS_MODE_DISABLED
 	player.body.global_position = Vector2(24, 100)
 	var enemy := spawn(level)
 	var bump := EntityHit.new(player, &"block_bump", Vector2.UP)
@@ -95,7 +103,7 @@ func _ready() -> void:
 	await ticks(1)
 	assert(enemy.state_machine.current_state.name == &"Walking")
 	assert(not enemy.sprite.flip_v and enemy.sprite.vframes == 1)
-	assert(enemy.get_node("WalkAnimationSync").enabled)
+	assert(enemy.get_node("Presentation/WalkAnimationSync").enabled)
 	# Exercise the real bonk -> block query -> receiver route as well.
 	enemy.free()
 	var block := (
@@ -115,4 +123,4 @@ func _ready() -> void:
 	game.queue_free()
 	await ticks(2)
 	print("koopa_block_bump_test: PASS")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

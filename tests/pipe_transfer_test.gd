@@ -10,6 +10,8 @@ func ticks(count: int) -> void:
 func _ready() -> void:
 	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	if "--super" in OS.get_cmdline_user_args():
+		fixture.player_start_configuration = preload("res://assets/player/forms/super.tres")
 	var main := fixture.get_node("Areas/MainArea") as BaseLevelArea
 	var markers := main.get_node("Layouts/EntityLayout") as TileMapLayer
 	markers.clear()
@@ -29,6 +31,7 @@ func _ready() -> void:
 	add_child(game)
 	var level := GameHandler.current_level
 	var player := level.player
+	var actor_id := player.get_instance_id()
 	var main_area := level.active_area
 	var lower := level.get_node("Areas/LowerArea") as BaseLevelArea
 	var pipe := main_area.get_node("WorldObjects/pipe_entrance_6_12") as PipeEntrance
@@ -36,7 +39,7 @@ func _ready() -> void:
 	var shape := pipe.get_node("Body/CollisionShape2D") as CollisionShape2D
 	assert((shape.shape as RectangleShape2D).size == Vector2(32, 32))
 	assert(shape.position == Vector2(16, 16))
-	var visuals := pipe.get_node("Visuals") as Node2D
+	var visuals := pipe.get_node("Presentation") as Node2D
 	assert(visuals.get_child_count() == 4)
 	assert(visuals.global_position == pipe.global_position)
 	assert(level.players.get_index() > level.get_node("Areas").get_index())
@@ -94,6 +97,8 @@ func _ready() -> void:
 	await get_tree().process_frame
 	assert(level.active_area == main_area)
 	state.controls_enabled = true
+	if "--super" in OS.get_cmdline_user_args():
+		(player as Mario).form_controller.set_crouched(true)
 	ControllerHandler.input_down = 1
 	assert(not level.request_area_transfer(&"missing"))
 	assert(not level.request_area_transfer(&"main"))
@@ -122,7 +127,12 @@ func _ready() -> void:
 		player.state_machine.process_physics(1.0 / 60.0)
 		await ticks(1)
 	assert(is_equal_approx(player.body.global_position.y - entry_origin.y, 24.0))
-	assert(not player.sprite.visible)
+	assert(
+		(
+			player.sprite.visible
+			== (24.0 < (player.pipe_enter_state as PlayerPipeEnterState)._hidden_depth)
+		)
+	)
 	assert(level.active_area == main_area)
 	assert(main_area.get_node("Camera2D").global_position == source_camera_position)
 	for tick in range(24):
@@ -142,6 +152,10 @@ func _ready() -> void:
 	assert(player.state_machine.current_state == player.state_machine.initial_state)
 	assert(not level.request_area_transfer(&"lower"))
 	ControllerHandler.input_down = 0
+	if "--super" in OS.get_cmdline_user_args():
+		assert(player.get_instance_id() == actor_id)
+		assert((player as Mario).form_controller.current_form.display_name == "Super")
+		assert(not (player as Mario).form_controller.is_crouched)
 	level.shutdown()
 	assert(not is_instance_valid(pipe) and not level.request_area_transfer(&"main"))
 	assert(not is_instance_valid(visuals) or visuals.is_queued_for_deletion())
@@ -150,4 +164,4 @@ func _ready() -> void:
 	print(
 		"PASS: painted solid pipe, alignment/ground/control gates, deferred one-way transfer, camera switch, state reset, session preservation, and shutdown."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

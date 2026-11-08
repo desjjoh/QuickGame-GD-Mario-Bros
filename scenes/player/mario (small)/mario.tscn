@@ -23,6 +23,12 @@
 [ext_resource type="Animation" path="res://scenes/player/mario (small)/animations/climb.tres" id="climb_animation"]
 [ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-climb-1.tres" id="climb_sprite"]
 
+[ext_resource type="Script" path="res://scripts/player/mario_form_controller.gd" id="form_controller"]
+[ext_resource type="Script" path="res://scripts/player/mario_form_presentation.gd" id="form_presentation"]
+[ext_resource type="Script" path="res://scripts/player/mario_damage.gd" id="damage"]
+
+[ext_resource type="Script" path="res://scripts/player/mario_terrain.gd" id="mario_terrain"]
+
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_mario"]
 _data = {
 &"climb": ExtResource("climb_animation"),
@@ -102,7 +108,7 @@ shape = SubResource("enemy_hurtbox")
 callback_mode_process = 0
 libraries/ = SubResource("AnimationLibrary_mario")
 
-[node name="Presentation" type="Node" parent="."]
+[node name="Presentation" parent="."]
 
 [node name="WalkAnimation" parent="Presentation" unique_id=274353247 instance=ExtResource("10_cadence")]
 
@@ -139,3 +145,15 @@ animation_name = &"climb"
 sprite_texture = ExtResource("climb_sprite")
 stop_animation_on_enter = true
 frame_updates_enabled = false
+
+[node name="Form" type="Node" parent="Status"]
+script = ExtResource("form_controller")
+
+[node name="FormPresentation" type="Node" parent="Presentation"]
+script = ExtResource("form_presentation")
+
+[node name="Damage" type="Node" parent="Status"]
+script = ExtResource("damage")
+
+[node name="MarioTerrain" type="Node" parent="Motion"]
+script = ExtResource("mario_terrain")

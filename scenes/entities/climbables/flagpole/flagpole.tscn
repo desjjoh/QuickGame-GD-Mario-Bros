@@ -1,73 +1,60 @@
-[gd_scene format=3]
+[gd_scene format=4 uid="uid://d0efh4eh8ensp"]
+
 [ext_resource type="PackedScene" path="res://scenes/entities/climbables/base/base_climbable.tscn" id="base"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/misc/flagpole-top.tres" id="top"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/misc/flagpole-pole.tres" id="pole"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/misc/flagpole-flag.png" id="flag"]
 [ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/block.tres" id="block"]
-[ext_resource type="Script" path="res://scenes/entities/climbables/flagpole/flagpole.gd" id="script"]
+[ext_resource type="Texture2D" uid="uid://kc8o4gk646ue" path="res://assets/palettes/overworld/misc/flagpole-flag.png" id="flag"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/misc/flagpole-pole.tres" id="pole"]
+[ext_resource type="Script" uid="uid://dal30ynqkvg6p" path="res://scenes/entities/climbables/flagpole/flagpole.gd" id="script"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/misc/flagpole-top.tres" id="top"]
 
 [sub_resource type="RectangleShape2D" id="capture"]
 size = Vector2(32, 164)
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2hxrn"]
+texture = ExtResource("top")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_83a6r"]
+texture = ExtResource("pole")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2al3u"]
+texture = ExtResource("block")
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_sc42h"]
+sources/0 = SubResource("TileSetAtlasSource_2hxrn")
+sources/1 = SubResource("TileSetAtlasSource_83a6r")
+sources/2 = SubResource("TileSetAtlasSource_2al3u")
+
 [sub_resource type="RectangleShape2D" id="solid"]
 size = Vector2(16, 16)
-[node name="Flagpole" instance=ExtResource("base")]
-script = ExtResource("script")
+
+[node name="Flagpole" unique_id=192651015 instance=ExtResource("base")]
 texture_filter = 1
-[node name="Visuals" type="Node2D" parent="."]
-[node name="Top" type="Sprite2D" parent="Visuals"]
+script = ExtResource("script")
+enabled = true
+attachment_tolerance = 2.0
+
+[node name="ClimbTop" parent="Anchors"]
 position = Vector2(24, 8)
-texture = ExtResource("top")
 
-[node name="Pole1" type="Sprite2D" parent="Visuals"]
-position = Vector2(24, 24)
-texture = ExtResource("pole")
-
-[node name="Pole2" type="Sprite2D" parent="Visuals"]
-position = Vector2(24, 40)
-texture = ExtResource("pole")
-
-[node name="Pole3" type="Sprite2D" parent="Visuals"]
-position = Vector2(24, 56)
-texture = ExtResource("pole")
-
-[node name="Pole4" type="Sprite2D" parent="Visuals"]
-position = Vector2(24, 72)
-texture = ExtResource("pole")
-
-[node name="Pole5" type="Sprite2D" parent="Visuals"]
-position = Vector2(24, 88)
-texture = ExtResource("pole")
-
-[node name="Pole6" type="Sprite2D" parent="Visuals"]
-position = Vector2(24, 104)
-texture = ExtResource("pole")
-
-[node name="Pole7" type="Sprite2D" parent="Visuals"]
-position = Vector2(24, 120)
-texture = ExtResource("pole")
-
-[node name="Pole8" type="Sprite2D" parent="Visuals"]
-position = Vector2(24, 136)
-texture = ExtResource("pole")
-
-[node name="Pole9" type="Sprite2D" parent="Visuals"]
-position = Vector2(24, 152)
-texture = ExtResource("pole")
-
-[node name="Flag" type="Sprite2D" parent="Visuals"]
-position = Vector2(16, 24)
-texture = ExtResource("flag")
-[node name="Base" type="Sprite2D" parent="Visuals"]
-position = Vector2(24, 168)
-texture = ExtResource("block")
-[node name="Body" type="StaticBody2D" parent="."]
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
-position = Vector2(24, 168)
-shape = SubResource("solid")
-
-[node name="ClimbTop" parent="."]
-position = Vector2(24, 8)
-[node name="CollisionShape2D" parent="Detection"]
+[node name="CollisionShape2D" parent="Interactions/Detection"]
 position = Vector2(24, 82)
 shape = SubResource("capture")
+
+[node name="Presentation" parent="."]
+
+[node name="Tiles" type="TileMapLayer" parent="Presentation" unique_id=1582886803]
+tile_map_data = PackedByteArray("AAABAAAAAAAAAAAAAAABAAEAAQAAAAAAAAABAAIAAQAAAAAAAAABAAMAAQAAAAAAAAABAAQAAQAAAAAAAAABAAUAAQAAAAAAAAABAAYAAQAAAAAAAAABAAcAAQAAAAAAAAABAAgAAQAAAAAAAAABAAkAAQAAAAAAAAABAAoAAgAAAAAAAAA=")
+tile_set = SubResource("TileSet_sc42h")
+
+[node name="Flag" type="Sprite2D" parent="Presentation" unique_id=805880893]
+position = Vector2(16, 24)
+texture = ExtResource("flag")
+
+[node name="Body" type="StaticBody2D" parent="." unique_id=236519456]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body" unique_id=504003249]
+position = Vector2(24, 168)
+shape = SubResource("solid")

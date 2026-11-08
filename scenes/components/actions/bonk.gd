@@ -14,10 +14,7 @@ func deliver_hidden(player: BasePlayer, previous_position: Vector2) -> bool:
 	var shape := player.collision_shape.shape as RectangleShape2D
 	if shape == null or player.body.global_position.y >= previous_position.y:
 		return false
-	var head := Vector2(
-		player.body.global_position.x + 0.0001,
-		player.collision_shape.global_position.y - shape.size.y / 2.0
-	)
+	var head := player.get_head_position() + Vector2(0.0001, 0)
 	var previous_head := head + previous_position - player.body.global_position
 	var query := PhysicsRayQueryParameters2D.create(
 		previous_head + Vector2(0, 0.001), head, HIDDEN_BLOCK_PROBE_MASK
@@ -27,7 +24,7 @@ func deliver_hidden(player: BasePlayer, previous_position: Vector2) -> bool:
 	var hit := player.body.get_world_2d().direct_space_state.intersect_ray(query)
 	if hit.is_empty() or hit.normal.y < 0.5:
 		return false
-	var block := (hit.collider as Node).get_parent() as HiddenQuestionBlock
+	var block := _find_block(hit.collider as Node) as HiddenQuestionBlock
 	if block == null or not block.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP, strength)):
 		return false
 	player.body.global_position.y += hit.position.y - head.y
@@ -42,10 +39,7 @@ func deliver(player: BasePlayer) -> bool:
 	# Prefer the reference's single center-head probe over contact ordering.
 	var shape := player.collision_shape.shape as RectangleShape2D
 	if shape != null:
-		var head := Vector2(
-			player.body.global_position.x,
-			player.collision_shape.global_position.y - shape.size.y / 2.0
-		)
+		var head := player.get_head_position()
 		# Exact cell boundaries belong to the right-hand tile.
 		head.x += 0.0001
 		var query := PhysicsRayQueryParameters2D.create(
@@ -57,7 +51,7 @@ func deliver(player: BasePlayer) -> bool:
 		var hit := player.body.get_world_2d().direct_space_state.intersect_ray(query)
 		if not hit.is_empty():
 			var collider := hit.collider as Node
-			var target := collider.get_parent() as BaseBlock if collider != null else null
+			var target := _find_block(collider)
 			# A used block or solid terrain under the probe must not redirect
 			# the attack into a neighboring active block.
 			return (
@@ -73,7 +67,7 @@ func deliver(player: BasePlayer) -> bool:
 		var collider := collision.get_collider() as Node
 		if collider == null:
 			continue
-		var target := collider.get_parent() as BaseBlock
+		var target := _find_block(collider)
 		if target == null:
 			continue
 		# Trust the actual ceiling contact, including partial head overlap.
@@ -92,3 +86,20 @@ func deliver(player: BasePlayer) -> bool:
 	if selected != null:
 		return selected.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP, strength))
 	return false
+
+
+## Reference head-probe contacts can occur above the short floor-support body.
+func deliver_at(player: BasePlayer, collider: Node) -> bool:
+	if not enabled or player.is_shutdown or collider == null:
+		return false
+	var target := _find_block(collider)
+	return (
+		target != null and target.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP, strength))
+	)
+
+
+func _find_block(collider: Node) -> BaseBlock:
+	var ancestor := collider
+	while ancestor != null and not ancestor is BaseBlock:
+		ancestor = ancestor.get_parent()
+	return ancestor as BaseBlock

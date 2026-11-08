@@ -8,11 +8,11 @@
 sideways = true
 destination_area_id = &"main"
 destination_endpoint_id = &"player_spawn"
-[node name="TopLeft" parent="Visuals" index="0"]
+[node name="TopLeft" parent="Presentation" index="0"]
 texture = ExtResource("2")
-[node name="TopRight" parent="Visuals" index="1"]
+[node name="TopRight" parent="Presentation" index="1"]
 texture = ExtResource("3")
-[node name="BottomLeft" parent="Visuals" index="2"]
+[node name="BottomLeft" parent="Presentation" index="2"]
 texture = ExtResource("4")
-[node name="BottomRight" parent="Visuals" index="3"]
+[node name="BottomRight" parent="Presentation" index="3"]
 texture = ExtResource("5")

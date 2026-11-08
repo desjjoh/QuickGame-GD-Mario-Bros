@@ -105,4 +105,4 @@ func _ready() -> void:
 	print(
 		"PASS: reference scroll thresholds, early/full-speed steps, no backward/vertical scroll, world limits, and live run to level end."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

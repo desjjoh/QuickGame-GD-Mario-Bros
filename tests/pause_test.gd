@@ -131,4 +131,4 @@ func _ready() -> void:
 	await ticks(2)
 	assert(not get_tree().paused)
 	print("pause_test: PASS")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

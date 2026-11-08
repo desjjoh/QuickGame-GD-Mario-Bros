@@ -171,4 +171,4 @@ func _ready() -> void:
 	print(
 		"PASS: stage order, duplicate/death/transport gates, cancellation recovery, carried player status, progress reset, final/unlisted title return and stale observer safety."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

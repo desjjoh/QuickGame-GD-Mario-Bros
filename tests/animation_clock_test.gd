@@ -127,4 +127,4 @@ func _ready() -> void:
 	print(
 		"PASS: shared 48-tick phases, late/themed joins, cosmetic suspension, bounce/used ownership, shutdown/unsubscribe, and clock continuity through area/level/session changes."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

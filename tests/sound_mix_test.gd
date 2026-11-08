@@ -83,4 +83,4 @@ func _ready() -> void:
 	print(
 		"PASS: default SFX gain, one-shot duration/loop preservation, replacement cancellation, pipe copy and death lifecycle playback."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

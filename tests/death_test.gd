@@ -279,7 +279,7 @@ func _ready() -> void:
 	print(
 		"PASS: pit threshold, player cleanup, world suspension/animation, optional presentation, death audio, global preserve/reset across areas, spawn restart, exactly-once life loss, negative-reserve game over and stale completion."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
 func reject_reentrant_death(

@@ -87,4 +87,4 @@ func _ready() -> void:
 	print(
 		"PASS: one-tile gap runs in both directions at five subpixel phases; wider gaps still cause falling."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

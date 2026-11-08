@@ -120,4 +120,4 @@ func _ready() -> void:
 	print(
 		"PASS: blocked pipe hops do not ratchet the camera in either direction at walk/run speeds; clearing the pipe resumes rightward scrolling."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

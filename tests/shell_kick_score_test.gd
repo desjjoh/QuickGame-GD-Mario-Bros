@@ -25,7 +25,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	print("shell_kick_score_test: PASS")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
 func check_kick(level: BaseLevel, count: int, remaining: int, points: int) -> void:

@@ -1047,3 +1047,112 @@ Expanded super-mario-research.md with all player terrain probe groups (including
 Inspected six supplied Super sheets containing nine distinct 16x32 frames. Recorded idle, three walk poses, skid, jump, crouch, and two climb regions, exact alpha bounds/padding, shared palette, and alignment with current Small Mario in super-mario-artwork.md. Identified the missing intermediate-growth and shrink-related swimming poses; basic movement/crouch/climb artwork is available. Theme-specific Super sets are not supplied or mapped. Preserved the three-row bottom padding on climb frame 1 in the authoring map and documented the existing one-pixel sprite/feet convention rather than choosing a new offset silently.
 
 Verification: original PNGs visually inspected, RGBA/dimensions/bounds measured with a standard-library decoder, current Small images cross-checked with System.Drawing, and scene/atlas/animation/theme references inspected. Documentation diff checks passed. No Godot import, rendered/Mesen comparison, or gameplay tests were performed. All image pixels, import settings, scenes, gameplay, and AGENTS.md were left unchanged.
+
+
+## 2026-11-07 - Small/Super Mario form configuration
+
+Added MarioForm resources, a visible Form controller child, instance-local animation/state artwork mapping, and standing enemy-contact profile application. The existing sandbox player starts Super via a generic BaseLevel/BasePlayer pre-tree configuration hook; 1-1 and default Mario remain Small. The actor/body/state machine are retained. Added references to supplied crouch and intermediate growth art without implementing those actions. Super terrain collision and damage remain incomplete by design.
+
+Affected paths: scripts/player, assets/player/forms, existing Mario script/scene, BaseLevel/BasePlayer startup hooks, TestLevel, mario_form_test, Small-specific enemy_spawn fixture, and setup/architecture/archive documentation. Ten focused regressions reached PASS in Godot 4.7.2; ObjectDB exit warnings remain (details in mario-forms.md). New sprites imported with existing defaults; no project settings or explicit import options changed. Full suite, rendered playtesting, and Mesen comparisons were not performed.
+
+
+## 2026-11-07 - Super standing, crouching, and presentation integration
+
+Added Super upper head/side probes on the existing floor-support body, reference grounded input filtering, preserved airborne crouch, standing/crouched contact/art, and immediate uncrouch push-out. Updated regular/hidden bonk head selection and form-aware climbing capture. Area arrival clears posture while retaining actor/form. Existing pipes and level-owned presentations retain ownership. Added the reference-derived big-jump cue with unchanged default playback gain/pitch.
+
+Verified original-game behavior in an isolated Mesen 2.1.1 runner using the user's ROM, with explicitly controlled RAM fixtures. Archived the non-ROM trace script, selected CSV, ROM hash, observations, and limitations. Super movement/form, Small movement/jump/bonk/corner/capture/death/pause/audio, and Small/Super pipe/climb/ending regressions reached PASS; ObjectDB warnings remain. Full suite and complete rendered/audio parity were not run. No settings, Input Map, import-option, or AGENTS.md changes. See super-mario-movement.md for affected ownership, detailed verification, and remaining growth/damage/brick work.
+
+
+## 2026-11-07 - Audio-only ObjectDB warnings isolated and regression teardown fixed
+
+Verbose logs identified AudioStreamWAV/AudioStreamPlaybackWAV survivors. A minimal scene reproduced 32 instances after stopping/freeing 16 voices and immediate exit; allowing audio mix-thread cleanup exited cleanly. Added shared test-only finish/drain helpers with observed mix boundaries, bounded timeout, and teardown quiescing; migrated successful test exits and added a weak-reference audio shutdown regression. Added focused runner selection and recognition of both existing PASS-marker formats while retaining strict error/warning failures.
+
+Affected paths: tests/fixtures/finish_test.gd, audio_shutdown_test, successful exits in existing regression scripts, scripts/run_tests.ps1, testing/backlog guides, and shutdown-investigation archive. Ten selected scenes passed with no errors/warnings; a five-scene overlapping follow-up after teardown safeguards also passed cleanly. Full suite and interactive/export shutdown were not tested. Native shutdown failure was not reproduced and is not claimed fixed. No runtime gameplay/shutdown logic, project settings, audio gain/pitch, or AGENTS.md changes.
+
+## 2026-11-07 — Growth, injury, and brick reference investigation
+
+Documented source behavior and proposed implementation batches in [growth, damage, and bricks research](growth-damage-bricks-research.md). Added a reproducible Mesen routine-entry fixture and selected CSV trace under `docs/archive/reference/`. Growth/shrink size changes, animation controls, unchanged position, routine completion, and injury-timer expiry were observed in Mesen. Pickup/brick contact and visual edge cases remain explicitly unverified. No gameplay or settings changes and no regression suite run for this research. Proposed ownership and unresolved Fire-tier/emergence behavior require review before implementation.
+
+## 2026-11-07 — Mario owns growth and shrinking presentations
+
+Implemented phases 1–2 through Mario's FormPresentation child, existing form resources/controller, and a BaseLevel timer/world gate. The user explicitly chose Mario ownership during implementation. The same actor and movement state survive; profiles switch at reference thresholds, poses follow the global four-tick cadence, and cancellation releases only acquired suspension before lifecycle handoff. Added first-swim-frame mappings, focused regression and F6 preview scenes. Seven focused regression scenes passed without engine errors or warnings; no full suite was run. Pickups, damage protection/sounds, and complete input-driven reference parity remain outside this phase. See [implementation and verification](mario-form-presentations.md).
+
+## 2026-11-07 — Super injury, protection, and flashing
+
+Connected shared enemy damage to BasePlayer.receive_damage and Mario's shrinking presentation. MarioDamage owns eight 21-tick protection intervals and alternating global-clock visibility, held during transformation and pause. Super damage retains lives; Small damage and explicit lethal level hazards retain death behavior. Injury aliases the existing reference pipe/injury stream at default gain/pitch. Damage contacts release the enemy latch so sustained overlap can hurt after expiry; stomps and kicks retain their existing latch. Seven focused scenes passed without engine errors or warnings; the three affected contact scenes passed again after the latch adjustment. No full suite or rendered/audio reference comparison was performed. Local interval-phase alignment and remaining power-up work are documented in [Super damage](super-mario-damage.md).
+
+## 2026-11-08 — Super Mushroom collection and reward authoring
+
+Added SuperMushroom using the existing Mushroom/PowerUp lifecycle and a shared mushroom scene inherited by 1-Up and Super variants. Small collection starts growth; both Small and already-Super collection award 1,000 points, popup, and the source-derived power-up grab cue. The user specified always 1,000 points in response to the proposed temporary already-Super policy; Super retains its form until Fire is available. Added the Super Mushroom option/continuous translucent preview to the existing block reward brush, preserving default coins, old assignments, and all four reward-block variants. Shared pickup polling handles overlap begun during suspension. No stage placements or project settings changed.
+
+Verification: super_mushroom_test, one_up_test, and mario_damage_test passed without engine errors or warnings after the overlap change and fixture corrections. The earlier focused run also passed question_block_test, reward_brick_test, score_popup_test, and sound_mix_test. Initial damage/1-Up failures were sandbox-dependent fixtures; tests now supply their required form, floor, and wall. Editor import/parse, formatter, diff whitespace, and archive links checked. Full suite and rendered painting/audio reference comparisons were not run. See [Super Mushroom](super-mushroom.md) for ownership, known differences, and affected paths.
+
+## 2026-11-08 — Collision-driven growth and injury animation comparison
+
+Captured running/jumping mushroom pickups and Goomba injury in Mesen and Godot, retaining full CSV logs and reproducible capture/build scripts under docs/archive/reference. Confirmed Super jump is the injury opening hold, final Small/Small-swim closing draws are missing, movement handoffs are early, and airborne growth restores the wrong movement state. Six supplied pose assets match source sprite geometry after palette normalization. The user selected Mesen movement poses, superseding the earlier idle-hold preference for the proposed correction. No gameplay changes were made in this investigation. Four captures per engine completed; no full suite run. See [audit, evidence limits, and correction plan](transformation-animation-audit.md).
+
+## 2026-11-08 — Reference-driven transformation animation correction
+
+Replaced requested growth idle holds with the user's selected Mesen movement poses. MarioFormPresentation owns the Super-jump injury opening, retained walk-history growth prelude, four-tick flicker, final Small/Small-swim closing draws, and next-engine-tick control handoff. Airborne growth uses the existing Move/falling route and preserves momentum with the reference first vertical-step delay. Existing actor/FSM, pause, audio, and contact-profile thresholds remain. Corrected the diagnostic AtlasTexture region crop and mapped the supplied cyclic walk-sheet order without changing normal walk resources.
+
+Verification: 180 visible timeline samples match preserved Mesen rows in the focused regression; 174/174 palette-normalized live sprite samples match all four collision-driven captures. Eight focused presentation/damage/pickup/falling/pause/death scenes passed without engine errors or warnings; the three directly affected scenes passed again after the final phase-preservation adjustment. No full suite or universal physics/renderer parity claimed. See [comparison and corrected evidence](transformation-animation-audit.md).
+
+## 2026-11-08 — World coins use form-aware terrain probes; speculative pipe checks reverted
+
+Implemented the actual secret-room coin correction: MarioTerrain checks head/feet/side points for WorldCoin areas in the current CanvasLayer; WorldCoin owns exactly-once rewards, state, and persistence. Small/crouched and standing Super use their established probe profiles. The 11×14 support body and enemy hurtboxes are unchanged. Removed the unrelated floor-support query/callers and provisional pipe-test changes; the arrival refresh flag remains removed. Historical investigation notes remain intact.
+
+Verification: actual Game/1-1 secret-pipe controlled reproduction now collects the previously missed upper-body coin. Seventeen isolated form/probe contacts and reward/persistence/gating checks pass. Seven focused scenes passed across the relevant runs, with the four directly affected scenes rerun clean after cleanup. Initial body-event-only test setup was adapted to step the player probes without weakening reward assertions. No project settings, import options, authored level placements, or audio tuning changed. Full suite and rendered manual playthrough not run. See [world-coin probes](world-coin-probes.md).
+
+
+## 2026-11-08 — Entity grouping and decorative tile grids
+
+Grouped remaining authored entity nodes by body, presentation, anchors, and interactions, with shared groups owned by the relevant base scenes. Converted castle and flagpole static sprite tiles to decorative TileMapLayers while retaining moving flags, fireworks, collision, and presentation ownership. Updated entity tile-atlas theme resolution, activity bounds, and internal coin/climbing query paths. Affected paths include scenes/entities/{blocks,coin,pipes,climbables,castle,base}, the climbing component, Mario terrain probes, and focused regression assertions.
+
+Verification: 13 focused regression scenes passed without engine errors or warnings. A temporary audit confirmed all 32 converted cells preserve texture regions and positions, and 11 affected entity scenes survive editor-state save/reload. No interactive visual playtest or full suite run was performed. See [entity scene organization](entity-scene-organization.md). No project/import/Input Map settings changed.
+
+
+## 2026-11-08 — Grounded Down plus direction correction
+
+Applied grounded diagonal input cancellation to Small as well as Super Mario, and separated raw horizontal intent from filtered movement for low-speed stopping. Matching-direction holds now coast instead of snapping to zero; Down-only/opposing-direction stops, jumping, and airborne behavior remain covered. Changed Mario input filtering, PlayerState, and RunAction; added down_direction_test. The Super movement regression exposed a missed hidden-block collider lookup from the preceding node cleanup; BonkAction now resolves block ownership through ancestor groups.
+
+Verification: seven focused scenes passed without engine errors or warnings, including the initially failing Super movement scene after the lookup correction. Formatting and diff checks passed. No full regression suite or manual controller playtest was performed. Reference evidence and exact checks are in [the input audit](down-direction-input-audit.md). Project settings and input bindings were unchanged.
+
+
+## 2026-11-08 — Reference enemy activation and horizontal cleanup
+
+Separated enemy boundaries from resident scenery/power-up buffering. BaseLevelArea now activates enemy placements at the reference tile-aligned right cutoff and removes ordinary enemies using their moving X anchor, without intermediate sleeping. EntitySpawner preserves painted pair locations through a +48-pixel trigger conversion and creates pairs together at 24-pixel spacing. Legacy EnemySpawner avoids overriding live BaseEnemy cleanup with its former rectangle check. No stage markers or settings changed.
+
+Eight focused regression scenes passed without engine errors or warnings after correcting initial script type-inference errors. Tests cover boundary thresholds, simultaneous pairs, independent shells, cap/skipped behavior, reload, and power-ups. No full suite, new emulator trace, or interactive playtest was performed. Paths and evidence are recorded in [the boundary audit](enemy-boundary-audit.md).
+
+
+## 2026-11-08 — Goomba pair visible-height correction
+
+Corrected EntitySpawner's reference group Y conversion after the user observed pairs dropping into view. Mesen OAM inspection confirmed the stored enemy Y includes a blank eight-pixel sprite row above the visible Goomba. Group actors now add that offset, placing their feet on the ground while keeping reference X creation and simultaneous 24-pixel spacing.
+
+Focused enemy_boundary_test, enemy_spawn_test, and nested_entity_activity_test passed after strengthening the ground-height fixture. Reference trace, OAM rows, and verification limits are in [the boundary audit](enemy-boundary-audit.md). No settings or authored stage geometry/markers changed.
+
+
+## 2026-11-08 — Offscreen pair entry
+
+Removed the enemy pair's special +48-pixel trigger and relocation to the visible screen edge. Pairs now use the same offscreen cutoff as singles, retain painted X positions and 24-pixel spacing, and activate together. The corrected group height remains. This is the user's requested difference from NES group placement.
+
+Changed EntitySpawner, removed BaseLevelArea's unused group-origin helper, and updated boundary/stage-spawn assertions and documentation. enemy_boundary_test, enemy_spawn_test, and nested_entity_activity_test passed without engine errors or warnings, including fully offscreen initial bounds and synchronized movement. No interactive playtest or full suite was performed. No settings or stage markers changed.
+
+
+## 2026-11-08 — Enemy grid and grounded spawn cleanup
+
+Returned all three EnemyLayout TileSets and grid enforcement to 16×16. Migrated 11 authored 1-1 markers with unchanged world X and eight-pixel-lower Y, aligning all 17 actor footprints with ground/platform surfaces. Removed the special pair Y offset. Per the user's clarification, reverted the offscreen pair-placement change and restored reference group timing and simultaneous screen-edge spawning.
+
+Nine focused scenes passed without errors or warnings; a separate authored-stage geometry audit verified ground contact and no terrain penetration for all 17 footprints. Updated marker/grid/contact fixtures, current guides, and boundary notes. No full suite or interactive visual playtest was performed. No project/input/import settings or terrain changed; see [boundary notes](enemy-boundary-audit.md).
+
+
+## 2026-11-08 — Selectable shadow styles and standalone decoration exclusion
+
+Added ShadowStyle resources for Soft, Crisp, Outer Blur, and a null bypass. BaseLevel selects the style; Game and standalone F6 both use SharedShadowComposer, so decorations remain visible outside the silhouette mask. Standalone rendering creates Systems/ShadowComposer without gameplay reparenting. Crisp uses its own nearest-sampled composite shader and skips blur; Outer Blur uses the Gaussian composite with zero offset. The existing Game master toggle remains supported.
+
+Affected paths: assets/shadows, scripts/resources/shadow_style.gd, scenes/levels/base/base_level.{gd,tscn}, scenes/ui/shared_shadow_composer.gd, scenes/ui/shaders/shadow_crisp.gdshader, and new shadow_style/koopa_shadow regressions. Six focused headless scenes passed without engine errors or warnings. Rendered style tests passed on D3D12 and OpenGL; shared-shadow and integer-position Koopa foreground comparisons passed on D3D12. Initial tests exposed an exported-property serialization order issue and a fixture's missing explicit master-toggle enablement; those were corrected. Exploratory half-pixel Koopa comparisons still show edge differences and do not establish a fix for the reported stray pixel. No full suite or natural Koopa playthrough was performed. No Project Settings, input, imports, or audio properties changed. See [shadow styles and evidence limits](shadow-styles.md).
+
+
+## 2026-11-08 — Game-wide shadow style ownership
+
+Moved Shadow Style from levels to Game at the user's correction. Title and stage replacements retain one selection; standalone F6 reads the saved Game style/master toggle without creating a game. Removed level-specific selection and updated style/Koopa fixtures and current guides. Shadow-style/shared-shadow headless checks and D3D12 rendered style/Koopa checks passed. No full suite was run; the documented half-pixel investigation remains open. No Project Settings or import settings changed.

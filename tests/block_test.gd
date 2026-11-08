@@ -83,4 +83,4 @@ func _ready() -> void:
 	assert(decoration.is_shutdown)
 	plain.free()
 	print("PASS: inherited brick entity, solid ceiling contact, landing, and level-owned shutdown.")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

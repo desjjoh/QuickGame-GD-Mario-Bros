@@ -20,7 +20,10 @@ func _check_climb_presentation() -> void:
 	if watch_climb and is_instance_valid(watched_player):
 		if (
 			watched_player.state_machine.current_state != watched_player.climb_state
-			or not watched_player.sprite.texture.resource_path.contains("mario-climb-")
+			or (
+				watched_player.sprite.texture
+				not in (watched_player as Mario).form_controller.current_form.climb
+			)
 		):
 			watch_climb = false
 			push_error(
@@ -39,6 +42,8 @@ func _ready() -> void:
 	get_window().unfocusable = true
 	process_physics_priority = 200
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	if "--super" in OS.get_cmdline_user_args():
+		fixture.player_start_configuration = preload("res://assets/player/forms/super.tres")
 	fixture.timer_enabled = false
 	fixture.get_node("Players/PlayerSpawn").position = Vector2(40, 208)
 	var ground := fixture.get_node("Areas/MainArea/Layouts/GroundLayout") as TileMapLayer
@@ -72,8 +77,14 @@ func _ready() -> void:
 		)
 	)
 	assert(
-		pole.get_node("Visuals/Base").texture.resource_path.ends_with(
-			"overworld/tileset/block.tres"
+		(
+			(
+				(pole.get_node("Presentation/Tiles") as TileMapLayer).tile_set.get_source(2)
+				as TileSetAtlasSource
+			)
+			. texture
+			. resource_path
+			. ends_with("overworld/tileset/block.tres")
 		)
 	)
 	pole.set_activity_suspended(true)
@@ -104,16 +115,16 @@ func _ready() -> void:
 	Input.action_release("ui_up")
 	assert(is_equal_approx(player.body.global_position.y, start_y - 14.0))
 	assert(player.animation_player.current_animation == &"climb")
-	assert(player.sprite.texture.resource_path.contains("mario-climb-"))
+	assert(player.sprite.texture in (player as Mario).form_controller.current_form.climb)
 	Input.action_press("ui_up")
 	for frame in range(20):
 		await ticks()
-		if player.sprite.texture.resource_path.ends_with("mario-climb-2.tres"):
+		if player.sprite.texture == (player as Mario).form_controller.current_form.climb[1]:
 			break
-	assert(player.sprite.texture.resource_path.ends_with("mario-climb-2.tres"))
+	assert(player.sprite.texture == (player as Mario).form_controller.current_form.climb[1])
 	Input.action_release("ui_up")
 	await ticks()
-	assert(player.sprite.texture.resource_path.ends_with("mario-climb-1.tres"))
+	assert(player.sprite.texture == (player as Mario).form_controller.current_form.climb[0])
 	# Down is faster; Run and Jump cannot replace the attached state.
 	start_y = player.body.global_position.y
 	Input.action_press("ui_down")
@@ -242,7 +253,7 @@ func _ready() -> void:
 		await ticks()
 		assert(player.climbing.get_surface() == pole)
 		assert(player.state_machine.current_state == player.climb_state)
-		assert(player.sprite.texture.resource_path.ends_with("mario-climb-1.tres"))
+		assert(player.sprite.texture == (player as Mario).form_controller.current_form.climb[0])
 	# Removing the surface must safely return to normal falling.
 	pole.queue_free()
 	await ticks(3)
@@ -291,4 +302,4 @@ func _ready() -> void:
 	print(
 		"PASS: painted full flagpole/base collision, signal-only surface, automatic grab, reference speeds/side timer, climb frames, bounds retain attachment, suspension, explicit detach/removal/area cleanup; no completion."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

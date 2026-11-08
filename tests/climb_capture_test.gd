@@ -209,4 +209,4 @@ func _ready() -> void:
 	print(
 		"PASS: 28 real-tick captures from both directions at walk/run speed, top/middle/base/landing edges; base standing, end-of-tick sampling, wall occlusion and below-shaft rejection."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

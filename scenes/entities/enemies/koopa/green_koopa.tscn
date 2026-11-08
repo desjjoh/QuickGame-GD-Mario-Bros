@@ -20,7 +20,7 @@ resource_name = "walk"
 length = 0.26666668
 loop_mode = 1
 tracks/0/type = "value"
-tracks/0/path = NodePath("Body/Sprite2D:frame")
+tracks/0/path = NodePath("Sprite2D:frame")
 tracks/0/interp = 1
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.13333334),
@@ -44,7 +44,7 @@ initial_state = NodePath("Walking")
 [node name="Walking" type="Node" parent="StateMachine" node_paths=PackedStringArray("synchronized_animation")]
 script = ExtResource("walking")
 face_movement = true
-synchronized_animation = NodePath("../../WalkAnimationSync")
+synchronized_animation = NodePath("../../Presentation/WalkAnimationSync")
 frame_updates_enabled = false
 input_enabled = false
 
@@ -84,13 +84,13 @@ monitorable = false
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Body/PlayerContact"]
 shape = SubResource("player_contact")
 
-[node name="AnimationPlayer" parent="." index="2"]
+[node name="AnimationPlayer" parent="Body"]
 libraries = {&"": SubResource("animations")}
 
-[node name="WalkAnimationSync" type="Node" parent="." node_paths=PackedStringArray("animation_player")]
+[node name="WalkAnimationSync" type="Node" parent="Presentation" node_paths=PackedStringArray("animation_player")]
 script = ExtResource("sync")
 cycle = SubResource("walk_cycle")
-animation_player = NodePath("../AnimationPlayer")
+animation_player = NodePath("../../Body/AnimationPlayer")
 animation_name = &"walk"
 
 [node name="ShellStunned" type="Node" parent="StateMachine"]

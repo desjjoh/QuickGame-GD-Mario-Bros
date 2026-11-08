@@ -42,7 +42,13 @@ func advance_timer() -> void:
 
 
 func prepare_ground_profile(
-	values: MotionValues, pressed: bool, direction: float, grounded: bool, facing: float
+	values: MotionValues,
+	pressed: bool,
+	direction: float,
+	grounded: bool,
+	facing: float,
+	stop_input_held: bool = false,
+	raw_direction: float = 0.0
 ) -> void:
 	values.remove_modifier(&"ground_neutral")
 	var moving_direction := (
@@ -70,11 +76,16 @@ func prepare_ground_profile(
 		values.set_modifier(
 			&"ground_neutral", {&"acceleration": rate, &"deceleration": rate}, modifier_priority + 1
 		)
-		# GetPlayerAnimSpeed follows profile selection. B alone takes ProcSkid
-		# and clears very low speed; fully released input preserves the latch.
+		# GetPlayerAnimSpeed reads raw direction even after grounded diagonal
+		# filtering. Down alone/opposite direction stops low speed; holding the
+		# movement direction preserves coasting, including with Down or B.
 		if speed >= history_speed_threshold:
 			running_history = true
-		elif pressed and speed < held_action_stop_speed:
+		elif (
+			(pressed or stop_input_held)
+			and raw_direction * moving_direction <= 0.0
+			and speed < held_action_stop_speed
+		):
 			var velocity := values.velocity
 			velocity.x = 0.0
 			values.velocity = velocity

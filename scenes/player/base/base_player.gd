@@ -38,6 +38,33 @@ var scripted_motion_step: Callable
 @onready var corner_correction: CornerCorrectionComponent = $Motion/CornerCorrection
 
 
+## Optional level-owned starting configuration, supplied before tree entry.
+func configure_start(_configuration: Resource) -> void:
+	pass
+
+
+## Area initialization resets transient posture without replacing the player.
+func on_area_arrival() -> void:
+	pass
+
+
+func get_movement_axis() -> Vector2:
+	return ControllerHandler.get_axis()
+
+
+func get_head_position() -> Vector2:
+	var shape := collision_shape.shape as RectangleShape2D
+	return Vector2(body.global_position.x, collision_shape.global_position.y - shape.size.y / 2.0)
+
+
+func get_side_probe_heights() -> PackedFloat32Array:
+	return PackedFloat32Array([climbing.capture_probe_offset_y])
+
+
+func get_climb_query_bounds() -> Rect2:
+	return collision_shape.global_transform * collision_shape.shape.get_rect()
+
+
 func get_effects_parent() -> Node2D:
 	return body
 
@@ -149,15 +176,20 @@ func move_body(gravity_after_motion: bool = false) -> void:
 	if rising and (hidden_hit or body.is_on_ceiling()):
 		if not hidden_hit:
 			bonk_action.deliver(self)
-		body.velocity.y = ceiling_bump_speed
-		jump_action.update(motion_values, false)
-		var sound := ceiling_bump_sound
-		if sound is AudioStreamWAV:
-			# One-shot playback without trusting embedded WAV loop metadata.
-			sound = SoundHandler.one_shot_copy(sound)
-		if sound == null:
-			sound = SoundHandler.get_sound(ceiling_bump_cue)
-		play_sound_effect(sound)
+		respond_to_ceiling()
+
+
+## Shared bonk motion/audio after the caller delivers the appropriate head hit.
+func respond_to_ceiling() -> void:
+	body.velocity.y = ceiling_bump_speed
+	jump_action.update(motion_values, false)
+	var sound := ceiling_bump_sound
+	if sound is AudioStreamWAV:
+		# One-shot playback without trusting embedded WAV loop metadata.
+		sound = SoundHandler.one_shot_copy(sound)
+	if sound == null:
+		sound = SoundHandler.get_sound(ceiling_bump_cue)
+	play_sound_effect(sound)
 
 
 func face_direction(direction: float) -> void:
@@ -209,3 +241,13 @@ func death_envelope_top() -> float:
 
 func can_read_controller_input() -> bool:
 	return not is_dead and super.can_read_controller_input()
+
+
+## Ordinary damage; lethal level hazards continue to call BaseLevel.on_death directly.
+func receive_damage(_source: BaseEntity = null) -> bool:
+	if is_dead or is_shutdown or gameplay_suspended:
+		return false
+	var ancestor := get_parent()
+	while ancestor != null and not ancestor is BaseLevel:
+		ancestor = ancestor.get_parent()
+	return (ancestor as BaseLevel).on_death(self, true) if ancestor is BaseLevel else false

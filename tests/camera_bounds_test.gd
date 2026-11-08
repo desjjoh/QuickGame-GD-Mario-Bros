@@ -63,4 +63,4 @@ func _ready() -> void:
 	print(
 		"PASS: camera bounds at both zooms, both edges, inward/outward/neutral input, reversal momentum retention, preserved vertical motion, and opt-out."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

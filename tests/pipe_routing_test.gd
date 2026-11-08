@@ -108,4 +108,4 @@ func _ready() -> void:
 	print(
 		"PASS: per-cell route save/reload, named and legacy endpoints, same-area exits, duplicate/missing/stale rejection, camera repositioning and input reentry lock."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

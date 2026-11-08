@@ -107,4 +107,4 @@ func _ready() -> void:
 	print(
 		"PASS: two-sided shallow landings, preserved momentum, two-sided head corner escape, centered bump, deep-wall rejection, and misses."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

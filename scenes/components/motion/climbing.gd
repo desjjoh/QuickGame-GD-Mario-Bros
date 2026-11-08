@@ -37,9 +37,7 @@ func find_surface(
 	player: BasePlayer, from_feet: Vector2, to_feet: Vector2, after_motion: bool = true
 ) -> BaseClimbable:
 	# Query the swept player region, independent of delayed Area2D overlap signals.
-	var bounds: Rect2 = (
-		player.collision_shape.global_transform * player.collision_shape.shape.get_rect()
-	)
+	var bounds: Rect2 = player.get_climb_query_bounds()
 	if _blocked_surface != null:
 		var blocked := _blocked_surface.get_ref() as BaseClimbable
 		if not is_instance_valid(blocked) or not blocked.overlaps_body(player):
@@ -54,7 +52,7 @@ func find_surface(
 	query.collide_with_bodies = false
 	query.collide_with_areas = true
 	for hit in player.body.get_world_2d().direct_space_state.intersect_shape(query):
-		var surface := (hit.collider as Node).get_parent() as BaseClimbable
+		var surface := (hit.collider as Node).get_parent().get_parent() as BaseClimbable
 		if surface != null:
 			register_surface(surface)
 	var nearest: BaseClimbable = null

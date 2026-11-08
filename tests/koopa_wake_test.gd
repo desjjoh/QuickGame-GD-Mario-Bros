@@ -1,16 +1,23 @@
 extends Node
 
+signal physics_step_finished
+
+
+func _physics_process(_delta: float) -> void:
+	physics_step_finished.emit()
+
 
 func ticks(count: int) -> void:
 	for frame in range(count):
-		await get_tree().physics_frame
-		await get_tree().process_frame
+		await physics_step_finished
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_physics_priority = 200
 	var stage := load("res://scenes/levels/worlds/world 1/1-1.tscn").instantiate() as BaseLevel
 	var layout := stage.get_node("Areas/MainArea/Layouts/EnemyLayout") as TileMapLayer
-	assert(layout.get_cell_source_id(Vector2i(214, 23)) == 2)
+	assert(layout.get_cell_source_id(Vector2i(107, 12)) == 2)
 	var count := 0
 	for cell in layout.get_used_cells():
 		if layout.get_cell_source_id(cell) == 2:
@@ -55,7 +62,7 @@ func _ready() -> void:
 	assert(koopa.state_machine.current_state == walking and koopa._can_hurt_player())
 	assert(koopa.sprite.vframes == 1 and koopa.sprite.position == Vector2(0, -8))
 	assert(walking._direction == (1 if GameHandler.animation_clock.tick_count % 2 == 0 else -1))
-	assert(koopa.get_node("WalkAnimationSync").enabled)
+	assert(koopa.get_node("Presentation/WalkAnimationSync").enabled)
 	assert(koopa.sprite.frame == int(GameHandler.animation_clock.tick_count / 8) % 2)
 	assert(koopa.receive_hit(EntityHit.new(level.player, &"stomp", Vector2.DOWN)))
 	assert(idle.wake_ticks_remaining == 336)
@@ -65,4 +72,4 @@ func _ready() -> void:
 	game.queue_free()
 	await ticks(2)
 	print("koopa_wake_test: PASS")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

@@ -71,4 +71,4 @@ func _ready() -> void:
 	print(
 		"PASS: enclosed lower room, inactive dedicated camera, fixed view and contained player after simulated arrival."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

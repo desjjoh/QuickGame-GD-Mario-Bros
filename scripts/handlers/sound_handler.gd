@@ -26,6 +26,43 @@ func _ready() -> void:
 	_square_two.finished.connect(func(): reward_voice_changed.emit(false))
 	_sounds[&"coin"] = _build_pulse([113, 84], [5, 48], 0.5, 14, true)
 	_sounds[&"extra_life"] = _build_pulse([84, 71, 42, 53, 47, 35], [8, 8, 8, 8, 8, 8], 0.5, 3)
+	# ContinuePowerUpGrab traverses its 27-entry frequency table backward,
+	# two frames per entry, Square 2 control $5d and sweep $7f.
+	var grab_pcm := PackedByteArray()
+	var grab: AudioStreamWAV
+	for period: int in [
+		0xd5,
+		0x11d,
+		0xd5,
+		0xa9,
+		0x8e,
+		0x6a,
+		0x8e,
+		0x10d,
+		0xd5,
+		0xb3,
+		0x86,
+		0xb3,
+		0x86,
+		0x6a,
+		0x59,
+		0x43,
+		0x59,
+		0xef,
+		0xbe,
+		0xa0,
+		0x77,
+		0xa0,
+		0x77,
+		0x5f,
+		0x50,
+		0x3b,
+		0x50
+	]:
+		grab = _build_swept_pulse(period, [2], [0x5d], [0x7f], [], {}, false)
+		grab_pcm.append_array(grab.data)
+	grab.data = grab_pcm
+	_sounds[&"power_up_grab"] = grab
 	# The reveal table holds the previous period when a frequency entry is zero.
 	_sounds[&"power_up_reveal"] = _build_pulse(
 		[0x1ab, 0x11d, 0x10d, 0x193, 0x10d, 0xfe, 0x17c, 0xfe, 0xef, 0x167, 0xef, 0xe2],
@@ -42,6 +79,10 @@ func _ready() -> void:
 
 	_sounds[&"jump_small"] = _build_swept_pulse(
 		0x0fe, [3, 5, 32], [0x82, 0x5f, 0x48], [0xa7, 0xf6, 0xbc]
+	)
+	# PlayBigJump uses frequency-table offset $18 ($17c), with the shared jump envelope.
+	_sounds[&"jump_big"] = _build_swept_pulse(
+		0x17c, [3, 5, 32], [0x82, 0x5f, 0x48], [0xa7, 0xf6, 0xbc]
 	)
 	_sounds[&"bump"] = _build_swept_pulse(0x23a, [4, 6], [0x9e, 0x9e], [0x93, 0xbb])
 	_sounds[&"enemy_smack"] = _build_swept_pulse(
@@ -72,6 +113,8 @@ func _ready() -> void:
 		pipe_data.append_array(pipe.data)
 	pipe.data = pipe_data
 	_sounds[&"pipe"] = pipe
+	# NES Sfx_PipeDown_Injury uses the same Square 1 routine for both events.
+	_sounds[&"injury"] = pipe
 
 
 func get_sound(cue: StringName) -> AudioStream:

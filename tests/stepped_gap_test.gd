@@ -99,4 +99,4 @@ func _ready() -> void:
 	print(
 		"PASS: two-tile gaps onto a one-tile-lower pipe preserve run momentum and land at eleven subpixel phases in both directions."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

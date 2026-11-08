@@ -25,15 +25,15 @@ func inject_markers(level: BaseLevel) -> void:
 			node.free()
 	var layout := TileMapLayer.new()
 	layout.tile_set = level.active_area.theme.enemy_markers
-	layout.set_cell(Vector2i(24, 23), 0, Vector2i.ZERO)
-	layout.set_cell(Vector2i(28, 23), 2, Vector2i.ZERO)
+	layout.set_cell(Vector2i(12, 12), 0, Vector2i.ZERO)
+	layout.set_cell(Vector2i(14, 12), 2, Vector2i.ZERO)
 	level.active_area.get_node("Layouts").add_child(layout)
 	level._spawn_layout_entities(level.active_area, layout, {})
 	layout.free()
-	assert(level.world_objects.get_node("goomba_spawner_24_23").get_node_or_null("Goomba") == null)
+	assert(level.world_objects.get_node("goomba_spawner_12_12").get_node_or_null("Goomba") == null)
 	assert(
 		(
-			level.world_objects.get_node("green_koopa_spawner_28_23").get_node_or_null("GreenKoopa")
+			level.world_objects.get_node("green_koopa_spawner_14_12").get_node_or_null("GreenKoopa")
 			== null
 		)
 	)
@@ -41,8 +41,8 @@ func inject_markers(level: BaseLevel) -> void:
 
 func check_backdrop() -> void:
 	var level: BaseLevel = GameHandler.current_level
-	var goomba := level.world_objects.get_node("goomba_spawner_24_23/Goomba") as BaseEnemy
-	var koopa := level.world_objects.get_node("green_koopa_spawner_28_23/GreenKoopa") as BaseEnemy
+	var goomba := level.world_objects.get_node("goomba_spawner_12_12/Goomba") as BaseEnemy
+	var koopa := level.world_objects.get_node("green_koopa_spawner_14_12/GreenKoopa") as BaseEnemy
 	assert(goomba != null and koopa != null)
 	assert(not level.is_physics_processing())
 	for entity in level.find_children("*", "BaseEntity", true, false):
@@ -80,4 +80,4 @@ func _ready() -> void:
 	game.queue_free()
 	await ticks(2)
 	print("title_backdrop_test: PASS")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

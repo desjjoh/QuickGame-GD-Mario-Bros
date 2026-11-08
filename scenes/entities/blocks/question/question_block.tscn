@@ -20,12 +20,12 @@ _data = {&"active": ExtResource("3_active")}
 
 [node name="QuestionBlock" node_paths=PackedStringArray("animation_player") instance=ExtResource("1_base")]
 script = ExtResource("10_question")
-animation_player = NodePath("AnimationPlayer")
+animation_player = NodePath("Body/AnimationPlayer")
 
-[node name="Sprite2D" parent="." index="2"]
+[node name="Sprite2D" parent="Body"]
 texture = ExtResource("2_texture")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Body"]
 libraries/ = SubResource("AnimationLibrary_question")
 callback_mode_process = 0
 
@@ -58,5 +58,5 @@ physics_updates_enabled = false
 [node name="PaletteAnimation" type="Node" parent="Presentation" node_paths=PackedStringArray("animation_player")]
 script = ExtResource("8_sync")
 cycle = ExtResource("9_cycle")
-animation_player = NodePath("../../AnimationPlayer")
+animation_player = NodePath("../../Body/AnimationPlayer")
 animation_name = &"active"

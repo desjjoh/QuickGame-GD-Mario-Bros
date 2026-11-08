@@ -18,15 +18,15 @@ script = ExtResource("hidden")
 [node name="Body" parent="." index="1"]
 collision_layer = 0
 
-[node name="Sprite2D" parent="." index="2"]
+[node name="Sprite2D" parent="Body"]
 texture = SubResource("outline")
 
-[node name="BonkProbe" type="Area2D" parent="."]
+[node name="BonkProbe" type="Area2D" parent="Body"]
 position = Vector2(8, 8)
 collision_layer = 2147483648
 collision_mask = 0
 monitoring = false
 monitorable = false
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="BonkProbe"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/BonkProbe"]
 shape = SubResource("probe")

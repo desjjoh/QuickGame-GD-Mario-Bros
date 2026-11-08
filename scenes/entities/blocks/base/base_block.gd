@@ -18,7 +18,7 @@ func receive_hit(hit: EntityHit) -> bool:
 		return false
 	if not (state_machine.current_state as EntityState).receive_hit(hit):
 		return false
-	$BlockImpact.strike(self, hit.attacker)
+	$Body/BlockImpact.strike(self, hit.attacker)
 	return true
 
 

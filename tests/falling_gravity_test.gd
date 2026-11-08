@@ -87,4 +87,4 @@ func _ready() -> void:
 	print(
 		"PASS: entrance gravity, five takeoff profiles, retained fall selection, passive-fall application, horizontal coasting, weight/override priority and modifier cleanup."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

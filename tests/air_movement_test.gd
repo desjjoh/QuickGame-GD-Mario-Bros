@@ -170,4 +170,4 @@ func run_checks() -> void:
 	print(
 		"PASS: air rates, facing-based braking, fast history, neutral coasting, skid-jump capture in both directions, and landing cleanup."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

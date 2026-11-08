@@ -121,4 +121,4 @@ func run_checks() -> void:
 			% [short_height, tall_height, heavy_height]
 		)
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

@@ -151,4 +151,4 @@ func _ready() -> void:
 	print(
 		"PASS: 50 points per timer unit per tick, HUD updates, preserved contact time, zero/disabled skip, completion gate, cancellation, stale callbacks, reentrant level replacement and score saturation; synthesized counting audio uses the shared voice."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

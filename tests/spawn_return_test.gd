@@ -59,4 +59,4 @@ func _ready() -> void:
 	print(
 		"PASS: secret pipe returns to the actual moved PlayerSpawn, restoring camera/control without an exit pipe or emergence."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

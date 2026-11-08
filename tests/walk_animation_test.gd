@@ -94,4 +94,4 @@ func run_checks() -> void:
 	print(
 		"PASS: three-pose loop, exact cadence boundaries in both directions, velocity-based speed changes, live frame progression, braking slowdown, and static Idle restoration."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

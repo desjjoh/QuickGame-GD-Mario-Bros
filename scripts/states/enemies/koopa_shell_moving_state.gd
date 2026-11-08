@@ -40,13 +40,15 @@ func _on_enemy_contact(other: BaseEnemy) -> void:
 		return
 	if _touching.has(other.get_instance_id()) or not other._blocks_enemy_contact():
 		return
-	_touching[other.get_instance_id()] = true
 	var position := (
 		other.sprite.global_position if other.sprite != null else other.body.global_position
 	)
 	var mutual := other.is_moving_shell()
 	if not other.receive_hit(EntityHit.new(enemy, &"shell", Vector2(_direction, 0))):
 		return
+	# Only accepted reactions consume the overlap. A temporarily unavailable
+	# target must remain eligible when the next physics poll sees it again.
+	_touching[other.get_instance_id()] = true
 	if not other._defeated:
 		return  # A surviving reaction is not a chain defeat.
 	if mutual:
