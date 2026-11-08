@@ -83,3 +83,9 @@ Successful scenes call `await preload("res://tests/fixtures/finish_test.gd").fin
 - Verify life loss by enemy/pit/timeout, restart, and final-life return to a clean title.
 - Finish with timer endings 1, 3, and 6; check fireworks, 500 points per burst, pause, score conversion, and music handoff.
 - Compare audio with Mesen at the same playback level. Investigate note period, envelope, cutoff, retrigger, and channel interaction before changing pitch or amplitude.
+
+`arrival_control_test` verifies exactly 17 locked movement ticks followed by held-input response, continued falling, controller disconnection/reconnection, pause preservation, direct-placement timing, a stationary 17-tick pre-emergence hold, immediate control after animated exit, cancellation, and unchanged start/respawn eligibility. Pipe entry/transfer, sideways travel, camera return, transport lifecycle, death, title, and pause scenes cover the affected integrations.
+
+`title_background_test` verifies a Game-selected backdrop on startup and stage-completion return, suspended backdrop actors, an unchanged gameplay stage list, and a different backdrop selection on a later menu return. Default-backdrop, game-over, and animated-return paths remain covered by the title/lifecycle regressions.
+
+The former playable Test Level is retained only as `tests/fixtures/sandbox_level.tscn`. Regression scenes use its stable geometry independently of 1-1 and the configured title backdrop.

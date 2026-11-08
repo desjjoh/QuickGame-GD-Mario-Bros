@@ -140,6 +140,10 @@ func _ready() -> void:
 	assert(player.body.global_position == end_position + Vector2(0, 96))
 	assert(not player.sprite.visible and not player.sprite.flip_h)
 	var hidden_y = player.body.global_position.y
+	assert(player.arrival_control_ticks_remaining == 17)
+	await ticks(17)
+	assert(player.arrival_control_ticks_remaining == 0)
+	assert(is_equal_approx(player.body.global_position.y, hidden_y))
 	await preload("res://tests/fixtures/pause_check.gd").check(level)
 	await ticks(12)
 	assert(is_equal_approx(player.body.global_position.y, hidden_y - 12.0))
@@ -163,10 +167,11 @@ func _ready() -> void:
 	assert(player.body.collision_mask == original_mask)
 	assert(player.sprite.visible)
 	assert(level.players.get_index() > level.get_node("Areas").get_index())
+	assert(player.arrival_control_ticks_remaining == 0)
 	await ticks(2)
 	assert(
 		player.body.global_position.x < end_position.x,
-		"Held direction works on normal physics after emergence without requiring release."
+		"Held direction works immediately after emergence without requiring release."
 	)
 	assert(
 		player.body.velocity.y >= 0.0,

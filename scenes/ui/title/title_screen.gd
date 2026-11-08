@@ -11,7 +11,6 @@ const THEME_BINDING := preload("res://scripts/themes/area_theme_binding.gd")
 @onready var cursor: Sprite2D = $Cursor
 
 signal start_requested(level: PackedScene)
-@export var background_level: PackedScene
 
 
 func _ready() -> void:

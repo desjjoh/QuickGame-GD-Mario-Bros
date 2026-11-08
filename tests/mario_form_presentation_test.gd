@@ -5,7 +5,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	ControllerHandler.set_physics_process(false)
 	GameHandler.animation_clock.set_physics_process(false)
-	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.process_mode = Node.PROCESS_MODE_PAUSABLE
 	level.entity_layout.clear()
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()

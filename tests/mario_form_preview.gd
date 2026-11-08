@@ -3,7 +3,7 @@ extends Node
 
 
 func _ready() -> void:
-	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.player_start_configuration = MarioFormPresentation.SMALL
 	level.timer_enabled = false
 	level.entity_layout.clear()

@@ -9,7 +9,7 @@ func ticks(count: int) -> void:
 
 func _ready() -> void:
 	for theme in ["overworld", "underground", "castle"]:
-		var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+		var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 		var area := level.get_node("Areas/MainArea") as BaseLevelArea
 		area.theme = load("res://assets/themes/%s.tres" % theme)
 		var layout := area.get_node("Layouts/EntityLayout") as TileMapLayer

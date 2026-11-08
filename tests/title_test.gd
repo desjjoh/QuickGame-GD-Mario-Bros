@@ -91,8 +91,11 @@ func run_checks() -> void:
 			)
 		)
 		var background := GameHandler.current_level
-		assert(background.scene_file_path == "res://scenes/levels/test_level.tscn")
-		assert(background.get_node("Areas").get_child_count() == 1)
+		var selected: PackedScene = game.title_background
+		if selected == null:
+			selected = game.stages[0]
+		assert(background.scene_file_path == selected.resource_path)
+		assert(background.active_area != null)
 		# Authored scenery may include blocks; title gameplay must remain frozen.
 		for entity in background.find_children("*", "BaseEntity", true, false):
 			assert(entity.gameplay_suspended and not entity.is_physics_processing())
@@ -331,9 +334,9 @@ func run_checks() -> void:
 	# Alternate destinations remain available independently of visible menu entries.
 	var alternate: Node = load("res://scenes/main/game.tscn").instantiate()
 	add_child(alternate)
-	assert(GameHandler.start_new_game(load("res://scenes/levels/test_level.tscn")))
+	assert(GameHandler.start_new_game(load("res://tests/fixtures/sandbox_level.tscn")))
 	await wait_for_play()
-	assert(GameHandler.current_level.scene_file_path == "res://scenes/levels/test_level.tscn")
+	assert(GameHandler.current_level.scene_file_path == "res://tests/fixtures/sandbox_level.tscn")
 	assert(GameHandler.title_flow.first_stage == alternate.stages[0])
 	assert(not GameHandler.current_player.gameplay_suspended)
 	alternate.free()

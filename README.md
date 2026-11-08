@@ -30,7 +30,7 @@ Hold Jump for more height, and press the opposite direction while running to ski
 
 Open `scenes/levels/worlds/world 1/1-1.tscn` and expand **Areas → MainArea → Layouts** to inspect terrain, scenery, and entity stamps. Open `scenes/player/mario/mario.tscn` to see how the player combines its state machine, motion components, and actions.
 
-For a one-screen sandbox, open `scenes/levels/test_level.tscn` and press **F6**.
+Open `scenes/levels/worlds/world 1/1-1.tscn` and press **F6** to run 1-1 directly.
 
 ## Documentation
 

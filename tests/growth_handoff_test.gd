@@ -4,7 +4,7 @@ extends Node
 func _ready() -> void:
 	ControllerHandler.set_physics_process(false)
 	GameHandler.animation_clock.set_physics_process(false)
-	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.player_start_configuration = MarioFormPresentation.SMALL
 	level.entity_layout.clear()
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()

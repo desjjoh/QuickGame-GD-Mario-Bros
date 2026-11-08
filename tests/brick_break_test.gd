@@ -6,7 +6,7 @@ func _ready() -> void:
 	ControllerHandler.set_physics_process(false)
 	var canvas := CanvasLayer.new()
 	add_child(canvas)
-	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.process_mode = Node.PROCESS_MODE_PAUSABLE
 	level.entity_layout.clear()
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()

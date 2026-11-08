@@ -104,7 +104,7 @@ func _ready() -> void:
 	assert(level.transport(player, destination, source))
 	assert(player.state_machine.current_state.name == &"TestTravel")
 	assert(not level.transport(player, destination, source))
-	await ticks(12)
+	await ticks(29)  # Existing presentation budget plus the shared 17-tick arrival hold.
 	assert(level.active_target_id == &"stage_return" and level.active_endpoint == null)
 	assert(
 		arrivals.size() == 1 and arrivals[0] == expected,
@@ -122,7 +122,7 @@ func _ready() -> void:
 		"An exit-only entity must reject use as an entrance."
 	)
 	assert(level.transport(player, other))
-	await ticks(3)
+	await ticks(20)  # Three presentation ticks after the arrival hold.
 	assert(level.active_target_id == &"other")
 	# Deletion between request and deferred handoff cannot teleport the player.
 	player.set_physics_process(false)

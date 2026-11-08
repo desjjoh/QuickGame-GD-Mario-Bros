@@ -12,6 +12,8 @@ const THEME_BINDING := preload("res://scripts/themes/area_theme_binding.gd")
 func _ready() -> void:
 	coin.sprite_frames = coin.sprite_frames.duplicate(true)
 	GameHandler.session_value_changed.connect(_on_session_value_changed)
+	GameHandler.transitions.started.connect(_on_transition_started)
+	GameHandler.transitions.finished.connect(_on_transition_finished)
 	theme_binding.theme_changed.connect(_apply_area_theme)
 	theme_binding.start()
 	_refresh_values()
@@ -22,12 +24,20 @@ func _on_session_value_changed(key: StringName, _value: Variant) -> void:
 		_refresh_values()
 
 
+func _on_transition_started(_id: int, _kind: StringName) -> void:
+	_refresh_values()
+
+
+func _on_transition_finished(_id: int, _success: bool) -> void:
+	_refresh_values()
+
+
 func _refresh_values() -> void:
 	$Score.text = " %06d" % GameHandler.player_status.score
 	$CoinCount.text = "%02d" % GameHandler.player_status.coins
 	$WorldValue.text = GameHandler.stage_label.left(3)
 	$TimeValue.text = "%03d" % GameHandler.time_remaining
-	$TimeValue.visible = GameHandler.timer_enabled
+	$TimeValue.visible = GameHandler.timer_enabled and not GameHandler.transitions.busy
 
 
 func _apply_area_theme(area_theme: AreaTheme) -> void:
@@ -41,5 +51,9 @@ func _apply_area_theme(area_theme: AreaTheme) -> void:
 
 
 func _exit_tree() -> void:
+	if GameHandler.transitions.started.is_connected(_on_transition_started):
+		GameHandler.transitions.started.disconnect(_on_transition_started)
+	if GameHandler.transitions.finished.is_connected(_on_transition_finished):
+		GameHandler.transitions.finished.disconnect(_on_transition_finished)
 	if GameHandler.session_value_changed.is_connected(_on_session_value_changed):
 		GameHandler.session_value_changed.disconnect(_on_session_value_changed)

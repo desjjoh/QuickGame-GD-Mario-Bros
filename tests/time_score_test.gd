@@ -130,7 +130,7 @@ func _ready() -> void:
 	await reach_score(level)
 	var replace_level := func(key: StringName, _value: Variant):
 		if key == &"time_remaining":
-			assert(GameHandler.load_level(load("res://scenes/levels/test_level.tscn")))
+			assert(GameHandler.load_level(load("res://tests/fixtures/sandbox_level.tscn")))
 	GameHandler.session_value_changed.connect(replace_level, CONNECT_ONE_SHOT)
 	await ticks(2)
 	assert(GameHandler.current_level != level)

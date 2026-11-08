@@ -1,0 +1,59 @@
+extends Node
+
+
+func check_background(label: String) -> void:
+	var level := GameHandler.current_level
+	assert(GameHandler.flow == GameHandler.GameFlow.TITLE)
+	assert(level.stage_label == label and GameHandler.current_stage_index == -1)
+	assert(not level.has_started and not level.is_physics_processing())
+	for entity in level.find_children("*", "BaseEntity", true, false):
+		assert(entity.gameplay_suspended)
+
+
+func _ready() -> void:
+	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	fixture.stage_label = "MENU"
+	var custom := PackedScene.new()
+	assert(custom.pack(fixture) == OK)
+	fixture.free()
+	var game = load("res://scenes/main/game.tscn").instantiate()
+	var first_stage: PackedScene = game.stages[0]
+	game.title_background = custom
+	game.transitions_enabled = false
+	add_child(game)
+	check_background("MENU")
+	assert(game.stages[0] == first_stage)
+	assert(GameHandler.start_new_game())
+	assert(GameHandler.current_level.scene_file_path == first_stage.resource_path)
+	assert(GameHandler.current_level.has_started)
+	assert(GameHandler.current_level.on_complete())
+	check_background("MENU")
+	# Re-read the Game selection on later returns, not a cached title-scene default.
+	fixture = load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	fixture.stage_label = "ALT MENU"
+	var alternate := PackedScene.new()
+	assert(alternate.pack(fixture) == OK)
+	fixture.free()
+	game.title_background = alternate
+	assert(GameHandler.start_new_game())
+	assert(GameHandler.current_level.on_complete())
+	check_background("ALT MENU")
+	# Empty selection falls back to the first configured stage on title return.
+	game.title_background = null
+	assert(GameHandler.start_new_game())
+	assert(GameHandler.current_level.on_complete())
+	assert(GameHandler.current_level.scene_file_path == first_stage.resource_path)
+	check_background(GameHandler.current_level.stage_label)
+	game.free()
+	await get_tree().process_frame
+	# The same fallback applies at startup.
+	game = load("res://scenes/main/game.tscn").instantiate()
+	game.title_background = null
+	game.transitions_enabled = false
+	add_child(game)
+	assert(GameHandler.current_level.scene_file_path == game.stages[0].resource_path)
+	check_background(GameHandler.current_level.stage_label)
+	game.free()
+	await get_tree().process_frame
+	print("title_background_test: PASS")
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

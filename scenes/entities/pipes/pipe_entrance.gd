@@ -33,6 +33,7 @@ func can_start_entry(player: BasePlayer) -> bool:
 		or not can_read_controller_input()
 		or not is_instance_valid(player)
 		or player.is_shutdown
+		or not player.can_read_controller_input()
 	):
 		return false
 	# Check each direction independently: opposing buttons must not cancel

@@ -6,7 +6,7 @@
 2. Press **F5** to run the game from the title screen.
 3. Press **Enter** or controller **Start** to load 1-1.
 
-Open `scenes/levels/test_level.tscn` and press **F6** to run the one-screen sandbox. The same scene serves as the title backdrop with gameplay disabled.
+Open `scenes/levels/worlds/world 1/1-1.tscn` and press **F6** to run 1-1 directly. It is also the default title backdrop, with gameplay disabled. Leave **Game → Presentation → Title Background** empty to use the first entry in **Stages**, or assign another level to override it.
 
 ## Controls
 
@@ -19,7 +19,7 @@ Open `scenes/levels/test_level.tscn` and press **F6** to run the one-screen sand
 | Start | Enter | Start / Menu |
 | Pause / resume during gameplay | Enter | Start / Menu |
 
-Hold Jump for a higher jump. Press the opposite direction while moving to skid. Sideways pipe entrances activate when you walk into their opening.
+Hold Jump for a higher jump. Press the opposite direction while moving to skid. Sideways pipe entrances activate when you walk into their opening. Area arrivals include a 17-physics-tick hold. Direct placements ignore movement input while Mario falls normally; pipe arrivals wait inside the exit for 17 ticks before emerging, with immediate control after the animation. Pause freezes the hold. Level starts and respawns do not use it.
 
 Pause keeps the current screen visible and freezes gameplay, animation, and ordinary audio. Release Start, then press it again to resume. A short lockout prevents rapid toggles. Pause is unavailable on the title screen and during active screen transitions. Pipe entry/emergence, death, and level-ending animations remain pausable. Standalone F6 levels also support pause.
 
@@ -39,7 +39,7 @@ Choose **Green Koopa Spawner** on EnemyLayout to try the Green Koopa. It uses th
 
 ## Preview Mario forms
 
-Test Level and 1-1 currently use the default Small Mario. Set **Player Start Configuration** to `assets/player/forms/super.tres` to preview Super with the same actor. Select the TestLevel root and inspect Player Start Configuration to choose Super or Small for F6. Open the existing Mario scene and inspect Starting Form for its default, currently Small; normal 1-1 still starts Small. The form's artwork/contact profile applies without replacing the player scene.
+1-1 currently uses the default Small Mario. Set **Player Start Configuration** to `assets/player/forms/super.tres` to preview Super with the same actor. Select the 1-1 root and inspect Player Start Configuration to choose Super or Small for F6. Open the existing Mario scene and inspect Starting Form for its default, currently Small; normal 1-1 still starts Small. The form's artwork/contact profile applies without replacing the player scene.
 
 Super now supports standing probes, crouching, crouch jumping, and reference-style uncrouching push-out. Hold Down alone on the ground to crouch; crouch is retained during a jump even after releasing Down. Grounded Down plus a horizontal button clears crouch and directional input, following the reference. The short physics body supplies floor support while extra probes handle Super's upper collisions. Super Mushroom collection grows Small Mario; enemy damage shrinks Super and starts damage protection. Super can break ordinary and alternate bricks for debris and 50 points without a score popup. Fire Mario and automatic mushroom/flower tier selection remain unimplemented.
 
