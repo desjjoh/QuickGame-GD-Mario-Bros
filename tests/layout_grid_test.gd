@@ -37,4 +37,4 @@ func _ready() -> void:
 	assert(base.get_node("Areas/MainArea/Layouts/GroundLayout") is TileMapLayer)
 	base.free()
 	print("PASS: inherited layouts share a fixed grid, preserve cells, and align spawned entities.")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

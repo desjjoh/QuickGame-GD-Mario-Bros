@@ -213,4 +213,4 @@ func _ready() -> void:
 	print(
 		"PASS: area-owned activity, hysteresis, resident identity/collision, suspension ownership, cosmetic sleep, enemy disposal/reentry and unload cleanup"
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

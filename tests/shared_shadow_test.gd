@@ -182,4 +182,4 @@ func _ready() -> void:
 	print(
 		"PASS: shared world/HUD/player composition, two-pass Gaussian/reference agreement, foreground occlusion, fractional-camera HUD stability, pipe draw ordering, shader bypass/restore and disabled startup/level replacement."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

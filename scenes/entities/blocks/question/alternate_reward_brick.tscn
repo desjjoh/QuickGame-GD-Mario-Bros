@@ -2,7 +2,7 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/question_block.tscn" id="base"]
 [ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/blocks/brick-alternate.tres" id="brick"]
 [node name="AlternateRewardBrick" instance=ExtResource("base")]
-[node name="Sprite2D" parent="." index="2"]
+[node name="Sprite2D" parent="Body"]
 texture = ExtResource("brick")
 [node name="Active" parent="StateMachine"]
 synchronized_animation = null

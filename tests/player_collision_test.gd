@@ -41,4 +41,4 @@ func _ready() -> void:
 	assert(not mario.body.is_on_floor(), "Sprite overlap alone must not support Mario on a ledge.")
 	mario.free()
 	print("PASS: one-tile gap clearance and falling when only sprite edges overlap a ledge.")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

@@ -50,7 +50,7 @@ func _ready() -> void:
 	assert(level._live_spawns[&"enemy"].has(koopa))
 	assert(koopa.sprite.vframes == 2 and koopa.sprite.frame == 4)
 	assert(koopa.sprite.position == Vector2(0, 2))
-	assert(not koopa.get_node("WalkAnimationSync").enabled)
+	assert(not koopa.get_node("Presentation/WalkAnimationSync").enabled)
 	assert(not koopa.receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)))
 	var shell_position := koopa.body.global_position
 	assert(GameHandler.request_pause_toggle())
@@ -105,4 +105,4 @@ func _ready() -> void:
 	game.queue_free()
 	await ticks(2)
 	print("koopa_contact_test: PASS")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

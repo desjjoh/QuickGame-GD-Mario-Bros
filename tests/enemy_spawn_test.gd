@@ -7,7 +7,7 @@ func _ready() -> void:
 	layout.clear()
 	level.entity_layout.clear()
 	for x in range(4, 15):
-		layout.set_cell(Vector2i(x * 2, 24), 0, Vector2i.ZERO)
+		layout.set_cell(Vector2i(x, 12), 0, Vector2i.ZERO)
 	add_one_up_placement(level, Vector2i(12, 12))
 
 	var camera := level.get_node("Areas/MainArea/Camera2D") as LevelCamera
@@ -73,8 +73,8 @@ func _ready() -> void:
 	await _test_goomba_contact()
 	await _test_stage_placements()
 	await _test_enemy_hits()
-	print("PASS: enemy limits, cleanup, 8-pixel placements, stomp, side damage and block hits.")
-	get_tree().quit()
+	print("PASS: enemy limits, cleanup, 16-pixel placements, stomp, side damage and block hits.")
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
 func _test_goomba_contact() -> void:
@@ -116,13 +116,13 @@ func _test_goomba_contact() -> void:
 func _test_stage_placements() -> void:
 	var level := preload("res://scenes/levels/worlds/world 1/1-1.tscn").instantiate() as BaseLevel
 	var layout := level.get_node("Areas/MainArea/Layouts/EnemyLayout") as TileMapLayer
-	assert(layout.tile_set.tile_size == Vector2i(8, 8))
+	assert(layout.tile_set.tile_size == Vector2i(16, 16))
 	# The authored stage is editable. Keep this test's placement independent.
 	layout.clear()
-	layout.set_cell(Vector2i(102, 23), 1, Vector2i.ZERO)
+	layout.set_cell(Vector2i(51, 12), 1, Vector2i.ZERO)
 	for source_id in [0, 1]:
 		var atlas := layout.tile_set.get_source(source_id) as TileSetAtlasSource
-		assert(atlas.get_tile_data(Vector2i.ZERO, 0).texture_origin == Vector2i(-4, -4))
+		assert(atlas.get_tile_data(Vector2i.ZERO, 0).texture_origin == Vector2i.ZERO)
 	add_child(level)
 	await get_tree().physics_frame
 	var goomba := preload("res://scenes/entities/enemies/goomba/goomba.tscn").instantiate()
@@ -140,34 +140,32 @@ func _test_stage_placements() -> void:
 			continue
 		for offset in placement.actor_offsets:
 			var origin: Vector2 = placement.global_position + offset
-			query.transform = Transform2D(0, origin + body_offset)
+			# Ground contact is intentional; reject penetration, not a touching floor.
+			query.transform = Transform2D(0, origin + body_offset - Vector2(0, 0.01))
 			assert(
 				space.intersect_shape(query).is_empty(), "Enemy starts inside terrain: %s" % origin
 			)
 			var feet := origin + body_offset + Vector2(0, shape.get_rect().end.y)
 			var floor_query := PhysicsRayQueryParameters2D.create(
-				feet, feet + Vector2(0, 9), 1, [level.player.body.get_rid()]
+				feet - Vector2(0, 0.1), feet + Vector2(0, 0.1), 1, [level.player.body.get_rid()]
 			)
 			var floor_hit := space.intersect_ray(floor_query)
 			assert(not floor_hit.is_empty(), "No surface below enemy: %s" % origin)
-			assert(is_equal_approx(floor_hit.position.y - feet.y, 8.0))
-	var pair := level.world_objects.get_node("goomba_pair_spawner_102_23") as EntitySpawner
+			assert(is_equal_approx(floor_hit.position.y - feet.y, 0.0))
+	var pair := level.world_objects.get_node("goomba_pair_spawner_51_12") as EntitySpawner
 	var camera := level.active_area.get_node("Camera2D") as LevelCamera
 	camera.follow_enabled = false
-	camera.position.x += (
-		pair.global_position.x - level.active_area.get_activity_region(false).end.x + 1
-	)
+	camera.position.x += pair.global_position.x - level.active_area.get_enemy_group_origin_x()
 	level.active_area.update_camera_activity()
-	var wake := Rect2(pair.global_position - Vector2.ONE, Vector2(2, 2))
+	var wake := level.active_area.get_enemy_spawn_region()
 	var actors: Array[BaseEnemy] = []
 	for child in pair.get_children():
 		if child is BaseEnemy:
 			actors.append(child)
 	assert(actors.size() == 2)
 	assert(actors[1].global_position - actors[0].global_position == Vector2(24, 0))
-	assert(
-		not level.active_area.get_activity_region(false).intersects(actors[1].get_activity_rect())
-	)
+	assert(actors[0].global_position.x == level.active_area.get_enemy_group_origin_x())
+	assert(actors[1].global_position.x == actors[0].global_position.x + 24)
 	assert(not actors[0].activity_suspended and not actors[1].activity_suspended)
 	var first_x := actors[0].body.global_position.x
 	for tick in range(5):
@@ -183,7 +181,7 @@ func _test_stage_placements() -> void:
 	level._unload_area(area)
 	assert(not is_instance_valid(pair))
 	level._load_area(area)
-	pair = level.world_objects.get_node("goomba_pair_spawner_102_23") as EntitySpawner
+	pair = level.world_objects.get_node("goomba_pair_spawner_51_12") as EntitySpawner
 	pair.update_activity(wake, wake, area.theme)
 	assert(pair.get_child_count() == 3)
 	level.queue_free()
@@ -196,6 +194,8 @@ func _test_enemy_hits() -> void:
 	level.entity_layout.clear()
 	level.entity_layout.set_cell(Vector2i(4, 9), 1, Vector2i.ZERO)
 	level.entity_layout.set_cell(Vector2i(6, 9), 1, Vector2i.ZERO)
+	# These edge-contact assertions deliberately exercise the Small profile.
+	level.player_start_configuration = preload("res://assets/player/forms/small.tres")
 	add_child(level)
 	var player := level.player
 	var scene := preload("res://scenes/entities/enemies/goomba/goomba.tscn")

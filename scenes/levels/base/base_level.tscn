@@ -8,7 +8,6 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/one_up_spawner.tscn" id="one_up"]
 [ext_resource type="PackedScene" path="res://scenes/entities/coin/coin.tscn" id="coin"]
 [ext_resource type="Script" uid="uid://b4k50e7vfpdc6" path="res://scenes/levels/base/base_level.gd" id="1_script"]
-[ext_resource type="Shader" uid="uid://cpscldbgpm4tf" path="res://scenes/levels/base/level_shadow.gdshader" id="2_shadow"]
 [ext_resource type="PackedScene" path="res://scenes/levels/areas/base_area.tscn" id="3_area"]
 
 [ext_resource type="AudioStream" path="res://assets/audio/music/death.wav" id="death_sound"]
@@ -36,15 +35,7 @@
 
 [ext_resource type="PackedScene" path="res://scenes/entities/pipes/sideways_pipe_entrance.tscn" id="entity_sideways_pipe_entrance"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_shadow"]
-shader = ExtResource("2_shadow")
-shader_parameter/shadow_offset = Vector2(2, 2)
-shader_parameter/blur_radius = 4.5
-shader_parameter/shadow_color = Color(0, 0, 0, 0.38)
-shader_parameter/shadow_enabled = true
-
 [node name="BaseLevel" type="CanvasGroup" unique_id=194333981]
-material = SubResource("ShaderMaterial_shadow")
 fit_margin = 12.0
 clear_margin = 12.0
 script = ExtResource("1_script")

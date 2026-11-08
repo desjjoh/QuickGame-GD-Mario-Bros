@@ -140,4 +140,4 @@ func _ready() -> void:
 	print(
 		"PASS: 16-frame death hold, dedicated launch/gravity/cap, input/collision bypass, both area cameras, full offscreen presentation, once-only cleanup and respawn, unchanged pit path."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

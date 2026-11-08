@@ -60,3 +60,7 @@ script = ExtResource("11_bonk")
 
 [node name="Climbing" type="Node" parent="Motion"]
 script = ExtResource("climbing")
+
+[node name="Status" type="Node" parent="."]
+
+[node name="Presentation" type="Node" parent="."]

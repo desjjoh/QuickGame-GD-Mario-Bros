@@ -2,12 +2,12 @@ class_name FlagpoleEntity
 extends BaseClimbable
 ## Visual capability only. A level-owned presentation requests each descent step.
 
-@onready var _flag_origin: Vector2 = $Visuals/Flag.position
+@onready var _flag_origin: Vector2 = $Presentation/Flag.position
 var _flag_fraction: int = 0
 
 
 func lower_flag(delta: float, speed: float) -> bool:
-	var flag := $Visuals/Flag as Sprite2D
+	var flag := $Presentation/Flag as Sprite2D
 	# Reference flag top stops at $aa while base top is $c0 (sprite center +8).
 	var target_y := climb_bottom.global_position.y - 14.0
 	# The reference checks completion before moving and retains the fractional byte.
@@ -22,8 +22,8 @@ func lower_flag(delta: float, speed: float) -> bool:
 
 func reset_flag() -> void:
 	_flag_fraction = 0
-	$Visuals/Flag.position = _flag_origin
-	$Visuals/Flag.reset_physics_interpolation()
+	$Presentation/Flag.position = _flag_origin
+	$Presentation/Flag.reset_physics_interpolation()
 
 
 func attachment_fraction(player: BasePlayer, _from_feet: Vector2, to_feet: Vector2) -> float:
@@ -31,12 +31,13 @@ func attachment_fraction(player: BasePlayer, _from_feet: Vector2, to_feet: Vecto
 		return -1.0
 	# HandleClimbing accepts the NES player's X low nibble $06..$09.
 	# With our +8px body origin, these are two bands relative to the shaft.
-	var probe_y := to_feet.y + player.climbing.capture_probe_offset_y
-	if probe_y < _capture_top(player) or probe_y >= climb_bottom.global_position.y:
-		return -1.0
 	var offset := to_feet.x - climb_top.global_position.x
-	if (offset >= -10.0 and offset < -6.0) or (offset >= 6.0 and offset < 10.0):
-		return 1.0
+	if not ((offset >= -10.0 and offset < -6.0) or (offset >= 6.0 and offset < 10.0)):
+		return -1.0
+	for height in player.get_side_probe_heights():
+		var probe_y := to_feet.y + height
+		if probe_y >= _capture_top(player) and probe_y < climb_bottom.global_position.y:
+			return 1.0
 	return -1.0
 
 
@@ -46,4 +47,4 @@ func attachment_y(feet_y: float) -> float:
 
 func _capture_top(_player: BasePlayer) -> float:
 	# The whole ball metatile is climbable, including its transparent top pixels.
-	return $Visuals/Top.to_global(Vector2(0.0, -8.0)).y
+	return $Presentation/Tiles.to_global(Vector2(16.0, 0.0)).y

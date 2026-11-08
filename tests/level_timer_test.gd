@@ -201,4 +201,4 @@ func _ready() -> void:
 	print(
 		"PASS: single timer initialization, post-intro start/full 24 ticks, phase-preserving pauses/area travel, disabled HUD number, zero dwell, animated timeout and TIME UP before lives/game-over."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

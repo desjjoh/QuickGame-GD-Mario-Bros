@@ -4,6 +4,8 @@ extends Node
 func _ready() -> void:
 	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	if "--super" in OS.get_cmdline_user_args():
+		fixture.player_start_configuration = preload("res://assets/player/forms/super.tres")
 	fixture.get_node("Areas/MainArea/Layouts/EntityLayout").clear()
 	fixture.get_node("Areas/MainArea/Layouts/EntityLayout").set_cell(
 		Vector2i(6, 11), 3, Vector2i.ZERO
@@ -98,4 +100,4 @@ func _ready() -> void:
 	print(
 		"PASS: PipeEnter ignores controls, moves at reference speed, freezes camera, plays once, cancels invalid targets and restores state/collision on shutdown."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

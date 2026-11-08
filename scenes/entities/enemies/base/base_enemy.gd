@@ -66,7 +66,11 @@ func _handle_player_contact(player: BasePlayer) -> void:
 		player.body.velocity.y = STOMP_REBOUND
 		player.play_sound_effect(SoundHandler.get_sound(&"stomp"))
 	else:
-		_level.on_death(player, true)
+		# Damage is guarded by the player, rather than the interaction latch.
+		# This includes the first accepted injury: an unbroken overlap must become
+		# dangerous again when its protection ends. Stomps/kicks retain their latch.
+		_player_contact_latched = false
+		player.receive_damage(self)
 
 
 ## Specialized enemies may accept a stomp under additional local conditions.

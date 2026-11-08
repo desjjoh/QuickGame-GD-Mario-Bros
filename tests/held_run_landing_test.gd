@@ -65,4 +65,4 @@ func _ready() -> void:
 	print(
 		"PASS: continuously held keyboard/controller Run survives 16 jump/landing cycles in both directions, with no stale air cap or re-press."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

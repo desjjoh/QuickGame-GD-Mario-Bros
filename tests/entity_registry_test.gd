@@ -31,4 +31,4 @@ func _ready() -> void:
 					assert(registry.has(key), "Unmapped palette marker: %s" % key)
 	base.free()
 	print("entity_registry_test: PASS")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

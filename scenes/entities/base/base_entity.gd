@@ -123,6 +123,23 @@ func _apply_visual_theme() -> void:
 	for child in find_children("*", "Sprite2D", true, false):
 		var child_sprite := child as Sprite2D
 		child_sprite.texture = resolve_texture(child_sprite.texture)
+	for child in find_children("*", "TileMapLayer", true, false):
+		var layer := child as TileMapLayer
+		if layer.tile_set == null:
+			continue
+		# Each actor owns its themed sources; other areas keep their original art.
+		layer.tile_set = layer.tile_set.duplicate() as TileSet
+		var source_ids: Array[int] = []
+		for index in range(layer.tile_set.get_source_count()):
+			source_ids.append(layer.tile_set.get_source_id(index))
+		for source_id in source_ids:
+			var source := layer.tile_set.get_source(source_id) as TileSetAtlasSource
+			if source == null:
+				continue
+			var themed_source := source.duplicate() as TileSetAtlasSource
+			themed_source.texture = resolve_texture(source.texture)
+			layer.tile_set.remove_source(source_id)
+			layer.tile_set.add_source(themed_source, source_id)
 	if animation_player == null or visual_theme.texture_overrides.is_empty():
 		return
 	# Clone animation containers only; never alter another area's shared assets.
@@ -234,7 +251,7 @@ func _append_owned_nodes(parent: Node, result: Array[Node]) -> void:
 func refresh_activity_geometry() -> void:
 	_activity_geometry.clear()
 	for child in _get_owned_nodes():
-		if child is CollisionShape2D or child is Sprite2D:
+		if child is CollisionShape2D or child is Sprite2D or child is TileMapLayer:
 			_activity_geometry.append(weakref(child))
 
 
@@ -251,6 +268,11 @@ func get_activity_rect() -> Rect2:
 			local_rect = child.shape.get_rect()
 		elif child is Sprite2D and child.texture != null:
 			local_rect = child.get_rect()
+		elif child is TileMapLayer and child.tile_set != null:
+			var cells: Rect2i = (child as TileMapLayer).get_used_rect()
+			local_rect = Rect2(Vector2(cells.position), Vector2(cells.size))
+			local_rect.position *= Vector2(child.tile_set.tile_size)
+			local_rect.size *= Vector2(child.tile_set.tile_size)
 		else:
 			continue
 		var world_rect: Rect2 = child.global_transform * local_rect

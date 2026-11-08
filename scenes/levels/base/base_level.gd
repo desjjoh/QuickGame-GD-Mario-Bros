@@ -47,6 +47,7 @@ var transition_in_progress: bool = false
 
 @export_group("Spawning")
 @export var player_scene: PackedScene
+@export var player_start_configuration: Resource
 @export var entity_scenes: Dictionary[StringName, PackedScene] = {}
 
 @export_group("Screen Bounds")
@@ -54,6 +55,7 @@ var transition_in_progress: bool = false
 @export_range(0.0, 64.0, 1.0) var horizontal_screen_inset: float = 7.0
 
 var player: BasePlayer
+var player_presentation: Node
 var is_shutdown: bool = false
 var _reward_timers: Dictionary[int, WeakRef] = {}
 var _spawned_areas: Dictionary[int, bool] = {}
@@ -141,6 +143,7 @@ func _ready() -> void:
 		active_area.enter_area()
 		if not is_instance_valid(GameHandler.current_game):
 			initialize_actors(false)
+			_create_standalone_shadow()
 
 
 func spawn_layout_entities() -> void:
@@ -212,6 +215,8 @@ func _physics_process(_delta: float) -> void:
 		return
 	if death_in_progress:
 		death_sequence.advance(_delta)
+		return
+	if is_instance_valid(player_presentation):
 		return
 	for id: int in _reward_timers.keys():
 		var block := _reward_timers[id].get_ref() as QuestionBlock
@@ -350,6 +355,8 @@ func spawn_player() -> BasePlayer:
 		return null
 
 	player = instance as BasePlayer
+	if player_start_configuration != null:
+		player.configure_start(player_start_configuration)
 	player.position = players.to_local(player_spawn.global_position)
 	players.add_child(player)
 	player.reset_physics_interpolation()
@@ -368,6 +375,8 @@ func _exit_tree() -> void:
 func shutdown() -> void:
 	if is_shutdown:
 		return
+	if is_instance_valid(player_presentation):
+		player_presentation.cancel()
 	is_shutdown = true
 	GameHandler.pause_controller.clear_for_level(self)
 	MusicHandler.stop_area(self)
@@ -425,6 +434,7 @@ func _commit_area_arrival(
 	area: BaseLevelArea, target_id: StringName, arrival: Dictionary, under_cover: bool
 ) -> bool:
 	player.state_machine.stop(false)
+	player.on_area_arrival()
 	player.body.velocity = Vector2.ZERO
 	player.jump_action.reset_falling_gravity()
 	player.body.global_position = arrival["position"]
@@ -479,6 +489,8 @@ func can_transport() -> bool:
 
 
 func _load_area(area: BaseLevelArea) -> void:
+	if is_instance_valid(player_presentation):
+		player_presentation.cancel()
 	if area.runtime_loaded and _spawned_areas.has(area.get_instance_id()):
 		return
 	var snapshot := GameHandler.get_area_progress(_progress_key, area.area_id)
@@ -598,6 +610,8 @@ func begin_ending(
 		return false
 	if is_shutdown or GameHandler.current_level != self:
 		return false
+	if is_instance_valid(player_presentation):
+		player_presentation.cancel()
 	if not presentation.start(self, player, source):
 		cancel_ending()
 		return false
@@ -655,6 +669,8 @@ func on_death(
 		or victim.is_shutdown
 	):
 		return false
+	if is_instance_valid(player_presentation):
+		player_presentation.cancel()
 	death_reason = reason
 	death_in_progress = true
 	MusicHandler.stop_area(self)
@@ -689,3 +705,17 @@ func _restart_after_death() -> void:
 	if is_shutdown or not death_in_progress or GameHandler.current_level != self:
 		return
 	GameHandler.restart_after_death(self, _progress_key)
+
+
+func _create_standalone_shadow() -> void:
+	var composer := SharedShadowComposer.new()
+	composer.name = "ShadowComposer"
+	$Systems.add_child(composer)
+	# Render the compositor outside the level it captures; scene ownership stays intact.
+	RenderingServer.canvas_item_set_parent(composer.get_canvas_item(), get_canvas())
+	var screen := Control.new()
+	screen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	composer.add_child(screen)
+	composer.set_shadow_style(ShadowStyle.game_default())
+	composer.configure(self, screen)
+	composer.bind_level(self)

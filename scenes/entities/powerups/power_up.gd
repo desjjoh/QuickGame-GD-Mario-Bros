@@ -48,6 +48,12 @@ func _physics_process(delta: float) -> void:
 			pickup.set_deferred("monitoring", true)
 		return
 	_advance_available(delta)
+	# A contact may start while suspended or while a form change rejects pickup.
+	# Retry existing overlaps once available instead of requiring re-entry.
+	for area: Area2D in pickup.get_overlapping_areas():
+		_on_pickup_overlap(area)
+		if _removing:
+			break
 
 
 func _update_emergence_sprite() -> void:
@@ -66,8 +72,12 @@ func _advance_available(_delta: float) -> void:
 
 func _on_pickup_overlap(area: Area2D) -> void:
 	if (
-		_removing or is_queued_for_deletion() or _emergence_remaining > 0.0
-		or is_shutdown or gameplay_suspended or activity_suspended
+		_removing
+		or is_queued_for_deletion()
+		or _emergence_remaining > 0.0
+		or is_shutdown
+		or gameplay_suspended
+		or activity_suspended
 	):
 		return
 	var player := area.get_parent().get_parent() as BasePlayer
@@ -80,10 +90,17 @@ func _on_pickup_overlap(area: Area2D) -> void:
 	):
 		return
 	_removing = true
+	if not _begin_collection(player):
+		_removing = false
+		return
 	report_consumed()
-	_grant_reward()
+	_grant_reward(player)
 	queue_free()
 
 
-func _grant_reward() -> void:
+func _begin_collection(_player: BasePlayer) -> bool:
+	return true
+
+
+func _grant_reward(_player: BasePlayer) -> void:
 	pass

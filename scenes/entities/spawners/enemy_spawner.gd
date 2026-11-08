@@ -27,7 +27,10 @@ func _ready() -> void:
 func update_activity(wake_region: Rect2, sleep_region: Rect2, theme: AreaTheme) -> void:
 	if (
 		is_instance_valid(actor)
-		and (actor.is_shutdown or not sleep_region.intersects(actor.get_activity_rect()))
+		and (
+			actor.is_shutdown
+			or (not actor is BaseEnemy and not sleep_region.intersects(actor.get_activity_rect()))
+		)
 	):
 		_dispose_actor()
 	if not sleep_region.has_point(global_position) and respawn_on_reentry:

@@ -25,6 +25,8 @@ func wait_phase(
 
 func make_game(manual: bool) -> Node:
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	if "--super" in OS.get_cmdline_user_args():
+		fixture.player_start_configuration = preload("res://assets/player/forms/super.tres")
 	var ending := fixture.ending_presentation as FlagpoleEndingPresentation
 	fixture.set_editable_instance(ending, true)
 	if manual:
@@ -95,7 +97,7 @@ func _ready() -> void:
 	Input.action_press("ui_up")
 	Input.action_press("secondary")
 	var pole := level.active_area.get_node("WorldObjects/flagpole_196_2") as FlagpoleEntity
-	var flag_start: float = pole.get_node("Visuals/Flag").global_position.y
+	var flag_start: float = pole.get_node("Presentation/Flag").global_position.y
 	for frame in range(15):
 		var previous_y := ending._score_popup.global_position.y
 		await ticks()
@@ -105,7 +107,7 @@ func _ready() -> void:
 		assert(player.state_machine.current_state == player.climb_state)
 		assert(player.scripted_motion_step.is_valid())
 	assert(player.body.global_position.y > 100 and player.body.velocity.x == 0)
-	assert(pole.get_node("Visuals/Flag").global_position.y > flag_start)
+	assert(pole.get_node("Presentation/Flag").global_position.y > flag_start)
 	assert(ending._score_popup.global_position.y < popup_start)
 	assert(GameHandler.player_status.score == score_before)
 	assert(GameHandler.time_remaining == time_before)
@@ -127,7 +129,7 @@ func _ready() -> void:
 	assert(absf(player.body.global_position.y - (pole.climb_bottom.global_position.y - 2)) < 0.1)
 	assert(is_equal_approx(player.body.global_position.x, pole.climb_bottom.global_position.x + 7))
 	assert(player.sprite.flip_h)
-	var flag_end: float = pole.get_node("Visuals/Flag").global_position.y
+	var flag_end: float = pole.get_node("Presentation/Flag").global_position.y
 	assert(flag_end == pole.climb_bottom.global_position.y - 13.0)
 	assert(GameHandler.player_status.score == score_before + 2000)
 	await ticks(23)
@@ -306,13 +308,13 @@ func _ready() -> void:
 	assert(player.body.global_position.y == low_contact.y)
 	await wait_phase(ending, FlagpoleEndingPresentation.Phase.DISMOUNT)
 	assert(player.body.global_position.y == low_contact.y)
-	assert(pole.get_node("Visuals/Flag").position == pole._flag_origin)
+	assert(pole.get_node("Presentation/Flag").position == pole._flag_origin)
 	game.free()
 	await ticks(3)
 	print(
 		"PASS: level-owned flagpole descent/flag/dismount/walk, camera lock, timer/input gates, endpoint retirement, async score/fireworks gates, music wait, title return and cancelled cleanup."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
 func capture_phase(value: FlagpoleEndingPresentation.Phase) -> void:

@@ -86,7 +86,7 @@ func _ready() -> void:
 	print(
 		"PASS: Regular bonk edges and seams, hidden-block side and top pass-through, shared bonk response, and used-block landing."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
 func _test_hidden_block() -> void:
@@ -94,6 +94,8 @@ func _test_hidden_block() -> void:
 	level.entity_layout.clear()
 	level.entity_layout.set_cell(Vector2i(8, 8), 9, Vector2i.ZERO)
 	level.entity_layout.set_cell(Vector2i(10, 8), 1, Vector2i.ZERO)
+	# These measured sweeps use the original Small head height.
+	level.player_start_configuration = preload("res://assets/player/forms/small.tres")
 	add_child(level)
 	var player := level.player
 	player.set_physics_process(false)

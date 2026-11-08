@@ -80,4 +80,4 @@ func run_checks() -> void:
 	print(
 		"PASS: preserved keyboard bindings and Xbox A raw-event jumps/releases on device IDs 0, 1, and 2."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

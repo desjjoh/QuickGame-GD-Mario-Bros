@@ -9,7 +9,7 @@
 [node name="BrickBlock" instance=ExtResource("1_base")]
 persist_progress = false
 
-[node name="Sprite2D" parent="." index="2"]
+[node name="Sprite2D" parent="Body"]
 texture = ExtResource("2_brick")
 
 [node name="StateMachine" parent="." node_paths=PackedStringArray("initial_state")]

@@ -126,4 +126,4 @@ func _ready() -> void:
 	print(
 		"PASS: 48 accepted jump-state ledge landings preserve one horizontal step; 24 over-depth contacts reject rescue; all 72 retain matching right-only camera motion."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

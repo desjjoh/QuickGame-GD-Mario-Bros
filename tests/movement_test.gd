@@ -106,4 +106,4 @@ func run_checks() -> void:
 	print(
 		"PASS: walk/run, static Idle, bindings, reversal/braking, control gates, shared motion modifiers, body velocity proxy, isolation, and timestep independence."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

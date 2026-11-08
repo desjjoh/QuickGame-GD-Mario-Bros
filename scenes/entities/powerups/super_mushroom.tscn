@@ -1,0 +1,10 @@
+[gd_scene format=3]
+[ext_resource type="PackedScene" path="res://scenes/entities/powerups/mushroom.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/powerups/super_mushroom.gd" id="script"]
+[ext_resource type="Texture2D" path="res://assets/items/red-mushroom.png" id="art"]
+
+[node name="SuperMushroom" instance=ExtResource("base")]
+script = ExtResource("script")
+
+[node name="Sprite2D" parent="Body" index="1"]
+texture = ExtResource("art")

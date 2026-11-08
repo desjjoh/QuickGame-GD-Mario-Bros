@@ -59,4 +59,4 @@ func _ready() -> void:
 	print(
 		"PASS: one-level area store, copied values, same-level/area preservation, different-level reset and stale-source rejection"
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

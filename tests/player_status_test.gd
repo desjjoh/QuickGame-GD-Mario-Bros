@@ -164,4 +164,4 @@ func _ready() -> void:
 	print(
 		"PASS: typed status defaults/ranges, signals, live HUD/title/intro, new-game reset, title-return record promotion/tie/lower-score handling, area/death continuity and no automatic coin rewards"
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

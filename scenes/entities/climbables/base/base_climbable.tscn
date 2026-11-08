@@ -5,14 +5,17 @@
 size = Vector2(32, 152)
 [node name="BaseClimbable" instance=ExtResource("base")]
 script = ExtResource("script")
-[node name="ClimbTop" type="Marker2D" parent="."]
+[node name="Anchors" type="Node2D" parent="."]
+[node name="ClimbTop" type="Marker2D" parent="Anchors"]
 position = Vector2(24, 24)
-[node name="ClimbBottom" type="Marker2D" parent="."]
+[node name="ClimbBottom" type="Marker2D" parent="Anchors"]
 position = Vector2(24, 160)
-[node name="Detection" type="Area2D" parent="."]
+[node name="Presentation" type="Node2D" parent="."]
+[node name="Interactions" type="Node2D" parent="."]
+[node name="Detection" type="Area2D" parent="Interactions"]
 collision_layer = 128
 collision_mask = 1
 monitorable = true
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Detection"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactions/Detection"]
 position = Vector2(24, 88)
 shape = SubResource("detection")

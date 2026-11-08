@@ -67,4 +67,4 @@ func _ready() -> void:
 		level.queue_free()
 		await ticks(2)
 	print("reward_brick_test: PASS")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

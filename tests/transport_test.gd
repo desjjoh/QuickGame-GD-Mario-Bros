@@ -139,4 +139,4 @@ func _ready() -> void:
 	print(
 		"PASS: shared transport supports non-pipe presentations, explicit IDs, moved targets, exit-only permissions, duplicate/missing/stale rejection, saved resources and unloaded removed targets."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

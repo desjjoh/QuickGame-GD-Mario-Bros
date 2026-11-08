@@ -93,7 +93,7 @@ func _ready() -> void:
 		assert(main.has_node("WorldObjects/brick_3_8"))
 		assert(main.get_node("Layouts/GroundLayout").get_cell_source_id(Vector2i(10, 13)) == -1)
 		assert(main.get_node("WorldObjects").get_child_count() == 3)
-		assert(main.get_node("WorldObjects/pipe_entrance_6_11/Visuals").get_child_count() == 4)
+		assert(main.get_node("WorldObjects/pipe_entrance_6_11/Presentation").get_child_count() == 4)
 		assert(GameHandler.get_session_value(&"coins") == 13)
 		assert(level.request_area_transfer(&"lower"))
 		await ticks(2)
@@ -119,4 +119,4 @@ func _ready() -> void:
 	print(
 		"PASS: only occupied runtime loaded, inactive collisions/entities/camera freed, used question blocks and tile edits persist, bricks reset through repeated visits, and pipe visuals clean up."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

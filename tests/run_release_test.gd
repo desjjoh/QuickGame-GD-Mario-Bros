@@ -155,4 +155,4 @@ func _ready() -> void:
 	print(
 		"PASS: nine retained ticks then tick-ten walk clamp in both directions, re-press, neutral braking, skidding, higher-priority caps, once-only handoff timing and expiry-tick jump momentum."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

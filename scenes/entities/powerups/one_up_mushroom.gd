@@ -5,7 +5,7 @@ const POPUP_RISE := 24.0
 const POPUP_DURATION := 0.8
 
 
-func _grant_reward() -> void:
+func _grant_reward(_player: BasePlayer) -> void:
 	var pickup_position := sprite.global_position
 	var popup := SCORE_POPUP.instantiate()
 	get_parent().add_child(popup)

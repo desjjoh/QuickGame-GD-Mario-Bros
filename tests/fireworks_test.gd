@@ -106,4 +106,4 @@ func _ready() -> void:
 	game.queue_free()
 	await ticks(2)
 	print("fireworks_test: PASS")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

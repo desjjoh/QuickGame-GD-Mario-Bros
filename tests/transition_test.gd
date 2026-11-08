@@ -287,4 +287,4 @@ func _ready() -> void:
 	print(
 		"PASS: named definitions, arbitrary presentations, snapshots, unchanged background, no Cover node, rendered visibility, minimum frames, slow loading, startup/respawn cards, real pipe transfer, control/visibility restoration, overlap rejection and stale/cancelled transaction safety."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

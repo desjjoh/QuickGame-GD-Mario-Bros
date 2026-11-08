@@ -179,4 +179,4 @@ func _ready() -> void:
 	print(
 		"PASS: three attempts, negative-only game over, reference hold, sound completion/fallback, title-owned progress cleanup, title/input reset and stale/cancelled ownership"
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

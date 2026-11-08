@@ -9,8 +9,8 @@ signal player_detached(player: BasePlayer)
 ## Half-width of the narrow shaft capture band, not a feet-distance allowance.
 @export var attachment_tolerance: float = 2.0
 
-@onready var climb_top: Marker2D = $ClimbTop
-@onready var climb_bottom: Marker2D = $ClimbBottom
+@onready var climb_top: Marker2D = $Anchors/ClimbTop
+@onready var climb_bottom: Marker2D = $Anchors/ClimbBottom
 
 
 func _ready() -> void:
@@ -19,8 +19,8 @@ func _ready() -> void:
 	set_process(false)
 	set_physics_process(false)
 	super()
-	$Detection.body_entered.connect(_on_body_entered)
-	$Detection.body_exited.connect(_on_body_exited)
+	$Interactions/Detection.body_entered.connect(_on_body_entered)
+	$Interactions/Detection.body_exited.connect(_on_body_exited)
 
 
 func is_available() -> bool:
@@ -28,11 +28,9 @@ func is_available() -> bool:
 
 
 func overlaps_body(player: BasePlayer) -> bool:
-	var detection := $Detection/CollisionShape2D as CollisionShape2D
+	var detection := $Interactions/Detection/CollisionShape2D as CollisionShape2D
 	var region: Rect2 = detection.global_transform * detection.shape.get_rect()
-	var bounds: Rect2 = (
-		player.collision_shape.global_transform * player.collision_shape.shape.get_rect()
-	)
+	var bounds: Rect2 = player.get_climb_query_bounds()
 	return region.intersects(bounds)
 
 
@@ -81,7 +79,7 @@ func _sweep_fraction(from: Vector2, to: Vector2, low: Vector2, high: Vector2) ->
 
 
 func _capture_bounds(player: BasePlayer) -> Rect2:
-	return player.collision_shape.global_transform * player.collision_shape.shape.get_rect()
+	return player.get_climb_query_bounds()
 
 
 func _capture_top(player: BasePlayer) -> float:

@@ -195,4 +195,4 @@ func run_checks() -> void:
 	print(
 		"PASS: 44 grounded/falling/skid/jump/landing handoffs integrate once and preserve horizontal displacement and camera motion in both directions with Run on/off."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

@@ -8,6 +8,11 @@ extends PlayerState
 
 var _previous_animation_speed: float = 1.0
 var _falling: bool = false
+var _defer_growth_vertical := false
+
+
+func defer_growth_fall_step() -> void:
+	_defer_growth_vertical = true
 
 
 func enter() -> void:
@@ -21,6 +26,7 @@ func enter() -> void:
 
 
 func exit() -> void:
+	_defer_growth_vertical = false
 	if _falling:
 		get_player().air_movement.end(get_player().motion_values)
 		get_player().motion_values.remove_modifier(&"passive_fall")
@@ -70,7 +76,16 @@ func _process_falling(player: BasePlayer, direction: float, delta: float) -> Bas
 			&"passive_fall", {&"gravity": player.jump_action.falling_gravity}, 250
 		)
 	player.air_movement.apply(player.motion_values, direction, delta)
-	player.move_body(true)
+	if _defer_growth_vertical:
+		# NES growth first runs a ground-control tick, then detects the fall.
+		# Retain upward momentum; vertical integration starts on the next tick.
+		_defer_growth_vertical = false
+		var vertical_speed := player.body.velocity.y
+		player.body.velocity.y = 0.0
+		player.move_body()
+		player.body.velocity.y = vertical_speed
+	else:
+		player.move_body(true)
 	var mario := player as Mario
 	_update_walk_animation(mario)
 	if player.body.is_on_floor():

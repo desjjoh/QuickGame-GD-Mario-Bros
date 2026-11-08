@@ -5,7 +5,7 @@ const REVEALED_TEXTURE := preload(
 	"res://assets/palettes/overworld/interactibles/blocks/question-block.tres"
 )
 
-@onready var _probe: Area2D = $BonkProbe
+@onready var _probe: Area2D = $Body/BonkProbe
 
 
 func _ready() -> void:

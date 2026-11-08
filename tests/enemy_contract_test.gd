@@ -58,4 +58,4 @@ func _ready() -> void:
 	stopped.queue_free()
 	await get_tree().process_frame
 	print("enemy_contract_test: PASS")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

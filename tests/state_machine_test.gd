@@ -229,4 +229,4 @@ func run_checks() -> void:
 	print(
 		"PASS: state transitions, presentation, isolated entities, Mario-owned Idle, global game ownership, level replacement, session data, and controller permissions."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

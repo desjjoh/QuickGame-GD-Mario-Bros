@@ -19,10 +19,10 @@ var fireworks_active := false
 var _burst_count := 0
 var _burst_index := 0
 var _fireworks_tick := 0
-@onready var _firework: Sprite2D = $Fireworks/Burst
+@onready var _firework: Sprite2D = $Presentation/Fireworks/Burst
 
-@onready var doorway: Marker2D = $Doorway
-@onready var _flag: Sprite2D = $Flag
+@onready var doorway: Marker2D = $Anchors/Doorway
+@onready var _flag: Sprite2D = $Presentation/Flag
 @onready var _flag_start_y: float = _flag.position.y
 
 

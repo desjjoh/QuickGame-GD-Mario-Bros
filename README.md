@@ -1,6 +1,6 @@
 # QuickGAME-GD Mario Bros
 
-A Godot 4.7 platformer tutorial and reference in the QuickReference series. The playable 1-1 stage brings reusable scenes, entity state machines, and 16×16 terrain and 8×8 enemy placement grids together in a complete title-to-stage-clear flow.
+A Godot 4.7 platformer tutorial and reference in the QuickReference series. The playable 1-1 stage brings reusable scenes, entity state machines, and shared 16×16 terrain and enemy placement grids together in a complete title-to-stage-clear flow.
 
 ## Run the game
 

@@ -1,12 +1,13 @@
+class_name WorldCoin
 extends BaseEntity
 
 signal collected(player: BasePlayer)
 
 var _collected: bool = false
 
-@onready var _pickup: Area2D = $Pickup
+@onready var _pickup: Area2D = $Body/Pickup
 @onready var _collected_state: BaseState = $StateMachine/Collected
-@onready var _palette_animation: SynchronizedAnimation = $PaletteAnimation
+@onready var _palette_animation: SynchronizedAnimation = $Presentation/PaletteAnimation
 
 
 func _ready() -> void:
@@ -15,7 +16,6 @@ func _ready() -> void:
 	if _collected:
 		state_machine.initial_state = _collected_state
 	state_machine.state_changed.connect(_on_state_changed)
-	_pickup.body_entered.connect(_on_body_entered)
 	super()
 
 
@@ -25,24 +25,26 @@ func _on_state_changed(_previous: BaseState, next: BaseState) -> void:
 	_collected = next == _collected_state
 	sprite.visible = not _collected
 	_palette_animation.set_enabled(not _collected)
-	_pickup.set_deferred("monitoring", not _collected)
+	_pickup.set_deferred("collision_layer", 0 if _collected else 1)
 
 
-func _on_body_entered(body: Node2D) -> void:
+## Called by a player's form-aware terrain probe, never the support-body overlap.
+func collect(player: BasePlayer) -> bool:
 	if _collected or is_shutdown or gameplay_suspended or activity_suspended:
-		return
-	var player := body.get_parent() as BasePlayer
+		return false
 	if (
 		player == null
-		or body != player.body
 		or player.is_dead
 		or player.is_shutdown
 		or player.gameplay_suspended
+		or player.activity_suspended
 	):
-		return
-	if state_machine.change_state(_collected_state):
-		GameHandler.award_coin()
-		collected.emit(player)
+		return false
+	if not state_machine.change_state(_collected_state):
+		return false
+	GameHandler.award_coin()
+	collected.emit(player)
+	return true
 
 
 func capture_area_state() -> Dictionary:

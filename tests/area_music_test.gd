@@ -33,4 +33,4 @@ func _ready() -> void:
 	print(
 		"PASS: area entry, preload, cross-area handoff and shutdown retain lifecycle without soundtrack playback."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

@@ -505,3 +505,84 @@ Implemented following discussion and explicit user choice: a 12-physics-tick (0.
 ## 2026-11-07 - Recoverable Koopa block stun
 
 Implemented after reference investigation and user approval: add ShellStunned as shared Walking physics plus landing-to-idle recovery, with Koopa-owned shell orientation. A moving shell retains ShellMoving and its attack identity when bumped, but uses the 60 px/s block-launch speed. This separates recoverable block stuns from permanent shell-hit defeat and reuses existing BlockHitReceiver, kick/score/cleanup paths. Repeat bumps reapply the launch and award 100. Airborne recovery intervals enable the reference zero-interval 8000 kick before a newly stunned walking Koopa lands. Fixed recovery, local stomp grace, and modern gravity integration remain deliberate differences; see archive/koopa.md.
+
+
+## 2026-11-07 - NES behavior target for Super Mario (research; implementation proposed)
+
+The user requests original NES behavior by default, without modern enhancements unless alternatives are explicitly requested. Earlier conversational suggestions to require headroom before standing/growing are withdrawn. Research confirms posture selection is not guarded by a safe-fit query; terrain resolution uses separate probes and incremental side correction. Keep one actor with form/posture configuration and shared movement as a proposal for the next discussion, not implemented functionality. Exact Godot body representation and obstruction corrections remain undecided pending the documented emulator scenarios. See [Super Mario reference investigation](super-mario-research.md).
+
+
+## 2026-11-07 - Proposed single-actor Mario forms and complete collision inventory
+
+Proposal, not implementation: keep one active Mario instance with Mario-specific form/posture configuration, shared movement states and generic BasePlayer lifecycle interfaces. Super/Fire should not be independent duplicated players or replacement actors during transformations. Crouch must persist independently of grounded state transitions; a grounded Crouch state may coordinate actions but cannot own all airborne posture. Recorded all 21 player terrain probe entries, three contact boxes, coordinate conversion, normal inclusive-edge comparison, current Godot shapes, and unresolved rectangle equivalence in super-mario-research.md. No scene restructuring, runtime configuration, or Super gameplay has been implemented.
+
+
+## 2026-11-07 - Implemented single-actor Mario form configuration
+
+Implements the startup configuration portion of the proposed single-actor form design. MarioForm resources and a MarioFormController child resolve instance-local state textures, animation keys, and enemy-contact profiles. BasePlayer exposes a generic pre-tree configuration hook; BaseLevel passes an optional resource, and the sandbox selects Super without a replacement player scene. Normal Mario defaults to Small. Preserves current Small feet alignment using Super sprite offset (0,-15). Crouch capabilities/profiles and growth art are data only; terrain/body behavior, damage, transformations, and session-form integration remain deferred. See mario-forms.md for boundaries and verification.
+
+
+## 2026-11-07 - Super posture and probe-owned upper collisions
+
+Implemented after the user requested the approach closer to the reference: retain the shared short support body and use Mario-specific head/side probes for Super upper-body collisions. This avoids Godot tall-shape overlap recovery deciding uncrouch behavior. Posture is independent of movement state, with immediate standing and ordered one-pixel push-out; no headroom restriction was added. Shared hooks provide head position, filtered movement intent, climbing bounds/side heights, ceiling response, and area-arrival reset without Mario-specific rules in other player types. Original Mesen runtime traces confirmed tested push-out paths and area-init crouch reset, which is applied through the existing lifecycle owner. See super-mario-movement.md for exact bounds and remaining hybrid-physics limitations.
+
+
+## 2026-11-07 - Observe audio-thread cleanup at regression exit
+
+Implemented: successful tests use one shared bounded completion helper that stops playback and observes audio mix boundaries before quitting. Evidence from a gameplay-free 16-voice reproduction identifies deferred engine audio release as the source of the inspected ObjectDB warnings. Do not add arbitrary gameplay exit sleeps or silence warnings to make tests green. Failure exits remain immediate; the runner remains strict and supports selected scenes. This addresses verified audio-only regression teardown, not every possible engine shutdown failure. See shutdown-investigation.md.
+
+## 2026-11-07 — Mario-owned form presentations
+
+Implemented: Mario owns growth/shrink sequence orchestration in FormPresentation and uses the existing Form controller for live profiles/artwork. The user explicitly requested that Mario may own these presentations, replacing the research proposal's level-owned coordinator. BaseLevel retains the temporary timer/world gate and lifecycle cancellation; existing entity gameplay suspension is reused. This avoids another player scene or level-ending dependency. Phase 3–4 must add actual damage/pickup entry points and continued injury protection. See mario-form-presentations.md for timing, tradeoffs, and unverified reference edges.
+
+## 2026-11-07 — Player-owned ordinary damage response
+
+Implemented: enemies deliver ordinary damage through BasePlayer.receive_damage; the concrete player decides injury versus death. Mario owns protection/flashing in a separate Damage child and reuses FormPresentation for shrinking. Explicit lethal level hazards bypass ordinary damage through BaseLevel.on_death. This keeps enemy code independent of Mario forms and avoids using collision-layer changes or the enemy latch as damage protection. The eight-interval cadence is local to the live actor; exact NES shared-counter phase across actor recreation is not claimed. See super-mario-damage.md.
+
+## 2026-11-08 — Shared mushroom scene and explicit Super reward
+
+Implemented: 1-Up and Super Mushroom inherit one mushroom scene and retain the existing Mushroom/PowerUp scripts for physics, emergence, collection, limits, and cleanup. Concrete items may reject collection before consumption/reward; existing overlaps are retried once available. The existing reward painter stores Super Mushroom as an explicit PackedScene-backed power-up reward, preserving coin defaults and legacy authoring. Automatic mushroom/flower tier selection remains future work. In response to the proposed points-only already-Super fallback until Fire exists, the user specified always 1,000 points; the first pass retains Super and documents this temporary NES difference. See super-mushroom.md.
+
+## 2026-11-08 — Reference movement poses replace requested growth idle holds
+
+User direction: Match Mesen's movement poses when presented with the collision-driven running/jumping comparison. This supersedes the earlier requested Small/Super idle holds as the target behavior. Implementation is proposed, not completed by this investigation. Injury must begin with a held Super jump; both transformations require reference closing draws and a corrected control handoff. Earlier shrink-tail reference claims are superseded by the measured collision fixtures. See transformation-animation-audit.md before implementing the correction.
+
+## 2026-11-08 — Implement source-driven transformation handoffs
+
+Implemented the user's selected reference movement poses, superseding the prior growth idle holds and the pending correction proposal. Mario's presentation owns explicit entry/flicker/closing/release phases; normal control resumes on the following engine tick. Airborne growth hands off to existing Move/falling behavior with momentum retained, instead of preserving the old Jump state. The common movement system and walk-resource ordering remain; the Mario presentation maps the supplied 1,2,0 sheet order to source indices. See transformation-animation-audit.md for evidence and remaining qualification boundaries.
+
+## 2026-11-08 — Terrain probes collect world coins
+
+Implemented: player terrain probes request coin collection; the coin owns reward and persistence. This supersedes body-overlap pickup for world coins and the incorrect diagnosis that Super's coin symptom required another crouch-profile reset. Use the existing Small/crouched versus standing probe sets, one successful collection per physics update, and the player's actual CanvasLayer. Do not enlarge the terrain-support body or reuse enemy-contact boxes for this purpose. Removed the speculative current-floor query and arrival-cache test additions at the user's request. See world-coin-probes.md for scope, scene properties, verification, and fidelity limits.
+
+
+## 2026-11-08 — Entity groups and decorative tile grids (implemented)
+
+Use purpose-based structural groups owned by the relevant base scenes rather than repeating loose nodes in concrete variants. Keep physics/contact under Body, visual helpers under Presentation, named attachment points under Anchors, and independent climb detection under Interactions. Do not add empty groups to marker-only spawners.
+
+Use decorative TileMapLayers for castle and flagpole fixed tile artwork. Preserve separate animated sprites and existing collision shapes. This keeps scenery editable as a grid and reduces scene-tree clutter; BaseEntity must therefore include tile atlases in per-instance theme resolution and tile extents in activity bounds. See [entity scene organization](entity-scene-organization.md).
+
+
+## 2026-11-08 — Separate ordinary enemy boundaries (implemented)
+
+Enemy activation and horizontal cleanup now follow the ordinary Goomba/Koopa reference policy rather than the shared 64/96-pixel scenery/power-up rectangles. BaseLevelArea remains the activity authority; live enemies keep updating until removal. Grouped placements convert painted first-member locations into a +48-pixel reference trigger and create available members together at the right edge. This replaces the enemy portion of the shared buffered activity policy, retaining resident hysteresis, power-up behavior, vertical cleanup, limits, skipped attempts, and lifecycle suspension. Tradeoff: future enemy-specific reference exceptions require explicit policy extensions. See [boundary implementation](enemy-boundary-audit.md).
+
+
+## 2026-11-08 — Keep enemy pairs offscreen (implemented)
+
+User preference supersedes the screen-edge group-placement portion of the earlier ordinary enemy boundary decision. Pairs use the same offscreen activation cutoff as singles, spawn at the painted marker plus member offsets, and start all available members in the same call. This preserves offscreen entry and 24-pixel pair spacing rather than reproducing NES screen-edge group placement. Corrected group height and reference-based horizontal cleanup remain intact.
+
+
+## 2026-11-08 — Ground-aligned enemy painting and reference pair timing (implemented)
+
+At the user's request, EnemyLayout returns to a 16×16 grid. Authored ground enemies start with feet on support; remove pair-only vertical compensation and migrate marker heights consistently. The user also clarified that the preceding offscreen pair-placement change should be reverted. Restore the reference group trigger/screen-edge placement and simultaneous 24-pixel spacing. This supersedes the earlier “Keep enemy pairs offscreen” decision; single-enemy activation and ordinary horizontal cleanup remain intact.
+
+
+## 2026-11-08 — Resource-selected shadow styles and one render path (implemented)
+
+Following user approval, levels select ShadowStyle resources for Soft, Crisp, Outer Blur, or null. Both Game and standalone F6 use SharedShadowComposer, replacing standalone root-shader rendering so decoration exclusion and style behavior agree. Runtime routing retains gameplay ownership; null bypasses shadow passes, while Crisp skips blur. The existing Game toggle remains a master override. This supersedes the standalone legacy-shader portion of the shared-shadow design. Tradeoff: standalone rendering now allocates compositor buffers even when disabled, retaining them for quick restoration. See [shadow styles](shadow-styles.md).
+
+
+## 2026-11-08 — Game owns shadow selection (implemented)
+
+User clarification supersedes the level-owned selection in the preceding shadow-style decision. Game owns one ShadowStyle resource for title/stages; BaseLevel has no per-level style override. Standalone previews read the saved Game selection and master toggle from PackedScene state without instantiating a game. Rendering ownership and decoration exclusion remain shared through SharedShadowComposer.

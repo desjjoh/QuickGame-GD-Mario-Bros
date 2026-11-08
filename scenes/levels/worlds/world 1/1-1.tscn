@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://wlp13xllihs5" path="res://scenes/levels/base/base_level.tscn" id="2_base"]
 [ext_resource type="PackedScene" uid="uid://b5m1vkcrml3t2" path="res://scenes/player/mario (small)/mario.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/entities/powerups/super_mushroom.tscn" id="7_msko4"]
 [ext_resource type="PackedScene" path="res://scenes/levels/areas/base_area.tscn" id="10_area"]
 [ext_resource type="Resource" uid="uid://chfcnww7r30v7" path="res://assets/themes/underground.tres" id="12_underground"]
 [ext_resource type="TileSet" uid="uid://g7pmg7w6xn86" path="res://assets/tileset/underground/terrain.tres" id="13_os2yb"]
@@ -39,6 +40,21 @@ entrance_enabled = false
 script = ExtResource("20_lletq")
 kind = 1
 
+[sub_resource type="Resource" id="Resource_1qen6"]
+script = ExtResource("20_lletq")
+kind = 2
+power_up_scene = ExtResource("7_msko4")
+
+[sub_resource type="Resource" id="Resource_dfu87"]
+script = ExtResource("20_lletq")
+kind = 2
+power_up_scene = ExtResource("7_msko4")
+
+[sub_resource type="Resource" id="Resource_wn7v3"]
+script = ExtResource("20_lletq")
+kind = 2
+power_up_scene = ExtResource("7_msko4")
+
 [sub_resource type="Resource" id="Destination_start"]
 script = ExtResource("transport_destination")
 area_id = &"main"
@@ -59,8 +75,11 @@ player_scene = ExtResource("3_player")
 process_physics_priority = 110
 transport_points = Array[ExtResource("transport_placement")]([SubResource("Point_entrance"), SubResource("Point_secret_exit")])
 question_block_rewards = Dictionary[Vector2i, Resource]({
+Vector2i(21, 9): SubResource("Resource_1qen6"),
 Vector2i(64, 8): ExtResource("one_up_reward"),
-Vector2i(94, 9): SubResource("Resource_md070")
+Vector2i(78, 9): SubResource("Resource_wn7v3"),
+Vector2i(94, 9): SubResource("Resource_md070"),
+Vector2i(109, 5): SubResource("Resource_dfu87")
 })
 theme = ExtResource("18_ukhqk")
 
@@ -77,7 +96,7 @@ tile_map_data = PackedByteArray("AAAQAAkAAQAAAAAAAAAUAAkAAAAAAAAAAAAWAAkAAAAAAAA
 tile_set = ExtResource("21_lletq")
 
 [node name="EnemyLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="3" unique_id=1742010551]
-tile_map_data = PackedByteArray("AAAsABcAAAAAAAAAAABQABcAAAAAAAAAAACgAAcAAAAAAAAAAACkAAcAAAAAAAAAAABmABcAAQAAAAAAAADCABcAAQAAAAAAAADkABcAAQAAAAAAAAAAARcAAQAAAAAAAABcARcAAQAAAAAAAAD4ABcAAQAAAAAAAADWABcAAgAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAWAAwAAAAAAAAAAAAoAAwAAAAAAAAAAABQAAQAAAAAAAAAAABSAAQAAAAAAAAAAAAzAAwAAQAAAAAAAABhAAwAAQAAAAAAAAByAAwAAQAAAAAAAACAAAwAAQAAAAAAAACuAAwAAQAAAAAAAAB8AAwAAQAAAAAAAABrAAwAAgAAAAAAAAA=")
 
 [node name="Camera2D" parent="Areas/MainArea" index="3" unique_id=254826152]
 position = Vector2(128, 120)

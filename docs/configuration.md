@@ -26,11 +26,15 @@ Set **Transport Points** and **Pipe Routes** on the source area to link placed p
 - Set camera world bounds on the area camera to define the playable scroll range.
 - Set the timer limit and enable flag on the level. A disabled timer hides the number and keeps the TIME label.
 - `GameHandler.reset_progress_on_death` controls whether death clears progress. Each entity’s persistence setting applies to both death and area reload.
-- The Game scene supplies the stage list and the shared shadow toggle. The first stage is 1-1.
+- The Game scene supplies the stage list and the shared shadow master toggle. The first stage is 1-1. Open `scenes/main/game.tscn`, select **Game**, and use **Presentation → Shadow Style** to load `assets/shadows/soft.tres`, `crisp.tres`, or `outer_blur.tres`. Clear the field for no shadow effect. Soft is the Game default. One selection applies to the title and every stage; standalone F6 previews read the saved Game selection and master toggle. Decorations remain outside the effect.
 
 Historical setting changes and their approvals are in the [settings record](archive/settings.md).
 
 ## Known reference differences
+
+Super Mushroom is available in the existing **EntityLayout** block reward brush: choose **Apply Super Mushroom Reward**, then click a painted question block, hidden question block, reward brick, or alternate reward brick. Its translucent red-mushroom indicator stays visible with the other reward previews. Coin remains the default. This assigns an explicit Super Mushroom, not an automatic mushroom/flower tier.
+
+Super Mushroom always grants 1,000 points. Small Mario grows; already-Super Mario stays Super until Fire is implemented. The latter is the approved temporary difference from the NES's status-based Fire upgrade. See [Super Mushroom](archive/super-mushroom.md).
 
 Timed multi-coin rewards use independent, fixed 231-physics-tick windows instead of the NES's shared, phase-dependent timer. Loading or hitting another block cannot alter an existing window. Pause and unloaded areas freeze remaining time; death follows the existing progress-reset policy. See the [reference investigation and version differences](archive/timed-coin-research.md#approved-version-difference).
 

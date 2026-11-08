@@ -16,7 +16,7 @@ func controller_controls_available() -> bool:
 
 
 func get_movement_axis() -> Vector2:
-	return ControllerHandler.get_axis() if controller_controls_available() else Vector2.ZERO
+	return get_player().get_movement_axis() if controller_controls_available() else Vector2.ZERO
 
 
 func prepare_horizontal_motion() -> float:
@@ -30,7 +30,9 @@ func prepare_horizontal_motion() -> float:
 		controller_controls_available() and ControllerHandler.input_secondary,
 		direction,
 		player.body.is_on_floor(),
-		facing
+		facing,
+		controller_controls_available() and ControllerHandler.input_down > 0.5,
+		ControllerHandler.get_axis().x if controller_controls_available() else 0.0
 	)
 	return direction
 

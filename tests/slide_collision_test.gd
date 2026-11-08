@@ -82,4 +82,4 @@ func _physics_process(delta: float) -> void:
 		print(
 			"PASS: wall stop/skid presentation, immediate reversal and retained edge skid momentum in both directions."
 		)
-		get_tree().quit()
+		await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

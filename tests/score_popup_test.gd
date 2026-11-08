@@ -31,4 +31,4 @@ func _ready() -> void:
 		var frame := get_viewport().get_texture().get_image()
 		assert(frame.save_png("res://.godot/validation/score-popup.png") == OK)
 	print("PASS: ten score tiles, 1 UP, world-space placement and unsupported amounts.")
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

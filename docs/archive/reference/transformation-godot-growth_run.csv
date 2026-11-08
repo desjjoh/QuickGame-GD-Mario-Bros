@@ -1,0 +1,67 @@
+relative,clock,timer,state,changing,pose,texture,visible,x,y,vx,vy
+0,219,254,Move,false,0,Small idle,true,50.5,207.925262451172,150.0,0.0
+1,220,253,Move,false,0,Small idle,true,50.5,207.925262451172,150.0,0.0
+2,221,252,Move,false,0,Small idle,true,50.5,207.925262451172,150.0,0.0
+3,222,251,Move,false,0,Small idle,true,50.5,207.925262451172,150.0,0.0
+4,223,250,Move,false,0,Small idle,true,50.5,207.925262451172,150.0,0.0
+5,224,249,Move,false,0,Small idle,true,50.5,207.925262451172,150.0,0.0
+6,225,248,Move,true,0,Small idle,true,50.5,207.925262451172,150.0,0.0
+7,226,247,Move,true,0,Small idle,true,50.5,207.925262451172,150.0,0.0
+8,227,246,Move,true,0,Small idle,true,50.5,207.925262451172,150.0,0.0
+9,228,245,Move,true,1,Intermediate,true,50.5,207.925262451172,150.0,0.0
+10,229,244,Move,true,1,Intermediate,true,50.5,207.925262451172,150.0,0.0
+11,230,243,Move,true,1,Intermediate,true,50.5,207.925262451172,150.0,0.0
+12,231,242,Move,true,1,Intermediate,true,50.5,207.925262451172,150.0,0.0
+13,232,241,Move,true,2,Small idle,true,50.5,207.925262451172,150.0,0.0
+14,233,240,Move,true,2,Small idle,true,50.5,207.925262451172,150.0,0.0
+15,234,239,Move,true,2,Small idle,true,50.5,207.925262451172,150.0,0.0
+16,235,238,Move,true,2,Small idle,true,50.5,207.925262451172,150.0,0.0
+17,236,237,Move,true,3,Intermediate,true,50.5,207.925262451172,150.0,0.0
+18,237,236,Move,true,3,Intermediate,true,50.5,207.925262451172,150.0,0.0
+19,238,235,Move,true,3,Intermediate,true,50.5,207.925262451172,150.0,0.0
+20,239,234,Move,true,3,Intermediate,true,50.5,207.925262451172,150.0,0.0
+21,240,233,Move,true,4,Small idle,true,50.5,207.925262451172,150.0,0.0
+22,241,232,Move,true,4,Small idle,true,50.5,207.925262451172,150.0,0.0
+23,242,231,Move,true,4,Small idle,true,50.5,207.925262451172,150.0,0.0
+24,243,230,Move,true,4,Small idle,true,50.5,207.925262451172,150.0,0.0
+25,244,229,Move,true,5,Intermediate,true,50.5,207.925262451172,150.0,0.0
+26,245,228,Move,true,5,Intermediate,true,50.5,207.925262451172,150.0,0.0
+27,246,227,Move,true,5,Intermediate,true,50.5,207.925262451172,150.0,0.0
+28,247,226,Move,true,5,Intermediate,true,50.5,207.925262451172,150.0,0.0
+29,248,225,Move,true,6,Super idle,true,50.5,207.925262451172,150.0,0.0
+30,249,224,Move,true,6,Super idle,true,50.5,207.925262451172,150.0,0.0
+31,250,223,Move,true,6,Super idle,true,50.5,207.925262451172,150.0,0.0
+32,251,222,Move,true,6,Super idle,true,50.5,207.925262451172,150.0,0.0
+33,252,221,Move,true,7,Small idle,true,50.5,207.925262451172,150.0,0.0
+34,253,220,Move,true,7,Small idle,true,50.5,207.925262451172,150.0,0.0
+35,254,219,Move,true,7,Small idle,true,50.5,207.925262451172,150.0,0.0
+36,255,218,Move,true,7,Small idle,true,50.5,207.925262451172,150.0,0.0
+37,256,217,Move,true,8,Intermediate,true,50.5,207.925262451172,150.0,0.0
+38,257,216,Move,true,8,Intermediate,true,50.5,207.925262451172,150.0,0.0
+39,258,215,Move,true,8,Intermediate,true,50.5,207.925262451172,150.0,0.0
+40,259,214,Move,true,8,Intermediate,true,50.5,207.925262451172,150.0,0.0
+41,260,213,Move,true,9,Super idle,true,50.5,207.925262451172,150.0,0.0
+42,261,212,Move,true,9,Super idle,true,50.5,207.925262451172,150.0,0.0
+43,262,211,Move,true,9,Super idle,true,50.5,207.925262451172,150.0,0.0
+44,263,210,Move,true,9,Super idle,true,50.5,207.925262451172,150.0,0.0
+45,264,209,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+46,265,208,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+47,266,207,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+48,267,206,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+49,268,205,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+50,269,204,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+51,270,203,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+52,271,202,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+53,272,201,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+54,273,200,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+55,274,199,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+56,275,198,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+57,276,197,Move,false,10,Super idle,true,50.5,207.925262451172,150.0,0.0
+58,277,196,Move,false,10,Super walk,true,53.0,207.925262451172,150.0,0.0
+59,278,196,Move,false,10,Super walk,true,55.5,207.925262451172,150.0,0.0
+60,279,196,Move,false,10,Super walk,true,58.0,207.925262451172,150.0,0.0
+61,280,196,Move,false,10,Super walk,true,60.5,207.925262451172,150.0,0.0
+62,281,196,Move,false,10,Super walk,true,63.0,207.925262451172,150.0,0.0
+63,282,196,Move,false,10,Super walk,true,65.5,207.925262451172,150.0,0.0
+64,283,196,Move,false,10,Super walk,true,68.0,207.925262451172,150.0,0.0
+65,284,196,Move,false,10,Super walk,true,70.5,207.925262451172,150.0,0.0

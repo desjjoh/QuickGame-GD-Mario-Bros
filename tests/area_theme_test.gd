@@ -14,7 +14,7 @@ func _ready() -> void:
 		assert(not theme.entity_markers.has_source(11))
 		preview.theme = theme
 		preview.apply_theme()
-		assert(enemy_layout.tile_set.tile_size == Vector2i(8, 8))
+		assert(enemy_layout.tile_set.tile_size == Vector2i(16, 16))
 		for source_id in [0, 1]:
 			var source := enemy_layout.tile_set.get_source(source_id) as TileSetAtlasSource
 			assert(
@@ -98,6 +98,7 @@ func _ready() -> void:
 	main_player.body.global_position = main_coin.global_position + Vector2(8, 16)
 	for frame in range(4):
 		await get_tree().physics_frame
+		main_player.move_body()
 	assert(GameHandler.player_status.coins == 99 and GameHandler.player_status.score == 200)
 	assert(GameHandler.player_status.lives == 2)
 	var reward_voice := SoundHandler.get_node("Square2Sfx") as AudioStreamPlayer
@@ -163,7 +164,7 @@ func _ready() -> void:
 	var originals := (
 		load("res://scenes/entities/blocks/brick/brick_block.tscn").instantiate() as BaseBlock
 	)
-	var original_texture: Texture2D = originals.get_node("Sprite2D").texture
+	var original_texture: Texture2D = originals.get_node("Body/Sprite2D").texture
 	originals.free()
 	var underground_count := 0
 	for block in lower.get_node("WorldObjects").get_children():
@@ -208,7 +209,7 @@ func _ready() -> void:
 		var pipe := load(scene_path).instantiate() as PipeEntrance
 		pipe.visual_theme = lower.theme
 		lower.get_node("WorldObjects").add_child(pipe)
-		for visual in pipe.get_node("Visuals").get_children():
+		for visual in pipe.get_node("Presentation").get_children():
 			assert(visual.texture.resource_path.contains("/palettes/underground/"))
 	for source_id in range(5):
 		var marker := lower.theme.entity_markers.get_source(source_id) as TileSetAtlasSource
@@ -264,6 +265,7 @@ func _ready() -> void:
 	player.body.velocity = Vector2.ZERO
 	for frame in range(4):
 		await get_tree().physics_frame
+		player.move_body()
 	assert(pickups == [player])
 	assert(GameHandler.player_status.coins == 1 and GameHandler.player_status.score == 600)
 	assert(GameHandler.player_status.lives == 3)
@@ -274,8 +276,8 @@ func _ready() -> void:
 	assert(GameHandler.player_status.lives == 3)
 	assert(reward_voice.playing and reward_voice.stream == SoundHandler.get_sound(&"extra_life"))
 	assert(lower_coin.state_machine.current_state.name == &"Collected")
-	assert(not lower_coin.sprite.visible and not lower_coin.get_node("Pickup").monitoring)
-	assert(not lower_coin.get_node("PaletteAnimation").enabled)
+	assert(not lower_coin.sprite.visible and not lower_coin.get_node("Body/Pickup").monitoring)
+	assert(not lower_coin.get_node("Presentation/PaletteAnimation").enabled)
 	assert(level.request_area_transfer(&"main", &"player_spawn"))
 	await get_tree().process_frame
 	assert(level.request_area_transfer(&"lower"))
@@ -283,7 +285,10 @@ func _ready() -> void:
 	var restored_coin := lower.get_node("WorldObjects/coin_2_5") as BaseEntity
 	assert(restored_coin.state_machine.current_state.name == &"Collected")
 	assert(
-		not restored_coin.sprite.visible and not restored_coin.get_node("PaletteAnimation").enabled
+		(
+			not restored_coin.sprite.visible
+			and not restored_coin.get_node("Presentation/PaletteAnimation").enabled
+		)
 	)
 	assert(GameHandler.player_status.coins == 2 and GameHandler.player_status.score == 800)
 	assert(GameHandler.player_status.lives == 3)
@@ -298,4 +303,4 @@ func _ready() -> void:
 	print(
 		"PASS: independent area themes, Underground terrain/decorations/pipes/question frames, artwork fallback, inherited bounce, resource isolation, and shutdown."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

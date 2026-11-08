@@ -136,4 +136,4 @@ func _ready() -> void:
 	print(
 		"PASS: full-speed launch/apex, tight staircase landing, early staircase misses, and upper question-block rejection across six takeoff positions."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

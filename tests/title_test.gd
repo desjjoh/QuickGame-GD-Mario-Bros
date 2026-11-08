@@ -358,4 +358,4 @@ func run_checks() -> void:
 	print(
 		"PASS: immediate title/no demo, suspended background Mario, white HUD font/cursor, Enter/gamepad Start, single visible option, once-only 1-1 load and retained alternate-stage launch, confirmation consumption, cancellation, session reset and detach cleanup."
 	)
-	get_tree().quit()
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

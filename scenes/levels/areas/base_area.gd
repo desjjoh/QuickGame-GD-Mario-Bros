@@ -246,7 +246,9 @@ func register_activity_entity(entity: BaseEntity) -> void:
 	if entity is BasePlayer:
 		return
 	_activity_entities[entity.get_instance_id()] = weakref(entity)
-	if is_active:
+	if is_active and entity is BaseEnemy:
+		entity.set_activity_suspended(false)
+	elif is_active:
 		entity.set_activity_suspended(
 			not get_activity_region(false).intersects(entity.get_activity_rect())
 		)
@@ -267,6 +269,36 @@ func get_activity_region(sleep_region: bool) -> Rect2:
 	return Rect2(camera.global_position - size / 2.0, size).grow(margin)
 
 
+## Last visible NES pixel, with the ordinary enemy parser's 16px column rounding.
+func get_enemy_spawn_region() -> Rect2:
+	var region := get_activity_region(false)
+	var view := get_activity_region(false).grow(-activation_buffer)
+	var right_pixel := floorf(view.end.x) - 1.0
+	var cutoff := floorf((right_pixel + 48.0) / 16.0) * 16.0
+	region.position.x = floorf(view.position.x)
+	region.size.x = cutoff + 1.0 - region.position.x
+	return region
+
+
+func get_enemy_group_origin_x() -> float:
+	return floorf(get_activity_region(false).end.x - activation_buffer) - 1.0
+
+
+## Ordinary Goomba/Koopa OffscreenBoundsCheck, including its borrow/carry.
+func enemy_outside_cleanup(enemy: BaseEnemy) -> bool:
+	var view := get_activity_region(false).grow(-activation_buffer)
+	var left := floorf(view.position.x)
+	var right := floorf(view.end.x) - 1.0
+	var anchor := floorf(enemy.body.global_position.x - 8.0)
+	var right_extension := 73.0 if left >= 73.0 else 72.0
+	return (
+		anchor < left - 73.0
+		or anchor >= right + right_extension
+		or enemy.get_activity_rect().end.y <= get_activity_region(true).position.y
+		or enemy.get_activity_rect().position.y >= get_activity_region(true).end.y
+	)
+
+
 func _physics_process(_delta: float) -> void:
 	update_camera_activity()
 
@@ -280,6 +312,12 @@ func update_camera_activity() -> void:
 		var entity := _activity_entities[id].get_ref() as BaseEntity
 		if not is_instance_valid(entity) or entity.is_shutdown:
 			_activity_entities.erase(id)
+			continue
+		if entity is BaseEnemy:
+			if enemy_outside_cleanup(entity):
+				entity.remove_offscreen()
+			else:
+				entity.set_activity_suspended(false)
 			continue
 		var bounds := entity.get_activity_rect()
 		if entity is SpawnableEntity and not sleep_region.intersects(bounds):
@@ -322,4 +360,10 @@ func _activate_spawners(wake_region: Rect2, sleep_region: Rect2) -> void:
 		if not is_instance_valid(spawner):
 			_spawners.erase(id)
 			continue
-		spawner.update_activity(wake_region, sleep_region, theme)
+		var enemy_placement: bool = (
+			spawner is EnemySpawner
+			or (spawner is EntitySpawner and spawner.spawn_category == &"enemy")
+		)
+		spawner.update_activity(
+			get_enemy_spawn_region() if enemy_placement else wake_region, sleep_region, theme
+		)
