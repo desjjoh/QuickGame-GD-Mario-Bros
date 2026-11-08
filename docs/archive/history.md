@@ -1028,3 +1028,22 @@ Affected paths: BaseEnemy contact eligibility hook, GreenKoopa, BasePlayer score
 Added ShellStunned and upside-down shell presentation shared across idle/moving recovery paths. Block bumps now launch/relaunch Koopas, award 100, and retain their enemy slot. Landing starts recovery; airborne kicks use the existing timer-based awards, including the zero-interval 8000 case. Moving shells remain dangerous after a bump at 60 px/s. Stomping restores upright idle presentation and re-kicking restores 180 px/s.
 
 Affected paths: GreenKoopa script/scene, koopa_shell_stunned_state, shell idle/moving states, koopa_block_bump_test, and architecture/Koopa/decisions documentation. Seven focused regressions reached PASS; final expanded block-hit integration test passed without warnings, other runs retained ObjectDB warnings (detailed in Koopa archive). Full suite, rendered playtesting, and Mesen comparisons were not performed. No project settings or import options changed.
+
+
+## 2026-11-07 - Super Mario reference investigation
+
+Recorded disassembly-backed Super Mario standing/crouched enemy boxes, independent terrain probes, grounded input filtering, preserved airborne crouch, one-pixel side push-out, pipe entry/emergence paths, and growth/injury transformation sequencing in super-mario-research.md. Corrected earlier proposed modern headroom restrictions: neither uncrouching nor growth is gated by a safe-fit check. Research separates source-confirmed values from deductions and pending Mesen scenarios. One-player form/posture ownership remains a proposal; nothing is implemented by this milestone.
+
+Verification: source tables/control flow were inspected, selected public disassembly labels cross-checked, and documentation diff checks performed. Mesen was not running, no repository ROM was found, and no emulator observations or gameplay regressions were performed. No gameplay, scenes, settings, imports, audio, or AGENTS.md changes.
+
+
+## 2026-11-07 - Complete player probe inventory and proposed form ownership
+
+Expanded super-mario-research.md with all player terrain probe groups (including the swimming group for completeness), exact contact-box controls/centers, feet-centered conversions, collision order and gates, current scene geometry, and proposed one-actor Mario form/posture ownership. Distinguishes source-confirmed spans/edge equality from unverified Godot continuous-shape equivalence and rendered artwork. Verification checked source tables and current player/state/bonk/pipe files; gameplay regressions and Mesen observations were not performed. Only archive documents changed; user-supplied Super artwork and all gameplay/settings/AGENTS files were left untouched.
+
+
+## 2026-11-07 - Super Mario sprite inventory
+
+Inspected six supplied Super sheets containing nine distinct 16x32 frames. Recorded idle, three walk poses, skid, jump, crouch, and two climb regions, exact alpha bounds/padding, shared palette, and alignment with current Small Mario in super-mario-artwork.md. Identified the missing intermediate-growth and shrink-related swimming poses; basic movement/crouch/climb artwork is available. Theme-specific Super sets are not supplied or mapped. Preserved the three-row bottom padding on climb frame 1 in the authoring map and documented the existing one-pixel sprite/feet convention rather than choosing a new offset silently.
+
+Verification: original PNGs visually inspected, RGBA/dimensions/bounds measured with a standard-library decoder, current Small images cross-checked with System.Drawing, and scene/atlas/animation/theme references inspected. Documentation diff checks passed. No Godot import, rendered/Mesen comparison, or gameplay tests were performed. All image pixels, import settings, scenes, gameplay, and AGENTS.md were left unchanged.

@@ -505,3 +505,13 @@ Implemented following discussion and explicit user choice: a 12-physics-tick (0.
 ## 2026-11-07 - Recoverable Koopa block stun
 
 Implemented after reference investigation and user approval: add ShellStunned as shared Walking physics plus landing-to-idle recovery, with Koopa-owned shell orientation. A moving shell retains ShellMoving and its attack identity when bumped, but uses the 60 px/s block-launch speed. This separates recoverable block stuns from permanent shell-hit defeat and reuses existing BlockHitReceiver, kick/score/cleanup paths. Repeat bumps reapply the launch and award 100. Airborne recovery intervals enable the reference zero-interval 8000 kick before a newly stunned walking Koopa lands. Fixed recovery, local stomp grace, and modern gravity integration remain deliberate differences; see archive/koopa.md.
+
+
+## 2026-11-07 - NES behavior target for Super Mario (research; implementation proposed)
+
+The user requests original NES behavior by default, without modern enhancements unless alternatives are explicitly requested. Earlier conversational suggestions to require headroom before standing/growing are withdrawn. Research confirms posture selection is not guarded by a safe-fit query; terrain resolution uses separate probes and incremental side correction. Keep one actor with form/posture configuration and shared movement as a proposal for the next discussion, not implemented functionality. Exact Godot body representation and obstruction corrections remain undecided pending the documented emulator scenarios. See [Super Mario reference investigation](super-mario-research.md).
+
+
+## 2026-11-07 - Proposed single-actor Mario forms and complete collision inventory
+
+Proposal, not implementation: keep one active Mario instance with Mario-specific form/posture configuration, shared movement states and generic BasePlayer lifecycle interfaces. Super/Fire should not be independent duplicated players or replacement actors during transformations. Crouch must persist independently of grounded state transitions; a grounded Crouch state may coordinate actions but cannot own all airborne posture. Recorded all 21 player terrain probe entries, three contact boxes, coordinate conversion, normal inclusive-edge comparison, current Godot shapes, and unresolved rectangle equivalence in super-mario-research.md. No scene restructuring, runtime configuration, or Super gameplay has been implemented.
