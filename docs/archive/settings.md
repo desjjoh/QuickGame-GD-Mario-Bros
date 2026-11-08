@@ -422,3 +422,17 @@ With explicit user approval, set rendering/environment/defaults/default_clear_co
 ## 2026-11-08 — Revert default clear colour; Game-owned backdrop
 
 At the user's explicit request, removed rendering/environment/defaults/default_clear_color=Color(0,0,0,1) from project.godot, restoring the previously implicit engine default. This supersedes the black-clear-colour entry above. Added Game/Backdrop as a black, viewport-filling, input-ignoring ColorRect behind the Game composition. It stays outside shadow capture. Existing area colours are unchanged; standalone F6 uses the viewport default where no area colour is supplied. No other project settings changed.
+
+
+## 2026-11-08 — Window-resolution composition and resizable aspect-preserving window
+
+Explicit user approval: change project settings so rendering follows window size and preserves the game's aspect ratio rather than locking output to 768×720.
+
+- display/window/stretch/mode: viewport → canvas_items.
+- display/window/stretch/aspect: previously implicit engine default → explicitly keep.
+- display/window/stretch/scale_mode: integer → fractional, allowing arbitrary fitted window sizes.
+- display/window/size/borderless: true → false, enabling normal window borders/resize controls.
+- display/window/size/resizable: previously implicit engine default → explicitly true.
+- display/window/size/maximize_disabled: true → false.
+
+Logical framing remains 256×240; 768×720 overrides remain the initial launch size, not a fixed rendering resolution. Native rendering fills the aspect-fitted window region, with bars for a wider/taller window. The OS window itself can have another aspect ratio. Sprite sampling remains nearest; glow/shadow sampling is smoothed separately. No Input Map or import settings changed. Verified rendered resize scenarios under OpenGL Compatibility; see shadow-styles.md.

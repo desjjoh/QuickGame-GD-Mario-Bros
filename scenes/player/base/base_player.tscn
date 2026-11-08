@@ -6,7 +6,7 @@
 [ext_resource type="Script" path="res://scenes/components/motion/motion_values.gd" id="4_values"]
 [ext_resource type="PackedScene" path="res://scenes/components/actions/run.tscn" id="5_run"]
 [ext_resource type="PackedScene" path="res://scenes/components/actions/slide.tscn" id="6_slide"]
-[ext_resource type="Script" path="res://scenes/components/motion/gravity.gd" id="7_gravity"]
+[ext_resource type="Script" path="res://scenes/components/motion/vertical_movement.gd" id="7_vertical"]
 [ext_resource type="Script" path="res://scenes/components/actions/jump.gd" id="8_jump"]
 [ext_resource type="Script" path="res://scenes/components/motion/air_movement.gd" id="9_air"]
 [ext_resource type="Script" path="res://scenes/components/motion/corner_correction.gd" id="10_corners"]
@@ -40,8 +40,8 @@ body = NodePath("../Body")
 [node name="AirMovement" type="Node" parent="Motion"]
 script = ExtResource("9_air")
 
-[node name="Gravity" type="Node" parent="Motion"]
-script = ExtResource("7_gravity")
+[node name="VerticalMovement" type="Node" parent="Motion"]
+script = ExtResource("7_vertical")
 
 [node name="CornerCorrection" type="Node" parent="Motion"]
 script = ExtResource("10_corners")

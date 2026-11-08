@@ -146,6 +146,7 @@ func get_climb_query_bounds() -> Rect2:
 
 
 func on_area_arrival() -> void:
+	super.on_area_arrival()
 	form_presentation.cancel()
 	damage.apply_visibility()
 	form_controller.set_crouched(false)

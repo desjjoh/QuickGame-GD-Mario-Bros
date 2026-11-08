@@ -52,7 +52,7 @@ func process_physics(delta: float) -> BaseState:
 
 	player.horizontal_movement.apply(player.body, player.motion_values, direction, delta)
 	player.face_direction(direction)
-	player.gravity_component.apply(player.motion_values, delta)
+	player.vertical_movement.apply_gravity(player.motion_values, delta)
 	player.move_body()
 
 	var mario := player as Mario

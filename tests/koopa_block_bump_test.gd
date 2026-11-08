@@ -30,6 +30,8 @@ func _ready() -> void:
 	add_child(game)
 	var level: BaseLevel = GameHandler.current_level
 	var player := level.player
+	# Scripted attacker placement selects hit direction, not camera scrolling.
+	(level.active_area.get_node("Camera2D") as LevelCamera).follow_enabled = false
 	# Freeze the actor and its child state machine during scripted block interactions.
 	player.process_mode = Node.PROCESS_MODE_DISABLED
 	player.body.global_position = Vector2(24, 100)

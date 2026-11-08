@@ -152,7 +152,7 @@ func _ready() -> void:
 		await step()
 		if block._bounce_reward_claimed:
 			break
-	assert(block._bounce_reward_claimed and mario.body.global_position.y >= 188)
+	assert(block._bounce_reward_claimed and mario.body.velocity.y == 0)
 	ControllerHandler.input_primary = false
 	block.free()
 	mario.body.global_position = Vector2(136, 208)
@@ -166,6 +166,7 @@ func _ready() -> void:
 	)
 	hidden.position = Vector2(128, 144)
 	level.world_objects.add_child(hidden)
+	mario.bonk_action.reset_reaction_gate()
 	await step(2)
 	ControllerHandler.input_primary = true
 	ControllerHandler.input_primary_just_pressed = true

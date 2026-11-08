@@ -8,9 +8,9 @@ void fragment() {
 	vec2 pixel = 1.0 / vec2(textureSize(foreground_texture, 0));
 	float alpha = 0.0;
 	float total_weight = 0.0;
-	for (int x = -6; x <= 6; x++) {
-		float weight = exp(-float(x * x) / 8.0);
-		vec2 tap = UV + vec2(float(x) * blur_radius / 6.0 * pixel.x, 0.0);
+	for (int x = -12; x <= 12; x++) {
+		float weight = exp(-float(x * x) / 32.0);
+		vec2 tap = UV + vec2(float(x) * blur_radius / 12.0 * pixel.x, 0.0);
 		float inside = step(0.0, tap.x) * step(tap.x, 1.0);
 		alpha += texture(foreground_texture, tap).a * weight * inside;
 		total_weight += weight;

@@ -26,6 +26,7 @@ var _prelude_advance := false
 var _closing_tick := -1
 var _finish_pending := false
 var _actor_restored := false
+var _reset_on_visible := false
 
 
 func _ready() -> void:
@@ -61,6 +62,7 @@ func begin(shrink: bool) -> bool:
 	_cycle_finished = false
 	_finish_pending = false
 	_actor_restored = false
+	_reset_on_visible = false
 	_closing_tick = -1
 	_remember_walk()
 	_prelude_advance = _walk_timer == 0
@@ -105,7 +107,10 @@ func _physics_process(_delta: float) -> void:
 			_prelude_advance = false
 		_apply_growth_normal(SMALL)
 	if timer == (0xf0 if shrinking else 0xf8):
+		var previous_offset := _mario.sprite.position
 		_mario.form_controller.configure(_mario, SMALL if shrinking else SUPER)
+		if _mario.sprite.position != previous_offset:
+			_reset_pose_interpolation()
 		_mario.animation_player.pause()
 		_walk_frame = 0
 		changing = true
@@ -128,6 +133,9 @@ func _physics_process(_delta: float) -> void:
 			_apply_growth_normal(SUPER)
 	if shrinking:
 		_mario.sprite.visible = _visible and tick % 2 == 0
+		if _mario.sprite.visible and _reset_on_visible:
+			_mario.sprite.reset_physics_interpolation()
+			_reset_on_visible = false
 	if timer == (0xc8 if shrinking else 0xc4):
 		# DonePlayerTask selects normal control for the NEXT engine tick.
 		timer = 0
@@ -155,7 +163,23 @@ func _remember_walk() -> void:
 
 func _set_pose(texture: Texture2D, form: MarioForm) -> void:
 	_mario.sprite.texture = _mario.resolve_texture(texture)
-	_mario.sprite.position = form.sprite_position
+	_set_pose_offset(form.sprite_position)
+
+
+func _set_pose_offset(offset: Vector2) -> void:
+	var changed := _mario.sprite.position != offset
+	_mario.sprite.position = offset
+	# Size-change textures swap instantly; their matching offsets must snap too.
+	if changed:
+		_reset_pose_interpolation()
+
+
+func _reset_pose_interpolation() -> void:
+	if shrinking:
+		# A hidden sprite must be shown before its render history is reset.
+		_reset_on_visible = true
+	else:
+		_mario.sprite.reset_physics_interpolation()
 
 
 func _apply_growth_normal(form: MarioForm) -> void:
@@ -201,7 +225,7 @@ func _apply_pose() -> void:
 		texture = [SMALL.idle, SUPER.growth_intermediate, SUPER.idle][pose]
 		offset = SMALL.sprite_position if pose == 0 else SUPER.sprite_position
 	_mario.sprite.texture = _mario.resolve_texture(texture)
-	_mario.sprite.position = offset
+	_set_pose_offset(offset)
 
 
 func _restore_actor_presentation() -> void:

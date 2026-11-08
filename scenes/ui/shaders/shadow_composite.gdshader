@@ -14,9 +14,9 @@ void fragment() {
 	vec2 shadow_uv = UV - shadow_offset * pixel;
 	float alpha = 0.0;
 	float total_weight = 0.0;
-	for (int y = -6; y <= 6; y++) {
-		float weight = exp(-float(y * y) / 8.0);
-		vec2 tap = shadow_uv + vec2(0.0, float(y) * blur_radius / 6.0 * pixel.y);
+	for (int y = -12; y <= 12; y++) {
+		float weight = exp(-float(y * y) / 32.0);
+		vec2 tap = shadow_uv + vec2(0.0, float(y) * blur_radius / 12.0 * pixel.y);
 		float inside = step(0.0, tap.x) * step(tap.x, 1.0)
 			* step(0.0, tap.y) * step(tap.y, 1.0);
 		alpha += texture(horizontal_texture, tap).r * weight * inside;

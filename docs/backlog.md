@@ -4,10 +4,18 @@
 
 
 - Wire shells, fireballs, and star contact into the enemy hit contract as those mechanics are added.
-- Add breakable bricks and additional power-up forms.
-  See [growth, damage, and bricks research](archive/growth-damage-bricks-research.md) for the agreed batches and remaining reference checks.
 - Extend climbable behavior to vines and add any vine-specific detach rules.
 - Define standalone level restart behavior for isolated F6 testing.
+
+## Brick breaking — deferred
+
+The user deferred the remaining work to tackle something else first. Implemented: breaking physics, themed debris, the accepted cached shatter sound, delayed bonk on follow-up contact, and 50 points without a score popup. Keep the accepted audio; the live shared noise channel was reverted after causing stutter.
+
+- Handle coins directly above a broken brick. Verify the reference behavior, then reuse the existing coin reward, persistence, sound, and popup path as appropriate.
+- Audit reactions above a shattering brick against the reference: Goombas, Koopas, stationary/moving shells, and mushrooms. Breaking currently delivers the shared block-hit interaction; identify any shatter-specific differences before changing behavior.
+- Complete focused integration checks for adjacent bricks, reward-brick protection, pause, debris/marker cleanup, and area reload.
+
+Suggested first item when resuming: coins above bricks. See [brick-breaking notes](archive/brick-breaking.md) and [growth, damage, and bricks research](archive/growth-damage-bricks-research.md) for implementation history, reference evidence, and remaining checks. Additional power-up forms remain separate pending work.
 
 ## Audio and presentation
 

@@ -84,3 +84,62 @@ Verification: growth_handoff_test compares **180 visible pose/state boundary sam
 - [Jumping injury](reference/transformation-godot-fixed-damage_jump.csv)
 
 Focused growth_handoff_test, mario_form_presentation_test, mario_damage_test, super_mushroom_test, falling_animation_test, falling_gravity_test, pause_test, and death_test passed without engine errors or warnings. The final cancellation/animation-phase adjustment was followed by another clean run of the three directly affected presentation/damage scenes. The full suite was not run. These results qualify the captured pose/hold/release cases, not complete NES movement/physics or desktop-renderer parity across all scenarios.
+
+## 2026-11-08 — Renewed growth-only review
+
+User reports growth still looks awkward and considers shrinking satisfactory. No gameplay, presentation, shrinking, or audio changes were made in this review. Re-ran the current controlled growth_run and growth_jump capture scene into .godot/validation/growth-review, preserving the earlier captures. Each produced 66 samples. Comparing clock, timer, state, changing, pose, texture label, and visibility against transformation-godot-fixed-growth_run/jump.csv found no differences across either sequence. This establishes stability of those sampled fixtures, not a new pixel comparison with Mesen or a claim that the reported issue is resolved.
+
+The existing fixture seeds walk phase and holds Right/Run (and Jump for airborne pickup). It does not qualify stationary/vertical-only collection, releasing or reversing controls during the freeze, arbitrary initial walk/global phases, or the complete rendered pickup with interpolation, world effects, and score presentation. Its CPU sprite output bottom-aligns each texture rather than reproducing the full sprite transform/camera rendering path. These limits matter when assessing apparent vertical pops or awkward movement around a correct pose sequence.
+
+Current code also explicitly consults live movement input for prelude/closing walking-versus-idle selection and forces a Move handoff after growth. These are review targets for additional controlled reference encounters; neither is classified as a newly confirmed mismatch by these two captures. Next investigation should target the user's observed segment and compare a complete rendered encounter against the reference before further animation changes.
+
+### Growth flicker artwork recheck
+
+The user identified the size-changing flicker as the awkward segment. Compared the fresh growth-only CPU sprite captures directly against the retained Mesen PNGs, using the existing calibrated screenshot offset and palette normalization. All 118 selected growth frames had zero foreground-shape differences. The temporary growth-only verifier initially returned its generic failure because its inherited expected count was still 174 (the four-case growth-plus-injury total); its results contained no mismatching frames. This is a two-case artwork/tick comparison, not a successful four-case verifier run.
+
+The reference's ten entries and closing Small-idle draw are already present in MarioFormPresentation. The main game's SharedShadow node disables interpolation, while the project enables physics interpolation. These settings do not by themselves establish whether Mario's pose-offset changes are being interpolated in the rendered path. A rendered flicker timing capture remains necessary before attributing the visual complaint to interpolation, shaders, display-frame pacing, or proposing changes to the verified reference sequence. No production changes were made.
+
+## 2026-11-08 — Confirmed rendered growth offset interpolation
+
+Rendered an isolated live Mario growth in OpenGL Compatibility on the local NVIDIA RTX 3070 Ti, at a requested 240 render FPS against 60Hz physics. The fixture retains the project's physics interpolation, instantiates the current sandbox/player/form presentation, fixes the body and camera, hides unrelated geometry, and disables the shadow effect only within the diagnostic instance. No production scripts, scenes, settings, artwork, or audio were changed. A second diagnostic changes only the sprite instance's interpolation mode to OFF. The control is an experiment, not an implemented fix.
+
+The frame_post_draw callback reads the rendered viewport and locates the lowest Mario foreground pixel. It compares that pixel with the expected opaque bottom computed from the current selected texture, its actual sprite transform, and transparent padding. This checks real rendering rather than bottom-aligning exported sprite images. Global clock and interpolation fraction accompany each measurement.
+
+Final two captures: inherited interpolation had 140 rendered flicker samples, with 25 displaced samples and errors ranging from -7 to +7 logical pixels. The sprite-OFF control had 145 rendered flicker samples, with zero displaced samples. Sample counts differ because the captures run independently in real time. The logical body is stationary; the sprite's local Y switches between -7 (Small) and -15 (intermediate/Super). Texture changes take effect while the local transform is still being interpolated toward its new position. This creates transient vertical movement on size swaps, explaining a rendered defect invisible to the earlier CPU sprite comparisons. Both final capture processes completed; stderr logs were empty. The earlier red-only probe was refined to use all three foreground colors and the texture's actual opaque bounds before these final measurements.
+
+Reproduction: reference/growth-render-interpolation.gd/.tscn. Set GROWTH_RENDER_CASE=inherited or control_off and launch the scene with a rendered window, --rendering-method gl_compatibility --rendering-driver opengl3 --resolution 256x240 --max-fps 240. Create .godot/validation/growth-render first. Captures are reference/growth-render-inherited.csv and growth-render-control-off.csv; ignored screenshots/logs remain under .godot/validation/growth-render. No new Mesen capture or full regression suite was needed for this diagnostic.
+
+Recommendation, not implemented: treat a growth artwork/offset swap as a discrete presentation change and reset the sprite's interpolation history when its local offset changes. This can preserve body/camera interpolation and leave shrinking's current behavior untouched. Confirm the chosen correction with the same rendered measurement before claiming it fixed. The experiment does not qualify the full F5 shader/compositor path, other graphics backends, or all transformation entry phases.
+
+## 2026-11-08 — Growth pose offset reset implemented
+
+At the user's approval, MarioFormPresentation now resets only the sprite's interpolation history whenever a growth pose changes its local offset. This covers the form-controller size-change threshold, the flicker entries and closing draw, and the following normal Super pose. Shrinking still assigns the same offsets without resetting interpolation; the helper explicitly excludes shrinking. Body movement, pose sequence, global phase, artwork, and audio are unchanged.
+
+Re-ran the rendered fixture with normal inherited interpolation (GROWTH_RENDER_CASE=growth_fixed), OpenGL Compatibility at requested 240 render FPS. All 143 captured flicker renders had zero difference between expected and rendered opaque-bottom positions; the prior inherited run had 25 displaced samples out of 140, with up to seven pixels of error. The final CSV is reference/growth-render-fixed.csv; ignored screenshots/logs remain under .godot/validation/growth-render. Capture stderr was empty.
+
+Four focused scenes passed without engine errors or warnings: growth_handoff_test, mario_form_presentation_test, mario_damage_test, super_mushroom_test. Formatter check passed. No full suite, project settings changes, new Mesen capture, or full F5 compositor qualification was performed. These results verify the isolated rendered interpolation defect and the affected transformation/pickup contracts.
+
+## 2026-11-08 — Shrinking interpolation investigation (no production change)
+
+At the user's request, extended the rendered probe to ordinary Super damage/shrinking, keeping current production behavior. The diagnostic starts Super, invokes receive_damage(), and records actual sprite visibility so hidden injury frames are excluded from foreground-position assertions. Geometry/shadows are isolated as in the growth probe. Compared inherited interpolation with a diagnostic sprite-OFF control, at two starting global-clock phases. Neither control alters an established scene or project setting.
+
+OpenGL Compatibility, requested 240 render FPS with 60Hz physics:
+
+| Start phase / mode | Visible changing renders | Displaced renders | Error range (logical px) |
+| --- | ---: | ---: | --- |
+| 0 / inherited | 72 | 32 | -8 to +8 |
+| 0 / sprite OFF control | 72 | 0 | 0 |
+| 1 / inherited | 76 | 35 | -7 to +7 |
+| 1 / sprite OFF control | 76 | 0 | 0 |
+
+Shrinking therefore has the same discrete-texture/interpolated-offset defect on visible frames. Flashing hides other frames but does not eliminate the problem. The growth fix deliberately excludes shrinking, as requested, so it could not correct these offsets. A matching targeted reset when shrinking changes sprite offset is recommended, but not implemented in this investigation. Keep the shrink pose sequence, flashing, and timers unchanged if that correction is approved.
+
+Reproduction uses reference/shrink-render-interpolation.gd/.tscn, SHRINK_RENDER_CASE=inherited or control_off (suffix _phase1 was used for separate output files), and SHRINK_PHASE=0 or 1. Create .godot/validation/shrink-render before launch. Command-line renderer/window/FPS parameters match the growth probe. Four CSVs are preserved as reference/shrink-render-inherited.csv, shrink-render-control_off.csv, shrink-render-inherited_phase1.csv, and shrink-render-control_off_phase1.csv. All four rendered captures completed with empty stderr. Formatter passed. No production edits, new Mesen capture, or regression suite were performed; the conclusion is scoped to the isolated rendered damage encounter on this backend.
+
+## 2026-11-08 — Shrinking offset correction implemented
+
+User approved the matching shrinking correction. MarioFormPresentation now resets sprite interpolation for both transformations' offset changes, including the form-controller threshold. Growth keeps its immediate reset. Shrinking queues a reset and applies it after setting the sprite visible on its next eligible damage-flash update. Pose sequence, timers, global phase, damage protection, and flashing cadence are unchanged; no body/camera interpolation or project settings were changed.
+
+The first implementation reset at assignment time and still showed 32 displaced visible frames in the phase-0 rendered probe (up to seven pixels). That verification failed and the implementation was corrected before completion. Shrink pose assignment can run while the sprite remains hidden from the previous flash; resetting after visibility is restored is necessary in this rendered path.
+
+Final OpenGL Compatibility captures at requested 240 render FPS: phase 0 had 72 visible flicker renders with zero displacement, and phase 1 had 76 with zero displacement. Both stderr logs were empty. Evidence is reference/shrink_fixed_phase0.csv and shrink_fixed_phase1.csv. The same production script was checked by the focused growth, form-presentation, damage, and mushroom regression scenes; their final outcome is reported in the task reply. No full suite, new Mesen capture, or full F5 compositor qualification was performed.

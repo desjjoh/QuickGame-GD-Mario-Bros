@@ -1198,3 +1198,125 @@ Four focused scenes passed without errors or warnings. A temporary replay matche
 Verified that phase 1 restores the correct fast-jump profile after landing and turning, without additional production movement or jump/gravity changes. Added landing_rejump_test, an inherited movement-probe fixture scene, and golden reference data from a fresh 20-case/960-frame Mesen flat-court capture. Both Small/Super and both reversal directions cover immediate/delayed jumps, tap/hold, and landing-contact input gating.
 
 Five focused scenes passed without engine errors or warnings, including the new case matrix and existing handoff, held-Run landing, jump, and falling-gravity checks. Golden checks cover exact takeoff, first velocity samples, apex tolerance, no automatic buffered jump, and one integration per tick. Corrected initial reference-fixture terrain contamination and a test-edit indentation error before final reruns. No full suite or rendered interactive comparison was performed. Source data, limits, and pending broader coverage are in [the movement audit](base-movement-audit.md). No settings changed.
+
+
+## 2026-11-08 — Super Mario corner collision and terrain audit
+
+Fixed standing head penetration on diagonal corner entry and a skipped check on the final upward tick. MarioTerrain adds occupied-probe underside recovery without changing the short support body, side probes, crouch, or hidden-block ownership. Added super_mario_corner_test and documented the related terrain audit in [corner investigation](super-mario-corner-investigation.md); updated architecture/testing guidance.
+
+Seven focused scenes passed without engine errors or warnings. The new corner scene passed again after adding thin-obstruction coverage. Formatter and whitespace checks passed. No full suite, new Mesen capture, or interactive visual playtest was performed. No settings changed.
+
+
+## 2026-11-08 — Transient Super corner-overlap reference follow-up
+
+Investigated the user's screenshots after clarification that overlap is brief and followed by a bonk. Eight seeded Mesen cases and eight Godot cases show matching one-/two-tick upper-side probe occupancy and confirm that transient visual overlap belongs to the reference's probe model. Preserved capture scripts/data and recorded evidence limits in [corner investigation](super-mario-corner-investigation.md). Also documented that the existing Godot head snap is more restrictive than the NES velocity-only response. No further gameplay/settings changes were made; no full suite or input-only visual reproduction was performed.
+
+
+## 2026-11-08 — Standing bonks clear naturally
+
+At the user's request, replaced Super standing head snapping with downward velocity reversal (+60 px/s), retaining head sweep/occupancy detection. Removed the obsolete underside-bound recovery helper and updated corner/Super movement assertions to allow temporary overlap and require reversal plus natural clearance. This supersedes the standing positional correction earlier today. Hidden-block and short-body paths remain unchanged. See [corner investigation](super-mario-corner-investigation.md).
+
+Verification: five focused scenes passed without engine errors or warnings (super_mario_corner_test, super_mario_movement_test, bonk_contact_test, corner_correction_test, question_block_test). Formatter and whitespace checks passed. No full suite or interactive playtest was performed; no settings changed.
+
+
+## 2026-11-08 — Sideways corner-stop investigation correction
+
+Investigated the user's clarification that Mesen stops sideways momentum on a partial corner contact. Added closer-corner material captures and Godot comparison under docs/archive/reference. Both tested implementations stop X when an upper side probe enters the obstacle; the exact reported mismatch remains unreproduced. Confirmed that our head occupancy fallback omits the reference Y-position gate and that the recent blanket +60 px/s override incorrectly conflates solid, bump, and future shatter responses. Recorded proposed corrections and superseded the earlier broad parity conclusion in [corner investigation](super-mario-corner-investigation.md). No gameplay/settings changes were made in this follow-up, and no full suite or input-only visual reproduction was performed.
+
+
+## 2026-11-08 — Standing corner head gate and block-bounce response
+
+Implemented the reference-derived standing head Y-phase gate and separated accepted block bounce (zero vertical speed) from solid/rejected ceiling response (+60 px/s). Retained independent side checks and natural clearance. Added both-direction adjacent-phase assertions for horizontal stop, one-pixel push-out, no Y snap, and one coin per bounce; updated the Super movement assertion and architecture guide. Supersedes the blanket standing +60 response earlier today. Shattering remains deferred; hidden/short-body paths remain unchanged.
+
+Six focused scenes passed without engine errors or warnings; formatter and whitespace checks passed. No new Mesen capture, input-only visual playtest, or full suite was performed. No project settings changed. Evidence and limits: [corner investigation](super-mario-corner-investigation.md).
+
+
+## 2026-11-08 — Block/ground differential and corner-fixture correction
+
+Compared ground, fresh brick/question blocks, and an inert brick control using identical clean geometry. Inert brick and ground match all 192 recorded position/velocity samples; fresh brick/question movement also matches. The confirmed divergence is the accepted bounce response and visual presentation, rather than a different collision envelope. Corrected inherited floating terrain in super_mario_corner_test; earlier contaminated seeded Godot capture conclusions are explicitly superseded in [the investigation](super-mario-corner-investigation.md). Preserved clean capture scripts/data under docs/archive/reference. Four audit scenes and the corrected corner regression completed without errors/warnings. Exact screenshot reproduction remains unresolved; no production/settings edits or full-suite run occurred in this follow-up.
+
+
+## 2026-11-08 — Reproduced deep used-block overlap under game canvas
+
+Reproduced the late-bonk failure in actual 1-1 geometry beneath a CanvasLayer, with the upper question block Inactive and no bounce running. MarioTerrain's default-canvas point queries miss block bodies on the game canvas while still detecting TileMap ground; matching canvas queries detect those same bodies. Preserved diagnostic scripts/CSVs and the approximately fourteen-pixel penetration trace in [corner investigation](super-mario-corner-investigation.md). No further production/settings changes made; correction and canvas-aware regression remain pending. Controlled movement reproduction is not an interactive F5 pixel comparison, and no full suite was run.
+
+
+## 2026-11-08 — Canvas-aware terrain probes and regression coverage
+
+Fixed MarioTerrain's occupied-head and side point queries to include both default-canvas TileMap bodies and player-canvas entity bodies. Added canvas_terrain_test with 48 default/game-canvas scenarios, including used blocks without bounce presentation, ground, head gating, side stopping, natural clearance, and exactly-once rewards. Current architecture/testing guides describe the shared query behavior. Controlled 1-1 replay reduces maximum head penetration from approximately 14px to 3.5px; baseline/fixed CSVs and limitations are in [corner investigation](super-mario-corner-investigation.md).
+
+Five focused scenes passed without engine errors/warnings in their final runs; the new test's initial type-inference parse failure was corrected. A deliberately disabled canvas lookup fails the new side-contact assertion, verifying defect coverage. Formatter/whitespace checks passed. No full suite, settings edits, or interactive rendered playtest was performed.
+
+
+## 2026-11-08 — Resizable native-resolution shadow composition
+
+Applied approved aspect-preserving canvas_items window settings; retained 256×240 logical framing and 768×720 initial size, enabled window controls/resizing/maximizing. Narrowed and softened Outer Blur after user feedback, increased Soft sampling density, and smoothed Crisp's silhouette sampling while preserving foreground nearest filtering. Added rendered window-size coverage and recorded exact settings/approval in settings.md and implementation limits in shadow-styles.md. Two focused shadow scenes passed headlessly; all-style OpenGL resize checks passed at three window sizes without errors/warnings. No full suite or performance benchmark was run.
+
+
+## 2026-11-08 — Block-bump test camera isolation
+
+Traced the previously freed Koopa to legitimate left-boundary cleanup after scripted Mario placement scrolled the camera. Fixed only koopa_block_bump_test by disabling camera follow during its hit-direction fixtures. Production enemy movement/lifecycle/cleanup remain unchanged. Both block-bump and enemy-canvas focused scenes pass without errors/warnings, including the previously unreachable real block-query checks. Evidence and prior failure retained in [enemy canvas audit](enemy-canvas-audit.md). No full suite or settings changes.
+
+
+## 2026-11-08 — Ordinary brick breaking, steps 1–2
+
+Added form-capability-selected ordinary/alternate brick breaking, immediate collision removal and deferred deletion. BonkAction captures an optional block-selected vertical response; player ceiling handling preserves -120 px/s without a snap. Reward/used blocks retain their existing behavior. Added brick_break_test and updated canvas/solid fixtures for the new terminal outcome. Eight focused scenes passed in final runs without errors/warnings, after correcting an obsolete side-stop assertion for removed bricks. No full suite, new Mesen capture, interactive playtest, or settings changes. Debris/audio/scoring/coin-above work remains deferred; see [brick breaking](brick-breaking.md).
+
+
+## 2026-11-08 — Broken-cell marker and neighboring-brick regression
+
+Retained invisible brick collision for the next contact pass before terminal cleanup, replacing immediate body removal. Normal head collision now reverses the shatter impulse after one two-pixel ascent step instead of allowing prolonged rise into neighboring bricks. Added both-direction/default/game-canvas neighbor coverage and updated terminal-lifetime assertions. Five focused scenes passed in final runs without errors/warnings; corrected a test scope error during coverage expansion. No full suite, interactive playtest, or settings changes. See [brick breaking](brick-breaking.md).
+
+
+## 2026-11-08 — No-ascent brick response and 16-tick reaction gate
+
+Implemented the user's clarified no-upward-movement requirement: zero break velocity, immediate collision removal, and no temporary marker. Added BonkAction's 16-physics-tick accepted-hit gate, including hidden blocks. Replaced the favorable seed regression with 20 full-jump cases using archived reference break-event timing; require no ascent, exact gate duration, and neighbor travel without claiming exact reference post-break positions. User confirmed the in-game feel. Six focused scenes passed in final runs without engine errors/warnings after correcting independent-fixture gate resets and a temporary test indentation error. No full suite or settings changes. Details and superseded decisions are in [brick breaking](brick-breaking.md).
+
+
+## 2026-11-08 — Input-only normal NES brick-break trace
+
+Captured actual 1-1 from boot, naturally collecting the mushroom and breaking an ordinary brick with controller inputs only. Recorded frame states, ordered CPU writes, and six PNGs under docs/archive/reference. The -2 integer-speed write survives one movement update: fractional carry produces one additional upward pixel, then head collision reverses speed before the updater clears the temporary cell. No project behavior/settings changed, and no regression suite was run for this read-only investigation. This resolves one ordinary encounter, not every seam/running/VRAM variant. Details: [normal brick-break trace](normal-brick-break-trace.md).
+
+
+## 2026-11-08 — Input-only running and seam shatter traces
+
+Captured 21 normal-play running jump routes in Mesen after naturally collecting the mushroom. Fourteen shatter runs include exact/near seam hits: thirteen reverse after one extra upward pixel, leftward contacts can stop X, and a row-edge escape continues upward five pixels. Preserved per-frame/CPU-write/event CSVs, screenshots and indexed summary under docs/archive/reference; documented pilot exclusions and limits in [normal brick-break trace](normal-brick-break-trace.md). No gameplay/settings changes or regression suite run. Existing no-ascent project behavior remains the user's chosen behavior rather than claimed exact NES emulation.
+
+
+## 2026-11-08 — Player vertical-motion component migration
+
+Replaced Motion/Gravity with Motion/VerticalMovement, preserving the script UID and existing float arithmetic. Moved post-movement vertical-speed commitment into the component; migrated Idle/Move/Slide/scripted walks and BasePlayer's airborne calculation. BasePlayer still owns one body movement call and final collision response; no second velocity cache or automatic integration was added. Jump tuning and the current brick-break behavior remain unchanged; NES integer/fraction storage remains deferred.
+
+Eight focused scenes passed in final runs without engine errors/warnings, including landing/re-jump, growth, pipes, flagpole and brick full-jump coverage. The initial class rename required generated Godot class-cache refresh and a focused brick-scene rerun. Formatter/whitespace checks passed. No full suite, interactive playtest, or settings changes. Details: [vertical movement component](vertical-movement-component.md).
+
+
+## 2026-11-08 — NES airborne fractional arithmetic
+
+Added integer speed, speed fraction and position fraction to VerticalMovement with carry-based displacement/gravity and the reference cap-reset threshold. BasePlayer still moves its body once, then commits speed; jump/arrival reset fractional state. Corrected tiny safe-margin recovery and standing-head boundary ownership so integer movement matches the captured tile convention. Retained compatibility float paths for non-NES configurations and the user-chosen zero-ascent brick response.
+
+Added exact verification of 313 observed Mesen integration steps and the six-frame controller-only Super jump approach, including both fractions. Eleven focused scenes passed without errors/warnings in the final run. Initial runs exposed fixture cap-extraction/activity issues and the actual underside-boundary mismatch; these were corrected without relaxing full-jump event assertions. Formatter/whitespace checks passed. No full suite, new Mesen capture, interactive playtest, or settings changes. See [vertical movement](vertical-movement-component.md).
+
+
+## 2026-11-08 — Reference shatter response and captured seam verification
+
+Restored integer -2 shatter through VerticalMovement while preserving speed/position fractions and held-jump gravity. Retained a temporary solid collision cell through the next contact pass; ordinary collision now determines reversal or row-edge escape. Supersedes the previous zero-ascent policy at the user's request. Expanded stationary continuation and full-jump assertions, added 182-frame vertical/terrain replay from 14 input-only running/seam captures, and verified marker pause/cleanup. Nine focused scenes passed in final runs without errors/warnings after fixture/obsolete assertion corrections. No full suite, new Mesen capture, interactive playtest, or settings changes. Exact comparison scope and limitations: [brick breaking](brick-breaking.md).
+
+## 2026-11-08 — Brick debris, shatter sound, and 50 points
+
+Completed the approved presentation/reward batch for ordinary and alternate brick breaking. Broken awards 50 points once without a score popup and creates a themed four-fragment effect under the area, independent of the short-lived collision marker. Added reference-derived trajectories/global flips, pause and screen-bottom cleanup, and SoundHandler's 32-frame noise cue through a non-positional default-gain voice. Affected paths: scenes/components/presentation/brick_debris.gd, scripts/states/blocks/broken_brick_state.gd, scripts/handlers/sound_handler.gd, brick regressions, architecture/backlog/testing guides. Five focused scenes passed without errors/warnings; no full suite, rendered/listening comparison, new Mesen capture, or settings changes. Coin-above and shatter-specific victims remain pending. See brick-breaking.md for reference details and limitations.
+
+### Brick presentation follow-up — audio sampling and editor diagnostics
+
+User testing identified an audible shatter discrepancy and INTEGER_DIVISION in the sprite-pair index. Made indexing explicit, captured read-only Mesen register writes, corrected the final-frame noise mute, and replaced point-sampled noise with oversampling/anti-alias resampling. Retained hardware periods and default playback gain/pitch. Added an ultrasonic-alias rejection and unity-gain check; focused debris/audio tests passed. Listening parity remains unverified. See brick-breaking.md for evidence and limits.
+
+## 2026-11-08 — Revert live shared noise synthesis
+
+User testing reported overworld frame stutter and requested reverting the shared noise channel while retaining delayed bonk behavior. Restored the original combined overworld WAV, music handler, and music generator. Removed the live noise renderer, generator playback, register schedule, and its regression scene. Brick debris again owns a normal non-positional sound player; its prior standalone cue is now cached as assets/audio/effects/brick_shatter.wav, avoiding live synthesis. Retained bonk suppression on accepted shatter: a subsequent solid marker contact can produce the pulse. Exact shared-channel fidelity remains deferred. Focused verification is recorded in the task reply; no project settings changed.
+
+## 2026-11-08 — Snap growth pose offsets without smoothing
+
+Fixed rendered vertical displacement during Mario's growth flicker by resetting the sprite's interpolation history when growth changes its local offset, including the form-change threshold and closing pose handoff. Shrinking retains its previous interpolation behavior. A rendered 240-FPS diagnostic with normal inherited interpolation produced 143 flicker frames with zero vertical displacement, versus up to seven pixels previously. Four focused transformation/damage/mushroom scenes and formatter check passed; no full suite or settings changes. Affected production path: scripts/player/mario_form_presentation.gd. Evidence and limits: transformation-animation-audit.md.
+
+## 2026-11-08 — Correct shrinking offset interpolation
+
+Extended MarioFormPresentation's discrete pose-offset reset to shrinking. Because flashing can hide the sprite at pose assignment, shrinking applies a pending interpolation reset after making the sprite visible. The first assignment-only attempt failed the rendered check and was corrected. Final captures across two clock phases produced 148 visible flicker frames with zero displacement, versus 67 displaced frames previously. Pose timing, damage flashing/protection, body interpolation, and settings remain unchanged. Evidence and verification scope: transformation-animation-audit.md.
