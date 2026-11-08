@@ -27,12 +27,10 @@ MusicHandler="*res://scripts/handlers/music_handler.gd"
 
 window/size/viewport_width=256
 window/size/viewport_height=240
-window/size/borderless=true
-window/size/maximize_disabled=true
 window/size/window_width_override=768
 window/size/window_height_override=720
-window/stretch/mode="viewport"
-window/stretch/scale_mode="integer"
+window/stretch/mode="canvas_items"
+window/vsync/vsync_mode=2
 
 [editor_plugins]
 

@@ -32,7 +32,7 @@ var scripted_motion_step: Callable
 @onready var run_action: RunAction = $Actions/Run
 @onready var slide_action: SlideAction = $Actions/Slide
 @onready var motion_values: MotionValues = $Motion
-@onready var gravity_component: GravityComponent = $Motion/Gravity
+@onready var vertical_movement: VerticalMovementComponent = $Motion/VerticalMovement
 @onready var jump_action: JumpAction = $Actions/Jump
 @onready var air_movement: AirMovementComponent = $Motion/AirMovement
 @onready var corner_correction: CornerCorrectionComponent = $Motion/CornerCorrection
@@ -45,7 +45,7 @@ func configure_start(_configuration: Resource) -> void:
 
 ## Area initialization resets transient posture without replacing the player.
 func on_area_arrival() -> void:
-	pass
+	vertical_movement.reset_fraction()
 
 
 func get_movement_axis() -> Vector2:
@@ -113,7 +113,7 @@ func award_shell_kick(enemy: BaseEnemy, world_position: Vector2, interval: int) 
 func advance_scripted_walk(direction: float, delta: float) -> void:
 	horizontal_movement.apply(body, motion_values, direction, delta)
 	face_direction(direction)
-	gravity_component.apply(motion_values, delta)
+	vertical_movement.apply_gravity(motion_values, delta)
 	move_body()
 	update_scripted_walk_animation()
 
@@ -138,6 +138,7 @@ func _try_attach_climbable(from_feet: Vector2, to_feet: Vector2, after_motion: b
 
 
 func _on_jump_started() -> void:
+	vertical_movement.reset_fraction(body)
 	var sound := jump_action.sound_effect
 	if sound == null:
 		sound = SoundHandler.get_sound(jump_action.sound_cue)
@@ -149,12 +150,12 @@ var camera_correction_x: float = 0.0
 
 
 func move_body(gravity_after_motion: bool = false) -> void:
+	var rising := body.velocity.y < 0.0
 	var next_vertical_speed := body.velocity.y
 	if gravity_after_motion:
-		next_vertical_speed = gravity_component.vertical_speed_after(
+		next_vertical_speed = vertical_movement.prepare_step(
 			motion_values, get_physics_process_delta_time()
 		)
-	var rising := body.velocity.y < 0.0
 	var previous_position := body.global_position
 	var horizontal_speed := body.velocity.x
 	var corrected_landing := corner_correction.prepare(
@@ -182,7 +183,7 @@ func move_body(gravity_after_motion: bool = false) -> void:
 	if gravity_after_motion:
 		# Position uses the current speed; gravity prepares the following tick.
 		# Landing and ceiling response retain authority over the resulting speed.
-		body.velocity.y = 0.0 if body.is_on_floor() else next_vertical_speed
+		vertical_movement.finish_step(motion_values, next_vertical_speed)
 	if corrected_landing:
 		body.velocity.x = horizontal_speed
 	# ImpedePlayerMove stops momentum into solid sides. Godot can retain
@@ -198,8 +199,17 @@ func move_body(gravity_after_motion: bool = false) -> void:
 
 ## Shared bonk motion/audio after the caller delivers the appropriate head hit.
 func respond_to_ceiling() -> void:
-	body.velocity.y = ceiling_bump_speed
-	jump_action.update(motion_values, false)
+	body.velocity.y = (
+		ceiling_bump_speed
+		if is_nan(bonk_action.response_velocity_y)
+		else bonk_action.response_velocity_y
+	)
+	# Shattering retains upward speed and the held-jump gravity selection.
+	if body.velocity.y >= 0.0:
+		jump_action.update(motion_values, false)
+	# Shatter itself has no bump pulse; a subsequent solid marker contact does.
+	if bonk_action.suppress_ceiling_sound:
+		return
 	var sound := ceiling_bump_sound
 	if sound is AudioStreamWAV:
 		# One-shot playback without trusting embedded WAV loop metadata.

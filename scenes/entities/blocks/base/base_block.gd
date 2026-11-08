@@ -5,6 +5,9 @@ extends BaseEntity
 
 @onready var body: StaticBody2D = $Body
 
+## Optional block-selected motion response; NAN preserves the ordinary bonk path.
+var bonk_velocity_y: float = NAN
+
 @onready var bounce: BlockBounce = $Presentation/Bounce
 
 

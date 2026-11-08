@@ -85,6 +85,7 @@ func _ready() -> void:
 		0x17c, [3, 5, 32], [0x82, 0x5f, 0x48], [0xa7, 0xf6, 0xbc]
 	)
 	_sounds[&"bump"] = _build_swept_pulse(0x23a, [4, 6], [0x9e, 0x9e], [0x93, 0xbb])
+	_sounds[&"brick_shatter"] = _build_brick_shatter()
 	_sounds[&"enemy_smack"] = _build_swept_pulse(
 		0xef,
 		[14],
@@ -151,6 +152,11 @@ func stop_reward(cue: StringName = &"") -> void:
 		return
 	_square_two.stop()
 	reward_voice_changed.emit(false)
+
+
+## Cached standalone cue; no per-frame synthesis or shared music voice.
+static func _build_brick_shatter() -> AudioStreamWAV:
+	return load("res://assets/audio/effects/brick_shatter.wav") as AudioStreamWAV
 
 
 static func _build_pulse(

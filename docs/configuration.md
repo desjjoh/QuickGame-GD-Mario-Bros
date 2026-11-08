@@ -45,3 +45,5 @@ Timed multi-coin rewards use independent, fixed 231-physics-tick windows instead
 ## Shared entity registry
 
 Add standard marker-to-scene mappings to **BaseLevel: Entity Scenes** in scenes/levels/base/base_level.tscn. TestLevel and 1-1 inherit this registry. Do not create a per-level dictionary override: Godot replaces the inherited dictionary rather than merging entries. Levels own their painted placements and reward overrides.
+
+The game uses 256×240 logical framing with window-resolution canvas_items rendering. The bordered, resizable window starts at 768×720; fractional aspect-preserving scaling fits other sizes with bars as needed. Shader masks can render smoothly while foreground artwork uses nearest sampling.

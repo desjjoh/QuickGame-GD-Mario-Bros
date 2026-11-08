@@ -48,18 +48,45 @@ func resolve(player: BasePlayer, before: Vector2, was_rising: bool, crouched: bo
 		return
 	var head := SHORT_HEAD if crouched else STANDING_HEAD
 	# The existing short body/bonk path already owns short-posture ceilings.
-	if not crouched and was_rising and player.body.velocity.y <= 0.0:
+	# HeadChk uses the NES origin (feet - 32), whose low nibble equals feet mod 16.
+	var head_phase := posmod(int(floorf(player.body.global_position.y)), 16)
+	if not crouched and was_rising and head_phase >= 4:
 		var from := Vector2(player.body.global_position.x, before.y) + head + Vector2(0.0001, 0)
-		var to := player.body.global_position + head + Vector2(0.0001, 0)
+		var to := player.body.global_position + head + Vector2(0.0001, 0.0001)
 		if to.y < from.y:
 			var query := PhysicsRayQueryParameters2D.create(
 				from, to, player.body.collision_mask, [player.body.get_rid()]
 			)
-			var hit := player.body.get_world_2d().direct_space_state.intersect_ray(query)
+			var space := player.body.get_world_2d().direct_space_state
+			var hit := space.intersect_ray(query)
+			if hit.is_empty() or hit.normal.y <= 0.5:
+				# A diagonal step can put the vertical ray's origin inside a tile.
+				# Like HeadChk, inspect the current head position as well as entry.
+				var point := PhysicsPointQueryParameters2D.new()
+				point.position = to
+				point.collision_mask = player.body.collision_mask
+				point.exclude = [player.body.get_rid()]
+				var occupied := _terrain_at(player, point)
+				if not occupied.is_empty():
+					hit = occupied[0]
+					hit["normal"] = Vector2.DOWN
 			if not hit.is_empty() and hit.normal.y > 0.5:
-				player.body.global_position.y = hit.position.y - head.y
-				player.bonk_action.deliver_at(player, hit.collider)
+				var solid_speed := player.vertical_movement.speed_with_integer(
+					player.motion_values, 1
+				)
+				var bounced := player.bonk_action.deliver_at(player, hit.collider)
 				player.respond_to_ceiling()
+				# BumpBlock stops upward motion; NYSpd reverses solid contact.
+				# Keep the accepted block reaction distinct from rejected/used solids.
+				if bounced:
+					player.body.velocity.y = (
+						0.0
+						if is_nan(player.bonk_action.response_velocity_y)
+						else player.bonk_action.response_velocity_y
+					)
+				else:
+					player.body.velocity.y = solid_speed
+
 	if crouched:
 		return
 	# Fixed left-first order, one encountered obstruction per update, as in SideCheckLoop.
@@ -70,7 +97,7 @@ func resolve(player: BasePlayer, before: Vector2, was_rising: bool, crouched: bo
 		query.collision_mask = player.body.collision_mask
 		query.exclude = [player.body.get_rid()]
 		var blocked := false
-		for hit: Dictionary in player.body.get_world_2d().direct_space_state.intersect_point(query):
+		for hit: Dictionary in _terrain_at(player, query):
 			var pipe := (hit.collider as Node).get_parent() as PipeEntrance
 			if pipe != null and pipe.sideways and index % 2 == 0:
 				continue
@@ -83,3 +110,15 @@ func resolve(player: BasePlayer, before: Vector2, was_rising: bool, crouched: bo
 			player.body.velocity.x = 0.0
 			player.body.global_position.x += push
 		return
+
+
+## TileMap bodies use the default canvas; entity bodies inherit Game's CanvasLayer.
+func _terrain_at(player: BasePlayer, query: PhysicsPointQueryParameters2D) -> Array[Dictionary]:
+	var space := player.body.get_world_2d().direct_space_state
+	query.canvas_instance_id = 0
+	var hits := space.intersect_point(query)
+	var canvas := player.body.get_canvas_layer_node()
+	if canvas != null:
+		query.canvas_instance_id = canvas.get_instance_id()
+		hits.append_array(space.intersect_point(query))
+	return hits

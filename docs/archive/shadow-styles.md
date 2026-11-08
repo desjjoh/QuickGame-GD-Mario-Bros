@@ -39,3 +39,17 @@ No full regression suite or natural interactive Koopa playthrough was performed.
 The user clarified that style selection must be game-wide rather than level-specific. Moved the exported Shadow Style field and Soft resource reference from BaseLevel to Game. SharedShadowComposer retains the Game selection across bind_level calls and supports runtime Game Inspector changes. BaseLevel no longer exposes the field. Standalone F6 reads the authored game.tscn property state, including the existing master toggle, rather than introducing a preview-specific authoring setting or another game session.
 
 Verification after this correction: shadow_style_test and shared_shadow_test passed headless; shadow_style_test and integer-position koopa_shadow_test passed rendered on D3D12. The style test covers blank Game startup and Outer Blur retention through level replacement; standalone startup matches the saved Game selection. The earlier half-pixel artifact limitation remains unresolved.
+
+
+## 2026-11-08 — Smoother, bolder Outer Blur
+
+Outer Blur now uses dedicated horizontal/composite shaders with 25 samples per axis, a wider Gaussian distribution, radius 6 (previously 4.5), and opacity 0.60 (previously 0.45). The foreground remains nearest-filtered; only the glow mask is blurred. Soft/Crisp shader resources are unchanged. The effect still renders at the game's canvas resolution, so it retains some pixel character rather than becoming a full-resolution postprocess. The wider kernel increases blur sampling cost for this style; no performance benchmark was run.
+
+shadow_style_test and shared_shadow_test passed headlessly without engine errors/warnings. shadow_style_test also passed with the OpenGL Compatibility renderer and no reported errors/warnings. No project/import settings changed.
+
+
+## 2026-11-08 — Native window rendering and all-style refinement
+
+With approved canvas_items/keep/fractional settings, final composition now rasterizes at the aspect-fitted window resolution instead of enlarging a completed low-resolution glow. Outer Blur radius is narrowed from 6 to 4; opacity reduced from 0.60 to 0.45 after user visual feedback. Soft uses 25 taps per axis with the original Gaussian spread retained. Crisp interpolates only the offset alpha silhouette to smooth its border; visible foreground sampling remains nearest and the offset shape remains hard. No additional blur pass is enabled for Crisp.
+
+Added window_render_test with render-resolution/aspect-fit assertions and all-style checks at 768×720, 1024×960, and 1000×700. It checks opaque foreground preservation, decoration visibility/exclusion from casting, and shadow presence. Initial test assumptions about ViewportTexture.get_size and a single subpixel edge sample were corrected: get_image reports actual fitted render dimensions, and edge checks sample the shadow band. Rendered OpenGL Compatibility checks passed without reported errors/warnings; both existing focused shadow scenes passed headlessly. Larger images were visually inspected for sharp foreground and smooth shadow edges. Other renderers/performance were not benchmarked.

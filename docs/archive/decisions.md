@@ -596,3 +596,33 @@ At the user's approval, separate player placement/recovery offsets from camera p
 ## 2026-11-08 — Area-owned bounded solid backgrounds (implemented)
 
 Use an exported area colour and one bounded ColorRect, with transparent default, rather than changing the viewport clear colour globally. Derive the extent from existing camera world limits/visible height. Route the fill behind decorations and outside shadow capture through the shared compositor. This keeps area/theme independence and avoids an opaque background turning the entire capture into a shadow silhouette. The user chose solid fills; painted background tiles remain outside this implementation.
+
+
+## 2026-11-08 — Accepted block reaction selects bonk velocity
+
+Implemented for the approved brick-breaking steps 1–2: ordinary bricks expose an optional selected bonk velocity, captured only by accepted BonkAction delivery and applied by the player. This avoids hard-coding brick type in player movement and prevents standing head handling overwriting the break response. NAN retains existing response behavior; each delivery resets the capture. Reward blocks opt out by retaining their existing active state. Debris and shatter rewards remain separate follow-up work. See brick-breaking.md.
+
+
+## 2026-11-08 — Temporary broken-cell collision marker
+
+Supersedes immediate collision removal in the first brick-breaking pass. Retain the hidden ordinary brick's body through the next physics contact tick, then retire it after player processing at priority 1000. This reproduces the captured temporary-solid-cell reversal without introducing collision immunity, player position snapping, or a general timer. The marker is terminal and cannot issue another block reward/hit. The one-tick model deliberately does not emulate variable NES VRAM queue delays. User explicitly approved this correction; details and verification are in brick-breaking.md.
+
+
+## 2026-11-08 — No-ascent brick breaking and player block-reaction gate
+
+Supersedes the temporary-marker decision. The user explicitly requested no upward movement after breaking and confirmed the resulting game feel. Bricks select zero Y speed and remove their collision immediately; marker lifetime/priority code is removed. Retain a 16-tick accepted block-reaction gate on BonkAction, including hidden-block delivery. This prevents neighboring interactive hits from reapplying responses/rewards while preserving solid contact. Full-jump regressions use captured reference break-event timing, but no-ascent is the chosen behavior and is not advertised as exact NES post-break trajectory parity. See brick-breaking.md.
+
+
+## 2026-11-08 — Separate vertical motion beside horizontal components
+
+Approved Motion grouping keeps horizontal and vertical arithmetic in separate components, coordinated by one BasePlayer movement call. Replaced the existing Gravity component with VerticalMovement instead of adding another gravity calculator. Retained authoritative Body.velocity and current float formulas during migration; integer/fraction emulation remains future work. This avoids introducing duplicate integration while establishing the ownership boundary. See vertical-movement-component.md.
+
+
+## 2026-11-08 — NES airborne byte arithmetic with explicit compatibility boundary
+
+Implemented the approved fractional phase on VerticalMovement: integer speed and two byte fractions, carry-based integer displacement, gravity carry, and NES cap threshold/reset. BasePlayer still moves once. The component reconciles subpixel safe-margin recovery without overriding real floor/ceiling contact; jump initialization and area arrival reset transient fractions. Keep float integration for non-NES timing/gravity/caps, and preserve the user's no-ascent brick response. Exact component/frame evidence and limitations are in vertical-movement-component.md. This supersedes the arithmetic-deferred portion of the component migration decision, not the collision/presentation ownership decisions.
+
+
+## 2026-11-08 — Restore reference shatter using VerticalMovement
+
+At the user's explicit request, supersede the no-ascent choice with the captured integer-byte shatter response. VerticalMovement composes integer -2 with retained fractions; negative response preserves jump-gravity selection. Retain a temporary solid cell through the next contact pass, allowing normal head/side collision to produce reversal or row-edge escape. No immunity or forced universal reversal. Exact running/seam vertical replay and independent full-jump directional checks bound the fidelity claim. Variable VRAM queue delay and crouched trajectories remain unqualified. See brick-breaking.md.

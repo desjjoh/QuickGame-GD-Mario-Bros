@@ -60,3 +60,22 @@ Names must match scene basenames. The runner accepts both `PASS:` and `<scene>_t
 
 
 `area_background_test` checks standalone preview colour, camera-bound fill geometry, transparent fallback, offset-area loading/routing, and disabled-shadow behavior. Its rendered checks also verify visible bounds, foreground order, and shadows landing on the fill without the fill casting its own shadow.
+
+
+`landing_rejump_test` compares 20 flat-ground cases with a fresh Mesen-derived fixture: Small/Super, both travel directions, immediate versus one-ground-tick-delayed re-jumps, tapped/held Jump, and landing-contact press/hold rejection. It checks initial velocity, takeoff tick, early horizontal samples, apex within 1.1 pixels, and one integration per tick. See [phase 2 evidence](archive/base-movement-audit.md). No modern input buffering is expected.
+
+`super_mario_corner_test` covers standing head penetration during diagonal apex entry in both directions, the last upward step before gravity reverses velocity, and thin upper obstructions. See [corner investigation and audit](archive/super-mario-corner-investigation.md) for verification limits.
+
+`canvas_terrain_test` runs 48 seeded trajectories across default/game-canvas hierarchies, both directions, ground/brick/active-question/used-question fixtures, and three contact heights. It checks head gating, sideways stop versus head-only travel, distinct bounce/solid response, no Y snap, natural clearance, and exactly-once coin rewards. The terrain fixture clears inherited floating geometry before placing its floor.
+
+`window_render_test` requires a rendered window and explicitly skips headless execution. It verifies all shadow styles and aspect-fitted image dimensions at 768×720, 1024×960, and 1000×700.
+
+`enemy_canvas_test` verifies real Super hurtbox overlaps and block-to-Goomba/Koopa shape-query hits under both default and game-style canvases. Evidence and the separate existing block-bump test failure are recorded in [enemy canvas audit](archive/enemy-canvas-audit.md).
+
+`brick_neighbor_test` uses 20 full grounded-jump cases with original-game break-event data. It compares recorded post-break integer heights/speed and directional outcomes, prevents repeated reactions for 16 physics ticks, and verifies gate expiry. It uses earlier controlled-court event data.
+
+`vertical_fraction_test` compares 313 captured Mesen integration steps exactly across integer Y, speed, speed fraction and position fraction. `vertical_jump_reference_test` verifies the six-frame normal Super jump approach and its fractions against the controller-only trace, under a CanvasLayer, including the recorded shatter continuation and descent. See [vertical arithmetic verification](archive/vertical-movement-component.md).
+
+`brick_seam_reference_test` checks 182 frames from 14 controller-only Mesen running/seam shatters, with exact logical Y, integer speed and both fractions. It replays observed horizontal positions to isolate vertical/collision behavior; horizontal simulation is checked separately by the full-jump neighbor regression.
+
+`brick_debris_test` checks all three themed fragment atlases, initial two-pair trajectories, the 32-frame non-positional shatter cue at default gain/pitch, pause, and cleanup below the visible screen. `brick_break_test` checks the direct 50-point award and duplicate-hit rejection; brick debris creates no score popup. Compare fragment appearance and the combined bonk/shatter sound in a rendered playtest before claiming visual/audio parity.
