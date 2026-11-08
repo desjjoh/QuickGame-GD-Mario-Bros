@@ -19,6 +19,7 @@ func frames() -> void:
 func check(
 	level: BaseLevel, composer: SharedShadowComposer, label: String, game: Node = null
 ) -> void:
+	level.active_area.background_color = Color(0.3, 0.3, 0.3, 1)
 	level.player.process_mode = Node.PROCESS_MODE_DISABLED
 	level.player.hide()
 	level.active_area.get_node("Layouts/GroundLayout").hide()

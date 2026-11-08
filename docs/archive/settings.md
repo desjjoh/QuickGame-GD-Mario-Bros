@@ -412,3 +412,13 @@ User approved Soft/Crisp/null resource selection and requested Outer Blur. BaseL
 ## 2026-11-08 — Move shadow selection to Game
 
 At the user's correction, moved the Shadow Style scene property from BaseLevel to Game in scenes/main/game.tscn, retaining assets/shadows/soft.tres as the default. BaseLevel no longer exposes a style override. Standalone previews read the saved Game property and existing master toggle. This supersedes the level-specific ownership above; no Project Settings or import settings changed.
+
+
+## 2026-11-08 — Black default viewport backdrop
+
+With explicit user approval, set rendering/environment/defaults/default_clear_color in project.godot to Color(0,0,0,1). The previous value was not serialized: the project used Godot's implicit gray default. Black now fills uncovered viewport pixels and transparent area backgrounds. Per-area Background Color overrides remain unchanged. Scope is the default runtime backdrop, including Game and standalone levels; no shadow, input, import, or audio settings changed.
+
+
+## 2026-11-08 — Revert default clear colour; Game-owned backdrop
+
+At the user's explicit request, removed rendering/environment/defaults/default_clear_color=Color(0,0,0,1) from project.godot, restoring the previously implicit engine default. This supersedes the black-clear-colour entry above. Added Game/Backdrop as a black, viewport-filling, input-ignoring ColorRect behind the Game composition. It stays outside shadow capture. Existing area colours are unchanged; standalone F6 uses the viewport default where no area colour is supplied. No other project settings changed.

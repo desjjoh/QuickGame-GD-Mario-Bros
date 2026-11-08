@@ -123,11 +123,16 @@ func _ready() -> void:
 		wall.position = Vector2(trial[0] + trial[1] / 2.0, 184)
 		level.world_objects.add_child(wall)
 		mario.body.global_position = Vector2(trial[2], 208)
+		var before_correction := mario.camera_correction_x
 		mario.body.velocity = Vector2.ZERO
 		await get_tree().physics_frame
 		await get_tree().process_frame
 		await step(28)
 		assert(is_equal_approx(mario.body.global_position.x, trial[3]))
+		assert(
+			absf((mario.camera_correction_x - before_correction) - (trial[3] - trial[2])) < 0.1,
+			"Stationary Super push-out must be excluded from camera progress."
+		)
 		wall.free()
 
 	# Super's center head, fourteen pixels above the support body's head, bonks a block.

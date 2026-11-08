@@ -1156,3 +1156,24 @@ Affected paths: assets/shadows, scripts/resources/shadow_style.gd, scenes/levels
 ## 2026-11-08 — Game-wide shadow style ownership
 
 Moved Shadow Style from levels to Game at the user's correction. Title and stage replacements retain one selection; standalone F6 reads the saved Game style/master toggle without creating a game. Removed level-specific selection and updated style/Koopa fixtures and current guides. Shadow-style/shared-shadow headless checks and D3D12 rendered style/Koopa checks passed. No full suite was run; the documented half-pixel investigation remains open. No Project Settings or import settings changed.
+
+
+## 2026-11-08 — Camera correction filtering and NES pipe return framing
+
+Separated head/physics/Super push-out corrections from LevelCamera's measured forward progress. Preserved legitimate walking and landing movement while suppressing side-blocked scroll. Added explicit pipe arrival framing at sprite-left X=56/body X=64, clamped to area bounds, without changing ordinary endpoint/respawn framing or stage geometry.
+
+Eight distinct focused regressions passed without engine errors or warnings, including real corner escapes, Super push-out, wall hops, the ledge matrix, normal follow/bounds, pipe transfer, and actual 1-1 return composition. Corrected initial blocked-recovery drift and a test camera process-mode warning before successful reruns. No full suite or interactive rendered judder playthrough was performed. Paths, reference evidence, and limitations are in [the camera audit](camera-correction-arrival-audit.md). No settings changed.
+
+
+## 2026-11-08 — Bounded per-area background colour
+
+Added BaseLevelArea Background Color and a ColorRect sized to the camera's world limits/visible height. Transparent defaults preserve existing appearances. SharedShadowComposer renders the active area's fill behind decorations, receiving foreground shadows without casting a backdrop silhouette; scene and gameplay ownership remain intact. The existing area runtime-template lifecycle handles recreation on area entry.
+
+Focused area_streaming_test, scene_hierarchy_test, shadow_style_test, and area_background_test passed without errors or warnings. The new test also passed rendered on D3D12, including standalone F6, bounds clipping, transparent fallback, foreground/shadow composition, and offset-area transfer. No full suite or interactive editor-authoring playthrough was performed. See [area background](area-background.md). No existing level colours, project settings, imports, or audio properties changed.
+
+
+## 2026-11-08 — Black backdrop belongs to Game
+
+At the user's request, removed the recently approved default-clear-colour override and added Game/Backdrop behind all composition, leaving unrelated project edits intact. The viewport-filling ColorRect ignores input and stays outside shadow capture. Per-area colours continue to overlay it; standalone levels retain the engine default for transparent gaps.
+
+Rendered area-background, shadow-style, and shared-shadow regressions passed on D3D12 without errors or warnings. Updated contrast fixtures and black fallback assertions. No full suite was run; see [settings reversal](settings.md) and [area background](area-background.md).

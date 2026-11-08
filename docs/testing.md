@@ -54,3 +54,9 @@ Names must match scene basenames. The runner accepts both `PASS:` and `<scene>_t
 
 
 `shadow_style_test` checks Game-wide Soft/Crisp/Outer Blur/null selection, persistence through level replacement, and standalone preview composition, including blank startup, restoration, buffer bypass, and unchanged decoration ownership. Standalone startup checks the authored Game default. Run it with a display to verify foreground sharpness, decoration exclusion, crisp offset, and symmetric outer blur pixels. `koopa_shadow_test` is a rendered-only comparison of both walking poses at integer positions across all styles; its headless path skips image assertions. A half-pixel compositor/direct rasterization discrepancy remains an investigation item; see [shadow styles](archive/shadow-styles.md).
+
+
+`camera_arrival_test` runs an actual 1-1 lower-area-to-overworld animated pipe return and asserts NES sprite-origin X=56/body X=64, idle stability, and no delayed scroll after a recorded placement correction. `corner_correction_test` checks that real head escapes do not move the camera and subsequent walking still does. Super movement checks account for stationary push-out; camera wall-hop and ledge matrices cover blocked contacts versus valid landing motion.
+
+
+`area_background_test` checks standalone preview colour, camera-bound fill geometry, transparent fallback, offset-area loading/routing, and disabled-shadow behavior. Its rendered checks also verify visible bounds, foreground order, and shadows landing on the fill without the fill casting its own shadow.

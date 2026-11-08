@@ -586,3 +586,13 @@ Following user approval, levels select ShadowStyle resources for Soft, Crisp, Ou
 ## 2026-11-08 — Game owns shadow selection (implemented)
 
 User clarification supersedes the level-owned selection in the preceding shadow-style decision. Game owns one ShadowStyle resource for title/stages; BaseLevel has no per-level style override. Standalone previews read the saved Game selection and master toggle from PackedScene state without instantiating a game. Rendering ownership and decoration exclusion remain shared through SharedShadowComposer.
+
+
+## 2026-11-08 — Camera motion excludes corrections; pipes request NES framing (implemented)
+
+At the user's approval, separate player placement/recovery offsets from camera progress while retaining real positions for collision and screen thresholds. BasePlayer owns shared motion accounting, Mario accounts for Super push-out, and LevelCamera owns follow history. Transport descriptors request sprite-origin X=56 for pipe arrivals; default endpoint/respawn framing is unchanged and world limits still clamp the result. This replaces deriving pipe framing from the normal follow threshold. No stage geometry was moved. See [camera audit and implementation](camera-correction-arrival-audit.md).
+
+
+## 2026-11-08 — Area-owned bounded solid backgrounds (implemented)
+
+Use an exported area colour and one bounded ColorRect, with transparent default, rather than changing the viewport clear colour globally. Derive the extent from existing camera world limits/visible height. Route the fill behind decorations and outside shadow capture through the shared compositor. This keeps area/theme independence and avoids an opaque background turning the entire capture into a shadow silhouette. The user chose solid fills; painted background tiles remain outside this implementation.

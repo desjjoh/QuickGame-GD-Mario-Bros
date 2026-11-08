@@ -24,6 +24,7 @@ var _level_material: Material
 var _routed_players: Node2D
 var _players_behind_world: bool = false
 var _routed_decorations: TileMapLayer
+var _routed_background: ColorRect
 
 
 func configure(world: Node2D, screen: Control) -> void:
@@ -178,6 +179,7 @@ func sync_rendering() -> void:
 	RenderingServer.canvas_item_set_draw_index(world_root.get_canvas_item(), 0)
 	RenderingServer.canvas_item_set_draw_index(screen_root.get_canvas_item(), 1)
 	var camera_transform := get_viewport().canvas_transform
+	_sync_background(camera_transform)
 	_sync_decorations(camera_transform)
 	# A transparent border retains offscreen silhouettes that cast into the visible image.
 	var padding := Vector2.ONE * SHADOW_PADDING if _shadow_enabled else Vector2.ZERO
@@ -226,6 +228,7 @@ func _sync_decorations(camera_transform: Transform2D) -> void:
 	var item := decorations.get_canvas_item()
 	RenderingServer.canvas_item_set_parent(item, get_canvas_item())
 	RenderingServer.canvas_item_set_draw_behind_parent(item, true)
+	RenderingServer.canvas_item_set_draw_index(item, 1)
 	RenderingServer.canvas_item_set_interpolated(item, false)
 	RenderingServer.canvas_item_set_transform(item, camera_transform * decorations.global_transform)
 	RenderingServer.canvas_item_set_visible(item, decorations.is_visible_in_tree())
@@ -246,6 +249,38 @@ func _restore_decorations() -> void:
 
 
 func _exit_tree() -> void:
+	_restore_background()
 	_restore_decorations()
 	if RenderingServer.frame_pre_draw.is_connected(sync_rendering):
 		RenderingServer.frame_pre_draw.disconnect(sync_rendering)
+
+
+func _sync_background(camera_transform: Transform2D) -> void:
+	var fill: ColorRect
+	if is_instance_valid(_level) and is_instance_valid(_level.active_area):
+		_level.active_area.refresh_background()
+		fill = _level.active_area.get_node_or_null("Background") as ColorRect
+	if _routed_background != fill:
+		_restore_background()
+		_routed_background = fill
+	if not is_instance_valid(fill):
+		return
+	var item := fill.get_canvas_item()
+	RenderingServer.canvas_item_set_parent(item, get_canvas_item())
+	RenderingServer.canvas_item_set_draw_behind_parent(item, true)
+	RenderingServer.canvas_item_set_draw_index(item, 0)
+	RenderingServer.canvas_item_set_interpolated(item, false)
+	RenderingServer.canvas_item_set_transform(item, camera_transform * fill.get_global_transform())
+	RenderingServer.canvas_item_set_visible(item, fill.is_visible_in_tree())
+
+
+func _restore_background() -> void:
+	if not is_instance_valid(_routed_background):
+		return
+	var item := _routed_background.get_canvas_item()
+	RenderingServer.canvas_item_set_parent(
+		item, (_routed_background.get_parent() as CanvasItem).get_canvas_item()
+	)
+	RenderingServer.canvas_item_set_draw_behind_parent(item, true)
+	RenderingServer.canvas_item_set_transform(item, _routed_background.get_transform())
+	RenderingServer.canvas_item_set_interpolated(item, _routed_background.is_physics_interpolated())

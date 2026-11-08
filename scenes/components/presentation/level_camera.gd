@@ -66,7 +66,7 @@ func _draw() -> void:
 
 
 func reset_target(target: CharacterBody2D) -> void:
-	_target_x = target.global_position.x
+	_target_x = target.global_position.x - _correction_x(target)
 	_has_target = true
 	reset_physics_interpolation()
 	force_update_scroll()
@@ -93,23 +93,29 @@ func is_scroll_locked() -> bool:
 
 
 func follow_target(target: CharacterBody2D) -> void:
-	follow_position(target.global_position.x)
+	follow_position(target.global_position.x, _correction_x(target))
 
 
-func follow_position(current_x: float) -> void:
+func _correction_x(target: CharacterBody2D) -> float:
+	var player := target.get_parent() as BasePlayer
+	return player.camera_correction_x if player != null else 0.0
+
+
+func follow_position(current_x: float, correction_x: float = 0.0) -> void:
+	var progress_x := current_x - correction_x
 	if not _has_target:
-		_target_x = current_x
+		_target_x = progress_x
 		_has_target = true
 	if not follow_enabled or is_scroll_locked():
-		_target_x = current_x
+		_target_x = progress_x
 		return
 	# Count new rightward territory once. Collision recovery can oscillate
 	# around a wall by a fraction of a pixel; adding every positive half
 	# of that oscillation would permanently ratchet this one-way camera.
-	var advance := current_x - _target_x
+	var advance := progress_x - _target_x
 	if advance <= 0.0:
 		return
-	_target_x = current_x
+	_target_x = progress_x
 	var width := get_viewport_rect().size.x / zoom.x
 	# Keep interpolated presentation coordinates out of physics feedback.
 	var left := global_position.x - width / 2.0
@@ -125,12 +131,16 @@ func follow_position(current_x: float) -> void:
 	force_update_scroll()
 
 
-func snap_to_arrival(target: CharacterBody2D) -> void:
+func snap_to_arrival(target: CharacterBody2D, sprite_screen_x: float = -1.0) -> void:
 	# Arrival at another endpoint explicitly resets right-only camera history.
 	if follow_enabled:
 		var width := get_viewport_rect().size.x / zoom.x
 		var left := clampf(
-			target.global_position.x - target_origin_offset - full_speed_start,
+			(
+				target.global_position.x
+				- target_origin_offset
+				- (sprite_screen_x if sprite_screen_x >= 0 else full_speed_start)
+			),
 			world_left,
 			maxf(world_left, world_right - width)
 		)
