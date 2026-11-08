@@ -36,6 +36,14 @@ func show_title(first_level: PackedScene) -> bool:
 
 
 func show_now(first_level: PackedScene) -> bool:
+	if not is_instance_valid(GameHandler.current_game):
+		return false
+	var game := GameHandler.current_game
+	var background: PackedScene = game.title_background
+	if background == null and not game.stages.is_empty():
+		background = game.stages[0]
+	if background == null:
+		return false
 	GameHandler.current_stage_index = -1
 	_clear_title()
 	first_stage = first_level
@@ -52,7 +60,7 @@ func show_now(first_level: PackedScene) -> bool:
 	# Promote the completed run before cleanup resets its score.
 	GameHandler.set_top_score(maxi(GameHandler.top_score, GameHandler.player_status.score))
 	GameHandler.clear_session()
-	if not GameHandler.load_level(screen.background_level):
+	if not GameHandler.load_level(background):
 		_clear_title()
 		return false
 	GameHandler.current_level.initialize_actors(true)

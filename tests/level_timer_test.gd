@@ -104,6 +104,7 @@ func _ready() -> void:
 	assert(not level.has_started and GameHandler.time_remaining == 5)
 	await wait_idle()
 	assert(level.has_started and time_values == [5])
+	assert(game.get_node("UI/HUD/TimeValue").visible)
 	assert(not level.on_level_start() and GameHandler.time_remaining == 5)
 	await ticks(23)
 	assert(GameHandler.time_remaining == 5)
@@ -163,6 +164,8 @@ func _ready() -> void:
 		assert(level.player.state_machine.current_state is MarioDeadState)
 		assert(GameHandler.player_status.lives == (-1 if final_attempt else 0))
 		await wait_phase(&"time_up")
+		assert(game.get_node("UI/HUD/TimeHeading").visible)
+		assert(not game.get_node("UI/HUD/TimeValue").visible)
 		assert(GameHandler.current_level == level and GameHandler.time_remaining == 0)
 		assert(
 			(

@@ -15,7 +15,7 @@ func _ready() -> void:
 
 
 func check_actor(source: int, marker: String, actor_name: String) -> void:
-	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.entity_layout.clear()
 	var layout := level.get_node("Areas/MainArea/Layouts/EnemyLayout") as TileMapLayer
 	layout.clear()

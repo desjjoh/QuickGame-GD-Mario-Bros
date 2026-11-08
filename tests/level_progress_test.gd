@@ -28,7 +28,7 @@ func _ready() -> void:
 	assert(GameHandler._progress_level_key == key)
 	# Visit another logical level, then return; the old visit must not resurrect.
 	var previous := GameHandler.current_level
-	assert(GameHandler.load_level(load("res://scenes/levels/test_level.tscn")))
+	assert(GameHandler.load_level(load("res://tests/fixtures/sandbox_level.tscn")))
 	assert(GameHandler._progress_level_key != key)
 	assert(GameHandler.get_area_progress(key, &"probe").is_empty())
 	GameHandler.store_area_progress(key, &"probe", {"stale": true}, previous)
@@ -46,7 +46,8 @@ func _ready() -> void:
 		"Old visit cannot write into a new visit of the same level."
 	)
 	# Title owns clearing even when gameplay and background are the same scene.
-	assert(GameHandler.load_level(load("res://scenes/levels/test_level.tscn")))
+	game.title_background = load("res://tests/fixtures/sandbox_level.tscn")
+	assert(GameHandler.load_level(load("res://tests/fixtures/sandbox_level.tscn")))
 	var test_key := GameHandler.current_level._progress_key
 	GameHandler.store_area_progress(test_key, &"probe", {"used": true}, GameHandler.current_level)
 	assert(GameHandler.show_title(game.stages[0]))

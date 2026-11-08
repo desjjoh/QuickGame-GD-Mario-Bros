@@ -17,7 +17,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	ControllerHandler.set_physics_process(false)
 	GameHandler.animation_clock.set_physics_process(false)
-	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.player_start_configuration = MarioFormPresentation.SUPER
 	level.process_mode = Node.PROCESS_MODE_PAUSABLE
 	level.entity_layout.clear()
@@ -109,7 +109,7 @@ func _ready() -> void:
 	level.free()
 	# Walking Koopas and moving shells use the same ordinary damage entry point.
 	for moving_shell in [false, true]:
-		level = load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+		level = load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 		level.player_start_configuration = MarioFormPresentation.SUPER
 		level.entity_layout.clear()
 		level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
@@ -126,7 +126,7 @@ func _ready() -> void:
 		assert(mario.form_presentation.active and mario.damage.is_protected() and not mario.is_dead)
 		level.free()
 	# Protection must never intercept the level's lethal hazard path.
-	level = load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	level = load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.player_start_configuration = MarioFormPresentation.SUPER
 	level.entity_layout.clear()
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()

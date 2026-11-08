@@ -97,6 +97,8 @@ func _ready() -> void:
 	await begin_final_death()
 	var card := game.get_node("UI/ScreenContainer/TransitionScreen").presentation as Control
 	assert(card.get_node("Message").text == "GAME OVER" and not card.has_node("Lives"))
+	assert(game.get_node("UI/HUD/TimeHeading").visible)
+	assert(not game.get_node("UI/HUD/TimeValue").visible)
 	assert(card.audio.playing and card.audio.volume_db == 0.0)
 	assert(not (card.audio.stream as AudioStreamWAV).loop_mode)
 	assert(GameHandler.current_level == null)
@@ -119,7 +121,10 @@ func _ready() -> void:
 	await wait_idle()
 	assert(GameHandler.flow == GameHandler.GameFlow.TITLE)
 	assert(director.elapsed_frames >= 402)
-	assert(GameHandler.current_level.scene_file_path == "res://scenes/levels/test_level.tscn")
+	var selected: PackedScene = game.title_background
+	if selected == null:
+		selected = game.stages[0]
+	assert(GameHandler.current_level.scene_file_path == selected.resource_path)
 	assert(GameHandler.get_area_progress(key, &"probe").is_empty())
 	assert(GameHandler.player_status.lives == 2 and GameHandler.top_score == 456999)
 	assert(GameHandler.player_status.score == 0 and GameHandler.player_status.coins == 0)

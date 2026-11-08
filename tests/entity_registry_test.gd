@@ -6,7 +6,7 @@ func _ready() -> void:
 	var registry := base.entity_scenes
 	assert(registry.has(&"green_koopa_spawner") and registry.has(&"castle"))
 	for path in [
-		"res://scenes/levels/test_level.tscn", "res://scenes/levels/worlds/world 1/1-1.tscn"
+		"res://tests/fixtures/sandbox_level.tscn", "res://scenes/levels/worlds/world 1/1-1.tscn"
 	]:
 		var packed := load(path) as PackedScene
 		var state := packed.get_state()

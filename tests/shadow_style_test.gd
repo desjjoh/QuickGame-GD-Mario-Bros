@@ -93,7 +93,7 @@ func sample(shot: Image, x: int, y: int) -> Color:
 
 
 func _ready() -> void:
-	var standalone := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var standalone := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	add_child(standalone)
 	assert(standalone.get_node("Systems/ShadowComposer").shadow_style == ShadowStyle.game_default())
 	await check(standalone, standalone.get_node("Systems/ShadowComposer"), "standalone-style")
@@ -104,7 +104,7 @@ func _ready() -> void:
 	game.start_with_title = false
 	game.transitions_enabled = false
 	game.shadow_style = null
-	game.stages.assign([load("res://scenes/levels/test_level.tscn")])
+	game.stages.assign([load("res://tests/fixtures/sandbox_level.tscn")])
 	add_child(game)
 	assert(game.get_node("SharedShadow").material == null)
 	await check(GameHandler.current_level, game.get_node("SharedShadow"), "game-style", game)

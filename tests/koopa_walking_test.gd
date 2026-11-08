@@ -43,7 +43,7 @@ func _ready() -> void:
 				== "green_koopa_spawner"
 			)
 		)
-	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.entity_layout.clear()
 	var floor := level.get_node("Areas/MainArea/Layouts/GroundLayout") as TileMapLayer
 	floor.clear()

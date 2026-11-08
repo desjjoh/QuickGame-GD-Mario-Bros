@@ -90,7 +90,7 @@ func _ready() -> void:
 
 
 func _test_hidden_block() -> void:
-	var level := preload("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.entity_layout.clear()
 	level.entity_layout.set_cell(Vector2i(8, 8), 9, Vector2i.ZERO)
 	level.entity_layout.set_cell(Vector2i(10, 8), 1, Vector2i.ZERO)

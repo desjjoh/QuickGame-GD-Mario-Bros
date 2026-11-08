@@ -13,6 +13,8 @@ extends Node
 @export_range(1, 99) var starting_lives: int = PlayerStatus.DEFAULT_LIVES + 1
 
 @export_group("Presentation")
+## Optional BaseLevel backdrop for the start menu. Empty uses the first stage.
+@export var title_background: PackedScene
 ## One style for the title, every stage, and standalone level previews.
 @export var shadow_style: ShadowStyle:
 	set(value):

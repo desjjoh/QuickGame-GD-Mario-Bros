@@ -29,7 +29,7 @@ func check(condition: bool, message: String) -> void:
 func _ready() -> void:
 	process_physics_priority = 200
 	ControllerHandler.set_physics_process(false)
-	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.player_scene = load("res://tests/fixtures/movement_probe.tscn")
 	level.entity_layout.clear()
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()

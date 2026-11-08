@@ -30,7 +30,7 @@ func make_game(animated: bool) -> Node:
 	game.stages.assign(
 		[
 			load("res://scenes/levels/worlds/world 1/1-1.tscn"),
-			load("res://scenes/levels/test_level.tscn")
+			load("res://tests/fixtures/sandbox_level.tscn")
 		]
 	)
 	game.start_with_title = false
@@ -39,7 +39,7 @@ func make_game(animated: bool) -> Node:
 
 
 func replace_on_completion() -> void:
-	assert(GameHandler.load_level(load("res://scenes/levels/test_level.tscn")))
+	assert(GameHandler.load_level(load("res://tests/fixtures/sandbox_level.tscn")))
 
 
 func _ready() -> void:
@@ -85,7 +85,7 @@ func _ready() -> void:
 		await wait_idle()
 		assert(GameHandler.current_stage_index == 1)
 		assert(GameHandler.flow == GameHandler.GameFlow.PLAYING)
-		assert(GameHandler.current_level.scene_file_path == "res://scenes/levels/test_level.tscn")
+		assert(GameHandler.current_level.scene_file_path == "res://tests/fixtures/sandbox_level.tscn")
 		assert(GameHandler.player_status.score == 1234 and GameHandler.player_status.coins == 7)
 		assert(
 			(
@@ -156,7 +156,7 @@ func _ready() -> void:
 	game.start_with_title = true
 	game.stages.resize(1)
 	add_child(game)
-	assert(GameHandler.start_new_game(load("res://scenes/levels/test_level.tscn")))
+	assert(GameHandler.start_new_game(load("res://tests/fixtures/sandbox_level.tscn")))
 	assert(GameHandler.current_stage_index == -1)
 	assert(GameHandler.current_level.on_complete())
 	assert(GameHandler.flow == GameHandler.GameFlow.TITLE)
@@ -165,7 +165,7 @@ func _ready() -> void:
 	source.completion_started.connect(replace_on_completion)
 	assert(not source.on_complete())
 	assert(GameHandler.flow == GameHandler.GameFlow.PLAYING)
-	assert(GameHandler.current_level.scene_file_path == "res://scenes/levels/test_level.tscn")
+	assert(GameHandler.current_level.scene_file_path == "res://tests/fixtures/sandbox_level.tscn")
 	game.free()
 	await ticks(2)
 	print(

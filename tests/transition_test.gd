@@ -91,6 +91,8 @@ func _ready() -> void:
 	level = GameHandler.current_level
 	assert(not level.players.visible and level.player.gameplay_suspended)
 	assert(is_instance_valid(view.presentation) and game.get_node("UI/HUD").visible)
+	assert(game.get_node("UI/HUD/TimeHeading").visible)
+	assert(not game.get_node("UI/HUD/TimeValue").visible)
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
 		assert(
@@ -107,6 +109,7 @@ func _ready() -> void:
 	await wait_until_idle()
 	assert(director.elapsed_frames >= 8 and not view.visible and level.players.visible)
 	assert(not level.player.gameplay_suspended and ControllerHandler.enabled)
+	assert(game.get_node("UI/HUD/TimeValue").visible == GameHandler.timer_enabled)
 	assert(RenderingServer.get_default_clear_color() == prior_clear)
 	# Named definitions select arbitrary presentation scenes, HUD and timings.
 	assert(director.begin(level, func(): return true, &"unknown") == 0)

@@ -11,7 +11,7 @@ func _ready() -> void:
 		print("koopa_shadow_test: PASS")
 		await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 		return
-	var level := load("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.entity_layout.clear()
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
 	add_child(level)

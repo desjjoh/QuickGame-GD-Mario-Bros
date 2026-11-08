@@ -2,7 +2,7 @@ extends Node
 
 
 func _ready() -> void:
-	var level := preload("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	var layout := level.get_node("Areas/MainArea/Layouts/EnemyLayout") as TileMapLayer
 	layout.clear()
 	level.entity_layout.clear()
@@ -81,7 +81,7 @@ func _ready() -> void:
 
 
 func _test_goomba_contact() -> void:
-	var level := preload("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.entity_layout.clear()
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
 	add_child(level)
@@ -192,7 +192,7 @@ func _test_stage_placements() -> void:
 
 
 func _test_enemy_hits() -> void:
-	var level := preload("res://scenes/levels/test_level.tscn").instantiate() as BaseLevel
+	var level := preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
 	level.entity_layout.clear()
 	level.entity_layout.set_cell(Vector2i(4, 9), 1, Vector2i.ZERO)

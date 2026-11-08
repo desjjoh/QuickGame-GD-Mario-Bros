@@ -271,7 +271,7 @@ func _ready() -> void:
 	add_child(game)
 	level = GameHandler.current_level
 	await grab(level, 120.0)
-	assert(GameHandler.load_level(load("res://scenes/levels/test_level.tscn")))
+	assert(GameHandler.load_level(load("res://tests/fixtures/sandbox_level.tscn")))
 	await ticks(2)
 	assert(GameHandler.flow == GameHandler.GameFlow.PLAYING)
 	assert(GameHandler.current_level.has_started)

@@ -12,6 +12,8 @@ const STOMP_CHAIN_POINTS := [100, 200, 400, 500, 800, 1000, 2000, 4000, 5000, 80
 var stomp_chain := 0
 var last_enemy_stomp_tick := -1
 var scripted_motion_step: Callable
+const ARRIVAL_CONTROL_TICKS := 17
+var arrival_control_ticks_remaining: int = 0
 
 @export_group("Transitions")
 @export var climb_state: PlayerClimbState
@@ -45,6 +47,7 @@ func configure_start(_configuration: Resource) -> void:
 
 ## Area initialization resets transient posture without replacing the player.
 func on_area_arrival() -> void:
+	clear_arrival_control_lock()
 	vertical_movement.reset_fraction()
 
 
@@ -76,6 +79,9 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if arrival_control_ticks_remaining > 0 and state_machine.current_state is PlayerTransportState:
+		_advance_arrival_control_lock()
+		return
 	if scripted_motion_step.is_valid() and not is_shutdown and not is_dead:
 		if not gameplay_suspended and not activity_suspended:
 			scripted_motion_step.call(delta)
@@ -88,6 +94,33 @@ func _physics_process(delta: float) -> void:
 	if not is_shutdown and not is_dead:
 		# Catch actual movement after state integration, including the tick we land.
 		_try_attach_climbable(before, body.global_position)
+	_advance_arrival_control_lock()
+
+
+func _advance_arrival_control_lock() -> void:
+	if not is_shutdown and not is_dead and not gameplay_suspended and not activity_suspended:
+		if arrival_control_ticks_remaining > 0:
+			arrival_control_ticks_remaining -= 1
+			if arrival_control_ticks_remaining == 0:
+				_sync_controller_input()
+
+
+## AreaTransport arms this at placement, before any exit presentation advances.
+func begin_arrival_control_lock() -> void:
+	if is_shutdown or is_dead:
+		return
+	arrival_control_ticks_remaining = ARRIVAL_CONTROL_TICKS
+	_sync_controller_input()
+
+
+func clear_arrival_control_lock() -> void:
+	arrival_control_ticks_remaining = 0
+	_sync_controller_input()
+
+
+func shutdown() -> void:
+	arrival_control_ticks_remaining = 0
+	super.shutdown()
 
 
 ## Called only after an enemy accepts a stomp, including nonterminal shell stops.
@@ -232,6 +265,7 @@ func begin_death(present: bool = false) -> void:
 		return
 	stomp_chain = 0
 	is_dead = true
+	arrival_control_ticks_remaining = 0
 	state_machine.stop(false)
 	if is_shutdown:
 		return
@@ -267,7 +301,9 @@ func death_envelope_top() -> float:
 
 
 func can_read_controller_input() -> bool:
-	return not is_dead and super.can_read_controller_input()
+	return (
+		not is_dead and arrival_control_ticks_remaining == 0 and super.can_read_controller_input()
+	)
 
 
 ## Ordinary damage; lethal level hazards continue to call BaseLevel.on_death directly.

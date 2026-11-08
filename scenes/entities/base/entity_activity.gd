@@ -93,8 +93,8 @@ func refresh_geometry(entity: BaseEntity) -> void:
 func get_rect(entity: BaseEntity) -> Rect2:
 	var bounds := Rect2(entity.global_position, Vector2.ZERO)
 	var found := false
-	for reference: WeakRef in _activity_geometry:
-		var child := reference.get_ref() as Node2D
+	for geometry_ref: WeakRef in _activity_geometry:
+		var child := geometry_ref.get_ref() as Node2D
 		if not is_instance_valid(child):
 			continue
 		var local_rect: Rect2
