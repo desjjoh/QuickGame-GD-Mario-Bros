@@ -9,10 +9,10 @@ func _begin_collection(player: BasePlayer) -> bool:
 	var mario := player as Mario
 	if mario == null or mario.form_presentation.active:
 		return false
-	if mario.form_controller.current_form == MarioFormPresentation.SMALL:
+	if mario.form_controller.current_form == mario.small_form:
 		return mario.grow()
 	# Approved temporary behavior until Fire is implemented: points, keep Super.
-	return mario.form_controller.current_form == MarioFormPresentation.SUPER
+	return mario.form_controller.current_form == mario.super_form
 
 
 func _grant_reward(_player: BasePlayer) -> void:

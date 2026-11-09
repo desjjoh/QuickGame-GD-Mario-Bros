@@ -4,7 +4,7 @@
 
 1. Open `project.godot` in Godot 4.7. Local regression runs use Godot 4.7.2.
 2. Press **F5** to run the game from the title screen.
-3. Press **Enter** or controller **Start** to load 1-1.
+3. Press **Tab** or controller **Select** to switch between **1 PLAYER GAME** for Mario and **2 PLAYER GAME** for a solo Luigi run. Press **Enter** or controller **Start** to load 1-1.
 
 Open `scenes/levels/worlds/world 1/1-1.tscn` and press **F6** to run 1-1 directly. It is also the default title backdrop, with gameplay disabled. Leave **Game → Presentation → Title Background** empty to use the first entry in **Stages**, or assign another level to override it.
 

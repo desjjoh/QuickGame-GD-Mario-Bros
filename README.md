@@ -6,7 +6,7 @@ A Godot 4.7 platformer tutorial and reference in the QuickReference series. The 
 
 1. Open `project.godot` in Godot 4.7.
 2. Press **F5** to launch the title screen.
-3. Press **Enter** or controller **Start** to play 1-1.
+3. Use **Tab** or controller **Select** to choose **1 PLAYER GAME** for Mario or **2 PLAYER GAME** for a solo Luigi run, then press **Enter** or controller **Start** to play 1-1.
 
 | Action                | Keyboard            | Controller             |
 | --------------------- | ------------------- | ---------------------- |

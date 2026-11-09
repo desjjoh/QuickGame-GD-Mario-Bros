@@ -1,0 +1,60 @@
+[gd_resource type="Resource" script_class="MarioForm" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-climb.png" id="climb"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-crouch.png" id="crouch"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-idle.png" id="idle"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-intermediate.png" id="intermediate"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-jump.png" id="jump"]
+[ext_resource type="Script" path="res://scripts/player/mario_form.gd" id="script"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-slide.png" id="slide"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-swim.png" id="swim"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-walk.png" id="walk"]
+
+[sub_resource type="AtlasTexture" id="climb0"]
+atlas = ExtResource("climb")
+region = Rect2(0, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="climb1"]
+atlas = ExtResource("climb")
+region = Rect2(16, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="shrink"]
+atlas = ExtResource("swim")
+region = Rect2(0, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="walk0"]
+atlas = ExtResource("walk")
+region = Rect2(0, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="walk1"]
+atlas = ExtResource("walk")
+region = Rect2(16, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="walk2"]
+atlas = ExtResource("walk")
+region = Rect2(32, 0, 16, 32)
+filter_clip = true
+
+[resource]
+script = ExtResource("script")
+display_name = "Super"
+idle = ExtResource("idle")
+walk = Array[Texture2D]([SubResource("walk0"), SubResource("walk1"), SubResource("walk2")])
+skid = ExtResource("slide")
+jump = ExtResource("jump")
+crouch = ExtResource("crouch")
+climb = Array[Texture2D]([SubResource("climb0"), SubResource("climb1")])
+growth_intermediate = ExtResource("intermediate")
+shrink_pose = SubResource("shrink")
+jump_cue = &"jump_big"
+sprite_position = Vector2(0, -15)
+standing_contact_size = Vector2(12, 24)
+standing_contact_position = Vector2(0, -12)
+crouched_contact_size = Vector2(12, 12)
+can_crouch = true
+can_break_bricks = true

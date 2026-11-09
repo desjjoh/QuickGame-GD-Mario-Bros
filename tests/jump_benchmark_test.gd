@@ -14,6 +14,8 @@ func tick() -> void:
 func _ready() -> void:
 	process_physics_priority = 200
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	if "--luigi" in OS.get_cmdline_user_args():
+		fixture.player_scene = preload("res://scenes/player/luigi/luigi.tscn")
 	fixture.timer_enabled = false
 	var main := fixture.get_node("Areas/MainArea") as BaseLevelArea
 	main.pipe_routes = []
@@ -95,6 +97,19 @@ func _ready() -> void:
 		for frame in range(65):
 			await tick()
 			player.state_machine.process_physics(1.0 / 60.0)
+			if "--trace" in OS.get_cmdline_user_args():
+				print(
+					(
+						"TRACE,%s,%s,%s,%s,%s"
+						% [
+							trial[0],
+							frame,
+							player.body.global_position,
+							player.body.velocity,
+							player.state_machine.current_state.name
+						]
+					)
+				)
 			peak = minf(peak, player.body.global_position.y)
 			if frame == 0:
 				assert(absf(origin.y - player.body.global_position.y - 5.0) < 0.1)

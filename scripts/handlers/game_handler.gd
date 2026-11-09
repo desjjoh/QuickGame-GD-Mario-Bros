@@ -2,6 +2,7 @@ extends Node
 ## Global game ownership and in-memory session data. No disk persistence yet.
 
 enum GameFlow { DETACHED, TITLE, STARTING, PLAYING, GAME_OVER, COMPLETING }
+enum PlayerCharacter { MARIO, LUIGI }
 
 signal flow_changed(value: GameFlow)
 signal pause_changed(value: bool)
@@ -22,6 +23,12 @@ var current_level: BaseLevel
 var current_player: BasePlayer
 var _level_container: Node2D
 var player_status := PlayerStatus.new()
+var player_character: PlayerCharacter = PlayerCharacter.MARIO:
+	set(value):
+		if player_character == value:
+			return
+		player_character = value
+		session_value_changed.emit(&"player_character", value)
 # App-session record: intentionally survives clear_session(), with no disk saving.
 var top_score: int = 0:
 	set(value):
@@ -141,6 +148,8 @@ func load_level(
 		previous_level.queue_free()
 	_current_level_scene = scene
 	current_level = instance as BaseLevel
+	if player_character == PlayerCharacter.LUIGI and current_level.player_scene != null:
+		current_level.player_scene = load("res://scenes/player/luigi/luigi.tscn")
 	if flow != GameFlow.TITLE:
 		current_stage_index = (
 			_stage_index(scene) if stage_index_override == -2 else stage_index_override
@@ -170,6 +179,7 @@ func set_session_value(key: StringName, value: Variant) -> void:
 			&"coins",
 			&"lives",
 			&"powerup_form",
+			&"player_character",
 			&"top_score",
 			&"stage_label",
 			&"time_remaining",
@@ -233,6 +243,7 @@ func clear_session() -> void:
 	_session.clear()
 	clear_level_progress()
 	_reset_player_status()
+	player_character = PlayerCharacter.MARIO
 	stage_label = "1-1"
 	time_remaining = 400
 	timer_enabled = true
@@ -323,6 +334,7 @@ func start_game_flow(first_level: PackedScene, with_title: bool = true) -> bool:
 	title_flow.first_stage = first_level
 	if with_title:
 		return show_title(first_level)
+	player_character = PlayerCharacter.MARIO
 	_reset_player_status()
 	_set_flow(GameFlow.PLAYING)
 	return transition_to_level(first_level)

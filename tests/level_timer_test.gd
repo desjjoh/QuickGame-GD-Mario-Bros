@@ -150,6 +150,8 @@ func _ready() -> void:
 		add_child(game)
 		await wait_idle()
 		level = GameHandler.current_level
+		if final_attempt:
+			GameHandler.player_character = GameHandler.PlayerCharacter.LUIGI
 		GameHandler.set_lives(0 if final_attempt else 1)
 		GameHandler.set_player_form(PlayerStatus.PowerupForm.SUPER)
 		transition_kinds.clear()
@@ -164,6 +166,7 @@ func _ready() -> void:
 		assert(level.player.state_machine.current_state is MarioDeadState)
 		assert(GameHandler.player_status.lives == (-1 if final_attempt else 0))
 		await wait_phase(&"time_up")
+		assert(game.get_node("UI/HUD/PlayerName").text == ("LUIGI" if final_attempt else "MARIO"))
 		assert(game.get_node("UI/HUD/TimeHeading").visible)
 		assert(not game.get_node("UI/HUD/TimeValue").visible)
 		assert(GameHandler.current_level == level and GameHandler.time_remaining == 0)

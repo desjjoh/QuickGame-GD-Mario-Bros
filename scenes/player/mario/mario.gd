@@ -2,7 +2,9 @@ class_name Mario
 extends BasePlayer
 ## Concrete player character with its own states and animation cadence.
 
-@export var starting_form: MarioForm = preload("res://assets/player/forms/small.tres")
+@export var small_form: MarioForm = MarioFormPresentation.SMALL
+@export var super_form: MarioForm = MarioFormPresentation.SUPER
+@export var starting_form: MarioForm = MarioFormPresentation.SMALL
 @onready var form_controller: MarioFormController = $Status/Form
 @onready var form_presentation: MarioFormPresentation = $Presentation/FormPresentation
 @onready var damage: MarioDamage = $Status/Damage
@@ -17,7 +19,7 @@ func receive_damage(source: BaseEntity = null) -> bool:
 		or form_presentation.active
 	):
 		return false
-	if form_controller.current_form == MarioFormPresentation.SUPER:
+	if form_controller.current_form == super_form:
 		if not shrink():
 			return false
 		damage.begin()
@@ -54,7 +56,12 @@ func configure_start(configuration: Resource) -> void:
 
 
 func _ready() -> void:
-	form_controller.configure(self, starting_form)
+	var form := starting_form
+	if form == null or form == MarioFormPresentation.SMALL:
+		form = small_form
+	elif form == MarioFormPresentation.SUPER:
+		form = super_form
+	form_controller.configure(self, form)
 	super._ready()
 
 

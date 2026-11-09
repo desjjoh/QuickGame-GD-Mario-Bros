@@ -25,6 +25,8 @@ func wait_phase(
 
 func make_game(manual: bool) -> Node:
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	if "--luigi" in OS.get_cmdline_user_args():
+		fixture.player_scene = preload("res://scenes/player/luigi/luigi.tscn")
 	if "--super" in OS.get_cmdline_user_args():
 		fixture.player_start_configuration = preload("res://assets/player/forms/super.tres")
 	var ending := fixture.ending_presentation as FlagpoleEndingPresentation
@@ -53,6 +55,8 @@ func grab(level: BaseLevel, height: float = 100.0) -> void:
 	camera.snap_to_arrival(player.body)
 	level.active_area.update_camera_activity()
 	await ticks(2)
+	var character := player as Mario
+	assert(player.sprite.texture in character.form_controller.current_form.climb)
 	assert(level.ending_in_progress and GameHandler.flow == GameHandler.GameFlow.COMPLETING)
 	assert(not level.on_complete() and not level.on_death(player, false))
 	assert(not level.request_area_transfer(&"lower"))

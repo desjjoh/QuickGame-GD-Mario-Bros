@@ -68,6 +68,10 @@ Activity tests check both suspension orders, preservation of collision/state, pr
 
 Pipe entry/transfer, sideways-pipe, climbing, and flagpole-ending tests also accept `-- --super` for their Super configuration. Their timing/contact assertions should remain meaningful when fixtures are isolated from authored stage settings.
 
+`jump_benchmark_test`, `super_mushroom_test`, `pipe_transfer_test`, and `flagpole_ending_test` accept `-- --luigi` to use Luigi's inherited scene. Add `--trace` to the jump benchmark to compare per-tick position, velocity, and state.
+
+`title_test` checks the HUD name and lives portrait on the initial and restart intro cards and the Mario reset on title return. The Time Up and Game Over tests check the active name on those cards, including Game Over after the player level is removed.
+
 Pipe entry and transfer checks cover simultaneous Up+Down, grounded Down with a horizontal direction, and Down+Right on the landing tick. The sideways check walks to the lower mouth, releases Right, and verifies entry with neutral input when facing right and rejection when facing left.
 
 ## Deterministic audio teardown
