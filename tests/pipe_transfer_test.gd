@@ -10,6 +10,8 @@ func ticks(count: int) -> void:
 func _ready() -> void:
 	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	if "--luigi" in OS.get_cmdline_user_args():
+		fixture.player_scene = preload("res://scenes/player/luigi/luigi.tscn")
 	if "--super" in OS.get_cmdline_user_args():
 		fixture.player_start_configuration = preload("res://assets/player/forms/super.tres")
 	var main := fixture.get_node("Areas/MainArea") as BaseLevelArea
@@ -114,6 +116,9 @@ func _ready() -> void:
 	ControllerHandler.input_right = 0
 	assert(not level.request_area_transfer(&"lower"), "Only one transfer may be queued.")
 	assert(player.state_machine.current_state is PlayerPipeEnterState)
+	var character := player as Mario
+	var form := character.form_controller.current_form
+	assert(player.sprite.texture in [form.idle, form.crouch])
 	assert(level.players.get_index() < level.get_node("Areas").get_index())
 	assert(not (player.state_machine.current_state as PlayerState).controls_enabled)
 	assert(player.body.collision_layer == 0 and player.body.collision_mask == 0)

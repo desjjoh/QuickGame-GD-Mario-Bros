@@ -4,12 +4,14 @@ extends Node
 var screen: Control
 var first_stage: PackedScene
 var starting_stage: PackedScene
+var starting_character := GameHandler.PlayerCharacter.MARIO
 
 
 func detach() -> void:
 	_clear_title()
 	first_stage = null
 	starting_stage = null
+	starting_character = GameHandler.PlayerCharacter.MARIO
 
 
 func reveal() -> void:
@@ -65,7 +67,7 @@ func show_now(first_level: PackedScene) -> bool:
 		return false
 	GameHandler.current_level.initialize_actors(true)
 	suspend_background()
-	screen.connect(&"start_requested", start_new_game)
+	screen.connect(&"start_requested", _start_selected_character)
 	if GameHandler.transitions.busy:
 		screen.hide()
 	GameHandler.current_game.get_node("UI/ScreenContainer").add_child(screen)
@@ -80,7 +82,14 @@ func suspend_background() -> void:
 	GameHandler.current_level.set_physics_process(false)
 
 
-func start_new_game(destination: PackedScene = null) -> bool:
+func _start_selected_character(character: GameHandler.PlayerCharacter) -> void:
+	start_new_game(null, character)
+
+
+func start_new_game(
+	destination: PackedScene = null,
+	character: GameHandler.PlayerCharacter = GameHandler.PlayerCharacter.MARIO
+) -> bool:
 	if (
 		GameHandler.flow != GameHandler.GameFlow.TITLE
 		or GameHandler._detaching
@@ -91,6 +100,7 @@ func start_new_game(destination: PackedScene = null) -> bool:
 	if not screen.is_visible_in_tree():
 		return false
 	starting_stage = destination if destination != null else first_stage
+	starting_character = character
 	ControllerHandler.consume_menu_confirmation()
 	GameHandler._set_flow(GameHandler.GameFlow.STARTING)
 	screen.hide()
@@ -117,12 +127,15 @@ func _load_starting_stage() -> bool:
 	if is_instance_valid(GameHandler.current_level):
 		GameHandler.current_level.shutdown()
 	var destination := starting_stage
+	var character := starting_character
 	GameHandler.clear_session()
+	GameHandler.player_character = character
 	return GameHandler.load_level(destination)
 
 
 func _start_finished(success: bool) -> void:
 	starting_stage = null
+	starting_character = GameHandler.PlayerCharacter.MARIO
 	if GameHandler._detaching or not is_instance_valid(GameHandler.current_game):
 		return
 	if success:

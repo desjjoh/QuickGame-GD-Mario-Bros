@@ -20,7 +20,17 @@ func _ready() -> void:
 
 
 func _on_session_value_changed(key: StringName, _value: Variant) -> void:
-	if key in [&"score", &"coins", &"stage_label", &"time_remaining", &"timer_enabled"]:
+	if (
+		key
+		in [
+			&"player_character",
+			&"score",
+			&"coins",
+			&"stage_label",
+			&"time_remaining",
+			&"timer_enabled"
+		]
+	):
 		_refresh_values()
 
 
@@ -33,6 +43,9 @@ func _on_transition_finished(_id: int, _success: bool) -> void:
 
 
 func _refresh_values() -> void:
+	$PlayerName.text = (
+		"LUIGI" if GameHandler.player_character == GameHandler.PlayerCharacter.LUIGI else "MARIO"
+	)
 	$Score.text = " %06d" % GameHandler.player_status.score
 	$CoinCount.text = "%02d" % GameHandler.player_status.coins
 	$WorldValue.text = GameHandler.stage_label.left(3)

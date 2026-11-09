@@ -11,12 +11,15 @@ func ticks(count: int) -> void:
 
 func _ready() -> void:
 	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	if "--luigi" in OS.get_cmdline_user_args():
+		level.player_scene = preload("res://scenes/player/luigi/luigi.tscn")
 	level.player_start_configuration = MarioFormPresentation.SMALL
 	level.entity_layout.clear()
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
 	add_child(level)
 	level.set_physics_process(false)
 	var mario := level.player as Mario
+	assert(mario.sprite.texture == mario.small_form.idle)
 	mario.set_physics_process(false)
 	mario.body.global_position = Vector2(256, 208)
 	var score := GameHandler.player_status.score
@@ -72,9 +75,15 @@ func _ready() -> void:
 	)
 	await ticks(6)
 	assert(GameHandler.player_status.score == score + 1000)
-	await mario.form_presentation.finished
+	var saw_intermediate := false
+	while mario.form_presentation.active:
+		await ticks(1)
+		saw_intermediate = (
+			saw_intermediate or mario.sprite.texture == mario.super_form.growth_intermediate
+		)
+	assert(saw_intermediate)
 	assert(mario.get_instance_id() == actor_id)
-	assert(mario.form_controller.current_form == MarioFormPresentation.SUPER)
+	assert(mario.form_controller.current_form == mario.super_form)
 	assert(level.has_spawn_capacity(&"power_up"))
 	# Already-Super collection gives the same 1,000 points without another transition.
 	mushroom = SUPER.instantiate() as SuperMushroom
@@ -95,7 +104,8 @@ func _ready() -> void:
 	mushroom.gravity = 0.0
 	assert(level.try_claim_spawn_slot(&"power_up", mushroom))
 	level.world_objects.add_child(mushroom)
-	assert(mario.shrink())
+	assert(mario.receive_damage())
+	assert(mario.sprite.texture == mario.super_form.jump)
 	mario.body.global_position = Vector2(128, 208)
 	await ticks(2)
 	assert(is_instance_valid(mushroom) and GameHandler.player_status.score == score + 2000)
@@ -123,6 +133,9 @@ func _ready() -> void:
 		GameHandler.player_status.score == score + 3000 and level.has_spawn_capacity(&"power_up")
 	)
 	assert((SoundHandler.get_sound(&"power_up_grab") as AudioStreamWAV).data.size() == 54 * 735 * 2)
+	if "--luigi" in OS.get_cmdline_user_args():
+		mario.begin_death(true)
+		assert(mario.sprite.texture == preload("res://assets/player/luigi (small)/luigi-dead.png"))
 	level.free()
 	print(
 		"PASS: Super Mushroom releases from all reward blocks, grows Small, awards 1000 once for either form, displays popup/plays cue, and reuses movement/cleanup."

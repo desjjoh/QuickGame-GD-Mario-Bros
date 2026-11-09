@@ -37,7 +37,7 @@ func _ready() -> void:
 func begin(shrink: bool) -> bool:
 	if active or _mario.is_dead or _mario.is_shutdown or _mario.gameplay_suspended:
 		return false
-	if _mario.form_controller.current_form != (SUPER if shrink else SMALL):
+	if _mario.form_controller.current_form != (_mario.super_form if shrink else _mario.small_form):
 		return false
 	_level = BaseLevel.containing(_mario)
 	if (
@@ -72,9 +72,9 @@ func begin(shrink: bool) -> bool:
 	_mario.form_controller.presentation_owned = true
 	_mario.animation_player.pause()
 	if shrinking:
-		_set_pose(SUPER.jump, SUPER)
+		_set_pose(_mario.super_form.jump, _mario.super_form)
 	else:
-		_apply_growth_normal(SMALL)
+		_apply_growth_normal(_mario.small_form)
 	for entity: BaseEntity in _level.find_children("*", "BaseEntity", true, false):
 		if entity != _mario and not entity.gameplay_suspended:
 			_suspended.append(weakref(entity))
@@ -102,10 +102,12 @@ func _physics_process(_delta: float) -> void:
 		if _prelude_advance:
 			_walk_frame = (_walk_frame + 1) % 3
 			_prelude_advance = false
-		_apply_growth_normal(SMALL)
+		_apply_growth_normal(_mario.small_form)
 	if timer == (0xf0 if shrinking else 0xf8):
 		var previous_offset := _mario.sprite.position
-		_mario.form_controller.configure(_mario, SMALL if shrinking else SUPER)
+		_mario.form_controller.configure(
+			_mario, _mario.small_form if shrinking else _mario.super_form
+		)
 		if _mario.sprite.position != previous_offset:
 			_reset_pose_interpolation()
 		_mario.animation_player.pause()
@@ -127,7 +129,7 @@ func _physics_process(_delta: float) -> void:
 			if timer != 0xc8 and not _actor_restored:
 				_restore_actor_presentation()
 		else:
-			_apply_growth_normal(SUPER)
+			_apply_growth_normal(_mario.super_form)
 	if shrinking:
 		_mario.sprite.visible = _visible and tick % 2 == 0
 		if _mario.sprite.visible and _reset_on_visible:
@@ -214,13 +216,17 @@ func _apply_pose() -> void:
 	var texture: Texture2D
 	var offset: Vector2
 	if shrinking:
-		var form := SMALL if pose_index % 2 == 0 else SUPER
+		var form := _mario.small_form if pose_index % 2 == 0 else _mario.super_form
 		texture = form.shrink_pose
 		offset = form.sprite_position
 	else:
 		var pose: int = GROWTH_POSES[pose_index]
-		texture = [SMALL.idle, SUPER.growth_intermediate, SUPER.idle][pose]
-		offset = SMALL.sprite_position if pose == 0 else SUPER.sprite_position
+		texture = [
+			_mario.small_form.idle, _mario.super_form.growth_intermediate, _mario.super_form.idle
+		][pose]
+		offset = (
+			_mario.small_form.sprite_position if pose == 0 else _mario.super_form.sprite_position
+		)
 	_mario.sprite.texture = _mario.resolve_texture(texture)
 	_set_pose_offset(offset)
 
@@ -244,7 +250,7 @@ func cancel() -> void:
 	active = false
 	changing = false
 	if is_instance_valid(_mario) and not _mario.is_shutdown:
-		var target := SMALL if shrinking else SUPER
+		var target := _mario.small_form if shrinking else _mario.super_form
 		if _mario.form_controller.current_form != target:
 			_mario.form_controller.configure(_mario, target)
 		if not _actor_restored:

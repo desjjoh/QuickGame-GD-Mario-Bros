@@ -24,6 +24,14 @@ offset_right = 184.0
 offset_bottom = 152.0
 mouse_filter = 2
 text = "1 PLAYER GAME"
+[node name="PlayerTwo" type="Label" parent="."]
+layout_mode = 0
+offset_left = 88.0
+offset_top = 160.0
+offset_right = 200.0
+offset_bottom = 168.0
+mouse_filter = 2
+text = "2 PLAYER GAME"
 [node name="Cursor" type="Sprite2D" parent="."]
 position = Vector2(72,144)
 texture = ExtResource("cursor")

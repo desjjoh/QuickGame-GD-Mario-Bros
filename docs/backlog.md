@@ -2,7 +2,6 @@
 
 ## Finish the 1-1 feature set
 
-- Add Luigi and two-player turn/session flow, keeping a separate player scene for future physics differences.
 - Add Fire Mario/Luigi, fireballs, Fire Flowers, and automatic mushroom/flower reward selection.
 - Add Starman movement, collection, timed invincibility, presentation, and enemy interactions.
 - Connect future fireball/star attacks to the existing enemy-hit contract. Moving-shell interactions are already implemented.

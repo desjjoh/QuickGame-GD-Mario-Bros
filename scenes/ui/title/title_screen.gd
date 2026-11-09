@@ -10,7 +10,9 @@ const THEME_BINDING := preload("res://scripts/themes/area_theme_binding.gd")
 @onready var title_card: Sprite2D = $TitleCard
 @onready var cursor: Sprite2D = $Cursor
 
-signal start_requested(level: PackedScene)
+signal start_requested(character: GameHandler.PlayerCharacter)
+
+var _selected_character := GameHandler.PlayerCharacter.MARIO
 
 
 func _ready() -> void:
@@ -24,8 +26,19 @@ func _ready() -> void:
 func _physics_process(_delta: float) -> void:
 	if not is_visible_in_tree() or not ControllerHandler.enabled:
 		return
+	if ControllerHandler.input_select_just_pressed:
+		_selected_character = (
+			GameHandler.PlayerCharacter.LUIGI
+			if _selected_character == GameHandler.PlayerCharacter.MARIO
+			else GameHandler.PlayerCharacter.MARIO
+		)
+	cursor.position.y = (
+		$PlayerTwo.position.y
+		if _selected_character == GameHandler.PlayerCharacter.LUIGI
+		else $PlayerOne.position.y
+	)
 	if ControllerHandler.input_start_just_pressed:
-		start_requested.emit(null)
+		start_requested.emit(_selected_character)
 
 
 func _on_session_value_changed(key: StringName, _value: Variant) -> void:

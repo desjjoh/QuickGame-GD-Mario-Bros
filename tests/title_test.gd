@@ -106,6 +106,7 @@ func run_checks() -> void:
 		var label := title.get_node("PlayerOne") as Label
 		var hud := game.get_node("UI/HUD") as Control
 		assert(label.text == "1 PLAYER GAME")
+		assert((title.get_node("PlayerTwo") as Label).text == "2 PLAYER GAME")
 		var copyright_label := title.get_node("Copyright") as Label
 		assert(
 			(
@@ -279,11 +280,24 @@ func run_checks() -> void:
 		starts.clear()
 		title = GameHandler.title_flow.screen
 		assert(not title.has_node("PlayerTest"))
+		Input.action_press(ControllerHandler.down_action)
+		await tick(2)
+		Input.action_release(ControllerHandler.down_action)
+		assert(title.cursor.position == Vector2(72, 144))
 		Input.action_press(ControllerHandler.select_action)
 		await tick(4)
 		Input.action_release(ControllerHandler.select_action)
 		await tick(2)
-		assert(title.cursor.position == Vector2(72, 144))
+		assert(title.cursor.position == Vector2(72, 160))
+		Input.action_press(ControllerHandler.up_action)
+		await tick(2)
+		Input.action_release(ControllerHandler.up_action)
+		assert(title.cursor.position == Vector2(72, 160))
+		if keyboard:
+			Input.action_press(ControllerHandler.select_action)
+			await tick(2)
+			Input.action_release(ControllerHandler.select_action)
+			assert(title.cursor.position == Vector2(72, 144))
 		GameHandler.set_score(999)
 		if keyboard:
 			enter_key(true)
@@ -292,6 +306,7 @@ func run_checks() -> void:
 		await wait_for_transition()
 		assert(GameHandler.flow == GameHandler.GameFlow.STARTING)
 		assert(not GameHandler.start_new_game())
+		await check_character_intro(game, keyboard)
 		await wait_for_play()
 		await tick(4)
 		assert(starts == [&"level"])
@@ -307,6 +322,12 @@ func run_checks() -> void:
 		assert(GameHandler.current_player.body.is_on_floor())
 		assert(not GameHandler.current_player.gameplay_suspended)
 		assert(GameHandler.player_status.score == 0)
+		var character := (
+			GameHandler.PlayerCharacter.MARIO if keyboard else GameHandler.PlayerCharacter.LUIGI
+		)
+		assert(GameHandler.player_character == character)
+		assert(GameHandler.current_player.name == (&"Mario" if keyboard else &"Luigi"))
+		assert(hud.get_node("PlayerName").text == ("MARIO" if keyboard else "LUIGI"))
 		assert(GameHandler.title_flow.screen == null)
 		# Holding Enter across reveal cannot become an immediate Jump.
 		assert(not ControllerHandler.input_primary_just_pressed)
@@ -323,6 +344,8 @@ func run_checks() -> void:
 		var jump_audio := GameHandler.current_player._active_sound_effect
 		while is_instance_valid(jump_audio) and jump_audio.playing:
 			await tick(1)
+		if not keyboard:
+			await check_luigi_run(game)
 		game.free()
 		await get_tree().process_frame
 		assert(
@@ -359,6 +382,52 @@ func run_checks() -> void:
 	definition.stages[1].minimum_frames = 12
 	director.started.disconnect(record_start)
 	print(
-		"PASS: immediate title/no demo, suspended background Mario, white HUD font/cursor, Enter/gamepad Start, single visible option, once-only 1-1 load and retained alternate-stage launch, confirmation consumption, cancellation, session reset and detach cleanup."
+		"PASS: title navigation and Mario/Luigi starts, Luigi area and level continuity, confirmation consumption, cancellation, session reset and detach cleanup."
 	)
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+
+
+func check_luigi_run(game: Node) -> void:
+	var level := GameHandler.current_level
+	var luigi := level.player
+	assert(level.request_area_transfer(&"lower"))
+	await tick(4)
+	while GameHandler.transitions.busy:
+		await tick(1)
+	assert(level.active_area.area_id == &"lower" and level.player == luigi)
+	assert(GameHandler.restart_after_death(level, level._progress_key))
+	await check_character_intro(game, false)
+	while GameHandler.transitions.busy:
+		await tick(1)
+	assert(GameHandler.current_level != level and GameHandler.current_player != luigi)
+	assert(GameHandler.current_player.name == &"Luigi")
+	assert(GameHandler.player_character == GameHandler.PlayerCharacter.LUIGI)
+	assert(GameHandler.transition_to_level(preload("res://tests/fixtures/sandbox_level.tscn")))
+	while GameHandler.transitions.busy:
+		await tick(1)
+	assert(GameHandler.current_player.name == &"Luigi")
+	assert(GameHandler.show_title(game.stages[0]))
+	assert(GameHandler.player_character == GameHandler.PlayerCharacter.MARIO)
+	assert(GameHandler.current_player.name == &"Mario")
+	assert(game.get_node("UI/HUD/PlayerName").text == "MARIO")
+	assert(GameHandler.title_flow.screen.cursor.position == Vector2(72, 144))
+
+
+func check_character_intro(game: Node, is_mario: bool) -> void:
+	for frame in range(180):
+		if GameHandler.transitions.phase == &"card":
+			break
+		await tick(1)
+	assert(GameHandler.transitions.phase == &"card")
+	var intro := game.get_node("UI/ScreenContainer/TransitionScreen").presentation as Control
+	var expected := (
+		preload("res://assets/player/mario (small)/mario-small-idle.png")
+		if is_mario
+		else preload("res://assets/player/luigi (small)/luigi-idle.png")
+	)
+	assert(intro.get_node("Portrait").texture == expected)
+	assert(game.get_node("UI/HUD/PlayerName").text == ("MARIO" if is_mario else "LUIGI"))
+	if not is_mario and DisplayServer.get_name() != "headless":
+		await RenderingServer.frame_post_draw
+		var frame := get_viewport().get_texture().get_image()
+		assert(frame.save_png("res://.godot/validation/luigi-intro.png") == OK)

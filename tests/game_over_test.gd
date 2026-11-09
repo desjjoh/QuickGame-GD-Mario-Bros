@@ -78,6 +78,7 @@ func _ready() -> void:
 	var game := make_game()
 	add_child(game)
 	game.transitions_enabled = true
+	GameHandler.player_character = GameHandler.PlayerCharacter.LUIGI
 	GameHandler.set_top_score(456789)
 	GameHandler.set_score(456999)
 	GameHandler.set_coins(8)
@@ -102,6 +103,7 @@ func _ready() -> void:
 	assert(card.audio.playing and card.audio.volume_db == 0.0)
 	assert(not (card.audio.stream as AudioStreamWAV).loop_mode)
 	assert(GameHandler.current_level == null)
+	assert(game.get_node("UI/HUD/PlayerName").text == "LUIGI")
 	assert(GameHandler.get_area_progress(key, &"probe").collected_coins.size() == 1)
 	assert(not ControllerHandler.enabled and not game.get_node("LevelContainer").visible)
 	assert(game.get_node("UI/HUD").visible and game.get_node("UI/HUD/CoinCount").text == "08")
@@ -120,6 +122,7 @@ func _ready() -> void:
 	assert(GameHandler.flow == GameHandler.GameFlow.GAME_OVER and director.busy)
 	await wait_idle()
 	assert(GameHandler.flow == GameHandler.GameFlow.TITLE)
+	assert(game.get_node("UI/HUD/PlayerName").text == "MARIO")
 	assert(director.elapsed_frames >= 402)
 	var selected: PackedScene = game.title_background
 	if selected == null:
