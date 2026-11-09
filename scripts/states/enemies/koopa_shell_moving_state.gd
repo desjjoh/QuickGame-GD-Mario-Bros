@@ -238,9 +238,11 @@ func _on_enemy_contact(other: BaseEnemy) -> void:
 		return
 	if _touching.has(other.get_instance_id()) or not other._blocks_enemy_contact():
 		return
-	var position := (
-		other.sprite.global_position if other.sprite != null else other.body.global_position
-	)
+	var position := other.reward_popup_position(true)
+	var defer_popup := _victim_precedes_shell(other, enemy)
+	if defer_popup:
+		# The reference uses the current shell's cached X if the victim already updated.
+		position.x = enemy.reward_popup_position().x
 	var mutual := other.is_moving_shell()
 	if not other.receive_hit(EntityHit.new(enemy, &"shell", Vector2(_direction, 0))):
 		return
@@ -250,12 +252,25 @@ func _on_enemy_contact(other: BaseEnemy) -> void:
 	if not other._defeated:
 		return  # A surviving reaction is not a chain defeat.
 	if mutual:
-		var own_position := enemy.sprite.global_position
+		var own_position := enemy.reward_popup_position()
 		if enemy.receive_hit(EntityHit.new(other, &"shell", Vector2(-_direction, 0))):
 			enemy.award_score(1000, own_position)
 	enemy.play_sound_effect(SoundHandler.get_sound(&"enemy_smack"))
 	if enemy.shell_chain < CHAIN_POINTS.size():
-		enemy.award_score(CHAIN_POINTS[enemy.shell_chain], position)
+		enemy.award_score(
+			CHAIN_POINTS[enemy.shell_chain], position, enemy.DELAYED_REWARD.DELAY_TICKS, defer_popup
+		)
 	else:
-		enemy.award_extra_life(position)
+		enemy.award_extra_life(position, defer_popup)
 	enemy.shell_chain += 1
+
+
+func _victim_precedes_shell(victim: BaseEnemy, shell: BaseEnemy) -> bool:
+	var level := BaseLevel.containing(shell)
+	if level != null:
+		var registry := level.spawn_registry
+		var victim_slot := registry.get_slot(&"enemy", victim)
+		var shell_slot := registry.get_slot(&"enemy", shell)
+		if victim_slot >= 0 and shell_slot >= 0:
+			return victim_slot < shell_slot
+	return shell.is_greater_than(victim)

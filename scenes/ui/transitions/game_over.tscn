@@ -22,3 +22,4 @@ offset_bottom = 136.0
 mouse_filter = 2
 text = "GAME OVER"
 [node name="Audio" type="AudioStreamPlayer" parent="."]
+bus = &"NES_Mix"

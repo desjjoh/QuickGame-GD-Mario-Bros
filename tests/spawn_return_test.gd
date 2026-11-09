@@ -50,7 +50,7 @@ func _ready() -> void:
 	assert(player.body.global_position == expected)
 	assert(player.sprite.visible and player.body.collision_mask == mask)
 	assert(player.state_machine.current_state == player.state_machine.initial_state)
-	assert(level.players.get_index() > level.get_node("Areas").get_index())
+	assert(not level.player_behind_world)
 	assert(main.find_transport_entity(&"stage_return") == null)
 	assert(get_viewport().get_camera_2d() == main.get_node("Camera2D"))
 	assert(GameHandler.get_session_value(&"current_target_id") == &"player_spawn")

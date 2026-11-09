@@ -2,6 +2,8 @@ extends Node
 
 signal reward_voice_changed(occupied: bool)
 
+const NES_MIX_BUS: StringName = &"NES_Mix"
+
 var _sounds: Dictionary[StringName, AudioStream] = {}
 var _square_two := AudioStreamPlayer.new()
 var _pause_voice := AudioStreamPlayer.new()
@@ -9,6 +11,7 @@ var _pause_voice := AudioStreamPlayer.new()
 
 func _ready() -> void:
 	_pause_voice.name = "PauseCue"
+	_pause_voice.bus = NES_MIX_BUS
 	_pause_voice.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_pause_voice)
 	# NES SoundEngine: offsets $44/$64, 6/6/6/24 frames, control $84.
@@ -22,6 +25,7 @@ func _ready() -> void:
 	pause_sound.data = pause_pcm
 	_sounds[&"pause"] = pause_sound
 	_square_two.name = "Square2Sfx"
+	_square_two.bus = NES_MIX_BUS
 	add_child(_square_two)
 	_square_two.finished.connect(func(): reward_voice_changed.emit(false))
 	_sounds[&"coin"] = _build_pulse([113, 84], [5, 48], 0.5, 14, true)
@@ -69,7 +73,8 @@ func _ready() -> void:
 		[3, 2, 2, 4, 2, 2, 4, 2, 2, 4, 2, 2],
 		0.5
 	)
-	_sounds[&"timer_tick"] = _build_pulse([113], [6], 0.5, 9)
+	# Square 2 control $98 selects a 50% duty cycle and constant volume 8.
+	_sounds[&"timer_tick"] = _build_swept_pulse(0x71, [6], [0x98], [0x7f], [], {}, false)
 	# Square 2 blast: $5e/$18 frequency offsets, $94/$93 sweep, $9f control.
 	var blast := _build_swept_pulse(0x2f9, [8], [0x9f], [0x94], [], {}, false)
 	var blast_pcm := blast.data

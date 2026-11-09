@@ -4,7 +4,7 @@ extends CanvasGroup
 ## Shared foundation for playable levels.
 
 const AREA_CONTENT = preload("res://scenes/levels/base/level_area_content.gd")
-
+const DRAW_ORDER = preload("res://scenes/components/presentation/draw_order.gd")
 const SPAWN_REGISTRY = preload("res://scenes/levels/base/level_spawn_registry.gd")
 
 enum CompletionMode { NORMAL, WARP }
@@ -57,6 +57,7 @@ var transition_in_progress: bool = false
 @export_range(0.0, 64.0, 1.0) var horizontal_screen_inset: float = 7.0
 
 var player: BasePlayer
+var player_behind_world: bool = false
 var player_presentation: Node
 var is_shutdown: bool = false
 var _reward_timers: Dictionary[int, WeakRef] = {}
@@ -113,8 +114,7 @@ func _ready() -> void:
 	death_sequence.presentation_finished.connect(_retire_death_player)
 	death_sequence.finished.connect(_restart_after_death, CONNECT_DEFERRED)
 	transition_in_progress = GameHandler.transitions.busy and GameHandler.current_level == self
-	# Keep gameplay in one CanvasGroup Z band, with players drawn last.
-	move_child(players, get_child_count() - 1)
+	DRAW_ORDER.apply($Areas, DRAW_ORDER.WORLD)
 	# Clamp the player body after actor physics.
 	process_physics_priority = 100
 	# All level children are ready before the level's _ready() runs.

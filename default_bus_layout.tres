@@ -1,0 +1,23 @@
+[gd_resource type="AudioBusLayout" format=3]
+
+[sub_resource type="AudioEffectHighPassFilter" id="HighPass"]
+resource_name = "HighPassFilter"
+cutoff_hz = 90.0
+resonance = 0.707107
+
+[sub_resource type="AudioEffectLowPassFilter" id="LowPass"]
+resource_name = "LowPassFilter"
+cutoff_hz = 18000.0
+resonance = 0.707107
+
+[resource]
+bus/1/name = &"NES_Mix"
+bus/1/solo = false
+bus/1/mute = false
+bus/1/bypass_fx = false
+bus/1/volume_db = 0.0
+bus/1/send = &"Master"
+bus/1/effect/0/effect = SubResource("HighPass")
+bus/1/effect/0/enabled = true
+bus/1/effect/1/effect = SubResource("LowPass")
+bus/1/effect/1/enabled = true

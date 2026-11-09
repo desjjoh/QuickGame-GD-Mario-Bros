@@ -17,6 +17,7 @@ func _ready() -> void:
 		assert(atlas.region == Rect2(88, 32, 8, 8))
 		assert(atlas.atlas.resource_path.contains("/%s/" % theme_name))
 		var audio := debris.get_node("ShatterSound") as AudioStreamPlayer
+		assert(audio.bus == SoundHandler.NES_MIX_BUS)
 		assert(audio.playing)
 		assert(audio.volume_db == 0.0)
 		assert(audio.pitch_scale == 1.0)

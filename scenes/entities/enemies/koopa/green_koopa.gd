@@ -23,7 +23,9 @@ func _update_player_contact(_previous: BaseState, current: BaseState) -> void:
 	if current == $StateMachine/Walking:
 		_player_contact_shape.shape = _walking_contact_shape
 		_player_contact_area.position = _walking_contact_position
-	elif current in [$StateMachine/ShellIdle, $StateMachine/ShellMoving, $StateMachine/ShellStunned]:
+	elif (
+		current in [$StateMachine/ShellIdle, $StateMachine/ShellMoving, $StateMachine/ShellStunned]
+	):
 		if _player_contact_shape.shape == _shell_contact_shape:
 			return
 		_player_contact_shape.shape = _shell_contact_shape
@@ -68,7 +70,9 @@ func _handle_player_contact(player: BasePlayer) -> void:
 
 
 func _accept_hit(hit: EntityHit) -> bool:
-	var reward_position := sprite.global_position
+	var reward_position := reward_popup_position(
+		hit.maneuver in [&"block_bump", &"fireball", &"star"]
+	)
 	if hit.maneuver == &"block_bump":
 		return _accept_block_bump(hit, reward_position)
 	if hit.maneuver in [&"shell", &"fireball", &"star"]:
@@ -85,7 +89,7 @@ func _accept_hit(hit: EntityHit) -> bool:
 			and not is_shutdown
 			and not is_queued_for_deletion()
 		):
-			award_smack_defeat(200)
+			award_smack_defeat(200, reward_position)
 		return true
 	if (
 		hit.maneuver == &"kick"

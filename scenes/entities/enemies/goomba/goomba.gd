@@ -4,6 +4,7 @@ extends BaseEnemy
 func _accept_hit(hit: EntityHit) -> bool:
 	if state_machine.current_state != $StateMachine/Walking and not _accepts_defeated_hit(hit):
 		return false
+	var reward_position := reward_popup_position(hit.maneuver != &"stomp")
 	match hit.maneuver:
 		&"stomp":
 			if not state_machine.change_state($StateMachine/Squashed):
@@ -22,12 +23,20 @@ func _accept_hit(hit: EntityHit) -> bool:
 	if is_shutdown or is_queued_for_deletion():
 		return true
 	if hit.maneuver == &"stomp":
-		award_stomp(hit, sprite.global_position)
+		award_stomp(hit, reward_position)
 	elif hit.maneuver == &"block_bump":
-		award_score(100, sprite.global_position)
+		award_score(100, reward_position)
 	elif hit.maneuver in [&"fireball", &"star"]:
-		award_smack_defeat(100)
+		award_smack_defeat(100, reward_position)
 	return true
+
+
+func _configure_reward_popup(popup: Sprite2D) -> void:
+	if state_machine.current_state != $StateMachine/Squashed:
+		return
+	var mario := _level.player as Mario if is_instance_valid(_level) else null
+	if is_instance_valid(mario):
+		popup.expire_after_intervals(mario.damage.interval_elapsed, 2)
 
 
 func _can_hurt_player() -> bool:

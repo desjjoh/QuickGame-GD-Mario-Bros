@@ -107,5 +107,4 @@ func _release_power_up() -> void:
 	power_up.position = position
 	power_up.begin_emergence()
 	get_parent().add_child(power_up)
-	get_parent().move_child(power_up, get_index())
 	power_up.reset_physics_interpolation()

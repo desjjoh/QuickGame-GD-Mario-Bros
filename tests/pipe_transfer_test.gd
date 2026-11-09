@@ -44,7 +44,7 @@ func _ready() -> void:
 	var visuals := pipe.get_node("Presentation") as Node2D
 	assert(visuals.get_child_count() == 4)
 	assert(visuals.global_position == pipe.global_position)
-	assert(level.players.get_index() > level.get_node("Areas").get_index())
+	assert(not level.player_behind_world)
 	assert(visuals.get_parent() == pipe)
 	assert(visuals.z_index == 0)
 	var source := (
@@ -119,7 +119,7 @@ func _ready() -> void:
 	var character := player as Mario
 	var form := character.form_controller.current_form
 	assert(player.sprite.texture in [form.idle, form.crouch])
-	assert(level.players.get_index() < level.get_node("Areas").get_index())
+	assert(level.player_behind_world)
 	assert(not (player.state_machine.current_state as PlayerState).controls_enabled)
 	assert(player.body.collision_layer == 0 and player.body.collision_mask == 0)
 	var entry_origin := player.body.global_position
@@ -154,7 +154,7 @@ func _ready() -> void:
 		await ticks(1)
 	await get_tree().process_frame
 	assert(level.player == player and level.active_area == lower)
-	assert(level.players.get_index() > level.get_node("Areas").get_index())
+	assert(not level.player_behind_world)
 	assert(player.body.global_position == lower.get_node("Arrival").global_position)
 	assert(player.body.velocity == Vector2.ZERO)
 	assert(player.body.collision_layer != 0 and player.body.collision_mask != 0)

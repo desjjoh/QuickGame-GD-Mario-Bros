@@ -287,6 +287,7 @@ func _begin_music_and_unlock() -> void:
 		_music_limit = maxi(60, ceili(music.get_length() * 60.0) + 60)
 		if music_pulse != null:
 			_pulse_audio = AudioStreamPlayer.new()
+			_pulse_audio.bus = SoundHandler.NES_MIX_BUS
 			_pulse_audio.stream = SoundHandler.one_shot_copy(music_pulse)
 			add_child(_pulse_audio)
 			_set_reward_voice_occupied(SoundHandler.is_reward_voice_occupied())
@@ -314,6 +315,7 @@ func _play_audio(stream: AudioStream) -> void:
 	if stream == null:
 		return
 	_audio = AudioStreamPlayer.new()
+	_audio.bus = SoundHandler.NES_MIX_BUS
 	_audio.stream = SoundHandler.one_shot_copy(stream)
 	add_child(_audio)
 	_audio.play()

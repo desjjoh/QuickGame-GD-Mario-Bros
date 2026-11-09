@@ -50,7 +50,7 @@ func _ready() -> void:
 	pipe._physics_process(1.0 / 60.0)
 	assert(player.state_machine.current_state == player.pipe_enter_state)
 	ControllerHandler.input_up = 0
-	assert(level.players.get_index() < level.get_node("Areas").get_index())
+	assert(level.player_behind_world)
 	# Entry aligns feet to the mouth; floor contact may retain a safe-margin offset.
 	var entry_origin := player.body.global_position
 	assert(is_equal_approx(entry_origin.y, pipe.entry_position().y))
@@ -72,7 +72,7 @@ func _ready() -> void:
 	transient.free()
 	level._physics_process(1.0 / 60.0)
 	assert(player.body.global_position == origin)
-	assert(level.players.get_index() > level.get_node("Areas").get_index())
+	assert(not level.player_behind_world)
 	assert(player.body.collision_layer == layer and player.body.collision_mask == mask)
 	assert(player.sprite.visible)
 	assert(player.state_machine.current_state == player.state_machine.initial_state)
