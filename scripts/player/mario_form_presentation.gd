@@ -8,29 +8,6 @@ const SMALL: MarioForm = preload("res://assets/player/forms/small.tres")
 const SUPER: MarioForm = preload("res://assets/player/forms/super.tres")
 const FIRE: MarioForm = preload("res://assets/player/forms/fire.tres")
 const GROWTH_POSES := [0, 1, 0, 1, 0, 1, 2, 0, 1, 2]
-const FIRE_PALETTE := preload("res://scenes/components/presentation/fire_palette.gdshader")
-const FIRE_COLORS := [Color("f7d8a5"), Color("e69c21"), Color("b53120")]
-const FIRE_FLASH_COLORS := {
-	&"Overworld":
-	[
-		[Color("109400"), Color.WHITE, Color("e69c21")],
-		[Color("b53120"), Color.WHITE, Color("e69c21")],
-		[Color.BLACK, Color("ffcec5"), Color("9c4a00")],
-	],
-	&"Underground":
-	[
-		[Color("007b8c"), Color("ffcec5"), Color("9c4a00")],
-		[Color("b53120"), Color.WHITE, Color("e69c21")],
-		[Color("00424a"), Color("b5efef"), Color("007b8c")],
-	],
-	&"Castle":
-	[
-		[Color("007b8c"), Color("ffcec5"), Color("9c4a00")],
-		[Color("b53120"), Color.WHITE, Color("e69c21")],
-		[Color("636363"), Color.WHITE, Color("adadad")],
-	],
-}
-
 var active := false
 var shrinking := false
 var timer := 0
@@ -51,9 +28,7 @@ var _finish_pending := false
 var _actor_restored := false
 var _reset_on_visible := false
 var _igniting := false
-var _original_material: Material
-var _fire_material: ShaderMaterial
-var _flash_colors: Array
+var _fire_frames: Array[Texture2D] = []
 var _fire_animation: StringName
 var _fire_animation_position := 0.0
 
@@ -264,23 +239,19 @@ func _begin_fire_palette() -> void:
 	_fire_animation = _mario.animation_player.current_animation
 	if _fire_animation != &"":
 		_fire_animation_position = _mario.animation_player.current_animation_position
-	_original_material = _mario.sprite.material
-	_fire_material = ShaderMaterial.new()
-	_fire_material.shader = FIRE_PALETTE
+	var texture := _mario.sprite.texture
 	var theme := _level.active_area.theme if _level.active_area != null else null
-	_flash_colors = FIRE_FLASH_COLORS.get(
-		StringName(theme.display_name) if theme != null else &"Overworld",
-		FIRE_FLASH_COLORS.Overworld
-	)
-	_mario.sprite.material = _fire_material
-	_update_fire_palette(0)
+	if theme == null or theme.fire_transform_palettes.is_empty():
+		theme = load("res://assets/themes/overworld.tres") as AreaTheme
+	var palettes := theme.fire_transform_palettes
+	_fire_frames.assign([texture])
+	for index in range(3):
+		var palette := palettes[index] if index < palettes.size() else null
+		_fire_frames.append(palette.remap(texture) if palette != null else texture)
 
 
 func _update_fire_palette(slot: int) -> void:
-	var colors: Array = FIRE_COLORS if slot == 0 else _flash_colors[slot - 1]
-	_fire_material.set_shader_parameter(&"light_color", colors[0])
-	_fire_material.set_shader_parameter(&"middle_color", colors[1])
-	_fire_material.set_shader_parameter(&"dark_color", colors[2])
+	_mario.sprite.texture = _fire_frames[slot]
 
 
 func _seek_reference_walk_start() -> void:
@@ -333,9 +304,8 @@ func cancel() -> void:
 	changing = false
 	if _igniting:
 		if is_instance_valid(_mario) and is_instance_valid(_mario.sprite):
-			_mario.sprite.material = _original_material
-		_original_material = null
-		_fire_material = null
+			_update_fire_palette(0)
+		_fire_frames.clear()
 	if is_instance_valid(_mario) and not _mario.is_shutdown:
 		var target := (
 			_mario.fire_form if _igniting else _mario.small_form if shrinking else _mario.super_form

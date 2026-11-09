@@ -70,9 +70,15 @@ Pipe entry/transfer, sideways-pipe, climbing, and flagpole-ending tests also acc
 
 `jump_benchmark_test`, `super_mushroom_test`, `pipe_transfer_test`, and `flagpole_ending_test` accept `-- --luigi` to use Luigi's inherited scene. Add `--trace` to the jump benchmark to compare per-tick position, velocity, and state.
 
-`fire_form_test` checks shared Fire artwork, contact size, pause, 63-update palette timing, and character-specific Fire-to-Small damage. Run it with rendering enabled to capture each character during the palette cycle.
+`fire_form_test` checks Fire artwork for Overworld, Underground, and Castle, 63-update palette timing, pause, walking atlas alignment, cancellation, and character-specific Fire-to-Small damage. Run it with rendering enabled to capture each character during the palette cycle.
 
 `fire_flower_test` checks block emergence and crop, four global palette phases, stationary motion, pickup for both characters in all three forms, and the delayed 1,000-point reward. A rendered run captures the flower partway through emergence.
+
+`fireball_test` compares per-tick positions, vertical speeds, and bounce flags with the Mesen right, left, and wall traces. It checks burst frame selection and release timing, fresh versus held Run input, alternating slot rejection and reuse, and player limits of zero, one, and two.
+
+The same test checks Fire throw duration and pose selection for both characters while standing, walking, running, and jumping with or without horizontal movement. A rendered run checks each pixel of the full throw and the two partial compositions in both directions.
+
+The enemy impact fixtures use captured Goomba, Koopa, and shell positions to compare contact timing, the initial knockout step, the early launch arc, delayed scoring, and burst release. They also check the left and right eligibility cutoffs and a shot that defeats two enemies in descending slot order.
 
 `title_test` checks the HUD name and lives portrait on the initial and restart intro cards and the Mario reset on title return. The Time Up and Game Over tests check the active name on those cards, including Game Over after the player level is removed.
 

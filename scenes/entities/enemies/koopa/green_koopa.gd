@@ -31,6 +31,12 @@ func is_moving_shell() -> bool:
 	return state_machine.current_state == $StateMachine/ShellMoving
 
 
+func fireball_bounds() -> Rect2:
+	if state_machine.current_state == $StateMachine/Walking:
+		return super()
+	return Rect2(body.global_position + Vector2(-5, -2), Vector2(10, 6))
+
+
 func _handle_player_contact(player: BasePlayer) -> void:
 	if state_machine.current_state in [$StateMachine/ShellIdle, $StateMachine/ShellStunned]:
 		receive_hit(EntityHit.new(player, &"kick", Vector2.ZERO))
@@ -42,13 +48,16 @@ func _accept_hit(hit: EntityHit) -> bool:
 	var reward_position := sprite.global_position
 	if hit.maneuver == &"block_bump":
 		return _accept_block_bump(hit, reward_position)
-	if hit.maneuver == &"shell":
+	if hit.maneuver in [&"shell", &"fireball"]:
 		var knocked_out := $StateMachine/KnockedOut as EnemyDefeatedState
 		knocked_out.launch_direction = away_from_attacker(hit)
+		knocked_out.fireball_launch = hit.maneuver == &"fireball"
 		if not state_machine.change_state(knocked_out):
 			return false
 		stomp_grace_ticks = 0
 		mark_defeated(hit)
+		if hit.maneuver == &"fireball" and not is_shutdown and not is_queued_for_deletion():
+			award_fireball_defeat(200)
 		return true
 	if (
 		hit.maneuver == &"kick"

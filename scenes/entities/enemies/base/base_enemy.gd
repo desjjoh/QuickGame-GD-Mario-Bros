@@ -6,6 +6,7 @@ signal enemy_contact(other: BaseEnemy)
 signal defeated(hit: EntityHit)
 
 const DELAYED_REWARD := preload("res://scenes/components/interactions/delayed_reward.gd")
+const FIREBALL_TARGETS := &"fireball_targets"
 const STOMP_REBOUND := -240.0
 const RISING_REWARD_POPUP := preload("res://scenes/components/presentation/rising_reward_popup.gd")
 
@@ -22,6 +23,7 @@ var _player_contact_latched := false
 
 func _ready() -> void:
 	super()
+	add_to_group(FIREBALL_TARGETS)
 	_enemy_contact_area.area_entered.connect(_on_enemy_contact)
 	_block_hits.hit_handler = receive_hit
 	_level = BaseLevel.containing(self)
@@ -117,9 +119,33 @@ func award_stomp(hit: EntityHit, world_position: Vector2) -> void:
 		award_score(100, world_position)
 
 
-func award_score(points: int, world_position: Vector2) -> void:
+func award_score(
+	points: int, world_position: Vector2, delay_ticks: int = DELAYED_REWARD.DELAY_TICKS
+) -> void:
 	RISING_REWARD_POPUP.show_score(get_parent(), points, world_position)
-	DELAYED_REWARD.schedule(self, GameHandler.add_score.bind(points))
+	DELAYED_REWARD.schedule(self, GameHandler.add_score.bind(points), delay_ticks)
+
+
+func award_fireball_defeat(points: int) -> void:
+	award_score(points, sprite.global_position, 5)
+	play_sound_effect(SoundHandler.get_sound(&"enemy_smack"))
+
+
+func can_contact_fireball() -> bool:
+	return (
+		not _defeated
+		and not is_shutdown
+		and not is_queued_for_deletion()
+		and not gameplay_suspended
+		and not activity_suspended
+	)
+
+
+func fireball_bounds() -> Rect2:
+	if _player_contact_area == null:
+		return Rect2()
+	var shape := _player_contact_area.get_node("CollisionShape2D") as CollisionShape2D
+	return shape.global_transform * shape.shape.get_rect()
 
 
 func _can_hurt_player() -> bool:
