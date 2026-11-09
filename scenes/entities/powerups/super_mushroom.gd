@@ -1,7 +1,8 @@
 class_name SuperMushroom
 extends Mushroom
 
-const SCORE_POPUP := preload("res://scenes/components/presentation/score_popup.tscn")
+const DELAYED_REWARD := preload("res://scenes/components/interactions/delayed_reward.gd")
+const RISING_REWARD_POPUP := preload("res://scenes/components/presentation/rising_reward_popup.gd")
 
 
 func _begin_collection(player: BasePlayer) -> bool:
@@ -15,9 +16,6 @@ func _begin_collection(player: BasePlayer) -> bool:
 
 
 func _grant_reward(_player: BasePlayer) -> void:
-	var popup := SCORE_POPUP.instantiate()
-	get_parent().add_child(popup)
-	popup.show_score(1000, sprite.global_position)
-	popup.rise_and_free()
-	GameHandler.add_score(1000)
+	RISING_REWARD_POPUP.show_score(get_parent(), 1000, sprite.global_position)
+	DELAYED_REWARD.schedule(self, GameHandler.add_score.bind(1000))
 	SoundHandler.play_reward(&"power_up_grab")

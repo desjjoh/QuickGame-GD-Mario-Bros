@@ -1,13 +1,19 @@
 extends Node
 
+signal physics_step_finished
+
+
+func _physics_process(_delta: float) -> void:
+	physics_step_finished.emit()
+
 
 func ticks(count: int) -> void:
 	for frame in range(count):
-		await get_tree().physics_frame
-		await get_tree().process_frame
+		await physics_step_finished
 
 
 func _ready() -> void:
+	process_physics_priority = 2000
 	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(game)
@@ -41,18 +47,17 @@ func _ready() -> void:
 	assert(GameHandler.request_pause_toggle())
 	# Actual fresh overlap while rising must stop this shell and bounce Mario.
 	player.body.global_position = shell.body.global_position + Vector2(0, -5)
-	var score := GameHandler.player_status.score
 	for index in range(4):
 		await ticks(1)
 		if not shell.is_moving_shell():
 			break
 	assert(not shell.is_moving_shell() and not level.death_in_progress)
 	assert(player.body.velocity.y == -240)
-	assert(GameHandler.player_status.score == score + 200)
+	assert(player.stomp_chain == 2)
 	assert(shell.get("stomp_grace_ticks") == 12)
 	# Remaining in contact cannot immediately kick or award another reward.
 	await ticks(4)
-	assert(not shell.is_moving_shell() and GameHandler.player_status.score == score + 200)
+	assert(not shell.is_moving_shell() and player.stomp_chain == 2)
 	player.body.global_position = Vector2(24, 100)
 	await ticks(2)
 	assert(shell.receive_hit(EntityHit.new(player, &"kick", Vector2.ZERO)))

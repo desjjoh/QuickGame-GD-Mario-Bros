@@ -65,6 +65,7 @@ func _ready() -> void:
 			)
 		)
 	var player: BasePlayer = level.player
+	pipe.set_physics_process(false)
 	player.body.global_position = pipe.to_global(Vector2(-14, 32))
 	player.body.velocity = Vector2.ZERO
 	player.body.reset_physics_interpolation()
@@ -78,13 +79,20 @@ func _ready() -> void:
 				sound_count[0] += 1
 	)
 	Input.action_press(ControllerHandler.right_action)
-	var entered := false
+	var reached_mouth := false
 	for frame in range(60):
 		await ticks(1)
-		if player.state_machine.current_state == player.pipe_enter_state:
-			entered = true
+		if pipe.can_start_entry(player):
+			reached_mouth = true
 			break
-	assert(entered, "Walking into the grounded left-facing mouth must trigger entry.")
+	assert(reached_mouth, "Walking right must reach the lower mouth.")
+	Input.action_release(ControllerHandler.right_action)
+	ControllerHandler.input_right = 0
+	player.face_direction(-1.0)
+	assert(not pipe.can_start_entry(player), "Left-facing contact must reject entry.")
+	player.face_direction(1.0)
+	pipe._physics_process(1.0 / 60.0)
+	assert(player.state_machine.current_state == player.pipe_enter_state)
 	await preload("res://tests/fixtures/pause_check.gd").check(level)
 	assert(player.body.collision_mask == 0)
 	var start = player.body.global_position
@@ -95,7 +103,6 @@ func _ready() -> void:
 	assert(player.sprite.texture != first_texture, "Side entry must cycle the walking sprites.")
 	assert(player.body.global_position.x > start.x)
 	assert(is_equal_approx(player.body.global_position.y, start.y))
-	Input.action_release(ControllerHandler.right_action)
 	await ticks(20)
 	assert(
 		player.body.global_position == start + Vector2(14, 0),

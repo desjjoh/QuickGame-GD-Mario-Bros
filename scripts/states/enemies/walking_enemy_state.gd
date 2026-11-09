@@ -1,6 +1,8 @@
 extends EntityState
 ## Shared patrol movement for enemies with a BaseEnemy terrain body.
 
+const TERRAIN_WALK := preload("res://scenes/components/motion/terrain_walk.gd")
+
 @export var walk_speed := 30.0
 @export var gravity := 61.0 / 256.0 * 60.0 * 60.0
 @export var fall_speed_limit := 180.0
@@ -22,14 +24,17 @@ func exit() -> void:
 
 
 func process_physics(delta: float) -> BaseState:
+	_move_with_horizontal_speed(delta, walk_speed * _direction)
+	return null
+
+
+func _move_with_horizontal_speed(delta: float, horizontal_speed: float) -> void:
 	var enemy := entity as BaseEnemy
 	var body := enemy.body
-	body.velocity.x = walk_speed * _direction
-	body.move_and_slide()
+	var hit_wall := TERRAIN_WALK.step(body, horizontal_speed)
 	body.velocity.y = minf(body.velocity.y + gravity * delta, fall_speed_limit)
-	if body.is_on_wall():
+	if hit_wall:
 		_turn_around()
-	return null
 
 
 func _turn_around() -> void:

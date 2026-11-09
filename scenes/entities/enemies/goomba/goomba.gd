@@ -9,8 +9,9 @@ func _accept_hit(hit: EntityHit) -> bool:
 			if not state_machine.change_state($StateMachine/Squashed):
 				return false
 		&"block_bump", &"shell", &"fireball", &"star":
-			var knocked_out: EnemyDefeatedState = $StateMachine/KnockedOut
+			var knocked_out = $StateMachine/KnockedOut
 			knocked_out.launch_direction = away_from_attacker(hit)
+			knocked_out.block_launch = hit.maneuver == &"block_bump"
 			if not state_machine.change_state(knocked_out):
 				return false
 		_:

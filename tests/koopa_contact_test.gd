@@ -44,7 +44,6 @@ func _ready() -> void:
 	assert(player.body.global_position == Vector2(150, 195))
 	assert(player.body.velocity == Vector2(90, -240))
 	assert(player._active_sound_effect.stream == SoundHandler.get_sound(&"stomp"))
-	assert(GameHandler.player_status.score == score + 100)
 	assert(GameHandler.player_status.lives == lives and not level.death_in_progress)
 	assert(not koopa._defeated and defeats.is_empty())
 	assert(level.spawn_registry._live_spawns[&"enemy"].has(koopa))

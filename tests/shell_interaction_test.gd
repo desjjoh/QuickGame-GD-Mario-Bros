@@ -34,21 +34,26 @@ func _ready() -> void:
 	player.set_physics_process(false)
 	var shell := koopa(120)
 	assert(shell.receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)))
+	await ticks(6)  # Settle the setup stomp before measuring the kick.
 	var lives := GameHandler.player_status.lives
 	var score := GameHandler.player_status.score
 	player.body.global_position = Vector2(118, 204)
 	player.body.velocity = Vector2.ZERO
 	await ticks(4)
 	assert(shell.is_moving_shell() and shell.body.velocity.x == 180)
-	assert(GameHandler.player_status.score == score + 500 and not level.death_in_progress)
 	assert(shell._active_sound_effect.stream == SoundHandler.get_sound(&"enemy_smack"))
+	await ticks(6)
+	assert(GameHandler.player_status.score == score + 500 and not level.death_in_progress)
 	var paused_position := shell.body.global_position
 	assert(GameHandler.request_pause_toggle())
 	await ticks(10)
 	assert(shell.body.global_position == paused_position)
 	assert(GameHandler.request_pause_toggle())
 	player.body.global_position = Vector2(40, 100)
-	await ticks(40)
+	for index in range(40):
+		await ticks(1)
+		if shell.body.velocity.x < 0:
+			break
 	assert(shell.body.velocity.x == -180)
 	assert(shell._active_sound_effect.stream == SoundHandler.get_sound(&"bump"))
 	shell.body.global_position = Vector2(128, 200)
@@ -79,6 +84,7 @@ func _ready() -> void:
 	survivor.set_script(load("res://tests/fixtures/reactive_enemy.gd"))
 	survivor.position = Vector2(180, 192)
 	level.world_objects.add_child(survivor)
+	await ticks(6)
 	var survivor_score := GameHandler.player_status.score
 	moving._on_enemy_contact(survivor)
 	moving._on_enemy_contact(survivor)
@@ -96,11 +102,12 @@ func _ready() -> void:
 		moving._on_enemy_contact(target)
 		assert(target._defeated and target.sprite.flip_v)
 		moving._on_enemy_contact(target)
+		target.free()
+		await ticks(6)
 		if index < 7:
 			assert(GameHandler.player_status.score == before + chain_points[index])
 		else:
 			assert(GameHandler.player_status.lives == life_before + 1)
-		target.free()
 	# Moving shell versus idle shell: only the idle target is defeated.
 	var retained_chain: int = shell.shell_chain
 	assert(shell.receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)))
@@ -133,9 +140,12 @@ func _ready() -> void:
 	assert(target.receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)))
 	assert(target.receive_hit(EntityHit.new(player, &"kick", Vector2.ZERO)))
 	shell.shell_chain = 0
+	target.set_physics_process(false)
+	await ticks(6)
 	var before := GameHandler.player_status.score
 	moving._on_enemy_contact(target)
 	assert(shell._defeated and target._defeated)
+	await ticks(6)
 	assert(GameHandler.player_status.score == before + 1500)
 	moving._on_enemy_contact(target)
 	assert(GameHandler.player_status.score == before + 1500)
@@ -173,11 +183,12 @@ func _ready() -> void:
 	)
 	overlap.position = Vector2(146, 192)
 	level.world_objects.add_child(overlap)
-	await ticks(2)
+	await ticks(6)
 	before = GameHandler.player_status.score
 	assert(shell.receive_hit(EntityHit.new(level.player, &"kick", Vector2.ZERO)))
 	await ticks(2)
 	assert(overlap._defeated and shell.is_moving_shell())
+	await ticks(6)
 	assert(GameHandler.player_status.score == before + 1000)
 	await ticks(3)
 	assert(GameHandler.player_status.score == before + 1000)

@@ -9,11 +9,9 @@
 
 ## Brick breaking
 
-Breaking physics, themed debris, the cached shatter cue, delayed follow-up bonk, and 50 points without a popup are implemented. Remaining work:
+Breaking physics, themed debris, the cached shatter cue, delayed follow-up bonk, and 50 points without a popup are implemented. Accepted bumps and breaks collect a world coin directly above the block. Goombas, Koopas, shells, and mushrooms share ordered block-hit delivery.
 
-- Handle coins directly above a broken brick through the existing reward and persistence paths.
-- Compare shatter-specific reactions for Goombas, Koopas, stationary/moving shells, and mushrooms with the reference before changing behavior.
-- Complete the remaining focused integration checks for adjacent bricks, reward-brick protection, pause, debris/marker cleanup, and area reload.
+- Compare receiver selection near brick seams if a block hit unexpectedly misses or catches an actor. The game currently uses a strip query where the NES uses an actor terrain probe.
 
 Keep the accepted cached audio. Live shared noise-channel playback was removed after causing stutter.
 

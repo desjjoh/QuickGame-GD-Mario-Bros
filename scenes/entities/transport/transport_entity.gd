@@ -12,10 +12,7 @@ var _level: BaseLevel
 
 
 func _ready() -> void:
-	var ancestor := get_parent()
-	while ancestor != null and not ancestor is BaseLevel:
-		ancestor = ancestor.get_parent()
-	_level = ancestor as BaseLevel
+	_level = BaseLevel.containing(self)
 	process_physics_priority = 50
 	super()
 

@@ -64,6 +64,14 @@ func _exit_tree() -> void:
 	shutdown()
 
 
+## Shuts down parent entities before their descendants, including nested actors.
+static func shutdown_descendants(root: Node) -> void:
+	for child in root.get_children():
+		if child is BaseEntity:
+			child.shutdown()
+		shutdown_descendants(child)
+
+
 func shutdown() -> void:
 	if is_shutdown:
 		return

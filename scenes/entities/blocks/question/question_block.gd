@@ -23,11 +23,9 @@ func _ready() -> void:
 	$StateMachine/Active.entered.connect(_allow_reward)
 	super()
 	if reward_kind == BlockReward.Kind.TIMED_COINS:
-		var ancestor := get_parent()
-		while ancestor != null and not ancestor is BaseLevel:
-			ancestor = ancestor.get_parent()
-		if ancestor is BaseLevel:
-			ancestor.register_reward_timer(self)
+		var level := BaseLevel.containing(self)
+		if level != null:
+			level.register_reward_timer(self)
 
 
 func _allow_reward() -> void:
@@ -85,10 +83,7 @@ func _release_reward() -> void:
 
 
 func _release_power_up() -> void:
-	var ancestor := get_parent()
-	while ancestor != null and not ancestor is BaseLevel:
-		ancestor = ancestor.get_parent()
-	var level := ancestor as BaseLevel
+	var level := BaseLevel.containing(self)
 	if level == null:
 		return
 	var instance := power_up_scene.instantiate()

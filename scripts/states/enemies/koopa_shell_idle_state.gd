@@ -11,11 +11,14 @@ func enter() -> void:
 	wake_ticks_remaining = WAKE_TICKS
 	var enemy := entity as BaseEnemy
 	enemy.body.velocity.x = 0.0
+	var previous_offset := enemy.sprite.position
 	# The final column contains two 16x16 poses; the upper one is the idle shell.
 	enemy.sprite.flip_v = enemy.get("shell_upside_down")
 	enemy.sprite.vframes = 2
 	enemy.sprite.frame = 4
 	enemy.sprite.position = Vector2(0, 2)
+	if enemy.sprite.position != previous_offset:
+		enemy.sprite.reset_physics_interpolation()
 
 
 func process_physics(delta: float) -> BaseState:

@@ -57,7 +57,7 @@ func _ready() -> void:
 	var actor_id := mario.get_instance_id()
 	await ticks(4)
 	assert(not is_instance_valid(mushroom))
-	assert(GameHandler.player_status.score == score + 1000)
+	assert(GameHandler.player_status.score == score)
 	assert(GameHandler.player_status.lives == lives and mario.form_presentation.active)
 	assert(voice.stream == SoundHandler.get_sound(&"power_up_grab"))
 	assert(voice.volume_db == 0.0 and voice.pitch_scale == 1.0)
@@ -70,6 +70,8 @@ func _ready() -> void:
 			and popup.global_position.y > pickup_position.y - 4
 		)
 	)
+	await ticks(6)
+	assert(GameHandler.player_status.score == score + 1000)
 	await mario.form_presentation.finished
 	assert(mario.get_instance_id() == actor_id)
 	assert(mario.form_controller.current_form == MarioFormPresentation.SUPER)
@@ -83,6 +85,7 @@ func _ready() -> void:
 	mario.body.global_position = mushroom.body.global_position + Vector2(0, 8)
 	await ticks(4)
 	assert(not is_instance_valid(mushroom))
+	await ticks(6)
 	assert(GameHandler.player_status.score == score + 2000)
 	assert(GameHandler.player_status.lives == lives and not mario.form_presentation.active)
 	# A contact begun during a suspended transformation is retried after release.
@@ -99,6 +102,7 @@ func _ready() -> void:
 	await mario.form_presentation.finished
 	await ticks(4)
 	assert(not is_instance_valid(mushroom))
+	await ticks(6)
 	assert(GameHandler.player_status.score == score + 3000 and mario.form_presentation.active)
 	await mario.form_presentation.finished
 	# Available mushrooms use the inherited walking/falling and cleanup path.

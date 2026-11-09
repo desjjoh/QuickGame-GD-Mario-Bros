@@ -27,7 +27,8 @@ func speed_after_gravity(values: MotionValues, delta: float) -> float:
 
 
 ## Prepare integer displacement and next speed without moving the body twice.
-func prepare_step(values: MotionValues, delta: float) -> float:
+## A launch can keep its fractional world position by supplying its own grid origin.
+func prepare_step(values: MotionValues, delta: float, grid_origin: float = 0.0) -> float:
 	var force := values.gravity * values.weight / 3600.0 * 256.0
 	_fixed_step = (
 		is_equal_approx(delta, 1.0 / 60.0)
@@ -54,7 +55,7 @@ func prepare_step(values: MotionValues, delta: float) -> float:
 	integer_speed = floori(next_units / 256.0)
 	speed_fraction = posmod(next_units, 256)
 	var next_speed := next_units / 256.0 * 60.0
-	_target_y = roundf(values.body.global_position.y) + displacement
+	_target_y = grid_origin + roundf(values.body.global_position.y - grid_origin) + displacement
 	values.body.velocity.y = (_target_y - values.body.global_position.y) / delta
 	return next_speed
 

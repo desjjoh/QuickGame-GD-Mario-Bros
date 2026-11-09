@@ -14,6 +14,8 @@ var last_enemy_stomp_tick := -1
 var scripted_motion_step: Callable
 const ARRIVAL_CONTROL_TICKS := 17
 var arrival_control_ticks_remaining: int = 0
+var _floor_sample_tick := -1
+var _grounded_at_tick_start := false
 
 @export_group("Transitions")
 @export var climb_state: PlayerClimbState
@@ -79,6 +81,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_floor_sample_tick = Engine.get_physics_frames()
+	_grounded_at_tick_start = body.is_on_floor()
 	if arrival_control_ticks_remaining > 0 and state_machine.current_state is PlayerTransportState:
 		_advance_arrival_control_lock()
 		return
@@ -95,6 +99,12 @@ func _physics_process(delta: float) -> void:
 		# Catch actual movement after state integration, including the tick we land.
 		_try_attach_climbable(before, body.global_position)
 	_advance_arrival_control_lock()
+
+
+func was_grounded_at_tick_start() -> bool:
+	if _floor_sample_tick == Engine.get_physics_frames():
+		return _grounded_at_tick_start
+	return body.is_on_floor()
 
 
 func _advance_arrival_control_lock() -> void:
@@ -310,7 +320,5 @@ func can_read_controller_input() -> bool:
 func receive_damage(_source: BaseEntity = null) -> bool:
 	if is_dead or is_shutdown or gameplay_suspended:
 		return false
-	var ancestor := get_parent()
-	while ancestor != null and not ancestor is BaseLevel:
-		ancestor = ancestor.get_parent()
-	return (ancestor as BaseLevel).on_death(self, true) if ancestor is BaseLevel else false
+	var level := BaseLevel.containing(self)
+	return level.on_death(self, true) if level != null else false

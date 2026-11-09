@@ -97,12 +97,21 @@ func _ready() -> void:
 	await get_tree().process_frame
 	assert(level.active_area == main_area)
 	state.controls_enabled = true
-	if "--super" in OS.get_cmdline_user_args():
-		(player as Mario).form_controller.set_crouched(true)
-	ControllerHandler.input_down = 1
 	assert(not level.request_area_transfer(&"missing"))
 	assert(not level.request_area_transfer(&"main"))
+	# Down+Right survives the landing update, but the grounded cases above reject it.
+	player.body.global_position = pipe.entry_position() + Vector2(0, -2)
+	player.body.velocity = Vector2(0, -60)
+	player.body.move_and_slide()
+	assert(not player.body.is_on_floor())
+	assert(player.state_machine.change_state(player.get_node("StateMachine/Jump")))
+	player.body.velocity = Vector2(0, 240)
+	ControllerHandler.input_down = 1
+	ControllerHandler.input_right = 1
+	player._physics_process(1.0 / 60.0)
+	assert(player.body.is_on_floor() and not player.was_grounded_at_tick_start())
 	pipe._physics_process(1.0 / 60.0)
+	ControllerHandler.input_right = 0
 	assert(not level.request_area_transfer(&"lower"), "Only one transfer may be queued.")
 	assert(player.state_machine.current_state is PlayerPipeEnterState)
 	assert(level.players.get_index() < level.get_node("Areas").get_index())

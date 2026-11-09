@@ -232,7 +232,7 @@ func unload_runtime() -> void:
 		return
 	prepare_runtime()
 	refresh_transport_cells()
-	_shutdown_branch(self)
+	BaseEntity.shutdown_descendants(self)
 	for branch_name in _runtime_templates:
 		var branch := get_node_or_null(NodePath(branch_name))
 		if branch != null:
@@ -242,13 +242,6 @@ func unload_runtime() -> void:
 	runtime_loaded = false
 	process_mode = Node.PROCESS_MODE_DISABLED
 	hide()
-
-
-func _shutdown_branch(parent: Node) -> void:
-	for child in parent.get_children():
-		if child is BaseEntity:
-			child.shutdown()
-		_shutdown_branch(child)
 
 
 func register_activity_entity(entity: BaseEntity) -> void:

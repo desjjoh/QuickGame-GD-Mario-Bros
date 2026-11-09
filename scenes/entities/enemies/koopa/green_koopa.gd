@@ -96,17 +96,13 @@ func _accept_block_bump(hit: EntityHit, reward_position: Vector2) -> bool:
 		$StateMachine/ShellIdle.wake_ticks_remaining = 0
 	shell_upside_down = true
 	if previous == $StateMachine/ShellMoving:
-		$StateMachine/ShellMoving.walk_speed = 60.0
-		$StateMachine/ShellMoving._direction = direction
+		$StateMachine/ShellMoving.begin_block_launch(direction, hit.struck_block as BaseBlock)
+		sprite.flip_v = true
+		body.position.y -= 2.0
+		body.velocity = Vector2(60.0 * direction, -180.0)
 	else:
-		$StateMachine/ShellStunned.initial_direction = direction
-		if previous != $StateMachine/ShellStunned:
-			if not state_machine.change_state($StateMachine/ShellStunned):
-				return false
-		else:
-			$StateMachine/ShellStunned._direction = direction
-	sprite.flip_v = true
-	body.position.y -= 2.0
-	body.velocity = Vector2(60.0 * direction, -180.0)
+		if not state_machine.change_state($StateMachine/ShellStunned):
+			return false
+		$StateMachine/ShellStunned.begin_block_launch(direction)
 	award_score(100, reward_position)
 	return true

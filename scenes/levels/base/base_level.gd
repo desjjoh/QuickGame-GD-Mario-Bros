@@ -83,6 +83,19 @@ var world_objects: Node2D:
 		return get_node_or_null("Areas/MainArea/WorldObjects") as Node2D
 
 
+## Finds the nearest level, including the starting node itself.
+static func containing(node: Node) -> BaseLevel:
+	while node != null and not node is BaseLevel:
+		node = node.get_parent()
+	return node as BaseLevel
+
+
+## Opt in when gameplay contact is handled separately from terrain collision.
+func ignore_player_body(body: PhysicsBody2D) -> void:
+	if is_instance_valid(player):
+		body.add_collision_exception_with(player.body)
+
+
 func has_spawn_capacity(category: StringName) -> bool:
 	return spawn_registry.has_capacity(category)
 
@@ -316,16 +329,9 @@ func shutdown() -> void:
 		active_area.exit_area()
 	if is_instance_valid(active_area) and active_area.runtime_loaded:
 		_save_area(active_area)
-	_shutdown_entities(self)
+	BaseEntity.shutdown_descendants(self)
 	if not _persistent_progress:
 		GameHandler.forget_area_progress(_progress_key)
-
-
-func _shutdown_entities(parent: Node) -> void:
-	for child in parent.get_children():
-		if child is BaseEntity:
-			child.shutdown()
-		_shutdown_entities(child)
 
 
 func transport(

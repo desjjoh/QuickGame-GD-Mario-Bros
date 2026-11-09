@@ -3,6 +3,8 @@ extends BaseEntity
 
 signal collected(player: BasePlayer)
 
+const BLOCK_COIN := preload("res://scenes/entities/blocks/question/block_coin.gd")
+
 var _collected: bool = false
 
 @onready var _pickup: Area2D = $Body/Pickup
@@ -28,7 +30,7 @@ func _on_state_changed(_previous: BaseState, next: BaseState) -> void:
 	_pickup.set_deferred("collision_layer", 0 if _collected else 1)
 
 
-## Called by a player's form-aware terrain probe, never the support-body overlap.
+## Common collection path for terrain probes and accepted block hits.
 func collect(player: BasePlayer) -> bool:
 	if _collected or is_shutdown or gameplay_suspended or activity_suspended:
 		return false
@@ -44,6 +46,18 @@ func collect(player: BasePlayer) -> bool:
 		return false
 	GameHandler.award_coin()
 	collected.emit(player)
+	return true
+
+
+func collect_from_block(player: BasePlayer) -> bool:
+	var origin := sprite.global_position
+	if not collect(player):
+		return false
+	if is_inside_tree() and not is_shutdown:
+		var effect := BLOCK_COIN.new()
+		get_parent().add_child(effect)
+		effect.global_position = origin
+		effect.reset_physics_interpolation()
 	return true
 
 

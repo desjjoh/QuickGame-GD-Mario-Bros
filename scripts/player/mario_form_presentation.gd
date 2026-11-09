@@ -39,10 +39,7 @@ func begin(shrink: bool) -> bool:
 		return false
 	if _mario.form_controller.current_form != (SUPER if shrink else SMALL):
 		return false
-	var ancestor := _mario.get_parent()
-	while ancestor != null and not ancestor is BaseLevel:
-		ancestor = ancestor.get_parent()
-	_level = ancestor as BaseLevel
+	_level = BaseLevel.containing(_mario)
 	if (
 		_level == null
 		or _level.is_shutdown
