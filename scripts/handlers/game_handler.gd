@@ -130,7 +130,10 @@ func detach_game(game: Node) -> void:
 
 
 func load_level(
-	scene: PackedScene, reset_progress: bool = false, stage_index_override: int = -2
+	scene: PackedScene,
+	reset_progress: bool = false,
+	stage_index_override: int = -2,
+	entry_mode: BaseLevel.EntryMode = BaseLevel.EntryMode.STAGE_START
 ) -> bool:
 	if _loading or scene == null or not is_instance_valid(_level_container):
 		return false
@@ -148,6 +151,7 @@ func load_level(
 		previous_level.queue_free()
 	_current_level_scene = scene
 	current_level = instance as BaseLevel
+	current_level.entry_mode = entry_mode
 	if player_character == PlayerCharacter.LUIGI and current_level.player_scene != null:
 		current_level.player_scene = load("res://scenes/player/luigi/luigi.tscn")
 	if flow != GameFlow.TITLE:

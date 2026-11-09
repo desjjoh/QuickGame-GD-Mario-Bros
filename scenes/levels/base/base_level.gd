@@ -17,6 +17,7 @@ var completion_dispatched: bool = false
 var completion_mode: CompletionMode = CompletionMode.NORMAL
 
 enum DeathReason { NORMAL, TIMEOUT }
+enum EntryMode { STAGE_START, RESPAWN, HALFWAY_RESPAWN }
 
 signal level_started
 var has_started: bool = false
@@ -25,6 +26,8 @@ var timer_expired: bool:
 		return level_timer.has_expired
 var time_up_shown: bool = false
 var death_reason: DeathReason = DeathReason.NORMAL
+var death_restart_entry: EntryMode = EntryMode.RESPAWN
+var entry_mode: EntryMode = EntryMode.STAGE_START
 
 signal death_started
 
@@ -43,6 +46,8 @@ signal death_started
 @export var death_sound: AudioStream
 @export_range(0.0, 10.0, 0.1) var death_fallback_delay: float = 1.0
 @export var death_presentation_timeout: float = 10.0
+## Optional restart marker for deaths at or beyond the stage's halfway check.
+@export var halfway_spawn: Marker2D
 
 var death_in_progress: bool = false
 var transition_in_progress: bool = false
@@ -64,6 +69,7 @@ var _reward_timers: Dictionary[int, WeakRef] = {}
 var _spawned_areas: Dictionary[int, bool] = {}
 var _progress_key: String
 var _persistent_progress: bool = false
+var _halfway_camera_left: float = INF
 var active_area: BaseLevelArea
 var active_endpoint: AreaEndpoint
 var active_target_id: StringName = &""
@@ -111,6 +117,7 @@ func try_claim_spawn_slot(category: StringName, actor: Node, replace_oldest := f
 func _ready() -> void:
 	GameHandler.pause_controller.register_level(self)
 	level_timer.expired.connect(_on_timer_expired)
+	level_timer.hurry_started.connect(_on_hurry_started)
 	death_sequence.presentation_finished.connect(_retire_death_player)
 	death_sequence.finished.connect(_restart_after_death, CONNECT_DEFERRED)
 	transition_in_progress = GameHandler.transitions.busy and GameHandler.current_level == self
@@ -129,14 +136,20 @@ func _ready() -> void:
 			if area != active_area:
 				area.unload_runtime()
 	_load_area(active_area)
-	spawn_player()
+	spawn_player(halfway_spawn if entry_mode == EntryMode.HALFWAY_RESPAWN else player_spawn)
 	_record_active_area()
 	var initial_camera := active_area.get_node("Camera2D") as LevelCamera
+	# The main area camera can unload while Mario is in a side room.
+	if initial_camera.halfway_check_enabled:
+		_halfway_camera_left = initial_camera.halfway_camera_left
 	initial_camera.enabled = true
 	initial_camera.make_current()
 	var camera := get_viewport().get_camera_2d() as LevelCamera
 	if camera != null and is_instance_valid(player):
-		camera.reset_target(player.body)
+		if entry_mode == EntryMode.STAGE_START:
+			camera.reset_target(player.body)
+		else:
+			camera.snap_to_arrival(player.body, LevelCamera.LEFT_ARRIVAL_SPRITE_X)
 	if not is_shutdown:
 		active_area.enter_area()
 		if not is_instance_valid(GameHandler.current_game):
@@ -184,8 +197,8 @@ func on_level_start() -> bool:
 	# load_level initialized the value once. Start only the local countdown phase.
 	initialize_actors(false)
 	has_started = true
-	level_timer.start(GameHandler.animation_clock.tick_count)
-	_play_area_music()
+	level_timer.start(GameHandler.animation_clock.tick_count, timer_enabled)
+	_play_area_music(level_timer.is_hurry)
 	level_started.emit()
 	return true
 
@@ -205,7 +218,7 @@ func register_reward_timer(block: QuestionBlock) -> void:
 	_reward_timers[block.get_instance_id()] = weakref(block)
 
 
-func _play_area_music() -> void:
+func _play_area_music(start_warning: bool = false) -> void:
 	if (
 		has_started
 		and not is_shutdown
@@ -217,7 +230,16 @@ func _play_area_music() -> void:
 	):
 		var mario := player as Mario
 		var starman := mario != null and mario.starman.uses_starman_music()
-		MusicHandler.play_area(self, active_area.background_music, starman)
+		var pace := MusicHandler.Pace.NORMAL
+		if start_warning:
+			pace = MusicHandler.Pace.WARNING
+		elif level_timer.is_hurry:
+			pace = MusicHandler.Pace.FAST
+		MusicHandler.play_area(self, active_area.background_music, starman, pace)
+
+
+func _on_hurry_started() -> void:
+	MusicHandler.start_hurry(self)
 
 
 func _update_level_timer() -> void:
@@ -278,7 +300,7 @@ func clamp_player_to_camera() -> void:
 	player.body.global_position = player_position
 
 
-func spawn_player() -> BasePlayer:
+func spawn_player(marker: Marker2D = null) -> BasePlayer:
 	if is_shutdown:
 		return null
 	if is_instance_valid(player):
@@ -295,7 +317,8 @@ func spawn_player() -> BasePlayer:
 	player = instance as BasePlayer
 	if player_start_configuration != null:
 		player.configure_start(player_start_configuration)
-	player.position = players.to_local(player_spawn.global_position)
+	var spawn_marker := marker if is_instance_valid(marker) else player_spawn
+	player.position = players.to_local(spawn_marker.global_position)
 	players.add_child(player)
 	player.reset_physics_interpolation()
 	if GameHandler.current_level == self:
@@ -361,7 +384,7 @@ func _commit_area_arrival(
 	area: BaseLevelArea, target_id: StringName, arrival: Dictionary, under_cover: bool
 ) -> bool:
 	player.state_machine.stop(false)
-	player.on_area_arrival()
+	player.on_area_arrival(arrival.get("through_pipe", false))
 	player.body.velocity = Vector2.ZERO
 	player.jump_action.reset_falling_gravity()
 	player.body.global_position = arrival["position"]
@@ -571,6 +594,7 @@ func on_death(
 		player_presentation.cancel()
 	death_reason = reason
 	death_in_progress = true
+	death_restart_entry = _select_death_restart_entry()
 	MusicHandler.stop_area(self)
 	if reason == DeathReason.TIMEOUT:
 		GameHandler.set_player_form(PlayerStatus.PowerupForm.SMALL)
@@ -585,6 +609,17 @@ func on_death(
 	if not is_shutdown:
 		death_started.emit()
 	return true
+
+
+func _select_death_restart_entry() -> EntryMode:
+	if not is_instance_valid(halfway_spawn):
+		return EntryMode.RESPAWN
+	var camera := get_viewport().get_camera_2d() as LevelCamera
+	if camera != null:
+		var half_width := camera.get_viewport_rect().size.x / (2.0 * camera.zoom.x)
+		if camera.global_position.x - half_width >= _halfway_camera_left:
+			return EntryMode.HALFWAY_RESPAWN
+	return EntryMode.RESPAWN
 
 
 func _retire_death_player(victim: BasePlayer) -> void:

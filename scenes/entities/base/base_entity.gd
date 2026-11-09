@@ -113,6 +113,7 @@ func play_sound_effect(sound: AudioStream) -> AudioStreamPlayer:
 	_active_sound_effect = audio
 	audio.stream = sound
 	get_effects_parent().add_child(audio)
+	SoundHandler.register_action_voice(audio)
 	audio.finished.connect(audio.queue_free)
 	audio.play()
 	return audio

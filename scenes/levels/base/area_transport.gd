@@ -181,7 +181,7 @@ func _arrival_data(area: BaseLevelArea, target_id: StringName, animate: bool) ->
 			return {}
 		return {
 			"position": target.exit_position(),
-			"camera_sprite_x": 56.0,  # NES alternate pipe entrance X ($38).
+			"camera_sprite_x": LevelCamera.LEFT_ARRIVAL_SPRITE_X,
 			"direction": target.exit_direction(),
 			"distance": target.exit_distance,
 			"state": state if animate else null,
@@ -286,6 +286,10 @@ func _commit_transport(phase: int, under_cover: bool = false) -> void:
 			level._unload_area(area)
 		cancel(true)
 		return
+	var arrival_state := arrival["state"] as PlayerTransportState
+	arrival["through_pipe"] = (
+		_transport_state is PlayerPipeEnterState or arrival_state is PlayerPipeEnterState
+	)
 	if _transport_state != null:
 		_transport_state.commit_transfer()
 	_disconnect_transport_state()
@@ -293,7 +297,6 @@ func _commit_transport(phase: int, under_cover: bool = false) -> void:
 	if not level._commit_area_arrival(area, trip["target_id"], arrival, under_cover):
 		cancel(false)
 		return
-	var arrival_state := arrival["state"] as PlayerTransportState
 	if arrival_state != null:
 		_transport_trip = trip
 		_transport_trip["source"] = null

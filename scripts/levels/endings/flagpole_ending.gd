@@ -93,6 +93,7 @@ func start(level: BaseLevel, player: BasePlayer, source: BaseEntity) -> bool:
 	_camera.follow_position(player.climbing.approach_position.x)
 	if not _camera.acquire_scroll_lock(self):
 		return false
+	player.on_level_end()
 	active = true
 	_music_started = false
 	_music_ticks = 0

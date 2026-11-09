@@ -2,9 +2,17 @@ extends Node2D
 
 const POPUP := preload("res://scenes/components/presentation/score_popup.tscn")
 
+signal tick_finished
+
+
+func _physics_process(_delta: float) -> void:
+	tick_finished.emit()
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Sample after the popup's update even when one rendered frame runs several physics ticks.
+	process_physics_priority = 200
 	var world := Node2D.new()
 	world.process_mode = Node.PROCESS_MODE_PAUSABLE
 	world.position = Vector2(19, 31)
@@ -35,8 +43,7 @@ func _ready() -> void:
 	assert(animated.show_score(1000, Vector2(100, 100)))
 	animated.rise_and_free()
 	for tick in range(1, 13):
-		await get_tree().physics_frame
-		await get_tree().process_frame
+		await tick_finished
 		assert(animated.global_position == Vector2(100, 100 - tick))
 	get_tree().paused = true
 	var paused_position: Vector2 = animated.global_position
@@ -45,10 +52,10 @@ func _ready() -> void:
 	assert(animated.global_position == paused_position)
 	get_tree().paused = false
 	for tick in range(13, 48):
-		await get_tree().physics_frame
-		await get_tree().process_frame
+		await tick_finished
 		assert(animated.global_position == Vector2(100, 100 - tick))
-	await get_tree().physics_frame
+	await tick_finished
+	assert(animated.is_queued_for_deletion())
 	await get_tree().process_frame
 	assert(not is_instance_valid(animated), "The opted-in rise must free its popup")
 	assert(

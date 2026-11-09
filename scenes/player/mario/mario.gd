@@ -206,9 +206,15 @@ func get_climb_query_bounds() -> Rect2:
 	return super.get_climb_query_bounds()
 
 
-func on_area_arrival() -> void:
-	super.on_area_arrival()
+func on_area_arrival(through_pipe: bool = false) -> void:
+	super.on_area_arrival(through_pipe)
+	if through_pipe:
+		starman.clear()
 	_throw_pose.clear()
 	form_presentation.cancel()
 	damage.apply_visibility()
 	form_controller.set_crouched(false)
+
+
+func on_level_end() -> void:
+	starman.clear()

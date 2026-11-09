@@ -1,5 +1,7 @@
 extends Node
 
+const SCORE_POPUP := preload("res://scenes/components/presentation/score_popup.gd")
+
 
 func ticks(n: int) -> void:
 	for i in range(n):
@@ -23,17 +25,21 @@ func _ready() -> void:
 	camera.position = Vector2(128, 120)
 	await ticks(2)
 	camera.position.x = 688
+	var shell_spawner := (
+		preload("res://scenes/entities/spawners/green_koopa_spawner.tscn").instantiate()
+		as EntitySpawner
+	)
+	shell_spawner.position = Vector2(560, 192)
+	level.world_objects.add_child(shell_spawner)
+	level.active_area.update_camera_activity()
+	var shell := shell_spawner.get_node("GreenKoopa") as BaseEnemy
+	shell.body.global_position = Vector2(802, 208)
 	var pair := (
 		load("res://scenes/entities/spawners/goomba_pair_spawner.tscn").instantiate()
 		as EntitySpawner
 	)
 	pair.position = Vector2(816, 192)
 	level.world_objects.add_child(pair)
-	var shell := (
-		load("res://scenes/entities/enemies/koopa/green_koopa.tscn").instantiate() as BaseEnemy
-	)
-	shell.position = Vector2(794, 192)
-	level.world_objects.add_child(shell)
 	assert(shell.receive_hit(EntityHit.new(null, &"stomp", Vector2.DOWN)))
 	assert(shell.receive_hit(EntityHit.new(null, &"kick", Vector2.ZERO)))
 	shell.get_node("StateMachine/ShellMoving")._direction = 1
@@ -72,8 +78,24 @@ func _ready() -> void:
 	await ticks(12)
 	assert(shell.body.global_position.x > far_target.body.global_position.x)
 	assert(not far_target._defeated and shell.get("shell_chain") == 1)
-	shell.free()
-	pair.free()
+
+	var popup: Sprite2D
+	for sprite: Sprite2D in level.world_objects.find_children("*", "Sprite2D", true, false):
+		if sprite.get_script() == SCORE_POPUP and sprite.region_rect == Rect2(0, 24, 16, 8):
+			popup = sprite
+			break
+	assert(is_instance_valid(popup) and popup.visible)
+	var popup_y := popup.global_position.y
+	camera.position.x = 800
+	level.active_area.update_camera_activity()
+	assert(shell_spawner.activity_suspended and not shell.activity_suspended)
+	await ticks(2)
+	assert(
+		popup.global_position.y < popup_y, "A shell popup must keep rising as its spawner sleeps."
+	)
+	await ticks(48)
+	assert(not is_instance_valid(popup), "A shell popup must expire after its spawner sleeps.")
+
 	level.queue_free()
 	await ticks(2)
 	print("shell_spawn_contact_test: PASS")

@@ -3,6 +3,18 @@ extends Node
 signal reward_voice_changed(occupied: bool)
 
 const NES_MIX_BUS: StringName = &"NES_Mix"
+const ACTION_VOICES := &"nes_square_one_voices"
+const ACTION_CUES := [
+	&"jump_small",
+	&"jump_big",
+	&"bump",
+	&"fireball",
+	&"enemy_smack",
+	&"stomp",
+	&"flagpole",
+	&"pipe",
+	&"injury"
+]
 const SAMPLE_RATE := 44100
 const SAMPLES_PER_FRAME := 735
 const CPU_HZ := 1789773.0
@@ -139,6 +151,20 @@ func _register_action_cues() -> void:
 
 func get_sound(cue: StringName) -> AudioStream:
 	return _sounds.get(cue)
+
+
+func register_action_voice(voice: AudioStreamPlayer) -> void:
+	for cue: StringName in ACTION_CUES:
+		if voice.stream == _sounds[cue]:
+			voice.add_to_group(ACTION_VOICES)
+			return
+
+
+func is_action_voice_occupied() -> bool:
+	for voice: AudioStreamPlayer in get_tree().get_nodes_in_group(ACTION_VOICES):
+		if voice.playing:
+			return true
+	return false
 
 
 func play_pause() -> void:

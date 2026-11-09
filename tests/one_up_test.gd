@@ -69,7 +69,7 @@ func _ready() -> void:
 	assert(voice.playing and voice.stream == SoundHandler.get_sound(&"extra_life"))
 	assert(not is_instance_valid(mushroom))
 	assert(level.has_spawn_capacity(&"power_up"))
-	var popup := spawner.get_node("ScorePopup") as Sprite2D
+	var popup := level.world_objects.get_node("ScorePopup") as Sprite2D
 	assert(popup.visible and popup.region_rect == Rect2(16, 40, 16, 8))
 	assert(not popup.is_physics_interpolated())
 	var popup_y := popup.global_position.y
