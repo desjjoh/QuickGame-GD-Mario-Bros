@@ -43,6 +43,9 @@ func check_pickup(is_luigi: bool, index: int) -> void:
 	level.world_objects.add_child(block)
 	assert(block.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP)))
 	var flower := level.world_objects.get_node("FireFlower") as PowerUp
+	var neighboring_block := QUESTION.instantiate() as QuestionBlock
+	neighboring_block.position = block.position + Vector2(16, 0)
+	level.world_objects.add_child(neighboring_block)
 	flower.set_physics_process(false)
 	assert(not flower.sprite.visible and not flower.pickup.monitoring)
 	assert(
@@ -58,6 +61,8 @@ func check_pickup(is_luigi: bool, index: int) -> void:
 		var rise := tick / 4
 		assert(flower.position == Vector2(128, 128 - rise))
 		assert(flower.sprite.visible == (rise > 0))
+		assert((flower.get_index() > neighboring_block.get_index()) == (rise == 16))
+		assert((flower.get_index() > block.get_index()) == (rise == 16))
 		if rise > 0 and rise < 16:
 			assert(flower.sprite.region_enabled)
 			assert(flower.sprite.region_rect == Rect2(0, 0, 16, rise))
@@ -75,7 +80,21 @@ func check_pickup(is_luigi: bool, index: int) -> void:
 	flower.set_physics_process(true)
 	await ticks(8)
 	assert(flower.sprite.global_position == anchor)
-	player.body.global_position = anchor + Vector2(0, 8)
+	if index == 0:
+		await get_tree().physics_frame
+		if Engine.get_physics_frames() % 2 == 0:
+			await get_tree().physics_frame
+		player.body.global_position = anchor + Vector2(-11, 8)
+		flower._physics_process(1.0 / 60.0)
+		assert(not flower.is_queued_for_deletion())
+		player.body.global_position.x -= 1.0
+		await get_tree().physics_frame
+		player.body.global_position.x += 1.0
+		assert(not flower.pickup.overlaps_area(player.enemy_hurtbox))
+		flower._physics_process(1.0 / 60.0)
+		assert(flower.is_queued_for_deletion())
+	else:
+		player.body.global_position = anchor + Vector2(0, 8)
 	await ticks(3)
 	assert(not is_instance_valid(flower))
 	assert(GameHandler.player_status.score == score)

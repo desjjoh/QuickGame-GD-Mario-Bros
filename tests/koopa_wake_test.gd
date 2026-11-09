@@ -60,6 +60,8 @@ func _ready() -> void:
 	assert(koopa.state_machine.current_state == idle)
 	await ticks(1)
 	assert(koopa.state_machine.current_state == walking and koopa._can_hurt_player())
+	assert(koopa._player_contact_shape.shape.size == Vector2(12, 12))
+	assert(koopa._player_contact_area.position == Vector2(0, -1))
 	assert(koopa.sprite.vframes == 1 and koopa.sprite.position == Vector2(0, -8))
 	assert(walking._direction == (1 if GameHandler.animation_clock.tick_count % 2 == 0 else -1))
 	assert(koopa.get_node("Presentation/WalkAnimationSync").enabled)

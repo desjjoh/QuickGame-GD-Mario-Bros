@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://wlp13xllihs5" path="res://scenes/levels/base/base_level.tscn" id="2_base"]
 [ext_resource type="PackedScene" uid="uid://b5m1vkcrml3t2" path="res://scenes/player/mario/mario.tscn" id="3_player"]
 [ext_resource type="PackedScene" path="res://scenes/entities/powerups/super_mushroom.tscn" id="7_msko4"]
+[ext_resource type="PackedScene" path="res://scenes/entities/powerups/starman.tscn" id="8_1qen6"]
 [ext_resource type="PackedScene" path="res://scenes/levels/areas/base_area.tscn" id="10_area"]
 [ext_resource type="Resource" uid="uid://chfcnww7r30v7" path="res://assets/themes/underground.tres" id="12_underground"]
 [ext_resource type="TileSet" uid="uid://g7pmg7w6xn86" path="res://assets/tileset/underground/terrain.tres" id="13_os2yb"]
@@ -55,6 +56,11 @@ script = ExtResource("20_lletq")
 kind = 2
 power_up_scene = ExtResource("7_msko4")
 
+[sub_resource type="Resource" id="Resource_djj3g"]
+script = ExtResource("20_lletq")
+kind = 2
+power_up_scene = ExtResource("8_1qen6")
+
 [sub_resource type="Resource" id="Destination_start"]
 script = ExtResource("transport_destination")
 area_id = &"main"
@@ -80,6 +86,7 @@ Vector2i(21, 9): SubResource("Resource_1qen6"),
 Vector2i(64, 8): ExtResource("one_up_reward"),
 Vector2i(78, 9): SubResource("Resource_wn7v3"),
 Vector2i(94, 9): SubResource("Resource_md070"),
+Vector2i(101, 9): SubResource("Resource_djj3g"),
 Vector2i(109, 5): SubResource("Resource_dfu87")
 })
 theme = ExtResource("18_ukhqk")

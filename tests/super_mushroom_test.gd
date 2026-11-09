@@ -40,7 +40,7 @@ func _ready() -> void:
 		mushroom.set_physics_process(false)
 		assert(mushroom._emergence_remaining == 16 and not mushroom.pickup.monitoring)
 		assert(mario.body in mushroom.body.get_collision_exceptions())
-		mushroom._on_pickup_overlap(mario.enemy_hurtbox)
+		mushroom._check_pickup()
 		assert(not mushroom._removing and GameHandler.player_status.score == score)
 		block.queue_free()
 		if path.ends_with("alternate_reward_brick.tscn"):
@@ -58,6 +58,9 @@ func _ready() -> void:
 	# Actual overlap grants the reward once and starts growth on this same actor.
 	mario.body.global_position = mushroom.body.global_position + Vector2(0, 8)
 	var actor_id := mario.get_instance_id()
+	mushroom.walk_speed = 0.0
+	mushroom.gravity = 0.0
+	mushroom.set_physics_process(true)
 	await ticks(4)
 	assert(not is_instance_valid(mushroom))
 	assert(GameHandler.player_status.score == score)
@@ -90,7 +93,8 @@ func _ready() -> void:
 	mushroom.position = Vector2(160, 192)
 	assert(level.try_claim_spawn_slot(&"power_up", mushroom))
 	level.world_objects.add_child(mushroom)
-	mushroom.set_physics_process(false)
+	mushroom.walk_speed = 0.0
+	mushroom.gravity = 0.0
 	mario.body.global_position = mushroom.body.global_position + Vector2(0, 8)
 	await ticks(4)
 	assert(not is_instance_valid(mushroom))

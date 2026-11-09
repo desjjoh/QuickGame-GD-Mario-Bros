@@ -3,6 +3,7 @@ extends "res://scripts/states/enemies/koopa_shell_idle_state.gd"
 const CHAIN_POINTS := [500, 800, 1000, 2000, 4000, 5000, 8000]
 const BLOCK_ROLL_SPEED := 60.0
 const AIRBORNE_SPEED_ADJUSTMENT := 90.0
+const LEFT_EDGE_ALLOWANCE := 7.0
 enum BlockLaunch { NONE, HIT_FRAME, AIRBORNE, FLOOR_CONTACT }
 
 var _touching: Dictionary[int, bool] = {}
@@ -26,21 +27,72 @@ func enter() -> void:
 
 func process_physics(delta: float) -> BaseState:
 	var enemy := entity as BaseEnemy
+	if Engine.get_physics_frames() % 2 != 0 and not enemy.is_queued_for_deletion():
+		_check_enemy_hits(enemy)
+	if enemy._defeated or enemy.is_shutdown or enemy.state_machine.current_state != self:
+		return null
 	_last_movement_tick = Engine.get_physics_frames()
 	_advance_shell(enemy.body, delta)
+	return null
+
+
+func _check_enemy_hits(enemy: BaseEnemy) -> void:
+	var level := BaseLevel.containing(enemy)
+	var area := level.active_area if is_instance_valid(level) else null
+	if not is_instance_valid(area) or not area.is_ancestor_of(enemy):
+		return
+	var view := area.get_activity_region(false).grow(-area.activation_buffer)
+	var shell_bounds := _screen_contact_box(enemy, view)
+	if shell_bounds.size.y <= 0.0:
+		_touching.clear()
+		return
 	var present: Dictionary[int, bool] = {}
-	for area: Area2D in enemy._enemy_contact_area.get_overlapping_areas():
-		var other := area.get_parent().get_parent() as BaseEnemy
-		if other == null or other == enemy:
+	for node in get_tree().get_nodes_in_group(BaseEnemy.FIREBALL_TARGETS):
+		var other := node as BaseEnemy
+		if (
+			other == null
+			or other == enemy
+			or not area.is_ancestor_of(other)
+			or not other._blocks_enemy_contact()
+			or other.is_shutdown
+			or other.is_queued_for_deletion()
+		):
+			continue
+		var bounds := _screen_contact_box(other, view)
+		if bounds.size.y <= 0.0 or not shell_bounds.intersects(bounds, true):
 			continue
 		present[other.get_instance_id()] = true
-		enemy._on_enemy_contact(area)
+		_on_enemy_contact(other)
 		if enemy._defeated or enemy.is_shutdown:
-			return null
+			return
 	for id: int in _touching.keys():
 		if not present.has(id):
 			_touching.erase(id)
-	return null
+
+
+func _screen_contact_box(enemy: BaseEnemy, view: Rect2) -> Rect2:
+	var body_position := enemy.body.global_position
+	# Read integer coordinates like the NES, with tolerance for Godot's motion rounding.
+	var pixel := (body_position + Vector2(0.001, 0.001)).floor()
+	var origin := pixel - Vector2(8, 16)
+	var left := floorf(view.position.x)
+	var right := floorf(view.end.x) - 1.0
+	if (
+		origin.x < left - LEFT_EDGE_ALLOWANCE
+		or origin.x > right
+		or origin.y < floorf(view.position.y)
+		or origin.y >= floorf(view.end.y)
+	):
+		return Rect2()
+	# Shells and fireballs use the same reference enemy boxes.
+	var bounds := enemy.fireball_bounds()
+	if not bounds.has_area():
+		return Rect2()
+	bounds.position += pixel - body_position
+	var end := clampf(bounds.end.x, left, right)
+	bounds.position.x = clampf(bounds.position.x, left, right)
+	bounds.size.x = end - bounds.position.x
+	return bounds
 
 
 func exit() -> void:
@@ -193,7 +245,7 @@ func _on_enemy_contact(other: BaseEnemy) -> void:
 	if not other.receive_hit(EntityHit.new(enemy, &"shell", Vector2(_direction, 0))):
 		return
 	# Only accepted reactions consume the overlap. A temporarily unavailable
-	# target must remain eligible when the next physics poll sees it again.
+	# target must remain eligible when the next contact check sees it again.
 	_touching[other.get_instance_id()] = true
 	if not other._defeated:
 		return  # A surviving reaction is not a chain defeat.

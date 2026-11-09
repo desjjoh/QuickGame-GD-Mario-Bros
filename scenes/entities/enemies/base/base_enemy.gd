@@ -7,12 +7,16 @@ signal defeated(hit: EntityHit)
 
 const DELAYED_REWARD := preload("res://scenes/components/interactions/delayed_reward.gd")
 const FIREBALL_TARGETS := &"fireball_targets"
+const PLAYER_CONTACT := preload("res://scenes/components/interactions/player_contact.gd")
 const STOMP_REBOUND := -240.0
 const RISING_REWARD_POPUP := preload("res://scenes/components/presentation/rising_reward_popup.gd")
 
 @onready var body: CharacterBody2D = $Body
 @onready var _enemy_contact_area: Area2D = $Body/EnemyContact
 @onready var _player_contact_area := get_node_or_null("Body/PlayerContact") as Area2D
+@onready var _player_contact_shape := (
+	get_node_or_null("Body/PlayerContact/CollisionShape2D") as CollisionShape2D
+)
 @onready var _block_hits: BlockHitReceiver = $Body/BlockHitReceiver
 
 var _level: BaseLevel
@@ -32,31 +36,52 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	var player := _level.player if is_instance_valid(_level) else null
+	var mario := player as Mario
+	if is_instance_valid(mario) and mario.starman.is_active():
+		# The NES checks contact before moving the enemy on a star hit.
+		if _can_check_player_contact(player) and _touches_player_now(player):
+			if receive_hit(EntityHit.new(player, &"star", Vector2.ZERO)):
+				return
+		super(delta)
+		return
+	_check_normal_player_contact(player)
 	super(delta)
+
+
+func _check_normal_player_contact(player: BasePlayer) -> void:
 	if (
 		_defeated
+		or is_shutdown
+		or gameplay_suspended
+		or activity_suspended
 		or not _has_player_contact()
-		or _level == null
-		or not is_instance_valid(_level.player)
+		or not _can_check_player_contact(player)
 	):
 		return
-	var player := _level.player
-	if player.is_dead or player.is_shutdown or player.gameplay_suspended:
+	if player.last_enemy_stomp_tick == Engine.get_physics_frames():
 		return
-	var tick := Engine.get_physics_frames()
-	if tick % 2 != 0 or player.last_enemy_stomp_tick == tick:
-		return
-	if (
-		_player_contact_area == null
-		or player.enemy_hurtbox == null
-		or not _player_contact_area.overlaps_area(player.enemy_hurtbox)
-	):
+	if not _touches_player_now(player):
 		_player_contact_latched = false
 		return
 	if _player_contact_latched:
 		return
 	_player_contact_latched = true
 	_handle_player_contact(player)
+
+
+func _can_check_player_contact(player: BasePlayer) -> bool:
+	return (
+		is_instance_valid(player)
+		and not player.is_dead
+		and not player.is_shutdown
+		and not player.gameplay_suspended
+		and PLAYER_CONTACT.is_check_tick()
+	)
+
+
+func _touches_player_now(player: BasePlayer) -> bool:
+	return PLAYER_CONTACT.touches(_player_contact_area, player.enemy_hurtbox)
 
 
 func _handle_player_contact(player: BasePlayer) -> void:
@@ -126,7 +151,7 @@ func award_score(
 	DELAYED_REWARD.schedule(self, GameHandler.add_score.bind(points), delay_ticks)
 
 
-func award_fireball_defeat(points: int) -> void:
+func award_smack_defeat(points: int) -> void:
 	award_score(points, sprite.global_position, 5)
 	play_sound_effect(SoundHandler.get_sound(&"enemy_smack"))
 
@@ -142,10 +167,9 @@ func can_contact_fireball() -> bool:
 
 
 func fireball_bounds() -> Rect2:
-	if _player_contact_area == null:
+	if _player_contact_shape == null:
 		return Rect2()
-	var shape := _player_contact_area.get_node("CollisionShape2D") as CollisionShape2D
-	return shape.global_transform * shape.shape.get_rect()
+	return PLAYER_CONTACT.bounds(_player_contact_shape)
 
 
 func _can_hurt_player() -> bool:
@@ -196,6 +220,8 @@ func _on_enemy_contact(area: Area2D) -> void:
 	if (
 		other != null
 		and other != self
+		and not is_moving_shell()
+		and not other.is_moving_shell()
 		and other._blocks_enemy_contact()
 		and not other.is_shutdown
 		and not other.is_queued_for_deletion()

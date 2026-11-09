@@ -7,8 +7,10 @@ const COIN_TINT := Color(1, 1, 1, 0.65)
 const ONE_UP_SCENE := preload("res://scenes/entities/powerups/one_up_mushroom.tscn")
 const ONE_UP_TEXTURE := preload("res://assets/palettes/overworld/misc/green-mushroom.png")
 const SUPER_TEXTURE := preload("res://assets/items/red-mushroom.png")
+const STARMAN_SCENE := preload("res://scenes/entities/powerups/starman.tscn")
+const STARMAN_TEXTURE := preload("res://assets/palettes/overworld/misc/starman.png")
 
-enum Brush { TILES, COIN, ONE_UP, TIMED_COINS, TIERED }
+enum Brush { TILES, COIN, ONE_UP, TIMED_COINS, TIERED, STARMAN }
 
 var _brush: OptionButton
 var _layer: TileMapLayer
@@ -21,6 +23,7 @@ func _enter_tree() -> void:
 	_brush.add_item("Apply 1-Up Reward", Brush.ONE_UP)
 	_brush.add_item("Apply Timed Coins Reward", Brush.TIMED_COINS)
 	_brush.add_item("Apply Tiered Power-Up Reward", Brush.TIERED)
+	_brush.add_item("Apply Starman Reward", Brush.STARMAN)
 	_brush.tooltip_text = "Choose a reward, then click a painted reward block."
 	add_control_to_container(CONTAINER_CANVAS_EDITOR_MENU, _brush)
 	_brush.hide()
@@ -77,6 +80,9 @@ func _apply_reward(cell: Vector2i) -> void:
 			Brush.ONE_UP:
 				reward.kind = BlockReward.Kind.POWER_UP
 				reward.power_up_scene = ONE_UP_SCENE
+			Brush.STARMAN:
+				reward.kind = BlockReward.Kind.POWER_UP
+				reward.power_up_scene = STARMAN_SCENE
 	var previous := area.question_block_rewards
 	var old := BlockReward.resolve(previous.get(cell))
 	var selected := BlockReward.resolve(reward)
@@ -161,6 +167,16 @@ func _forward_canvas_force_draw_over_viewport(overlay: Control) -> void:
 						area.theme.resolve_texture(base_texture) if area.theme else base_texture
 					)
 					overlay.draw_texture_rect(texture, destination, false, COIN_TINT)
+				elif (
+					reward.kind == BlockReward.Kind.POWER_UP
+					and reward.power_up_scene == STARMAN_SCENE
+				):
+					var texture := (
+						area.theme.resolve_texture(STARMAN_TEXTURE) if area.theme else STARMAN_TEXTURE
+					)
+					overlay.draw_texture_rect_region(
+						texture, destination, Rect2(16, 0, 16, 16), COIN_TINT
+					)
 				else:
 					overlay.draw_texture_rect_region(
 						COIN_TEXTURE, destination, COIN_FRAME, COIN_TINT

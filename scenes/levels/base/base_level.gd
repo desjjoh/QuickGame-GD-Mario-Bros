@@ -115,7 +115,7 @@ func _ready() -> void:
 	transition_in_progress = GameHandler.transitions.busy and GameHandler.current_level == self
 	# Keep gameplay in one CanvasGroup Z band, with players drawn last.
 	move_child(players, get_child_count() - 1)
-	# Player state physics runs at priority 0; clamp its moving body afterward.
+	# Clamp the player body after actor physics.
 	process_physics_priority = 100
 	# All level children are ready before the level's _ready() runs.
 	_persistent_progress = GameHandler.current_level == self and not scene_file_path.is_empty()
@@ -215,7 +215,9 @@ func _play_area_music() -> void:
 		and GameHandler.flow == GameHandler.GameFlow.PLAYING
 		and is_instance_valid(active_area)
 	):
-		MusicHandler.play_area(self, active_area.background_music)
+		var mario := player as Mario
+		var starman := mario != null and mario.starman.uses_starman_music()
+		MusicHandler.play_area(self, active_area.background_music, starman)
 
 
 func _update_level_timer() -> void:

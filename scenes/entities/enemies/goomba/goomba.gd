@@ -13,6 +13,7 @@ func _accept_hit(hit: EntityHit) -> bool:
 			knocked_out.launch_direction = away_from_attacker(hit)
 			knocked_out.block_launch = hit.maneuver == &"block_bump"
 			knocked_out.fireball_launch = hit.maneuver == &"fireball"
+			knocked_out.star_launch = hit.maneuver == &"star"
 			if not state_machine.change_state(knocked_out):
 				return false
 		_:
@@ -24,8 +25,8 @@ func _accept_hit(hit: EntityHit) -> bool:
 		award_stomp(hit, sprite.global_position)
 	elif hit.maneuver == &"block_bump":
 		award_score(100, sprite.global_position)
-	elif hit.maneuver == &"fireball":
-		award_fireball_defeat(100)
+	elif hit.maneuver in [&"fireball", &"star"]:
+		award_smack_defeat(100)
 	return true
 
 
@@ -36,7 +37,7 @@ func _can_hurt_player() -> bool:
 func _accepts_defeated_hit(hit: EntityHit) -> bool:
 	return (
 		hit != null
-		and hit.maneuver == &"shell"
+		and hit.maneuver in [&"shell", &"star"]
 		and state_machine.current_state == $StateMachine/Squashed
 	)
 

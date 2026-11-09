@@ -26,6 +26,7 @@
 [ext_resource type="Script" path="res://scripts/player/mario_form_controller.gd" id="form_controller"]
 [ext_resource type="Script" path="res://scripts/player/mario_form_presentation.gd" id="form_presentation"]
 [ext_resource type="Script" path="res://scripts/player/mario_damage.gd" id="damage"]
+[ext_resource type="Script" path="res://scripts/player/mario_starman.gd" id="starman"]
 [ext_resource type="Script" path="res://scripts/player/fire_throw_pose.gd" id="throw_pose"]
 
 [ext_resource type="Script" path="res://scripts/player/mario_terrain.gd" id="mario_terrain"]
@@ -159,6 +160,9 @@ script = ExtResource("form_presentation")
 
 [node name="Damage" type="Node" parent="Status"]
 script = ExtResource("damage")
+
+[node name="Starman" type="Node" parent="Status"]
+script = ExtResource("starman")
 
 [node name="MarioTerrain" type="Node" parent="Motion"]
 script = ExtResource("mario_terrain")

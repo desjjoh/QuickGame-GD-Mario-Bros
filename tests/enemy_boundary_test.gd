@@ -76,9 +76,49 @@ func _ready() -> void:
 	assert(actors[0].body.global_position.x < first.x)
 	assert(actors[1].body.global_position.x < second.x)
 	assert(is_equal_approx(actors[1].body.global_position.x - actors[0].body.global_position.x, 24))
+	await check_spawn_beyond_cleanup(level, area)
 	# Existing scenery/power-up rectangle defaults remain unchanged.
 	assert(area.activation_buffer == 64 and area.deactivation_buffer == 96)
 	level.queue_free()
 	await get_tree().process_frame
 	print("enemy_boundary_test: PASS")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+
+
+func check_spawn_beyond_cleanup(level: BaseLevel, area: BaseLevelArea) -> void:
+	# At this camera position, the pair starts at X816 and cleanup starts at X889.
+	var pair := (
+		preload("res://scenes/entities/spawners/goomba_pair_spawner.tscn").instantiate()
+		as EntitySpawner
+	)
+	pair.position = Vector2(816, 192)
+	pair.actor_offsets = [Vector2.ZERO, Vector2(80, 0)]
+	level.world_objects.add_child(pair)
+	area.update_camera_activity()
+
+	var outside: BaseEnemy
+	for child in pair.get_children():
+		if child is BaseEnemy and area.enemy_outside_cleanup(child):
+			outside = child
+	assert(is_instance_valid(outside))
+	var spawn_x := outside.body.global_position.x - 8.0
+	assert(spawn_x == 896.0)
+	var slot := level.spawn_registry.get_slot(&"enemy", outside)
+	assert(slot >= 0)
+	# Walk farther right and let the area's normal physics sweep perform cleanup.
+	outside.state_machine.current_state._direction = 1
+	var exit_x: Array[float] = []
+	outside.tree_exiting.connect(
+		func(): exit_x.append(outside.body.global_position.x - 8.0)
+	)
+	area.set_physics_process(true)
+	await get_tree().physics_frame
+	await get_tree().process_frame
+	assert(not is_instance_valid(outside))
+	assert(exit_x.size() == 1 and exit_x[0] > spawn_x)
+	assert(is_instance_valid(pair.get_node_or_null("Goomba")))
+
+	var replacement := preload("res://scenes/entities/enemies/goomba/goomba.tscn").instantiate()
+	assert(level.try_claim_spawn_slot(&"enemy", replacement))
+	level.world_objects.add_child(replacement)
+	assert(level.spawn_registry.get_slot(&"enemy", replacement) == slot)
