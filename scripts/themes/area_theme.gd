@@ -18,4 +18,15 @@ extends Resource
 func resolve_texture(texture: Texture2D) -> Texture2D:
 	if texture == null:
 		return null
-	return texture_overrides.get(texture.resource_path, texture)
+	var replacement: Texture2D = texture_overrides.get(texture.resource_path)
+	if replacement != null:
+		return replacement
+	var frame := texture as AtlasTexture
+	if frame == null or frame.atlas == null:
+		return texture
+	var themed_atlas: Texture2D = texture_overrides.get(frame.atlas.resource_path)
+	if themed_atlas == null:
+		return texture
+	var themed_frame := frame.duplicate() as AtlasTexture
+	themed_frame.atlas = themed_atlas
+	return themed_frame

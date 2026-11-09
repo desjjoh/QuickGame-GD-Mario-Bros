@@ -13,6 +13,7 @@ const FIREBALL_LAUNCHER = preload("res://scripts/player/fireball_launcher.gd")
 @onready var form_controller: MarioFormController = $Status/Form
 @onready var form_presentation: MarioFormPresentation = $Presentation/FormPresentation
 @onready var damage: MarioDamage = $Status/Damage
+@onready var starman: MarioStarman = $Status/Starman
 @onready var _throw_pose: FireThrowPose = $Body/Sprite2D/ThrowPose
 var _fireballs := FIREBALL_LAUNCHER.new()
 var _throw_timer_reload := 7
@@ -24,6 +25,7 @@ func receive_damage(source: BaseEntity = null) -> bool:
 		or is_shutdown
 		or gameplay_suspended
 		or damage.is_protected()
+		or starman.is_active()
 		or form_presentation.active
 	):
 		return false
@@ -52,6 +54,7 @@ func shrink() -> bool:
 
 
 func begin_death(present: bool = false) -> void:
+	starman.clear()
 	_throw_pose.clear()
 	form_presentation.cancel()
 	damage.clear()
@@ -59,6 +62,8 @@ func begin_death(present: bool = false) -> void:
 
 
 func shutdown() -> void:
+	if is_instance_valid(starman):
+		starman.clear()
 	if is_instance_valid(_throw_pose):
 		_throw_pose.clear()
 	if is_instance_valid(form_presentation):

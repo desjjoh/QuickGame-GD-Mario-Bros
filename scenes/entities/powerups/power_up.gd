@@ -4,24 +4,28 @@ extends SpawnableEntity
 
 const EMERGENCE_HEIGHT := 16.0
 const EMERGENCE_STEP_TIME := 4.0 / 60.0
+const PLAYER_CONTACT := preload("res://scenes/components/interactions/player_contact.gd")
 
 var _removing := false
 var _emergence_remaining := 0.0
 var _emergence_elapsed := 0.0
 var _previous_interpolation_mode: PhysicsInterpolationMode
+var _level: BaseLevel
 
 @export var pickup: Area2D
+@export_range(0, 16) var minimum_pickup_rise: int = 16
 
 
 func _ready() -> void:
-	pickup.monitoring = is_zero_approx(_emergence_remaining)
+	_level = BaseLevel.containing(self)
+	pickup.monitoring = (
+		is_zero_approx(_emergence_remaining) or minimum_pickup_rise < EMERGENCE_HEIGHT
+	)
 	super()
 	if _emergence_remaining > 0.0:
 		sprite.hide()
 		SoundHandler.play_reward(&"power_up_reveal")
 	set_process(false)
-	# An accepted pickup can reconfigure the player's collision shapes.
-	pickup.area_entered.connect(_on_pickup_overlap, CONNECT_DEFERRED)
 
 
 ## Configure before entering the tree so pickup starts disabled.
@@ -35,26 +39,33 @@ func _physics_process(delta: float) -> void:
 	if _removing or is_queued_for_deletion():
 		return
 	if _emergence_remaining > 0.0:
-		_emergence_elapsed += delta
-		var rise := minf(_emergence_remaining, floorf(_emergence_elapsed / EMERGENCE_STEP_TIME))
-		if rise == 0.0:
-			return
-		_emergence_elapsed -= rise * EMERGENCE_STEP_TIME
-		position.y -= rise
-		_emergence_remaining -= rise
-		_update_emergence_sprite()
-		if _emergence_remaining == 0.0:
-			physics_interpolation_mode = _previous_interpolation_mode
-			reset_physics_interpolation()
-			pickup.set_deferred("monitoring", true)
+		_advance_emergence(delta)
+		if minimum_pickup_rise < EMERGENCE_HEIGHT and _can_pick_up_at_current_height():
+			_check_pickup()
 		return
 	_advance_available(delta)
-	# A contact may start while suspended or while a form change rejects pickup.
-	# Retry existing overlaps once available instead of requiring re-entry.
-	for area: Area2D in pickup.get_overlapping_areas():
-		_on_pickup_overlap(area)
-		if _removing:
-			break
+	_check_pickup()
+
+
+func _advance_emergence(delta: float) -> void:
+	_emergence_elapsed += delta
+	var rise := minf(_emergence_remaining, floorf(_emergence_elapsed / EMERGENCE_STEP_TIME))
+	if rise == 0.0:
+		return
+	_emergence_elapsed -= rise * EMERGENCE_STEP_TIME
+	position.y -= rise
+	_emergence_remaining -= rise
+	_update_emergence_sprite()
+	if _emergence_remaining == 0.0:
+		# Draw over blocks within the world layer once the item clears its source.
+		get_parent().move_child(self, -1)
+		physics_interpolation_mode = _previous_interpolation_mode
+		reset_physics_interpolation()
+		pickup.set_deferred("monitoring", true)
+
+
+func _can_pick_up_at_current_height() -> bool:
+	return EMERGENCE_HEIGHT - _emergence_remaining >= minimum_pickup_rise
 
 
 func _update_emergence_sprite() -> void:
@@ -71,25 +82,25 @@ func _advance_available(_delta: float) -> void:
 	pass
 
 
-func _on_pickup_overlap(area: Area2D) -> void:
+func _check_pickup() -> void:
 	if (
 		_removing
-		or not is_instance_valid(area)
-		or not area.is_inside_tree()
+		or not PLAYER_CONTACT.is_check_tick()
+		or not is_instance_valid(_level)
 		or is_queued_for_deletion()
-		or _emergence_remaining > 0.0
+		or not _can_pick_up_at_current_height()
 		or is_shutdown
 		or gameplay_suspended
 		or activity_suspended
 	):
 		return
-	var player := area.get_parent().get_parent() as BasePlayer
+	var player := _level.player
 	if (
-		player == null
-		or area != player.enemy_hurtbox
+		not is_instance_valid(player)
 		or player.is_dead
 		or player.is_shutdown
 		or player.gameplay_suspended
+		or not PLAYER_CONTACT.touches(pickup, player.enemy_hurtbox)
 	):
 		return
 	_removing = true

@@ -62,7 +62,7 @@ Activity tests check both suspension orders, preservation of collision/state, pr
 - `vertical_fraction_test` compares 313 captured arithmetic steps exactly. `vertical_jump_reference_test` checks a natural stationary jump/break sequence. `brick_seam_reference_test` compares 182 post-break vertical samples from 14 running/seam routes while replaying recorded horizontal positions; it does not independently verify horizontal integration.
 - `brick_neighbor_test` checks 20 full-jump cases, reaction gating, and directional outcomes. `brick_break_test` / `brick_debris_test` cover capability selection, temporary collision, scoring, theme, pause, and effect cleanup.
 - `block_top_coin_test` covers Small bumps and Super breaks across both canvas hierarchies. It checks same-cell pickup, adjacent coin exclusion, duplicate collection, rollover, effect origin and pause, and coin persistence after an area round trip.
-- `enemy_boundary_test` covers activation-column rounding, cleanup thresholds, and simultaneous paired movement. `shell_spawn_contact_test` verifies retry after rejected overlap and exactly-once accepted chain rewards; the natural pair-entry report remains unconfirmed.
+- `enemy_boundary_test` covers activation-column rounding, cleanup thresholds, and simultaneous paired movement. `shell_spawn_contact_test` verifies retry after rejected contact, exactly-once chain rewards, and a moving shell passing the far Goomba of a pair beyond the right edge.
 - `score_popup_test` checks placement, optional rise/cleanup, pause, display-only lifetime, and absence of reward side effects. Entity callers retain reward ownership; flagpole and block-coin lifetimes remain separate.
 - `camera_arrival_test`, `corner_correction_test`, and `area_background_test` cover return-pipe framing, correction-excluded camera progress, background bounds, and shadow routing.
 
@@ -73,6 +73,12 @@ Pipe entry/transfer, sideways-pipe, climbing, and flagpole-ending tests also acc
 `fire_form_test` checks Fire artwork for Overworld, Underground, and Castle, 63-update palette timing, pause, walking atlas alignment, cancellation, and character-specific Fire-to-Small damage. Run it with rendering enabled to capture each character during the palette cycle.
 
 `fire_flower_test` checks block emergence and crop, four global palette phases, stationary motion, pickup for both characters in all three forms, and the delayed 1,000-point reward. A rendered run captures the flower partway through emergence.
+
+`starman_test` checks release from painted reward data, all four item frames in each theme, emergence clipping, collection at four pixels of rise, the five-tick score delay, and bounce and wall-reversal positions from Mesen.
+
+`starman_effect_test` checks two complete Mesen timing traces, enemy damage protection, the music handoff, refresh, and pause. Run it with a renderer to also check the recolored sprite pixels and Fire throw overlay.
+
+`starman_enemy_test` checks contact priority, the hit-frame pose and body movement, the next-update reveal, and the five-tick score award. It includes a Koopa hit at exact box-edge contact before Godot refreshes its cached overlap. It covers walking and squashed Goombas, walking Koopas, and idle, moving, and stunned shells.
 
 `fireball_test` compares per-tick positions, vertical speeds, and bounce flags with the Mesen right, left, and wall traces. It checks burst frame selection and release timing, fresh versus held Run input, alternating slot rejection and reuse, and player limits of zero, one, and two.
 

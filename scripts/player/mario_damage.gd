@@ -2,6 +2,8 @@ class_name MarioDamage
 extends Node
 ## Injury protection is independent of form art and the shrinking presentation.
 
+signal interval_elapsed
+
 const INTERVAL_TICKS := 21
 const INJURY_INTERVALS := 8
 
@@ -40,6 +42,7 @@ func _physics_process(_delta: float) -> void:
 				intervals_remaining -= 1
 				if not is_protected():
 					_mario.sprite.visible = _visible
+			interval_elapsed.emit()
 	apply_visibility()
 
 

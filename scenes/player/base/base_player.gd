@@ -75,6 +75,8 @@ func get_effects_parent() -> Node2D:
 
 
 func _ready() -> void:
+	# Actors sample the player's current position after player movement.
+	process_physics_priority = -1
 	jump_action.reset_falling_gravity()
 	jump_action.jumped.connect(_on_jump_started)
 	super()

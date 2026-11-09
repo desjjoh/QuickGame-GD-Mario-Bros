@@ -40,6 +40,11 @@ func _ready() -> void:
 	camera.position.x = 689
 	level.active_area.update_camera_activity()
 	var target := pair.get_node("Goomba") as BaseEnemy
+	var far_target: BaseEnemy
+	for child in pair.get_children():
+		if child is BaseEnemy and child != target:
+			far_target = child as BaseEnemy
+	assert(is_instance_valid(far_target))
 	target.set_gameplay_suspended(true)
 	await ticks(5)
 	assert(not target._defeated)
@@ -63,6 +68,10 @@ func _ready() -> void:
 	assert(GameHandler.player_status.score == score + 500)
 	moving._on_enemy_contact(target)
 	assert(GameHandler.player_status.score == score + 500)
+	shell.set_physics_process(true)
+	await ticks(12)
+	assert(shell.body.global_position.x > far_target.body.global_position.x)
+	assert(not far_target._defeated and shell.get("shell_chain") == 1)
 	shell.free()
 	pair.free()
 	level.queue_free()

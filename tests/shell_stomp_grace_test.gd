@@ -46,7 +46,7 @@ func _ready() -> void:
 	assert(shell.get("stomp_grace_ticks") == remaining)
 	assert(GameHandler.request_pause_toggle())
 	# Actual fresh overlap while rising must stop this shell and bounce Mario.
-	player.body.global_position = shell.body.global_position + Vector2(0, -5)
+	player.body.global_position = shell.body.global_position + Vector2(0, -1)
 	for index in range(4):
 		await ticks(1)
 		if not shell.is_moving_shell():

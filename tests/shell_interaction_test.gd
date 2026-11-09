@@ -58,7 +58,7 @@ func _ready() -> void:
 	assert(shell._active_sound_effect.stream == SoundHandler.get_sound(&"bump"))
 	shell.body.global_position = Vector2(128, 200)
 	shell.get_node("StateMachine/ShellMoving")._direction = 1
-	player.body.global_position = Vector2(128, 195)
+	player.body.global_position = Vector2(128, 198)
 	player.body.velocity = Vector2(90, 120)
 	for frame in range(6):
 		await ticks(1)

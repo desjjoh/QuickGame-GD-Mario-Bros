@@ -9,11 +9,8 @@ var _launch_presentation := (
 
 func enter() -> void:
 	var was_flipped := entity.sprite.flip_v
-	if fireball_launch:
-		entity.sprite.position.y += 2.0
 	super.enter()
 	if not block_launch:
-		entity.sprite.frame = 0
 		return
 
 	_launch_presentation.capture(entity.sprite)
@@ -23,6 +20,16 @@ func enter() -> void:
 	super.process_physics(1.0 / 60.0)
 	entity.sprite.flip_v = was_flipped
 	_launch_presentation.hold_after_motion(entity.sprite, body)
+
+
+func _apply_launch_pose() -> void:
+	super()
+	if fireball_launch:
+		entity.sprite.position.y += 2.0
+	elif star_launch:
+		entity.sprite.position = _star_pose.original_position + Vector2(0, 2)
+	if not block_launch:
+		entity.sprite.frame = 0
 
 
 func process_physics(delta: float) -> BaseState:

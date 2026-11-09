@@ -84,10 +84,16 @@ func _ready() -> void:
 	stomp_target.position = Vector2(200, 192)
 	level.world_objects.add_child(stomp_target)
 	stomp_target.set_physics_process(false)
+	await get_tree().physics_frame
+	if Engine.get_physics_frames() % 2 != 0:
+		await get_tree().physics_frame
+	mario.body.global_position = stomp_target.body.global_position + Vector2(0, -2)
+	assert(not stomp_target._player_contact_area.overlaps_area(mario.enemy_hurtbox))
 	mario.body.velocity.y = 60.0
-	stomp_target._handle_player_contact(mario)
+	stomp_target._physics_process(1.0 / 60.0)
 	assert(stomp_target._defeated and mario.body.velocity.y == BaseEnemy.STOMP_REBOUND)
 	assert(mario.damage.is_protected())
+	mario.body.global_position = Vector2(128, 208)
 	mario.body.velocity = Vector2.ZERO
 	var elapsed := 2
 	while mario.damage.is_protected():
@@ -118,11 +124,22 @@ func _ready() -> void:
 		var koopa := (
 			load("res://scenes/entities/enemies/koopa/green_koopa.tscn").instantiate() as BaseEnemy
 		)
+		koopa.position = Vector2(120, 192)
 		level.world_objects.add_child(koopa)
+		mario.set_physics_process(false)
+		koopa.set_physics_process(false)
 		if moving_shell:
 			assert(koopa.state_machine.change_state(koopa.get_node("StateMachine/ShellMoving")))
+		var reach := 11.0 if moving_shell else 12.0
+		mario.body.global_position = koopa.body.global_position + Vector2(-reach - 1, 4)
 		mario.body.velocity = Vector2.ZERO
-		koopa._handle_player_contact(mario)
+		await get_tree().physics_frame
+		if Engine.get_physics_frames() % 2 != 0:
+			await get_tree().physics_frame
+		koopa._check_normal_player_contact(mario)
+		assert(not mario.form_presentation.active)
+		mario.body.global_position.x += 1.0
+		koopa._check_normal_player_contact(mario)
 		assert(mario.form_presentation.active and mario.damage.is_protected() and not mario.is_dead)
 		level.free()
 	# Protection must never intercept the level's lethal hazard path.

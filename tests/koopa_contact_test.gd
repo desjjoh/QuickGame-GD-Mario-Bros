@@ -30,7 +30,7 @@ func _ready() -> void:
 	var koopa := spawn_koopa(level)
 	var player := level.player
 	player.set_physics_process(false)
-	player.body.global_position = Vector2(150, 195)
+	player.body.global_position = Vector2(150, 198)
 	player.body.velocity = Vector2(90, 120)
 	var lives := GameHandler.player_status.lives
 	var score := GameHandler.player_status.score
@@ -41,7 +41,7 @@ func _ready() -> void:
 		if koopa.state_machine.current_state.name == &"ShellIdle":
 			break
 	assert(koopa.state_machine.current_state.name == &"ShellIdle")
-	assert(player.body.global_position == Vector2(150, 195))
+	assert(player.body.global_position == Vector2(150, 198))
 	assert(player.body.velocity == Vector2(90, -240))
 	assert(player._active_sound_effect.stream == SoundHandler.get_sound(&"stomp"))
 	assert(GameHandler.player_status.lives == lives and not level.death_in_progress)
@@ -84,7 +84,8 @@ func _ready() -> void:
 				== "res://assets/palettes/%s/enemies/koopa.png" % theme
 			)
 		)
-		assert(themed.get_node("Body/PlayerContact/CollisionShape2D").shape.size == Vector2(12, 12))
+		assert(themed._player_contact_shape.shape.size == Vector2(10, 6))
+		assert(themed._player_contact_area.position == Vector2(0, 1))
 		themed.queue_free()
 	game.queue_free()
 	await ticks(2)
@@ -92,12 +93,24 @@ func _ready() -> void:
 	game = make_game()
 	level = GameHandler.current_level
 	koopa = spawn_koopa(level)
+	koopa.set_physics_process(false)
 	player = level.player
 	player.set_physics_process(false)
-	player.body.global_position = Vector2(150, 204)
+	player.body.global_position = koopa.body.global_position + Vector2(-12, 4)
 	player.body.velocity = Vector2.ZERO
 	lives = GameHandler.player_status.lives
-	await ticks(4)
+	await ticks(2)
+	await get_tree().physics_frame
+	if Engine.get_physics_frames() % 2 == 0:
+		await get_tree().physics_frame
+	player.body.global_position.x += 1.0
+	assert(koopa._touches_player_now(player))
+	koopa._check_normal_player_contact(player)
+	assert(not player.is_dead, "An odd-tick contact must wait for the next eligible tick.")
+	player.body.global_position.x -= 1.0
+	await get_tree().physics_frame
+	player.body.global_position.x += 1.0
+	koopa._physics_process(1.0 / 60.0)
 	assert(level.death_in_progress and player.is_dead)
 	assert(GameHandler.player_status.lives == lives - 1)
 	assert(koopa.state_machine.current_state.name == &"Walking")

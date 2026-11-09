@@ -18,3 +18,4 @@ sheets = Dictionary[StringName, Texture2D]({
 &"slide.png": ExtResource("slide"),
 &"climb.png": ExtResource("climb"),
 })
+starman_colors = Array[Color]([Color(0.70980392, 0.19215686, 0.1254902, 1), Color(1, 1, 1, 1), Color(0.90196078, 0.61176471, 0.12941176, 1)])

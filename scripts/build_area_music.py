@@ -90,11 +90,18 @@ UNDERGROUND = (
     "83 1a 18 16 84 14 1a 18 0e 0c 16 83 14 20 1e 1c 28 26 "
     "87 24 1a 12 10 62 0e 80 04 04"
 )
+STARMAN_LENGTHS = (36, 2, 6, 4, 12, 18, 24, 8)
+STARMAN = (
+    "84 2c 2c 2c 82 04 2c 04 85 2c 84 2c 2c 2a 2a 2a 82 04 2a 04 85 2a 84 2a 2a",
+    "1f 1f 1f 98 1f 1f 98 9e 98 1f 1d 1d 1d 94 1d 1d 94 9c 94 1d",
+    "86 18 85 26 30 84 04 26 30 86 14 85 22 2c 84 04 22 2c",
+    "21 d0 c4 d0 31 d0 c4 d0",
+)
 
 
-def render_noise(pattern, count):
+def render_noise(pattern, count, lengths=NORMAL_LENGTHS):
     output = [0] * count
-    beats = list(decode(pattern, NORMAL_LENGTHS, packed=True))
+    beats = list(decode(pattern, lengths, packed=True))
     offset = 0
     register = 1
     clock = 0.0
@@ -121,16 +128,16 @@ def render_noise(pattern, count):
     return output
 
 
-def render_section(melody, harmony, bass, beats=""):
-    notes = list(decode(melody, NORMAL_LENGTHS))
+def render_section(melody, harmony, bass, beats="", lengths=NORMAL_LENGTHS):
+    notes = list(decode(melody, lengths))
     count = sum(frames for _, frames in notes) * SAMPLES_PER_FRAME
     voices = (
         render(notes, count, area=True),
-        render(decode(harmony, NORMAL_LENGTHS, packed=True), count, area=True),
-        render(decode(bass, NORMAL_LENGTHS), count, triangle=True, area=True),
+        render(decode(harmony, lengths, packed=True), count, area=True),
+        render(decode(bass, lengths), count, triangle=True, area=True),
     )
     if beats:
-        voices += (render_noise(beats, count),)
+        voices += (render_noise(beats, count, lengths),)
     return b"".join(struct.pack("<h", round(sum(sample))) for sample in zip(*voices))
 
 
@@ -144,6 +151,7 @@ def main():
     tracks = {
         "overworld": (ground[part] for part in GROUND_ORDER.split()),
         "underground": (render_section(UNDERGROUND, "", UNDERGROUND),),
+        "starman": (render_section(*STARMAN, lengths=STARMAN_LENGTHS),),
     }
     for name, sections in tracks.items():
         with wave.open(str(folder / f"{name}.wav"), "wb") as stream:

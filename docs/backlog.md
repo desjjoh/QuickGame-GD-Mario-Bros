@@ -2,7 +2,6 @@
 
 ## Finish the 1-1 feature set
 
-- Add Starman movement, collection, timed invincibility, presentation, and enemy interactions.
 - Connect future fireball/star attacks to the existing enemy-hit contract. Moving-shell interactions are already implemented.
 
 ## Brick breaking

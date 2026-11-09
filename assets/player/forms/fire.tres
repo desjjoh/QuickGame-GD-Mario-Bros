@@ -1,12 +1,12 @@
-[gd_resource type="Resource" script_class="MarioForm" format=3]
+[gd_resource type="Resource" script_class="MarioForm" format=3 uid="uid://vehrckrp5rsd"]
 
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/climb.png" id="climb"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/crouch.png" id="crouch"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/idle.png" id="idle"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/jump.png" id="jump"]
-[ext_resource type="Script" path="res://scripts/player/mario_form.gd" id="script"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/slide.png" id="slide"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/walk.png" id="walk"]
+[ext_resource type="Texture2D" uid="uid://dv1ilheyj4iqb" path="res://assets/player/mario + luigi (fire)/climb.png" id="climb"]
+[ext_resource type="Texture2D" uid="uid://mh42rieqwpna" path="res://assets/player/mario + luigi (fire)/crouch.png" id="crouch"]
+[ext_resource type="Texture2D" uid="uid://bbs1teax6cd35" path="res://assets/player/mario + luigi (fire)/idle.png" id="idle"]
+[ext_resource type="Texture2D" uid="uid://d2lijbxdkbaq7" path="res://assets/player/mario + luigi (fire)/jump.png" id="jump"]
+[ext_resource type="Script" uid="uid://1ugsbwr6iakt" path="res://scripts/player/mario_form.gd" id="script"]
+[ext_resource type="Texture2D" uid="uid://vl1xho11l3cq" path="res://assets/player/mario + luigi (fire)/slide.png" id="slide"]
+[ext_resource type="Texture2D" uid="uid://wmp86rfpn66e" path="res://assets/player/mario + luigi (fire)/walk.png" id="walk"]
 
 [sub_resource type="AtlasTexture" id="climb0"]
 atlas = ExtResource("climb")

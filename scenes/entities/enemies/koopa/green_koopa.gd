@@ -1,10 +1,33 @@
 extends BaseEnemy
 
 const STOMP_GRACE_TICKS := 12
+const SHELL_CONTACT_BOUNDS := Rect2(-5, -2, 10, 6)
 var stomp_grace_ticks := 0
 var _last_shell_stomp_tick := -1
 var shell_chain := 0
 var shell_upside_down := false
+var _walking_contact_shape: Shape2D
+var _walking_contact_position: Vector2
+var _shell_contact_shape := RectangleShape2D.new()
+
+
+func _ready() -> void:
+	_walking_contact_shape = _player_contact_shape.shape
+	_walking_contact_position = _player_contact_area.position
+	_shell_contact_shape.size = SHELL_CONTACT_BOUNDS.size
+	state_machine.state_changed.connect(_update_player_contact)
+	super()
+
+
+func _update_player_contact(_previous: BaseState, current: BaseState) -> void:
+	if current == $StateMachine/Walking:
+		_player_contact_shape.shape = _walking_contact_shape
+		_player_contact_area.position = _walking_contact_position
+	elif current in [$StateMachine/ShellIdle, $StateMachine/ShellMoving, $StateMachine/ShellStunned]:
+		if _player_contact_shape.shape == _shell_contact_shape:
+			return
+		_player_contact_shape.shape = _shell_contact_shape
+		_player_contact_area.position = SHELL_CONTACT_BOUNDS.get_center()
 
 
 func _physics_process(delta: float) -> void:
@@ -34,7 +57,7 @@ func is_moving_shell() -> bool:
 func fireball_bounds() -> Rect2:
 	if state_machine.current_state == $StateMachine/Walking:
 		return super()
-	return Rect2(body.global_position + Vector2(-5, -2), Vector2(10, 6))
+	return Rect2(body.global_position + SHELL_CONTACT_BOUNDS.position, SHELL_CONTACT_BOUNDS.size)
 
 
 func _handle_player_contact(player: BasePlayer) -> void:
@@ -48,16 +71,21 @@ func _accept_hit(hit: EntityHit) -> bool:
 	var reward_position := sprite.global_position
 	if hit.maneuver == &"block_bump":
 		return _accept_block_bump(hit, reward_position)
-	if hit.maneuver in [&"shell", &"fireball"]:
+	if hit.maneuver in [&"shell", &"fireball", &"star"]:
 		var knocked_out := $StateMachine/KnockedOut as EnemyDefeatedState
 		knocked_out.launch_direction = away_from_attacker(hit)
 		knocked_out.fireball_launch = hit.maneuver == &"fireball"
+		knocked_out.star_launch = hit.maneuver == &"star"
 		if not state_machine.change_state(knocked_out):
 			return false
 		stomp_grace_ticks = 0
 		mark_defeated(hit)
-		if hit.maneuver == &"fireball" and not is_shutdown and not is_queued_for_deletion():
-			award_fireball_defeat(200)
+		if (
+			(knocked_out.fireball_launch or knocked_out.star_launch)
+			and not is_shutdown
+			and not is_queued_for_deletion()
+		):
+			award_smack_defeat(200)
 		return true
 	if (
 		hit.maneuver == &"kick"
