@@ -4,6 +4,7 @@ extends BasePlayer
 
 @export var small_form: MarioForm = MarioFormPresentation.SMALL
 @export var super_form: MarioForm = MarioFormPresentation.SUPER
+@export var fire_form: MarioForm = MarioFormPresentation.FIRE
 @export var starting_form: MarioForm = MarioFormPresentation.SMALL
 @onready var form_controller: MarioFormController = $Status/Form
 @onready var form_presentation: MarioFormPresentation = $Presentation/FormPresentation
@@ -19,7 +20,7 @@ func receive_damage(source: BaseEntity = null) -> bool:
 		or form_presentation.active
 	):
 		return false
-	if form_controller.current_form == super_form:
+	if form_controller.current_form in [super_form, fire_form]:
 		if not shrink():
 			return false
 		damage.begin()
@@ -30,6 +31,10 @@ func receive_damage(source: BaseEntity = null) -> bool:
 
 func grow() -> bool:
 	return form_presentation.begin(false)
+
+
+func ignite() -> bool:
+	return form_presentation.begin_fire()
 
 
 func shrink() -> bool:
@@ -61,6 +66,8 @@ func _ready() -> void:
 		form = small_form
 	elif form == MarioFormPresentation.SUPER:
 		form = super_form
+	elif form == MarioFormPresentation.FIRE:
+		form = fire_form
 	form_controller.configure(self, form)
 	super._ready()
 

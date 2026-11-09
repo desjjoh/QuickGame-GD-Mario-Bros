@@ -38,9 +38,9 @@ Open `scenes/main/game.tscn`, select **Game**, and assign **Presentation → Tit
 
 ## Known reference differences
 
-Super Mushroom is available in the existing **EntityLayout** block reward brush: choose **Apply Super Mushroom Reward**, then click a painted question block, hidden question block, reward brick, or alternate reward brick. Its translucent red-mushroom indicator stays visible with the other reward previews. Coin remains the default. This assigns an explicit Super Mushroom, not an automatic mushroom/flower tier.
+Choose **Apply Tiered Power-Up Reward** in the **EntityLayout** block reward brush, then click a painted question block, hidden question block, reward brick, or alternate reward brick. The translucent red mushroom marks the tiered reward. The block chooses a Super Mushroom for Small Mario or Luigi and a Fire Flower for Super or Fire when it releases the reward. Previously painted Super Mushroom assignments use the same tiered behavior. Coin remains the default.
 
-Super Mushroom always grants 1,000 points. Small Mario grows; already-Super Mario stays Super until Fire is implemented. The latter is the approved temporary difference from the NES's status-based Fire upgrade.
+Both items grant 1,000 points on pickup. Super Mushroom grows Small to Super. Fire Flower grows Small to Super, upgrades Super to Fire, and grants points to an already-Fire player.
 
 Timed multi-coin rewards use independent, fixed 231-physics-tick windows instead of the NES's shared, phase-dependent timer. Loading or hitting another block cannot alter an existing window. Pause and unloaded areas freeze remaining time; death follows the existing progress-reset policy.
 

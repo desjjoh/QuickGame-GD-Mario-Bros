@@ -70,7 +70,7 @@ func _release_reward() -> void:
 	# Preserve the current artwork unless this hit consumes the final reward.
 	if $StateMachine/Bouncing.return_state == $StateMachine/Inactive:
 		sprite.texture = resolve_texture($StateMachine/Inactive.sprite_texture)
-	if power_up_scene != null:
+	if reward_kind == BlockReward.Kind.TIERED_POWER_UP or power_up_scene != null:
 		_release_power_up()
 		return
 	GameHandler.award_coin()
@@ -86,7 +86,15 @@ func _release_power_up() -> void:
 	var level := BaseLevel.containing(self)
 	if level == null:
 		return
-	var instance := power_up_scene.instantiate()
+	var scene := power_up_scene
+	if reward_kind == BlockReward.Kind.TIERED_POWER_UP:
+		var player := level.player as Mario
+		var powered := (
+			is_instance_valid(player)
+			and player.form_controller.current_form in [player.super_form, player.fire_form]
+		)
+		scene = load(BlockReward.FIRE_FLOWER_PATH if powered else BlockReward.SUPER_MUSHROOM_PATH)
+	var instance := scene.instantiate()
 	var power_up := instance as PowerUp
 	if power_up == null:
 		instance.free()

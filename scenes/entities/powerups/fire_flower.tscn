@@ -1,0 +1,69 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/powerups/power_up.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/powerups/fire_flower.gd" id="flower"]
+[ext_resource type="Texture2D" path="res://assets/items/fire-flower.png" id="art"]
+[ext_resource type="Script" path="res://scenes/components/presentation/synchronized_animation.gd" id="sync"]
+[ext_resource type="Script" path="res://scenes/components/presentation/cosmetic_animation_cycle.gd" id="cycle"]
+
+[sub_resource type="AtlasTexture" id="phase0"]
+atlas = ExtResource("art")
+region = Rect2(0, 0, 16, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="phase1"]
+atlas = ExtResource("art")
+region = Rect2(16, 0, 16, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="phase2"]
+atlas = ExtResource("art")
+region = Rect2(32, 0, 16, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="phase3"]
+atlas = ExtResource("art")
+region = Rect2(48, 0, 16, 16)
+filter_clip = true
+
+[sub_resource type="Resource" id="palette_cycle"]
+script = ExtResource("cycle")
+phase_ticks = PackedInt32Array(2, 2, 2, 2)
+
+[sub_resource type="Animation" id="palette_animation"]
+resource_name = "palette"
+length = 0.133333333333333
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite2D:texture")
+tracks/0/interp = 1
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.033333333, 0.066666667, 0.1),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("phase0"), SubResource("phase1"), SubResource("phase2"), SubResource("phase3")]
+}
+
+[sub_resource type="AnimationLibrary" id="palette_library"]
+_data = {&"palette": SubResource("palette_animation")}
+
+[node name="FireFlower" node_paths=PackedStringArray("animation_player") instance=ExtResource("base")]
+script = ExtResource("flower")
+animation_player = NodePath("Body/AnimationPlayer")
+
+[node name="Body" parent="." index="1"]
+collision_mask = 0
+
+[node name="Sprite2D" parent="Body" index="1"]
+texture = SubResource("phase0")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Body" index="3"]
+libraries = {&"": SubResource("palette_library")}
+
+[node name="Presentation" type="Node" parent="."]
+
+[node name="PaletteAnimation" type="Node" parent="Presentation" node_paths=PackedStringArray("animation_player")]
+script = ExtResource("sync")
+cycle = SubResource("palette_cycle")
+animation_player = NodePath("../../Body/AnimationPlayer")
+animation_name = &"palette"

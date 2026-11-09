@@ -6,7 +6,30 @@ signal finished
 
 const SMALL: MarioForm = preload("res://assets/player/forms/small.tres")
 const SUPER: MarioForm = preload("res://assets/player/forms/super.tres")
+const FIRE: MarioForm = preload("res://assets/player/forms/fire.tres")
 const GROWTH_POSES := [0, 1, 0, 1, 0, 1, 2, 0, 1, 2]
+const FIRE_PALETTE := preload("res://scenes/components/presentation/fire_palette.gdshader")
+const FIRE_COLORS := [Color("f7d8a5"), Color("e69c21"), Color("b53120")]
+const FIRE_FLASH_COLORS := {
+	&"Overworld":
+	[
+		[Color("109400"), Color.WHITE, Color("e69c21")],
+		[Color("b53120"), Color.WHITE, Color("e69c21")],
+		[Color.BLACK, Color("ffcec5"), Color("9c4a00")],
+	],
+	&"Underground":
+	[
+		[Color("007b8c"), Color("ffcec5"), Color("9c4a00")],
+		[Color("b53120"), Color.WHITE, Color("e69c21")],
+		[Color("00424a"), Color("b5efef"), Color("007b8c")],
+	],
+	&"Castle":
+	[
+		[Color("007b8c"), Color("ffcec5"), Color("9c4a00")],
+		[Color("b53120"), Color.WHITE, Color("e69c21")],
+		[Color("636363"), Color.WHITE, Color("adadad")],
+	],
+}
 
 var active := false
 var shrinking := false
@@ -27,6 +50,12 @@ var _closing_tick := -1
 var _finish_pending := false
 var _actor_restored := false
 var _reset_on_visible := false
+var _igniting := false
+var _original_material: Material
+var _fire_material: ShaderMaterial
+var _flash_colors: Array
+var _fire_animation: StringName
+var _fire_animation_position := 0.0
 
 
 func _ready() -> void:
@@ -35,9 +64,20 @@ func _ready() -> void:
 
 
 func begin(shrink: bool) -> bool:
+	return _begin(shrink, false)
+
+
+func begin_fire() -> bool:
+	return _begin(false, true)
+
+
+func _begin(shrink: bool, ignite: bool) -> bool:
 	if active or _mario.is_dead or _mario.is_shutdown or _mario.gameplay_suspended:
 		return false
-	if _mario.form_controller.current_form != (_mario.super_form if shrink else _mario.small_form):
+	var form := _mario.form_controller.current_form
+	if shrink and form not in [_mario.super_form, _mario.fire_form]:
+		return false
+	if not shrink and form != (_mario.super_form if ignite else _mario.small_form):
 		return false
 	_level = BaseLevel.containing(_mario)
 	if (
@@ -53,6 +93,7 @@ func begin(shrink: bool) -> bool:
 		return false
 	active = true
 	shrinking = shrink
+	_igniting = ignite
 	timer = 0xff
 	pose_index = 0
 	changing = false
@@ -68,10 +109,16 @@ func begin(shrink: bool) -> bool:
 	_mario.state_machine.gameplay_suspended = true
 	_animation_speed = _mario.animation_player.speed_scale
 	_visible = _mario.sprite.visible
+	if _igniting:
+		_begin_fire_palette()
 	_mario.animation_player.speed_scale = 0.0
 	_mario.form_controller.presentation_owned = true
 	_mario.animation_player.pause()
-	if shrinking:
+	var target := PlayerStatus.PowerupForm.SUPER
+	if _igniting:
+		target = PlayerStatus.PowerupForm.FIRE
+	elif shrinking:
+		target = PlayerStatus.PowerupForm.SMALL
 		_set_pose(_mario.super_form.jump, _mario.super_form)
 	else:
 		_apply_growth_normal(_mario.small_form)
@@ -79,9 +126,7 @@ func begin(shrink: bool) -> bool:
 		if entity != _mario and not entity.gameplay_suspended:
 			_suspended.append(weakref(entity))
 			entity.set_gameplay_suspended(true)
-	GameHandler.set_player_form(
-		PlayerStatus.PowerupForm.SMALL if shrink else PlayerStatus.PowerupForm.SUPER
-	)
+	GameHandler.set_player_form(target)
 	return true
 
 
@@ -98,6 +143,12 @@ func _physics_process(_delta: float) -> void:
 		return
 	timer -= 1
 	var tick := GameHandler.animation_clock.tick_count
+	if _igniting:
+		_update_fire_palette(0 if timer == 0xc0 else (tick >> 2) & 3)
+		if timer == 0xc0:
+			timer = 0
+			_finish_pending = true
+		return
 	if not shrinking and not changing and not _cycle_finished:
 		if _prelude_advance:
 			_walk_frame = (_walk_frame + 1) % 3
@@ -192,7 +243,7 @@ func _apply_growth_normal(form: MarioForm) -> void:
 
 
 func _finish() -> void:
-	var growth := not shrinking
+	var growth := not shrinking and not _igniting
 	var airborne := not _mario.body.is_on_floor()
 	var velocity := _mario.body.velocity
 	cancel()
@@ -204,6 +255,32 @@ func _finish() -> void:
 			next_state.defer_growth_fall_step()
 		_seek_reference_walk_start()
 	finished.emit()
+
+
+func _begin_fire_palette() -> void:
+	var crouched := _mario.form_controller.is_crouched
+	_mario.form_controller.configure(_mario, _mario.fire_form)
+	_mario.form_controller.set_crouched(crouched)
+	_fire_animation = _mario.animation_player.current_animation
+	if _fire_animation != &"":
+		_fire_animation_position = _mario.animation_player.current_animation_position
+	_original_material = _mario.sprite.material
+	_fire_material = ShaderMaterial.new()
+	_fire_material.shader = FIRE_PALETTE
+	var theme := _level.active_area.theme if _level.active_area != null else null
+	_flash_colors = FIRE_FLASH_COLORS.get(
+		StringName(theme.display_name) if theme != null else &"Overworld",
+		FIRE_FLASH_COLORS.Overworld
+	)
+	_mario.sprite.material = _fire_material
+	_update_fire_palette(0)
+
+
+func _update_fire_palette(slot: int) -> void:
+	var colors: Array = FIRE_COLORS if slot == 0 else _flash_colors[slot - 1]
+	_fire_material.set_shader_parameter(&"light_color", colors[0])
+	_fire_material.set_shader_parameter(&"middle_color", colors[1])
+	_fire_material.set_shader_parameter(&"dark_color", colors[2])
 
 
 func _seek_reference_walk_start() -> void:
@@ -237,6 +314,11 @@ func _restore_actor_presentation() -> void:
 	if shrinking:
 		_mario.state_machine.gameplay_suspended = _previous_machine_suspended
 	_mario.animation_player.speed_scale = _animation_speed
+	if _igniting:
+		if _fire_animation != &"":
+			_mario.animation_player.play(_fire_animation)
+			_mario.animation_player.seek(_fire_animation_position, true)
+		return
 	if _mario.state_machine.current_state != null:
 		_mario.state_machine.current_state.apply_presentation()
 	_seek_reference_walk_start()
@@ -249,14 +331,22 @@ func cancel() -> void:
 		return
 	active = false
 	changing = false
+	if _igniting:
+		if is_instance_valid(_mario) and is_instance_valid(_mario.sprite):
+			_mario.sprite.material = _original_material
+		_original_material = null
+		_fire_material = null
 	if is_instance_valid(_mario) and not _mario.is_shutdown:
-		var target := _mario.small_form if shrinking else _mario.super_form
+		var target := (
+			_mario.fire_form if _igniting else _mario.small_form if shrinking else _mario.super_form
+		)
 		if _mario.form_controller.current_form != target:
 			_mario.form_controller.configure(_mario, target)
 		if not _actor_restored:
 			_restore_actor_presentation()
 		_mario.sprite.visible = _visible
 		_mario.state_machine.gameplay_suspended = _previous_machine_suspended
+	_igniting = false
 	for reference: WeakRef in _suspended:
 		var entity := reference.get_ref() as BaseEntity
 		if is_instance_valid(entity) and not entity.is_shutdown:

@@ -1,0 +1,51 @@
+[gd_resource type="Resource" script_class="MarioForm" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/climb.png" id="climb"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/crouch.png" id="crouch"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/idle.png" id="idle"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/jump.png" id="jump"]
+[ext_resource type="Script" path="res://scripts/player/mario_form.gd" id="script"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/slide.png" id="slide"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/walk.png" id="walk"]
+
+[sub_resource type="AtlasTexture" id="climb0"]
+atlas = ExtResource("climb")
+region = Rect2(0, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="climb1"]
+atlas = ExtResource("climb")
+region = Rect2(16, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="walk0"]
+atlas = ExtResource("walk")
+region = Rect2(0, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="walk1"]
+atlas = ExtResource("walk")
+region = Rect2(16, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="walk2"]
+atlas = ExtResource("walk")
+region = Rect2(32, 0, 16, 32)
+filter_clip = true
+
+[resource]
+script = ExtResource("script")
+display_name = "Fire"
+idle = ExtResource("idle")
+walk = Array[Texture2D]([SubResource("walk0"), SubResource("walk1"), SubResource("walk2")])
+skid = ExtResource("slide")
+jump = ExtResource("jump")
+crouch = ExtResource("crouch")
+climb = Array[Texture2D]([SubResource("climb0"), SubResource("climb1")])
+jump_cue = &"jump_big"
+sprite_position = Vector2(0, -15)
+standing_contact_size = Vector2(12, 24)
+standing_contact_position = Vector2(0, -12)
+crouched_contact_size = Vector2(12, 12)
+can_crouch = true
+can_break_bricks = true

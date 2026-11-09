@@ -20,7 +20,8 @@ func _ready() -> void:
 		sprite.hide()
 		SoundHandler.play_reward(&"power_up_reveal")
 	set_process(false)
-	pickup.area_entered.connect(_on_pickup_overlap)
+	# An accepted pickup can reconfigure the player's collision shapes.
+	pickup.area_entered.connect(_on_pickup_overlap, CONNECT_DEFERRED)
 
 
 ## Configure before entering the tree so pickup starts disabled.
@@ -73,6 +74,8 @@ func _advance_available(_delta: float) -> void:
 func _on_pickup_overlap(area: Area2D) -> void:
 	if (
 		_removing
+		or not is_instance_valid(area)
+		or not area.is_inside_tree()
 		or is_queued_for_deletion()
 		or _emergence_remaining > 0.0
 		or is_shutdown
