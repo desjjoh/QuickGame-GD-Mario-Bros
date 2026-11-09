@@ -45,6 +45,9 @@ func _ready() -> void:
 	assert(not target._defeated)
 	var moving := shell.get_node("StateMachine/ShellMoving")
 	assert(not moving._touching.has(target.get_instance_id()))
+	shell.set_physics_process(false)
+	await ticks(6)  # Finish setup awards without moving past the suspended target.
+	shell.set_physics_process(true)
 	var score := GameHandler.player_status.score
 	target.set_gameplay_suspended(false)
 	for frame in range(8):
@@ -55,6 +58,8 @@ func _ready() -> void:
 		target._defeated, "A temporarily rejected shell contact must retry while overlap continues."
 	)
 	assert(shell.get("shell_chain") == 1)
+	shell.set_physics_process(false)
+	await ticks(6)
 	assert(GameHandler.player_status.score == score + 500)
 	moving._on_enemy_contact(target)
 	assert(GameHandler.player_status.score == score + 500)

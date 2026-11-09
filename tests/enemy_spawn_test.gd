@@ -215,6 +215,9 @@ func _test_enemy_hits() -> void:
 			break
 	assert(stomped.state_machine.current_state.name == &"Squashed")
 	assert(stomped.sprite.frame == 2 and player.body.velocity.y < 0.0)
+	for tick in range(6):
+		await get_tree().physics_frame
+	await get_tree().process_frame
 	assert(
 		GameHandler.player_status.score == score + 100 and GameHandler.player_status.lives == lives
 	)
@@ -239,6 +242,9 @@ func _test_enemy_hits() -> void:
 	assert(corner.state_machine.current_state.name == &"Squashed")
 	assert(player.body.global_position == contact_position)
 	assert(player.body.velocity == Vector2(90, -240))
+	for tick in range(6):
+		await get_tree().physics_frame
+	await get_tree().process_frame
 	assert(GameHandler.player_status.score == score + 300)  # Consecutive airborne stomps: 100 + 200.
 	player.set_physics_process(true)
 
@@ -253,8 +259,10 @@ func _test_enemy_hits() -> void:
 	for tick in range(3):
 		await get_tree().physics_frame
 	var block := level.world_objects.get_node("question_block_4_9") as BaseBlock
+	var pre_hit := knocked.body.global_position
 	assert(block.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP)))
-	assert(knocked.state_machine.current_state.name == &"KnockedOut" and knocked.sprite.flip_v)
+	assert(knocked.state_machine.current_state.name == &"KnockedOut" and not knocked.sprite.flip_v)
+	assert(knocked.body.global_position.is_equal_approx(pre_hit + Vector2(-1.0, -7.0)))
 	var mushroom_block := level.world_objects.get_node("question_block_6_9") as BaseBlock
 	assert(mushroom_block.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP)))
 	assert(mushroom.body.velocity.y < 0.0)
@@ -262,6 +270,7 @@ func _test_enemy_hits() -> void:
 	var knock_origin := knocked.body.global_position
 	for tick in range(4):
 		await get_tree().physics_frame
+	assert(knocked.sprite.flip_v)
 	assert(knocked.body.global_position.x < knock_origin.x)
 	assert(knocked.body.global_position.y < knock_origin.y)
 	for tick in range(32):

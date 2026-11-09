@@ -6,6 +6,8 @@ var attacker: BaseEntity
 var maneuver: StringName
 var direction: Vector2
 var strength: float
+## The block that delivered a bump, separate from the actor that struck it.
+var struck_block: BaseEntity
 
 
 func _init(source: BaseEntity, kind: StringName, travel: Vector2, power: float = 1.0) -> void:

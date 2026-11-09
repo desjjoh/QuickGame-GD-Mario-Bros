@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://scripts/states/enemies/walking_enemy_state.gd" id="walking"]
 [ext_resource type="Script" path="res://scenes/entities/enemies/goomba/goomba.gd" id="goomba"]
 [ext_resource type="Script" path="res://scripts/states/enemies/enemy_defeated_state.gd" id="defeated"]
+[ext_resource type="Script" path="res://scripts/states/enemies/goomba_knocked_out_state.gd" id="knocked_out"]
 [ext_resource type="Script" path="res://scenes/components/presentation/synchronized_animation.gd" id="sync"]
 [ext_resource type="Script" path="res://scenes/components/presentation/cosmetic_animation_cycle.gd" id="cycle"]
 
@@ -52,11 +53,10 @@ frame_updates_enabled = false
 input_enabled = false
 
 [node name="KnockedOut" type="Node" parent="StateMachine"]
-script = ExtResource("defeated")
+script = ExtResource("knocked_out")
 launch_speed = -180.0
 horizontal_speed = 60.0
 stop_animation_on_enter = true
-sprite_frame = 0
 frame_updates_enabled = false
 input_enabled = false
 

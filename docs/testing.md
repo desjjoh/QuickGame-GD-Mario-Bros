@@ -60,12 +60,15 @@ Activity tests check both suspension orders, preservation of collision/state, pr
 - `down_direction_test` checks grounded Down/direction filtering and coasting, low-speed stop rules, crouch release, jump eligibility, and airborne steering. `super_mario_movement_test` retains crouch-jump/landing coverage.
 - `canvas_terrain_test`, `super_mario_corner_test`, and `enemy_canvas_test` exercise head/side contact, block/ground response, real hurtbox overlaps, and block-hit shape queries across canvas hierarchies.
 - `vertical_fraction_test` compares 313 captured arithmetic steps exactly. `vertical_jump_reference_test` checks a natural stationary jump/break sequence. `brick_seam_reference_test` compares 182 post-break vertical samples from 14 running/seam routes while replaying recorded horizontal positions; it does not independently verify horizontal integration.
-- `brick_neighbor_test` checks 20 full-jump cases, reaction gating, and directional outcomes. `brick_break_test` / `brick_debris_test` cover capability selection, temporary collision, scoring, theme, pause, and effect cleanup. Coin-above and shatter-victim work remains in the backlog.
+- `brick_neighbor_test` checks 20 full-jump cases, reaction gating, and directional outcomes. `brick_break_test` / `brick_debris_test` cover capability selection, temporary collision, scoring, theme, pause, and effect cleanup.
+- `block_top_coin_test` covers Small bumps and Super breaks across both canvas hierarchies. It checks same-cell pickup, adjacent coin exclusion, duplicate collection, rollover, effect origin and pause, and coin persistence after an area round trip.
 - `enemy_boundary_test` covers activation-column rounding, cleanup thresholds, and simultaneous paired movement. `shell_spawn_contact_test` verifies retry after rejected overlap and exactly-once accepted chain rewards; the natural pair-entry report remains unconfirmed.
 - `score_popup_test` checks placement, optional rise/cleanup, pause, display-only lifetime, and absence of reward side effects. Entity callers retain reward ownership; flagpole and block-coin lifetimes remain separate.
 - `camera_arrival_test`, `corner_correction_test`, and `area_background_test` cover return-pipe framing, correction-excluded camera progress, background bounds, and shadow routing.
 
 Pipe entry/transfer, sideways-pipe, climbing, and flagpole-ending tests also accept `-- --super` for their Super configuration. Their timing/contact assertions should remain meaningful when fixtures are isolated from authored stage settings.
+
+Pipe entry and transfer checks cover simultaneous Up+Down, grounded Down with a horizontal direction, and Down+Right on the landing tick. The sideways check walks to the lower mouth, releases Right, and verifies entry with neutral input when facing right and rejection when facing left.
 
 ## Deterministic audio teardown
 
@@ -89,3 +92,11 @@ Successful scenes call `await preload("res://tests/fixtures/finish_test.gd").fin
 `title_background_test` verifies a Game-selected backdrop on startup and stage-completion return, suspended backdrop actors, an unchanged gameplay stage list, and a different backdrop selection on a later menu return. Default-backdrop, game-over, and animated-return paths remain covered by the title/lifecycle regressions.
 
 The former playable Test Level is retained only as `tests/fixtures/sandbox_level.tscn`. Regression scenes use its stable geometry independently of 1-1 and the configured title backdrop.
+
+`delayed_reward_test` checks the six-update enemy/power-up award delay, pause, exactly-once delivery after actor/popup deletion, concurrent life awards, and shutdown cancellation. Enemy interaction tests wait for pending awards separately from their immediate reaction assertions.
+
+`spawn_registry_test` verifies category-local slot lookup before tree entry, the ten-enemy cap, lowest-free reuse without renumbering, independent power-up capacity, untracked categories, oldest-actor replacement, and safe release after deferred replacement exits.
+
+`block_hit_receiver_test` verifies acknowledged enemy/mushroom delivery, repeated recoverable hits, permanent-defeat rejection, unbound/freed callbacks, emergence and suspension guards, and unchanged launch direction/velocity.
+
+`block_receiver_order_test` checks 12 receiver arrangements for both bump and break on normal and CanvasLayer-backed levels (48 combinations): slot/tree ordering, slot reuse, category priority, rejected and out-of-range receivers, unregistered fallback, emerging power-ups, the tenth enemy slot, no accepted receiver, and exactly one delayed entity reward.

@@ -60,7 +60,7 @@ func _ready() -> void:
 	var previous_lives := GameHandler.player_status.lives
 	var voice := SoundHandler.get_node("Square2Sfx") as AudioStreamPlayer
 	level.player.body.global_position = mushroom.global_position + Vector2(8, 16)
-	for tick in range(6):
+	for tick in range(10):
 		await get_tree().physics_frame
 
 	assert(GameHandler.player_status.lives == previous_lives + 1)

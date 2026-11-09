@@ -39,26 +39,34 @@ func _ready() -> void:
 	var bump := EntityHit.new(player, &"block_bump", Vector2.UP)
 	var score := GameHandler.player_status.score
 	var before := enemy.body.global_position
+	var pose_position := enemy.sprite.global_position
 	enemy.get_node("Body/BlockHitReceiver").receive_hit(bump)
 	assert(enemy.state_machine.current_state.name == &"ShellStunned")
-	assert(enemy.body.global_position == before + Vector2(0, -2))
-	assert(enemy.body.velocity == Vector2(60, -180))
-	assert(enemy.sprite.flip_v and enemy.sprite.frame == 4)
+	assert(enemy.body.global_position.is_equal_approx(before + Vector2(1, -5)))
+	assert(enemy.body.velocity == Vector2(60, -165.703125))
+	assert(not enemy.sprite.flip_v and enemy.sprite.vframes == 1)
+	assert(enemy.sprite.global_position.is_equal_approx(pose_position))
 	assert(not enemy._defeated and level.spawn_registry._live_spawns[&"enemy"].has(enemy))
-	assert(GameHandler.player_status.score == score + 100)
+	assert(GameHandler.player_status.score == score)
 	assert(enemy.get_node("StateMachine/ShellIdle").wake_ticks_remaining == 0)
 	# Repeat bumps reapply the impulse and award once each, including opposite direction.
 	player.body.global_position.x = 240
 	before = enemy.body.global_position
 	assert(enemy.receive_hit(bump))
-	assert(enemy.body.global_position == before + Vector2(0, -2))
-	assert(enemy.body.velocity == Vector2(-60, -180))
-	assert(GameHandler.player_status.score == score + 200)
+	assert(enemy.body.global_position.is_equal_approx(before + Vector2(-1, -5)))
+	assert(enemy.body.velocity == Vector2(-60, -165.703125))
+	assert(GameHandler.player_status.score == score)
 	var position := enemy.body.global_position
 	assert(GameHandler.request_pause_toggle())
 	await ticks(12)
 	assert(enemy.body.global_position == position)
 	assert(GameHandler.request_pause_toggle())
+	await ticks(1)
+	assert(
+		enemy.sprite.flip_v and enemy.sprite.frame == 4 and enemy.sprite.position == Vector2.ZERO
+	)
+	await ticks(5)
+	assert(GameHandler.player_status.score == score + 200)
 	for index in range(90):
 		await ticks(1)
 		if enemy.state_machine.current_state.name == &"ShellIdle":
@@ -71,10 +79,14 @@ func _ready() -> void:
 	assert(enemy.receive_hit(EntityHit.new(player, &"kick", Vector2.ZERO)))
 	assert(enemy.is_moving_shell() and enemy.sprite.flip_v)
 	assert(enemy.body.velocity.x == -180)
+	await ticks(1)  # Deliver the bonk after the shell's update for this tick.
 	assert(enemy.receive_hit(bump))
 	assert(enemy.is_moving_shell() and enemy._can_hurt_player())
 	assert(enemy.body.velocity == Vector2(-60, -180))
 	assert(enemy.get_node("StateMachine/ShellMoving").walk_speed == 60)
+	var launch_position := enemy.body.global_position
+	await ticks(1)
+	assert(enemy.body.global_position.is_equal_approx(launch_position + Vector2(0.5, -3.0)))
 	var target := (
 		load("res://scenes/entities/enemies/goomba/goomba.tscn").instantiate() as BaseEnemy
 	)
@@ -87,12 +99,15 @@ func _ready() -> void:
 	assert(enemy.receive_hit(EntityHit.new(player, &"kick", Vector2.ZERO)))
 	assert(absf(enemy.body.velocity.x) == 180)
 	enemy.free()
+	await ticks(6)
 	# A newly block-stunned walking Koopa has no recovery interval until landing.
 	player.body.global_position = Vector2(24, 100)
 	enemy = spawn(level)
 	assert(enemy.receive_hit(bump))
+	await ticks(6)
 	score = GameHandler.player_status.score
 	assert(enemy.receive_hit(EntityHit.new(player, &"kick", Vector2.ZERO)))
+	await ticks(6)
 	assert(GameHandler.player_status.score == score + 8000)
 	enemy.free()
 	enemy = spawn(level)
@@ -117,10 +132,12 @@ func _ready() -> void:
 	enemy.body.global_position = Vector2(200, 104)
 	enemy.get_node("StateMachine/Walking").walk_speed = 0.0
 	await ticks(2)
+	await ticks(6)
 	score = GameHandler.player_status.score
 	assert(block.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP)))
 	assert(enemy.state_machine.current_state.name == &"ShellStunned")
-	assert(enemy.body.velocity == Vector2(60, -180))
+	assert(enemy.body.velocity == Vector2(60, -165.703125))
+	await ticks(6)
 	assert(GameHandler.player_status.score == score + 100)
 	game.queue_free()
 	await ticks(2)

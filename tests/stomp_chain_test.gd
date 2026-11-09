@@ -30,6 +30,8 @@ func _ready() -> void:
 		enemy.position = Vector2(192, 160)
 		level.world_objects.add_child(enemy)
 		assert(enemy.receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)))
+		enemy.process_mode = Node.PROCESS_MODE_DISABLED
+		await ticks(6)
 		if index < 10:
 			earned += expected[index]
 		assert(GameHandler.player_status.score == score + earned)
@@ -43,6 +45,7 @@ func _ready() -> void:
 			lives += 1  # Kick at the saturated airborne chain also awards a life.
 			assert(enemy.receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)))
 			lives += 1
+			await ticks(6)
 			assert(GameHandler.player_status.lives == lives + 2)
 		enemy.queue_free()
 	assert(GameHandler.request_pause_toggle())
@@ -63,6 +66,7 @@ func _ready() -> void:
 	level.world_objects.add_child(fresh)
 	var before := GameHandler.player_status.score
 	assert(fresh.receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)))
+	await ticks(6)
 	assert(GameHandler.player_status.score == before + 100 and player.stomp_chain == 1)
 	player.begin_death()
 	assert(player.stomp_chain == 0)

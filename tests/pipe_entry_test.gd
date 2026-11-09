@@ -45,7 +45,11 @@ func _ready() -> void:
 			if child is AudioStreamPlayer:
 				sounds.append(child)
 	)
-	assert(level.transport(level.player, pipe.get_destination(), pipe))
+	ControllerHandler.input_down = 1
+	ControllerHandler.input_up = 1
+	pipe._physics_process(1.0 / 60.0)
+	assert(player.state_machine.current_state == player.pipe_enter_state)
+	ControllerHandler.input_up = 0
 	assert(level.players.get_index() < level.get_node("Areas").get_index())
 	# Entry aligns feet to the mouth; floor contact may retain a safe-margin offset.
 	var entry_origin := player.body.global_position

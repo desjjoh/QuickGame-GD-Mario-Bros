@@ -5,8 +5,9 @@ extends SpawnableEntity
 signal enemy_contact(other: BaseEnemy)
 signal defeated(hit: EntityHit)
 
+const DELAYED_REWARD := preload("res://scenes/components/interactions/delayed_reward.gd")
 const STOMP_REBOUND := -240.0
-const SCORE_POPUP := preload("res://scenes/components/presentation/score_popup.tscn")
+const RISING_REWARD_POPUP := preload("res://scenes/components/presentation/rising_reward_popup.gd")
 
 @onready var body: CharacterBody2D = $Body
 @onready var _enemy_contact_area: Area2D = $Body/EnemyContact
@@ -22,14 +23,10 @@ var _player_contact_latched := false
 func _ready() -> void:
 	super()
 	_enemy_contact_area.area_entered.connect(_on_enemy_contact)
-	_block_hits.hit_received.connect(receive_hit)
-	var ancestor := get_parent()
-	while ancestor != null and not ancestor is BaseLevel:
-		ancestor = ancestor.get_parent()
-	_level = ancestor as BaseLevel
-	if _level != null and is_instance_valid(_level.player):
-		# The player shares the terrain layer. Enemy contact is handled separately.
-		body.add_collision_exception_with(_level.player.body)
+	_block_hits.hit_handler = receive_hit
+	_level = BaseLevel.containing(self)
+	if _level != null:
+		_level.ignore_player_body(body)
 
 
 func _physics_process(delta: float) -> void:
@@ -121,11 +118,8 @@ func award_stomp(hit: EntityHit, world_position: Vector2) -> void:
 
 
 func award_score(points: int, world_position: Vector2) -> void:
-	var popup := SCORE_POPUP.instantiate()
-	get_parent().add_child(popup)
-	popup.show_score(points, world_position)
-	popup.rise_and_free()
-	GameHandler.add_score(points)
+	RISING_REWARD_POPUP.show_score(get_parent(), points, world_position)
+	DELAYED_REWARD.schedule(self, GameHandler.add_score.bind(points))
 
 
 func _can_hurt_player() -> bool:
@@ -150,10 +144,11 @@ func away_from_attacker(hit: EntityHit) -> float:
 
 
 func award_extra_life(world_position: Vector2) -> void:
-	var popup := SCORE_POPUP.instantiate()
-	get_parent().add_child(popup)
-	popup.show_one_up(world_position)
-	popup.rise_and_free()
+	RISING_REWARD_POPUP.show_one_up(get_parent(), world_position)
+	DELAYED_REWARD.schedule(self, _grant_extra_life)
+
+
+static func _grant_extra_life() -> void:
 	GameHandler.set_lives(GameHandler.player_status.lives + 1)
 	SoundHandler.play_reward(&"extra_life")
 

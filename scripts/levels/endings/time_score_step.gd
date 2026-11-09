@@ -14,17 +14,15 @@ func _ready() -> void:
 
 
 func _begin(ticket: int) -> void:
-	var ancestor := get_parent()
-	while ancestor != null and not ancestor is BaseLevel:
-		ancestor = ancestor.get_parent()
-	if ancestor == null:
+	var level := BaseLevel.containing(self)
+	if level == null:
 		cancel()
 		return
-	_level = weakref(ancestor)
+	_level = weakref(level)
 	if not _owns_conversion():
 		cancel()
 		return
-	if not (ancestor as BaseLevel).timer_enabled or GameHandler.time_remaining == 0:
+	if not level.timer_enabled or GameHandler.time_remaining == 0:
 		complete(ticket)
 		return
 	# Retirement can happen earlier in this physics tick; start on the next one.

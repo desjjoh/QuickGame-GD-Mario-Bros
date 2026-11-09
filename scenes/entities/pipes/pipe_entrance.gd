@@ -20,7 +20,7 @@ func _physics_process(delta: float) -> void:
 	var player := _level.player
 	if not is_instance_valid(player) or player.is_shutdown:
 		return
-	if not sideways and (ControllerHandler.input_down <= 0.5 or ControllerHandler.input_up > 0.5):
+	if not sideways and ControllerHandler.input_down <= 0.5:
 		return
 	if not can_start_entry(player):
 		return
@@ -36,9 +36,12 @@ func can_start_entry(player: BasePlayer) -> bool:
 		or not player.can_read_controller_input()
 	):
 		return false
-	# Check each direction independently: opposing buttons must not cancel
-	# into a neutral axis and accidentally allow pipe entry.
-	if not sideways and (ControllerHandler.input_left > 0.0 or ControllerHandler.input_right > 0.0):
+	# The reference filters Down with horizontal input before moving the player.
+	if (
+		not sideways
+		and player.was_grounded_at_tick_start()
+		and (ControllerHandler.input_left > 0.0 or ControllerHandler.input_right > 0.0)
+	):
 		return false
 	var state := player.state_machine.current_state as PlayerState
 	if state == null or not state.controls_enabled or not player.body.is_on_floor():
@@ -46,12 +49,22 @@ func can_start_entry(player: BasePlayer) -> bool:
 	var feet := to_local(player.body.global_position)
 	if sideways:
 		return (
-			ControllerHandler.input_right > 0.5
-			and ControllerHandler.input_left <= 0.0
+			player.sprite != null
+			and not player.sprite.flip_h
 			and absf(feet.x + 6.0) <= 1.5
 			and absf(feet.y - 32.0) <= alignment_tolerance
+			and _touches_side_mouth(player.body)
 		)
 	return absf(feet.x - 16.0) <= alignment_tolerance and absf(feet.y) <= 1.0
+
+
+func _touches_side_mouth(player_body: CharacterBody2D) -> bool:
+	# Bridge the body's fractional clearance at the mouth.
+	var contact := KinematicCollision2D.new()
+	return (
+		player_body.test_move(player_body.global_transform, Vector2.RIGHT * 0.5, contact)
+		and contact.get_collider() == $Body
+	)
 
 
 func entry_position() -> Vector2:

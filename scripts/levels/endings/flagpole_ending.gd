@@ -63,10 +63,7 @@ func bind_entity(entity: BaseEntity, cell: Vector2i, area: BaseLevelArea) -> voi
 func _on_attached(player: BasePlayer, pole: FlagpoleEntity) -> void:
 	if active:
 		return
-	var ancestor := get_parent()
-	while ancestor != null and not ancestor is BaseLevel:
-		ancestor = ancestor.get_parent()
-	var level := ancestor as BaseLevel
+	var level := BaseLevel.containing(self)
 	if level != null and is_instance_valid(_castle) and not _castle.is_shutdown:
 		level.begin_ending(self, player, pole)
 
