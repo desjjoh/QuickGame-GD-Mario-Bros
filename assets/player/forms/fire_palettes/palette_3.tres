@@ -1,21 +1,21 @@
-[gd_resource type="Resource" script_class="PlayerPalette" format=3]
+[gd_resource type="Resource" script_class="PlayerPalette" format=3 uid="uid://b461csymamymg"]
 
-[ext_resource type="Script" path="res://scripts/player/player_palette.gd" id="script"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 3/idle.png" id="idle"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 3/walk.png" id="walk"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 3/jump.png" id="jump"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 3/crouch.png" id="crouch"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 3/slide.png" id="slide"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 3/climb.png" id="climb"]
+[ext_resource type="Texture2D" uid="uid://csfe872qcq72e" path="res://assets/player/mario + luigi (starman)/palette 3/climb.png" id="climb"]
+[ext_resource type="Texture2D" uid="uid://ddiak7jdi3ple" path="res://assets/player/mario + luigi (starman)/palette 3/crouch.png" id="crouch"]
+[ext_resource type="Texture2D" uid="uid://bfsc41u4ylkfs" path="res://assets/player/mario + luigi (starman)/palette 3/idle.png" id="idle"]
+[ext_resource type="Texture2D" uid="uid://d1i61lx3tqbjp" path="res://assets/player/mario + luigi (starman)/palette 3/jump.png" id="jump"]
+[ext_resource type="Script" uid="uid://btb1x05u3u4un" path="res://scripts/player/player_palette.gd" id="script"]
+[ext_resource type="Texture2D" uid="uid://dlr1bib7yld12" path="res://assets/player/mario + luigi (starman)/palette 3/slide.png" id="slide"]
+[ext_resource type="Texture2D" uid="uid://d4bfhtxp218m1" path="res://assets/player/mario + luigi (starman)/palette 3/walk.png" id="walk"]
 
 [resource]
 script = ExtResource("script")
 sheets = Dictionary[StringName, Texture2D]({
-&"idle.png": ExtResource("idle"),
-&"walk.png": ExtResource("walk"),
-&"jump.png": ExtResource("jump"),
-&"crouch.png": ExtResource("crouch"),
-&"slide.png": ExtResource("slide"),
 &"climb.png": ExtResource("climb"),
+&"crouch.png": ExtResource("crouch"),
+&"idle.png": ExtResource("idle"),
+&"jump.png": ExtResource("jump"),
+&"slide.png": ExtResource("slide"),
+&"walk.png": ExtResource("walk")
 })
-starman_colors = Array[Color]([Color(0.70980392, 0.19215686, 0.1254902, 1), Color(1, 1, 1, 1), Color(0.90196078, 0.61176471, 0.12941176, 1)])
+starman_colors = Array[Color]([Color(0.70980394, 0.19215687, 0.1254902, 1), Color(1, 1, 1, 1), Color(0.9019608, 0.6117647, 0.12941176, 1)])

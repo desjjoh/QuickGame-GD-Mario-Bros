@@ -51,15 +51,15 @@ power_up_scene = ExtResource("7_msko4")
 script = ExtResource("20_lletq")
 kind = 1
 
-[sub_resource type="Resource" id="Resource_dfu87"]
-script = ExtResource("20_lletq")
-kind = 2
-power_up_scene = ExtResource("7_msko4")
-
 [sub_resource type="Resource" id="Resource_djj3g"]
 script = ExtResource("20_lletq")
 kind = 2
 power_up_scene = ExtResource("8_1qen6")
+
+[sub_resource type="Resource" id="Resource_dfu87"]
+script = ExtResource("20_lletq")
+kind = 2
+power_up_scene = ExtResource("7_msko4")
 
 [sub_resource type="Resource" id="Destination_start"]
 script = ExtResource("transport_destination")
@@ -72,9 +72,10 @@ cell = Vector2i(13, 11)
 target_id = &"secret_return"
 destination = SubResource("Destination_start")
 
-[node name="1-1" unique_id=441193935 node_paths=PackedStringArray("ending_presentation") instance=ExtResource("2_base")]
+[node name="1-1" unique_id=441193935 node_paths=PackedStringArray("ending_presentation", "halfway_spawn") instance=ExtResource("2_base")]
 texture_filter = 1
 ending_presentation = NodePath("Presentations/FlagpoleEnding")
+halfway_spawn = NodePath("Players/HalfwaySpawn")
 player_scene = ExtResource("3_player")
 
 [node name="MainArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="0" unique_id=250103957]
@@ -116,6 +117,8 @@ position = Vector2(128, 120)
 editor_draw_limits = true
 world_left = 0.0
 world_right = 3328.0
+halfway_check_enabled = true
+halfway_camera_left = 1280.0
 
 [node name="LowerArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="1" unique_id=1048954744 instance=ExtResource("10_area")]
 process_physics_priority = 110
@@ -128,6 +131,7 @@ theme = ExtResource("12_underground")
 [node name="Background" parent="Areas/LowerArea" index="0"]
 offset_right = 256.0
 offset_bottom = 240.0
+metadata/_edit_use_anchors_ = true
 
 [node name="DecorationLayout" parent="Areas/LowerArea/Layouts" parent_id_path=PackedInt32Array(1048954744, 1417906807) index="0" unique_id=1428866671]
 tile_set = ExtResource("16_vda6h")
@@ -155,6 +159,9 @@ world_right = 1152.0
 
 [node name="PlayerSpawn" parent="Players" parent_id_path=PackedInt32Array(1625753015) index="0" unique_id=321075723]
 position = Vector2(48, 208)
+
+[node name="HalfwaySpawn" type="Marker2D" parent="Players" parent_id_path=PackedInt32Array(1625753015) index="1" unique_id=1427039794]
+position = Vector2(1344, 208)
 
 [node name="FlagpoleEnding" parent="Presentations" index="0" unique_id=1345145040 instance=ExtResource("ending")]
 flagpole_cell = Vector2i(196, 2)

@@ -32,9 +32,16 @@ Open `scenes/main/game.tscn`, select **Game**, and assign **Presentation → Tit
 ## Level rules
 
 - Set camera world bounds on the area camera to define the playable scroll range.
-- Set the timer limit and enable flag on the level. A disabled timer hides the number and keeps the TIME label. Transitions also hide the number, including level intro, TIME UP, and GAME OVER; it returns afterward only when the timer is enabled.
+- Set the timer limit and enable flag on the level. The HUD keeps the TIME label and hides the digits on the start screen, during transitions such as level intro, TIME UP, and GAME OVER, and whenever the timer is disabled.
+- Hurry-up plays once when the timer falls from 100 to 99. A timed stage authored at 1–99 plays the warning at gameplay reveal and then uses the fast music. Starting below 100 is a deliberate extension for authored stages.
 - `GameHandler.reset_progress_on_death` controls whether death clears progress. Each entity’s persistence setting applies to both death and area reload.
 - The Game scene supplies the stage list and the shared shadow master toggle. The first stage is 1-1. Open `scenes/main/game.tscn`, select **Game**, and use **Presentation → Shadow Style** to load `assets/shadows/soft.tres`, `crisp.tres`, or `outer_blur.tres`. Clear the field for no shadow effect. Outer Blur is the current authored Game selection. One selection applies to the title and every stage; standalone F6 previews read the saved Game selection and master toggle. Decorations remain outside the effect.
+
+### Halfway restarts
+
+Add a `Marker2D` under **Players** at the desired feet position and assign it to the level's **Death → Halfway Spawn** field. On **Areas → MainArea → Camera2D**, enable **Halfway Restart → Halfway Check Enabled** and set **Halfway Camera Left** in world pixels. The 2D editor draws a labeled dashed guide at that X coordinate. At life loss, the active area's camera is measured against this stage-wide threshold.
+
+1-1 uses a marker at `(1344, 208)` and a camera-left threshold of `1280`. A halfway restart snaps the camera to X=1280 and places Mario's sprite 56 px from the left edge. This places Mario 16 px farther right than the NES halfway restart while keeping page 5 in view. A death before the threshold uses the normal spawn, with camera framing clamped by the main area's bounds. The authored secret room is before the threshold. If a side area's camera is placed at or beyond the threshold, death there uses the halfway marker.
 
 ## Known reference differences
 
@@ -42,7 +49,7 @@ Choose **Apply Tiered Power-Up Reward** in the **EntityLayout** block reward bru
 
 Both items grant 1,000 points on pickup. Super Mushroom grows Small to Super. Fire Flower grows Small to Super, upgrades Super to Fire, and grants points to an already-Fire player.
 
-Choose **Apply Starman Reward** in the same brush to paint a fixed star reward. The translucent star uses the area's item art. Starman can be collected after rising four pixels and grants 1,000 points and about 12 seconds of contact protection. While active, touching Goombas, Koopas, or shells knocks them out. The player cycles through the area's alternate palettes and the Starman theme temporarily overrides the area music.
+Choose **Apply Starman Reward** in the same brush to paint a fixed star reward. The translucent star uses the area's item art. Starman can be collected after rising four pixels and grants 1,000 points and about 12 seconds of contact protection. While active, touching Goombas, Koopas, or shells knocks them out. The player cycles through the area's alternate palettes and the Starman theme temporarily overrides the area music. The effect clears on pipe transfer, flagpole grab, and death. Clearing at the flagpole grab is a deliberate difference from the NES.
 
 Timed multi-coin rewards use independent, fixed 231-physics-tick windows instead of the NES's shared, phase-dependent timer. Loading or hitting another block cannot alter an existing window. Pause and unloaded areas freeze remaining time; death follows the existing progress-reset policy.
 

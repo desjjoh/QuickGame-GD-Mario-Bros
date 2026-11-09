@@ -23,6 +23,12 @@ static func show_one_up(
 
 
 static func _create(parent: Node) -> Sprite2D:
+	# The area's runtime outlives sleeping spawners and still unloads with the area.
+	var area := parent
+	while area != null and not area is BaseLevelArea:
+		area = area.get_parent()
+	if area != null:
+		parent = area.get_node("WorldObjects")
 	var popup := SCORE_POPUP.instantiate() as Sprite2D
 	parent.add_child(popup)
 	return popup

@@ -1,4 +1,4 @@
-"""Render the ending jingles as mono PCM from their NES note and length data."""
+"""Render event jingles as mono PCM from their NES note and length data."""
 from math import floor
 from pathlib import Path
 import struct
@@ -22,6 +22,7 @@ PERIODS = (
 )
 NORMAL_LENGTHS = (54, 3, 9, 6, 18, 27, 36, 12)
 CLEAR_LENGTHS = (36, 2, 6, 4, 12, 18, 24, 8)
+HURRY_JINGLE_LENGTHS = (3, 6, 12, 24, 48, 18, 36, 8)
 EVENT_PULSE_VOLUME = (
     0, 1, 2, 2, 3, 3, 3, 4,
     4, 4, 4, 4, 4, 5, 5, 5,
@@ -29,6 +30,9 @@ EVENT_PULSE_VOLUME = (
     6, 6, 6, 6, 6, 6, 6, 6,
     6, 6, 6, 6, 5, 5, 4, 3,
 )
+# Hurry's first note frame reads one byte beyond the event envelope table.
+HURRY_PULSE_CONTROLS = (0x15, *(0x90 | volume for volume in reversed(EVENT_PULSE_VOLUME)))
+PULSE_DUTIES = (0.125, 0.25, 0.5, 0.75)
 # The area counter starts at 8, immediately after the eight-entry area table.
 AREA_PULSE_VOLUME = (0, 4, 4, 5, 5, 6, 7, 8, 0)
 TRACKS = {
@@ -53,6 +57,11 @@ TRACKS = {
         "82 22 04 04 1c 04 04 84 14 86 1e 80 16 80 14",
     ),
 }
+HURRY_JINGLE = (
+    "81 1c 30 04 30 30 04 1e 32 04 32 32 04 20 34 04 34 34 04 36 04 84 36",
+    "46 a4 64 a4 48 a6 66 a6 4a a8 68 a8 6a 44 2b",
+    "81 2a 42 04 42 42 04 2c 64 04 64 64 04 2e 46 04 46 46 04 22 04 84 22",
+)
 
 
 def decode(data, lengths, packed=False):
@@ -67,7 +76,7 @@ def decode(data, lengths, packed=False):
             yield value, duration
 
 
-def render(notes, samples, triangle=False, death=False, sweep=False, area=False):
+def render(notes, samples, triangle=False, death=False, sweep=False, area=False, controls=()):
     output = [0.0] * samples
     offset = 0
     for note, frames in notes:
@@ -94,15 +103,20 @@ def render(notes, samples, triangle=False, death=False, sweep=False, area=False)
                     if death and index * 4 >= 31 * SAMPLES_PER_FRAME:
                         value = 0.0
                 else:
+                    duty = 0.5
                     if death:
                         # The death event uses hardware decay instead of the music envelope table.
                         step = index * 4 // (3 * SAMPLES_PER_FRAME)
                         envelope = max(0.0, (15 - step) / 15.0)
+                    elif controls:
+                        control = controls[min(len(controls) - 1, index // SAMPLES_PER_FRAME)]
+                        envelope = (control & 0x0F) / 15.0
+                        duty = PULSE_DUTIES[control >> 6]
                     else:
                         volumes = AREA_PULSE_VOLUME if area else EVENT_PULSE_VOLUME
                         table_index = max(0, len(volumes) - 1 - index // SAMPLES_PER_FRAME)
                         envelope = volumes[table_index] / 15.0
-                    value = (1 if phase < 0.5 else -1) * PULSE_PEAK * envelope
+                    value = (1 if phase < duty else -1) * PULSE_PEAK * envelope
                 output[offset + index] = value * edge
                 if death:
                     phase = (phase + rate / SAMPLE_RATE) % 1.0
@@ -126,6 +140,22 @@ def main():
             write_track(folder / "stage_clear_pulse.wav", (voices[0],))
             voices = voices[1:]
         write_track(folder / f"{name}.wav", voices)
+    melody, harmony, bass = HURRY_JINGLE
+    pulse_two = list(decode(melody, HURRY_JINGLE_LENGTHS))
+    frames = sum(duration for _, duration in pulse_two)
+    assert frames == 168
+    count = frames * SAMPLES_PER_FRAME
+    write_track(
+        folder / "hurry_up_pulse_two.wav",
+        (render(pulse_two, count, controls=HURRY_PULSE_CONTROLS),),
+    )
+    pulse_one = decode(harmony, HURRY_JINGLE_LENGTHS, packed=True)
+    write_track(
+        folder / "hurry_up_pulse_one.wav",
+        (render(pulse_one, count, controls=HURRY_PULSE_CONTROLS),),
+    )
+    triangle = decode(bass, HURRY_JINGLE_LENGTHS)
+    write_track(folder / "hurry_up_triangle.wav", (render(triangle, count, triangle=True),))
 
 
 def write_track(path, voices):

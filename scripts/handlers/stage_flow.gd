@@ -69,13 +69,14 @@ func _restart_death_now(level: BaseLevel, progress_key: String) -> bool:
 	if GameHandler.current_level != level or GameHandler._current_level_scene == null:
 		return false
 	var scene: PackedScene = GameHandler._current_level_scene
+	var entry_mode := level.death_restart_entry
 	# Shutdown saves the final active snapshot before a deliberate reset.
 	level.shutdown()
 	if GameHandler.current_level != level:
 		return false
 	if GameHandler.reset_progress_on_death:
 		GameHandler.forget_area_progress(progress_key)
-	return GameHandler.load_level(scene)
+	return GameHandler.load_level(scene, false, -2, entry_mode)
 
 
 func transition_to_level(scene: PackedScene) -> bool:

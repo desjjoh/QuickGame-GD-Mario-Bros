@@ -15,6 +15,7 @@ func _ready() -> void:
 	if "--super" in OS.get_cmdline_user_args():
 		fixture.player_start_configuration = preload("res://assets/player/forms/super.tres")
 	var main := fixture.get_node("Areas/MainArea") as BaseLevelArea
+	main.background_music = MusicHandler.Track.OVERWORLD
 	var markers := main.get_node("Layouts/EntityLayout") as TileMapLayer
 	markers.clear()
 	markers.set_cell(Vector2i(6, 12), 3, Vector2i.ZERO)
@@ -22,7 +23,9 @@ func _ready() -> void:
 	floor.clear()
 	for x in range(16):
 		floor.set_cell(Vector2i(x, 13), 0, Vector2i.ZERO)
-	fixture.get_node("Areas/LowerArea/Layouts/EntityLayout").clear()
+	var lower_fixture := fixture.get_node("Areas/LowerArea") as BaseLevelArea
+	lower_fixture.background_music = MusicHandler.Track.UNDERGROUND
+	lower_fixture.get_node("Layouts/EntityLayout").clear()
 	fixture.get_node("Players/PlayerSpawn").position = Vector2(112, 192)
 	for area in fixture.get_node("Areas").get_children():
 		fixture.set_editable_instance(area, true)
@@ -101,6 +104,14 @@ func _ready() -> void:
 	state.controls_enabled = true
 	assert(not level.request_area_transfer(&"missing"))
 	assert(not level.request_area_transfer(&"main"))
+	var character := player as Mario
+	character.starman.begin()
+	for frame in range(8):
+		await ticks(1)
+		if character.starman.palette_slot != 0:
+			break
+	assert(character.starman.palette_slot != 0)
+	assert(MusicHandler._voice.stream == MusicHandler._loops[MusicHandler.STARMAN_TRACK])
 	# Down+Right survives the landing update, but the grounded cases above reject it.
 	player.body.global_position = pipe.entry_position() + Vector2(0, -2)
 	player.body.velocity = Vector2(0, -60)
@@ -116,7 +127,6 @@ func _ready() -> void:
 	ControllerHandler.input_right = 0
 	assert(not level.request_area_transfer(&"lower"), "Only one transfer may be queued.")
 	assert(player.state_machine.current_state is PlayerPipeEnterState)
-	var character := player as Mario
 	var form := character.form_controller.current_form
 	assert(player.sprite.texture in [form.idle, form.crouch])
 	assert(level.player_behind_world)
@@ -149,11 +159,15 @@ func _ready() -> void:
 	)
 	assert(level.active_area == main_area)
 	assert(main_area.get_node("Camera2D").global_position == source_camera_position)
+	assert(character.starman.is_active())
+	assert(MusicHandler._voice.stream == MusicHandler._loops[MusicHandler.STARMAN_TRACK])
 	for tick in range(24):
 		player.state_machine.process_physics(1.0 / 60.0)
 		await ticks(1)
 	await get_tree().process_frame
 	assert(level.player == player and level.active_area == lower)
+	assert(not character.starman.is_active() and character.starman.palette_slot == 0)
+	assert(MusicHandler._voice.stream == MusicHandler._loops[MusicHandler.Track.UNDERGROUND])
 	assert(not level.player_behind_world)
 	assert(player.body.global_position == lower.get_node("Arrival").global_position)
 	assert(player.body.velocity == Vector2.ZERO)

@@ -4,6 +4,7 @@ import struct
 import wave
 
 from build_music_tracks import (
+    CLEAR_LENGTHS,
     CPU_HZ,
     NORMAL_LENGTHS,
     PULSE_PEAK,
@@ -90,7 +91,7 @@ UNDERGROUND = (
     "83 1a 18 16 84 14 1a 18 0e 0c 16 83 14 20 1e 1c 28 26 "
     "87 24 1a 12 10 62 0e 80 04 04"
 )
-STARMAN_LENGTHS = (36, 2, 6, 4, 12, 18, 24, 8)
+FAST_STARMAN_LENGTHS = (18, 1, 3, 2, 6, 9, 12, 4)
 STARMAN = (
     "84 2c 2c 2c 82 04 2c 04 85 2c 84 2c 2c 2a 2a 2a 82 04 2a 04 85 2a 84 2a 2a",
     "1f 1f 1f 98 1f 1f 98 9e 98 1f 1d 1d 1d 94 1d 1d 94 9c 94 1d",
@@ -141,23 +142,43 @@ def render_section(melody, harmony, bass, beats="", lengths=NORMAL_LENGTHS):
     return b"".join(struct.pack("<h", round(sum(sample))) for sample in zip(*voices))
 
 
-def main():
-    folder = Path(__file__).resolve().parents[1] / "assets" / "audio" / "music"
-    folder.mkdir(parents=True, exist_ok=True)
+def write_area_tracks(folder, suffix, area_lengths, star_lengths):
     ground = {
-        name: render_section(melody.split(" 00", 1)[0], harmony, bass, GROUND_BEATS[name])
+        name: render_section(
+            melody.split(" 00", 1)[0], harmony, bass, GROUND_BEATS[name], area_lengths
+        )
         for name, (melody, harmony, bass) in GROUND.items()
     }
+    ground_sections = [ground[part] for part in GROUND_ORDER.split()]
     tracks = {
-        "overworld": (ground[part] for part in GROUND_ORDER.split()),
-        "underground": (render_section(UNDERGROUND, "", UNDERGROUND),),
-        "starman": (render_section(*STARMAN, lengths=STARMAN_LENGTHS),),
+        "overworld": ground_sections,
+        "underground": (render_section(UNDERGROUND, "", UNDERGROUND, lengths=area_lengths),),
+        "starman": (render_section(*STARMAN, lengths=star_lengths),),
     }
     for name, sections in tracks.items():
-        with wave.open(str(folder / f"{name}.wav"), "wb") as stream:
+        with wave.open(str(folder / f"{name}{suffix}.wav"), "wb") as stream:
             stream.setparams((1, 2, SAMPLE_RATE, 0, "NONE", "not compressed"))
             for section in sections:
                 stream.writeframesraw(section)
+    return ground_sections
+
+
+def main():
+    folder = Path(__file__).resolve().parents[1] / "assets" / "audio" / "music"
+    folder.mkdir(parents=True, exist_ok=True)
+    write_area_tracks(folder, "", NORMAL_LENGTHS, CLEAR_LENGTHS)
+    fast_sections = write_area_tracks(folder, "_fast", CLEAR_LENGTHS, FAST_STARMAN_LENGTHS)
+    start_frames = []
+    frame = 0
+    for section in fast_sections:
+        start_frames.append(frame)
+        frame += len(section) // (2 * SAMPLES_PER_FRAME)
+    starts = ", ".join(map(str, start_frames))
+    (folder / "overworld_fast_sections.tres").write_text(
+        '[gd_resource type="Resource" format=3]\n\n[resource]\n'
+        f"metadata/start_frames = PackedInt32Array({starts})\n",
+        encoding="utf-8",
+    )
 
 
 if __name__ == "__main__":

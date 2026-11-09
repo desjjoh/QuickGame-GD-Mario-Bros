@@ -48,9 +48,14 @@ func configure_start(_configuration: Resource) -> void:
 
 
 ## Area initialization resets transient posture without replacing the player.
-func on_area_arrival() -> void:
+func on_area_arrival(_through_pipe: bool = false) -> void:
 	clear_arrival_control_lock()
 	vertical_movement.reset_fraction()
+
+
+## Called when an ending presentation accepts the player's level completion.
+func on_level_end() -> void:
+	pass
 
 
 func get_movement_axis() -> Vector2:

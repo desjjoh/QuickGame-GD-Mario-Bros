@@ -27,6 +27,7 @@ func wait_phase(
 
 func make_game(manual: bool) -> Node:
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	fixture.starting_time = 400
 	if "--luigi" in OS.get_cmdline_user_args():
 		fixture.player_scene = preload("res://scenes/player/luigi/luigi.tscn")
 	if "--super" in OS.get_cmdline_user_args():
@@ -83,6 +84,13 @@ func _ready() -> void:
 	ending.phase_changed.connect(capture_phase)
 	var player := level.player
 	var camera := get_viewport().get_camera_2d() as LevelCamera
+	var star := (player as Mario).starman
+	star.begin()
+	# Seed the effect without advancing the grab fixture's player motion.
+	star._physics_process(1.0 / 60.0)
+	star._set_palette(1)
+	assert(star.palette_slot != 0)
+	assert(MusicHandler._voice.stream == MusicHandler._loops[MusicHandler.STARMAN_TRACK])
 	GameHandler.set_top_score(123456)
 	var score_before := GameHandler.player_status.score
 	var time_before := GameHandler.time_remaining
@@ -94,6 +102,8 @@ func _ready() -> void:
 				assert(not ending._score_popup.is_physics_interpolated())
 	)
 	await grab(level)
+	assert(not star.is_active() and star.palette_slot == 0)
+	assert(MusicHandler._voice.stream == null)
 	await PAUSE_CHECK.check(level)
 	assert(ending.grab_height == 92.0 and ending.remaining_time_at_contact == time_before)
 	assert(ending.grab_points == 2000 and GameHandler.player_status.score == score_before)

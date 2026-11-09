@@ -21,6 +21,10 @@
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/tileset/block.tres" id="art_16"]
 [ext_resource type="Texture2D" uid="uid://rojclmop6o2k" path="res://assets/palettes/underground/tileset/Palette 1 (Ground and Stone).png" id="castle_art"]
 [ext_resource type="TileSet" uid="uid://b5swkgewllff0" path="res://assets/tileset/underground/enemy_layout.tres" id="enemy_markers"]
+[ext_resource type="Resource" uid="uid://b461csymamymg" path="res://assets/player/forms/fire_palettes/palette_3.tres" id="fire_3"]
+[ext_resource type="Resource" uid="uid://c81uarekeqbcv" path="res://assets/player/forms/fire_palettes/palette_5.tres" id="fire_5"]
+[ext_resource type="Resource" uid="uid://cwlkjhw2bwdtk" path="res://assets/player/forms/fire_palettes/palette_6.tres" id="fire_6"]
+[ext_resource type="Script" uid="uid://btb1x05u3u4un" path="res://scripts/player/player_palette.gd" id="fire_palette_script"]
 [ext_resource type="Texture2D" uid="uid://bhmfkcm66quc2" path="res://assets/palettes/underground/misc/flagpole-flag.png" id="flag_banner"]
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/misc/flagpole-pole.tres" id="flag_pole"]
 [ext_resource type="Texture2D" path="res://assets/palettes/underground/misc/flagpole-top.tres" id="flag_top"]
@@ -28,17 +32,11 @@
 [ext_resource type="Texture2D" uid="uid://c7psk8vqg64p0" path="res://assets/palettes/underground/ui/hud-coin.png" id="hud_coin"]
 [ext_resource type="Texture2D" uid="uid://dgylwq14okd7f" path="res://assets/palettes/underground/enemies/koopa.png" id="koopa"]
 [ext_resource type="Texture2D" uid="uid://djwa8a77btioc" path="res://assets/palettes/underground/misc/green-mushroom.png" id="one_up"]
-[ext_resource type="Texture2D" path="res://assets/palettes/underground/misc/starman.png" id="starman"]
+[ext_resource type="Texture2D" uid="uid://dg6alpwa557uc" path="res://assets/palettes/underground/misc/starman.png" id="starman"]
 [ext_resource type="FontFile" uid="uid://cnagecrnf8opo" path="res://assets/palettes/underground/ui/alphabet-alt.fnt" id="title_accent"]
 [ext_resource type="Texture2D" uid="uid://b3asgrqfa0i4r" path="res://assets/palettes/underground/ui/start-title.png" id="title_card"]
 [ext_resource type="Texture2D" uid="uid://clblmsvsl46nd" path="res://assets/palettes/underground/ui/start-cursor.png" id="title_cursor"]
 [ext_resource type="Texture2D" uid="uid://bs8mp6mky012v" path="res://assets/palettes/underground/interactibles/items/coins.tres" id="world_coin"]
-
-[ext_resource type="Resource" path="res://assets/player/forms/fire_palettes/palette_5.tres" id="fire_5"]
-[ext_resource type="Resource" path="res://assets/player/forms/fire_palettes/palette_3.tres" id="fire_3"]
-[ext_resource type="Resource" path="res://assets/player/forms/fire_palettes/palette_6.tres" id="fire_6"]
-
-[ext_resource type="Script" path="res://scripts/player/player_palette.gd" id="fire_palette_script"]
 
 [resource]
 script = ExtResource("1")

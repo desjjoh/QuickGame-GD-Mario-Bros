@@ -76,9 +76,11 @@ Pipe entry/transfer, sideways-pipe, climbing, and flagpole-ending tests also acc
 
 `starman_test` checks release from painted reward data, all four item frames in each theme, emergence clipping, collection at four pixels of rise, the five-tick score delay, and bounce and wall-reversal positions from Mesen.
 
-`starman_effect_test` checks two complete Mesen timing traces, enemy damage protection, the music handoff, refresh, and pause. Run it with a renderer to also check the recolored sprite pixels and Fire throw overlay.
+`starman_effect_test` checks two complete Mesen timing traces, enemy damage protection, the music handoff, refresh, and pause. Run it with a renderer to also check the recolored sprite pixels and Fire throw overlay. The pipe transfer and flagpole ending tests check that protection, palette, and music clear at their respective handoffs.
 
 `starman_enemy_test` checks contact priority, the hit-frame pose and body movement, the next-update reveal, and the five-tick score award. It includes a Koopa hit at exact box-edge contact before Godot refreshes its cached overlap. It covers walking and squashed Goombas, walking Koopas, and idle, moving, and stunned shells.
+
+`hurry_music_test` checks the warning at 100 → 99, starts at 101, 100, 75 and zero, a disabled timer, pulse priority during the warning, pause, Starman handoff, fast music through the secret pipe, and flagpole cancellation during the warning and fast music.
 
 `fireball_test` compares per-tick positions, vertical speeds, and bounce flags with the Mesen right, left, and wall traces. It checks burst frame selection and release timing, fresh versus held Run input, alternating slot rejection and reuse, and player limits of zero, one, and two.
 
@@ -108,6 +110,8 @@ Successful scenes call `await preload("res://tests/fixtures/finish_test.gd").fin
 - Compare audio with Mesen at the same playback level. Investigate note period, envelope, cutoff, retrigger, and channel interaction before changing pitch or amplitude.
 
 `arrival_control_test` verifies exactly 17 locked movement ticks followed by held-input response, continued falling, controller disconnection/reconnection, pause preservation, direct-placement timing, a stationary 17-tick pre-emergence hold, immediate control after animated exit, cancellation, and unchanged start/respawn eligibility. Pipe entry/transfer, sideways travel, camera return, transport lifecycle, death, title, and pause scenes cover the affected integrations.
+
+`halfway_restart_test` uses 1-1 with transitions enabled. It checks deaths at camera-left X=1279 and X=1280, a second death immediately after the halfway restart, a timeout in the original secret room, and a death after moving that room past the threshold. It verifies the spawn and camera while the transition covers the restart and checks control after the reveal.
 
 `title_background_test` verifies a Game-selected backdrop on startup and stage-completion return, suspended backdrop actors, an unchanged gameplay stage list, and a different backdrop selection on a later menu return. Default-backdrop, game-over, and animated-return paths remain covered by the title/lifecycle regressions.
 

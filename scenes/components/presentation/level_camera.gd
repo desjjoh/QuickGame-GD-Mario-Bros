@@ -3,6 +3,8 @@ class_name LevelCamera
 extends Camera2D
 ## Called after player movement and before the level's screen-edge clamp.
 
+const LEFT_ARRIVAL_SPRITE_X := 56.0  # NES alternate pipe entrance X ($38).
+
 @export var follow_enabled: bool = true
 @export var world_left: float = -128.0:
 	set(value):
@@ -18,6 +20,16 @@ extends Camera2D
 @export var full_speed_start: float = 112.0
 ## Mario's body origin is 8 pixels right of the NES sprite's top-left origin.
 @export var target_origin_offset: float = 8.0
+
+@export_group("Halfway Restart")
+@export var halfway_check_enabled: bool = false:
+	set(value):
+		halfway_check_enabled = value
+		queue_redraw()
+@export var halfway_camera_left: float = 0.0:
+	set(value):
+		halfway_camera_left = value
+		queue_redraw()
 
 @export_group("Editor Guides")
 @export var draw_world_bounds: bool = true:
@@ -42,7 +54,7 @@ func _notification(what: int) -> void:
 
 
 func _draw() -> void:
-	if not Engine.is_editor_hint() or not draw_world_bounds:
+	if not Engine.is_editor_hint():
 		return
 	var height := (
 		float(ProjectSettings.get_setting("display/window/size/viewport_height", 240))
@@ -51,6 +63,22 @@ func _draw() -> void:
 	var top := global_position.y - height / 2.0
 	var bottom := global_position.y + height / 2.0
 	var font := ThemeDB.fallback_font
+	if halfway_check_enabled:
+		var start := to_local(Vector2(halfway_camera_left, top))
+		var end := to_local(Vector2(halfway_camera_left, bottom))
+		var color := Color(1.0, 0.85, 0.25)
+		draw_dashed_line(start, end, color, 1.0, 8.0)
+		draw_string(
+			font,
+			start + Vector2(4.0, 25.0),
+			"Halfway camera left: %s" % halfway_camera_left,
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1,
+			10,
+			color
+		)
+	if not draw_world_bounds:
+		return
 	var edges := [world_left, world_right]
 	var colors := [Color(0.25, 0.9, 0.65), Color(1.0, 0.55, 0.25)]
 	for index in range(2):

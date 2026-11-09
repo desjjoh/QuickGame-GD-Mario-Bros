@@ -109,6 +109,9 @@ func run_checks() -> void:
 		var title := game.get_node("UI/ScreenContainer/TitleScreen") as Control
 		var label := title.get_node("PlayerOne") as Label
 		var hud := game.get_node("UI/HUD") as Control
+		assert(GameHandler.timer_enabled)
+		assert(hud.get_node("TimeHeading").visible)
+		assert(not hud.get_node("TimeValue").visible)
 		assert(label.text == "1 PLAYER GAME")
 		assert((title.get_node("PlayerTwo") as Label).text == "2 PLAYER GAME")
 		var copyright_label := title.get_node("Copyright") as Label
@@ -313,6 +316,7 @@ func run_checks() -> void:
 		await check_character_intro(game, keyboard)
 		await wait_for_play()
 		await tick(4)
+		assert(hud.get_node("TimeValue").visible)
 		assert(starts == [&"level"])
 		assert(
 			(
@@ -414,6 +418,7 @@ func check_luigi_run(game: Node) -> void:
 	assert(GameHandler.player_character == GameHandler.PlayerCharacter.MARIO)
 	assert(GameHandler.current_player.name == &"Mario")
 	assert(game.get_node("UI/HUD/PlayerName").text == "MARIO")
+	assert(not game.get_node("UI/HUD/TimeValue").visible)
 	assert(GameHandler.title_flow.screen.cursor.position == Vector2(72, 144))
 
 
