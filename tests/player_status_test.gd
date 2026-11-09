@@ -18,7 +18,8 @@ func _ready() -> void:
 	var status := GameHandler.player_status
 	assert(status.score == 0 and status.coins == 0 and status.lives == 2)
 	assert(status.powerup_form == PlayerStatus.PowerupForm.SMALL)
-	var game: Node = load("res://scenes/main/game.tscn").instantiate()
+	var game_scene := load("res://scenes/main/game.tscn") as PackedScene
+	var game: Node = game_scene.instantiate()
 	game.transitions_enabled = false
 	add_child(game)
 	var hud := game.get_node("UI/HUD")
@@ -147,7 +148,7 @@ func _ready() -> void:
 			and GameHandler.top_score == 60000
 		)
 	)
-	var configured := load("res://scenes/main/game.tscn").instantiate() as Node
+	var configured := game_scene.instantiate() as Node
 	configured.transitions_enabled = false
 	configured.starting_score = 125
 	configured.starting_coins = 99

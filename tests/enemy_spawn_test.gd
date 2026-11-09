@@ -1,8 +1,11 @@
 extends Node
 
+const GOOMBA := preload("res://scenes/entities/enemies/goomba/goomba.tscn")
+const SANDBOX_LEVEL := preload("res://tests/fixtures/sandbox_level.tscn")
+
 
 func _ready() -> void:
-	var level := preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	var level := SANDBOX_LEVEL.instantiate() as BaseLevel
 	var layout := level.get_node("Areas/MainArea/Layouts/EnemyLayout") as TileMapLayer
 	layout.clear()
 	level.entity_layout.clear()
@@ -81,13 +84,12 @@ func _ready() -> void:
 
 
 func _test_goomba_contact() -> void:
-	var level := preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	var level := SANDBOX_LEVEL.instantiate() as BaseLevel
 	level.entity_layout.clear()
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
 	add_child(level)
-	var scene := preload("res://scenes/entities/enemies/goomba/goomba.tscn")
-	var left := scene.instantiate() as BaseEnemy
-	var right := scene.instantiate() as BaseEnemy
+	var left := GOOMBA.instantiate() as BaseEnemy
+	var right := GOOMBA.instantiate() as BaseEnemy
 	left.position = Vector2(92, 192)
 	right.position = Vector2(132, 192)
 	left.get_node("StateMachine/Walking").initial_direction = 1
@@ -128,7 +130,7 @@ func _test_stage_placements() -> void:
 		assert(atlas.get_tile_data(Vector2i.ZERO, 0).texture_origin == Vector2i.ZERO)
 	add_child(level)
 	await get_tree().physics_frame
-	var goomba := preload("res://scenes/entities/enemies/goomba/goomba.tscn").instantiate()
+	var goomba := GOOMBA.instantiate()
 	var collider := goomba.get_node("Body/CollisionShape2D") as CollisionShape2D
 	var body_offset := (collider.get_parent() as Node2D).position + collider.position
 	var shape := collider.shape
@@ -192,7 +194,7 @@ func _test_stage_placements() -> void:
 
 
 func _test_enemy_hits() -> void:
-	var level := preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	var level := SANDBOX_LEVEL.instantiate() as BaseLevel
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
 	level.entity_layout.clear()
 	level.entity_layout.set_cell(Vector2i(4, 9), 1, Vector2i.ZERO)
@@ -201,8 +203,7 @@ func _test_enemy_hits() -> void:
 	level.player_start_configuration = preload("res://assets/player/forms/small.tres")
 	add_child(level)
 	var player := level.player
-	var scene := preload("res://scenes/entities/enemies/goomba/goomba.tscn")
-	var stomped := scene.instantiate() as BaseEnemy
+	var stomped := GOOMBA.instantiate() as BaseEnemy
 	stomped.position = Vector2(144, 192)
 	level.world_objects.add_child(stomped)
 	player.body.global_position = Vector2(150, 180)
@@ -223,7 +224,7 @@ func _test_enemy_hits() -> void:
 	)
 	assert(not stomped.receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)))
 
-	var corner := scene.instantiate() as BaseEnemy
+	var corner := GOOMBA.instantiate() as BaseEnemy
 	corner.position = Vector2(120, 192)
 	corner.get_node("StateMachine/Walking").walk_speed = 0.0
 	level.world_objects.add_child(corner)
@@ -248,7 +249,7 @@ func _test_enemy_hits() -> void:
 	assert(GameHandler.player_status.score == score + 300)  # Consecutive airborne stomps: 100 + 200.
 	player.set_physics_process(true)
 
-	var knocked := scene.instantiate() as BaseEnemy
+	var knocked := GOOMBA.instantiate() as BaseEnemy
 	knocked.position = Vector2(64, 128)
 	level.world_objects.add_child(knocked)
 	var mushroom := (
@@ -282,7 +283,7 @@ func _test_enemy_hits() -> void:
 			break
 	assert(not is_instance_valid(knocked))
 
-	var hazard := scene.instantiate() as BaseEnemy
+	var hazard := GOOMBA.instantiate() as BaseEnemy
 	hazard.position = Vector2(180, 192)
 	level.world_objects.add_child(hazard)
 	player.body.global_position = Vector2(186, 208)

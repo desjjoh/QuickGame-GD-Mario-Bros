@@ -1,5 +1,7 @@
 extends Node
 
+const TEST_FLOOR := preload("res://tests/test_floor.gd")
+
 
 func tick() -> void:
 	await get_tree().physics_frame
@@ -7,11 +9,12 @@ func tick() -> void:
 
 
 func _ready() -> void:
+	var game_scene := load("res://tests/fixtures/silent_game.tscn") as PackedScene
 	for direction in [-1.0, 1.0]:
 		for phase in [0.0, 0.5, 1.0, 1.5, 2.0]:
-			var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
+			var game := game_scene.instantiate() as Node
 			add_child(game)
-			preload("res://tests/test_floor.gd").extend_floor(game)
+			TEST_FLOOR.extend_floor(game)
 			var level := GameHandler.current_level
 			level.keep_player_on_screen = false
 			(get_viewport().get_camera_2d() as LevelCamera).follow_enabled = false
@@ -57,9 +60,9 @@ func _ready() -> void:
 			Input.action_release(action)
 			Input.action_release(ControllerHandler.secondary_action)
 			game.free()
-	var wide_game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
+	var wide_game := game_scene.instantiate() as Node
 	add_child(wide_game)
-	preload("res://tests/test_floor.gd").extend_floor(wide_game)
+	TEST_FLOOR.extend_floor(wide_game)
 	var wide_level := GameHandler.current_level
 	wide_level.keep_player_on_screen = false
 	# This fixture inspects continued falling, independently of the death lifecycle.

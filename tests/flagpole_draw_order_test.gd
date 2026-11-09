@@ -1,10 +1,12 @@
 extends Node
 
+const FINISH_TEST := preload("res://tests/fixtures/finish_test.gd")
+
 
 func _ready() -> void:
 	if DisplayServer.get_name() == "headless":
 		print("PASS: rendered flag draw-order check skipped in headless mode.")
-		await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+		await FINISH_TEST.finish(get_tree())
 		return
 	get_window().unfocusable = true
 	var game = load("res://tests/fixtures/silent_game.tscn").instantiate()
@@ -66,4 +68,4 @@ func _ready() -> void:
 	game.free()
 	await get_tree().process_frame
 	print("PASS: rendered flag contact preserves Mario foreground ordering.")
-	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+	await FINISH_TEST.finish(get_tree())

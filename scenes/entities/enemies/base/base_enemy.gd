@@ -180,7 +180,8 @@ func can_contact_fireball() -> bool:
 	)
 
 
-func fireball_bounds() -> Rect2:
+## Shared target box for fireballs and moving shells.
+func projectile_target_bounds() -> Rect2:
 	if _player_contact_shape == null:
 		return Rect2()
 	return PLAYER_CONTACT.bounds(_player_contact_shape)

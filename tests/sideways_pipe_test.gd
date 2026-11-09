@@ -1,5 +1,7 @@
 extends Node
 
+const PAUSE_CHECK := preload("res://tests/fixtures/pause_check.gd")
+
 signal physics_step_finished
 
 
@@ -93,7 +95,7 @@ func _ready() -> void:
 	player.face_direction(1.0)
 	pipe._physics_process(1.0 / 60.0)
 	assert(player.state_machine.current_state == player.pipe_enter_state)
-	await preload("res://tests/fixtures/pause_check.gd").check(level)
+	await PAUSE_CHECK.check(level)
 	assert(player.body.collision_mask == 0)
 	var start = player.body.global_position
 	assert(player.animation_player.current_animation == &"walk")
@@ -151,7 +153,7 @@ func _ready() -> void:
 	await ticks(17)
 	assert(player.arrival_control_ticks_remaining == 0)
 	assert(is_equal_approx(player.body.global_position.y, hidden_y))
-	await preload("res://tests/fixtures/pause_check.gd").check(level)
+	await PAUSE_CHECK.check(level)
 	await ticks(12)
 	assert(is_equal_approx(player.body.global_position.y, hidden_y - 12.0))
 	assert(not player.sprite.visible)

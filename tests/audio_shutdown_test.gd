@@ -1,5 +1,7 @@
 extends Node
 
+const FINISH_TEST := preload("res://tests/fixtures/finish_test.gd")
+
 
 func create_stopped_voices() -> Array[WeakRef]:
 	var references: Array[WeakRef] = []
@@ -19,8 +21,8 @@ func create_stopped_voices() -> Array[WeakRef]:
 
 func _ready() -> void:
 	var references := create_stopped_voices()
-	assert(await preload("res://tests/fixtures/finish_test.gd").drain_audio(get_tree()))
+	assert(await FINISH_TEST.drain_audio(get_tree()))
 	for reference in references:
 		assert(reference.get_ref() == null, "Stopped audio resource survived mix-thread cleanup.")
 	print("audio_shutdown_test: PASS")
-	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+	await FINISH_TEST.finish(get_tree())

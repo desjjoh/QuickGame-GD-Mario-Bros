@@ -7,8 +7,8 @@ func ticks(count: int) -> void:
 		await get_tree().process_frame
 
 
-func check_duplicate_completion() -> void:
-	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
+func check_duplicate_completion(game_scene: PackedScene) -> void:
+	var game := game_scene.instantiate() as Node
 	add_child(game)
 	var level: BaseLevel = GameHandler.current_level
 	var player := level.player
@@ -46,9 +46,10 @@ func check_duplicate_completion() -> void:
 
 
 func _ready() -> void:
-	await check_duplicate_completion()
+	var game_scene := load("res://tests/fixtures/silent_game.tscn") as PackedScene
+	await check_duplicate_completion(game_scene)
 	for trigger in [&"current_area_id", &"current_target_id"]:
-		var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
+		var game := game_scene.instantiate() as Node
 		add_child(game)
 		var level: BaseLevel = GameHandler.current_level
 		var old_id := level.get_instance_id()

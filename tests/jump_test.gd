@@ -11,8 +11,8 @@ func tick(count: int) -> void:
 	await get_tree().process_frame
 
 
-func trial(hold_ticks: int, weight: float) -> float:
-	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
+func trial(game_scene: PackedScene, hold_ticks: int, weight: float) -> float:
+	var game: Node = game_scene.instantiate()
 	get_tree().root.add_child(game)
 	var player := GameHandler.current_player
 	player.motion_values.base_weight = weight
@@ -45,12 +45,13 @@ func trial(hold_ticks: int, weight: float) -> float:
 
 
 func run_checks() -> void:
-	var short_height := await trial(3, 1.0)
-	var tall_height := await trial(90, 1.0)
-	var heavy_height := await trial(90, 2.0)
+	var game_scene := load("res://tests/fixtures/silent_game.tscn") as PackedScene
+	var short_height := await trial(game_scene, 3, 1.0)
+	var tall_height := await trial(game_scene, 90, 1.0)
+	var heavy_height := await trial(game_scene, 90, 2.0)
 	assert(tall_height > short_height + 10.0)
 	assert(heavy_height < tall_height)
-	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
+	var game: Node = game_scene.instantiate()
 	get_tree().root.add_child(game)
 	var player := GameHandler.current_player
 	await tick(5)
@@ -75,7 +76,7 @@ func run_checks() -> void:
 	assert(player.body.velocity.y > 0.0 and not player.jump_action.active)
 	assert(not player.jump_action.begin(player.motion_values))
 	game.free()
-	game = load("res://tests/fixtures/silent_game.tscn").instantiate()
+	game = game_scene.instantiate()
 	get_tree().root.add_child(game)
 	player = GameHandler.current_player
 	var ground: TileMapLayer = GameHandler.current_level.get_node(

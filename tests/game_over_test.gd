@@ -168,7 +168,8 @@ func _ready() -> void:
 	assert(GameHandler.current_level == replacement and not replacement.transition_in_progress)
 	assert(not replacement.player.gameplay_suspended)
 	# Missing audio still completes through the minimum-frame path.
-	var silent_card: Control = load("res://scenes/ui/transitions/game_over.tscn").instantiate()
+	var game_over_scene := load("res://scenes/ui/transitions/game_over.tscn") as PackedScene
+	var silent_card: Control = game_over_scene.instantiate()
 	silent_card.sound = null
 	var silent_scene := PackedScene.new()
 	assert(silent_scene.pack(silent_card) == OK)
@@ -189,7 +190,7 @@ func _ready() -> void:
 	await wait_idle()
 	definition.stages[0].completion_timeout_frames = 600
 	# A closing Game cancels the card/audio and cannot recreate a title afterward.
-	definition.stages[0].scene = load("res://scenes/ui/transitions/game_over.tscn")
+	definition.stages[0].scene = game_over_scene
 	await begin_final_death()
 	game.free()
 	await ticks(3)

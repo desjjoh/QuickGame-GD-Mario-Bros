@@ -1,5 +1,7 @@
 extends Node
 
+const GOOMBA_PAIR_SPAWNER := preload("res://scenes/entities/spawners/goomba_pair_spawner.tscn")
+
 
 func _ready() -> void:
 	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
@@ -45,10 +47,7 @@ func _ready() -> void:
 	assert(not is_instance_valid(enemy))
 	# Pair reference timing uses the group trigger and creates both members at the right edge.
 	camera.position.x = 560 + 128
-	var pair := (
-		load("res://scenes/entities/spawners/goomba_pair_spawner.tscn").instantiate()
-		as EntitySpawner
-	)
+	var pair := GOOMBA_PAIR_SPAWNER.instantiate() as EntitySpawner
 	pair.position = Vector2(816, 192)
 	level.world_objects.add_child(pair)
 	area.update_camera_activity()
@@ -87,10 +86,7 @@ func _ready() -> void:
 
 func check_spawn_beyond_cleanup(level: BaseLevel, area: BaseLevelArea) -> void:
 	# At this camera position, the pair starts at X816 and cleanup starts at X889.
-	var pair := (
-		preload("res://scenes/entities/spawners/goomba_pair_spawner.tscn").instantiate()
-		as EntitySpawner
-	)
+	var pair := GOOMBA_PAIR_SPAWNER.instantiate() as EntitySpawner
 	pair.position = Vector2(816, 192)
 	pair.actor_offsets = [Vector2.ZERO, Vector2(80, 0)]
 	level.world_objects.add_child(pair)
@@ -108,9 +104,7 @@ func check_spawn_beyond_cleanup(level: BaseLevel, area: BaseLevelArea) -> void:
 	# Walk farther right and let the area's normal physics sweep perform cleanup.
 	outside.state_machine.current_state._direction = 1
 	var exit_x: Array[float] = []
-	outside.tree_exiting.connect(
-		func(): exit_x.append(outside.body.global_position.x - 8.0)
-	)
+	outside.tree_exiting.connect(func(): exit_x.append(outside.body.global_position.x - 8.0))
 	area.set_physics_process(true)
 	await get_tree().physics_frame
 	await get_tree().process_frame

@@ -33,9 +33,10 @@ func _ready() -> void:
 	level.active_area.set_physics_process(false)
 	p = level.player as Mario
 	p.set_physics_process(false)
-	var block := (
-		load("res://scenes/entities/blocks/question/question_block.tscn").instantiate() as BaseBlock
+	var question_scene := (
+		load("res://scenes/entities/blocks/question/question_block.tscn") as PackedScene
 	)
+	var block := question_scene.instantiate() as BaseBlock
 	block.position = Vector2(128, 128)
 	level.world_objects.add_child(block)
 	block.state_machine.change_state(block.get_node("StateMachine/Inactive"))
@@ -105,10 +106,7 @@ func _ready() -> void:
 	block.free()
 	for direction in [-1.0, 1.0]:
 		for feet_y in [163.0, 164.0]:
-			var question := (
-				load("res://scenes/entities/blocks/question/question_block.tscn").instantiate()
-				as QuestionBlock
-			)
+			var question := question_scene.instantiate() as QuestionBlock
 			question.position = Vector2(128, 128)
 			level.world_objects.add_child(question)
 			await get_tree().physics_frame

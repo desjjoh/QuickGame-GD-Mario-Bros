@@ -36,8 +36,10 @@ func check_themed_frames() -> void:
 			var frame := star.sprite.texture as AtlasTexture
 			assert(frame.region == Rect2(phase * 16, 0, 16, 16))
 			assert(
-				frame.atlas.resource_path
-				== "res://assets/palettes/%s/misc/starman.png" % theme_name
+				(
+					frame.atlas.resource_path
+					== "res://assets/palettes/%s/misc/starman.png" % theme_name
+				)
 			)
 		star.free()
 

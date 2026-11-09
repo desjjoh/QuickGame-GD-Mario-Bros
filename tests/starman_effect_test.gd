@@ -1,5 +1,7 @@
 extends Node
 
+const SMALL_IDLE_TEXTURE := preload("res://assets/player/mario (small)/mario-small-idle.png")
+const OVERWORLD_THEME := preload("res://assets/themes/overworld.tres")
 const LEVEL := preload("res://tests/fixtures/sandbox_level.tscn")
 const STEP := 1.0 / 60.0
 
@@ -58,12 +60,7 @@ func _check_palettes() -> void:
 	if DisplayServer.get_name() == "headless":
 		return
 	var cases := [
-		[
-			preload("res://assets/themes/overworld.tres"),
-			preload("res://assets/player/mario (small)/mario-small-idle.png"),
-			Color("b53120"),
-			Color("109400")
-		],
+		[OVERWORLD_THEME, SMALL_IDLE_TEXTURE, Color("b53120"), Color("109400")],
 		[
 			preload("res://assets/themes/underground.tres"),
 			preload("res://assets/player/luigi (super)/luigi-idle.png"),
@@ -94,7 +91,10 @@ func _check_palettes() -> void:
 				if pixel.to_rgba32() == (item[2] as Color).to_rgba32():
 					assert(
 						replacement.to_rgba32() == (item[3] as Color).to_rgba32(),
-						"%s recolored to %s, expected %s." % [source.resource_path, replacement, item[3]]
+						(
+							"%s recolored to %s, expected %s."
+							% [source.resource_path, replacement, item[3]]
+						)
 					)
 					changed = true
 		assert(changed)
@@ -106,17 +106,19 @@ func _check_rendered_pose() -> void:
 	var viewport := SubViewport.new()
 	viewport.size = Vector2i(32, 32)
 	viewport.transparent_bg = true
-	viewport.canvas_item_default_texture_filter = Viewport.DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST
+	viewport.canvas_item_default_texture_filter = (
+		Viewport.DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST
+	)
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	add_child(viewport)
 	var sprite := Sprite2D.new()
 	sprite.position = Vector2(16, 16)
-	sprite.texture = preload("res://assets/player/mario (small)/mario-small-idle.png")
+	sprite.texture = SMALL_IDLE_TEXTURE
 	viewport.add_child(sprite)
 	var pose := FireThrowPose.new()
 	pose.hide()
 	sprite.add_child(pose)
-	var theme := preload("res://assets/themes/overworld.tres") as AreaTheme
+	var theme := OVERWORLD_THEME as AreaTheme
 	var palette := theme.fire_transform_palettes[0]
 	pose.set_palette(palette)
 	await RenderingServer.frame_post_draw

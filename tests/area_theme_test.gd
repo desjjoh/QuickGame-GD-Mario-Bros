@@ -219,9 +219,10 @@ func _ready() -> void:
 				or marker.texture.resource_path.contains("underground/previews")
 			)
 		)
-	var question := (
-		load("res://scenes/entities/blocks/question/question_block.tscn").instantiate() as BaseBlock
+	var question_scene := (
+		load("res://scenes/entities/blocks/question/question_block.tscn") as PackedScene
 	)
+	var question := question_scene.instantiate() as BaseBlock
 	question.visual_theme = lower.theme
 	lower.get_node("WorldObjects").add_child(question)
 	for sample in [
@@ -248,9 +249,7 @@ func _ready() -> void:
 			"palettes/underground/interactibles/blocks/question-block-4.tres"
 		)
 	)
-	var original_question := (
-		load("res://scenes/entities/blocks/question/question_block.tscn").instantiate() as BaseBlock
-	)
+	var original_question := question_scene.instantiate() as BaseBlock
 	add_child(original_question)
 	original_question.animation_player.seek(0.55, true)
 	assert(original_question.sprite.texture.resource_path.contains("/palettes/overworld/"))

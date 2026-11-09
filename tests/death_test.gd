@@ -212,7 +212,8 @@ func _ready() -> void:
 	assert(not question.gameplay_suspended and question.is_physics_processing())
 	question.free()
 	# Optional visible presentation is retained until explicit completion.
-	var player := load("res://scenes/player/mario/mario.tscn").instantiate() as BasePlayer
+	var mario_scene := load("res://scenes/player/mario/mario.tscn") as PackedScene
+	var player := mario_scene.instantiate() as BasePlayer
 	var death_state := load("res://tests/fixtures/death_presentation_state.gd").new() as PlayerState
 	death_state.name = "Death"
 	player.get_node("StateMachine").add_child(death_state)
@@ -279,7 +280,7 @@ func _ready() -> void:
 	game.free()
 	await get_tree().process_frame
 	await ticks(8)
-	await check_life_loss_boundaries()
+	await check_life_loss_boundaries(mario_scene)
 	print(
 		"PASS: pit threshold, player cleanup, world suspension/animation, optional presentation, death audio, global preserve/reset across areas, spawn restart, exactly-once life loss, negative-reserve game over and stale completion."
 	)
@@ -298,13 +299,13 @@ func replace_on_life_loss(key: StringName, _value: Variant, game: Node) -> void:
 		assert(GameHandler.load_level(game.stages[0]))
 
 
-func check_life_loss_boundaries() -> void:
+func check_life_loss_boundaries(mario_scene: PackedScene) -> void:
 	GameHandler.clear_session()
 	var game := make_game()
 	add_child(game)
 	var level := GameHandler.current_level
 	var victim := level.player
-	var outsider := load("res://scenes/player/mario/mario.tscn").instantiate() as BasePlayer
+	var outsider := mario_scene.instantiate() as BasePlayer
 	add_child(outsider)
 	assert(not level.on_death(outsider) and GameHandler.player_status.lives == 2)
 	outsider.free()

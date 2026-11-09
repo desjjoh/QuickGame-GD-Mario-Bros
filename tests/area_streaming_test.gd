@@ -14,7 +14,8 @@ func floor_hit(at: Vector2) -> bool:
 
 func _ready() -> void:
 	GameHandler.clear_session()
-	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
+	var game_scene := load("res://tests/fixtures/silent_game.tscn") as PackedScene
+	var game := game_scene.instantiate() as Node
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	for area in fixture.get_node("Areas").get_children():
 		area.get_node("Layouts/EntityLayout").clear()
@@ -35,7 +36,8 @@ func _ready() -> void:
 	assert(packed.pack(fixture) == OK)
 	assert(ResourceSaver.save(packed, "res://.godot/validation/streaming-persistence.tscn") == OK)
 	fixture.free()
-	game.stages.assign([load("res://.godot/validation/streaming-persistence.tscn")])
+	var streaming_scene := load("res://.godot/validation/streaming-persistence.tscn") as PackedScene
+	game.stages.assign([streaming_scene])
 	add_child(game)
 	await ticks(5)
 	var level := GameHandler.current_level
@@ -105,8 +107,8 @@ func _ready() -> void:
 	await ticks(2)
 	assert(not GameHandler.get_area_progress(progress_key, &"main").is_empty())
 	# The handler also owns progress across replacing the level instance.
-	game = load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
-	game.stages.assign([load("res://.godot/validation/streaming-persistence.tscn")])
+	game = game_scene.instantiate() as Node
+	game.stages.assign([streaming_scene])
 	add_child(game)
 	level = GameHandler.current_level
 	question = level.world_objects.get_node("question_block_4_9") as BaseBlock

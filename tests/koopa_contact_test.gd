@@ -14,10 +14,8 @@ func make_game() -> Node:
 	return game
 
 
-func spawn_koopa(level: BaseLevel) -> BaseEnemy:
-	var koopa := (
-		load("res://scenes/entities/enemies/koopa/green_koopa.tscn").instantiate() as BaseEnemy
-	)
+func spawn_koopa(level: BaseLevel, koopa_scene: PackedScene) -> BaseEnemy:
+	var koopa := koopa_scene.instantiate() as BaseEnemy
 	koopa.position = Vector2(144, 192)
 	assert(level.try_claim_spawn_slot(&"enemy", koopa))
 	level.world_objects.add_child(koopa)
@@ -27,7 +25,8 @@ func spawn_koopa(level: BaseLevel) -> BaseEnemy:
 func _ready() -> void:
 	var game := make_game()
 	var level: BaseLevel = GameHandler.current_level
-	var koopa := spawn_koopa(level)
+	var koopa_scene := load("res://scenes/entities/enemies/koopa/green_koopa.tscn") as PackedScene
+	var koopa := spawn_koopa(level, koopa_scene)
 	var player := level.player
 	player.set_physics_process(false)
 	player.body.global_position = Vector2(150, 198)
@@ -71,9 +70,7 @@ func _ready() -> void:
 	assert(koopa.body.velocity.x == 0 and koopa.body.velocity.y > 0)
 	# Shell uses the same themed sheet and fixed contact box in every theme.
 	for theme in ["overworld", "underground", "castle"]:
-		var themed := (
-			load("res://scenes/entities/enemies/koopa/green_koopa.tscn").instantiate() as BaseEnemy
-		)
+		var themed := koopa_scene.instantiate() as BaseEnemy
 		themed.visual_theme = load("res://assets/themes/%s.tres" % theme)
 		themed.position = Vector2(210, 100)
 		level.world_objects.add_child(themed)
@@ -92,7 +89,7 @@ func _ready() -> void:
 	# Walking side contact follows the existing player-death path once.
 	game = make_game()
 	level = GameHandler.current_level
-	koopa = spawn_koopa(level)
+	koopa = spawn_koopa(level, koopa_scene)
 	koopa.set_physics_process(false)
 	player = level.player
 	player.set_physics_process(false)

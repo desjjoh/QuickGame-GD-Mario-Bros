@@ -17,15 +17,19 @@ func _clear(body: CharacterBody2D, at: Vector2) -> bool:
 	return not body.test_move(transform, Vector2.ZERO, null, 0.01, true)
 
 
-func prepare(body: CharacterBody2D, shape: CollisionShape2D, delta: float) -> bool:
+func prepare(
+	body: CharacterBody2D, shape: CollisionShape2D, delta: float, vertical_speed: float
+) -> bool:
 	if not shape.shape is RectangleShape2D:
 		return false
 	var half := (shape.shape as RectangleShape2D).size / 2.0
 	var motion := body.velocity * delta
+	if vertical_speed > 0.0 and not body.is_on_floor():
+		# Rounding the body position can yield a slight upward sweep while falling.
+		motion.y = maxf(motion.y, 0.0)
+		return _correct_landing(body, shape, half, motion)
 	if motion.y < 0.0:
 		_correct_head(body, shape, half, motion)
-	elif motion.y > 0.0 and not body.is_on_floor():
-		return _correct_landing(body, shape, half, motion)
 	return false
 
 

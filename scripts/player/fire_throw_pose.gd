@@ -81,4 +81,6 @@ func _draw() -> void:
 		_apply_palette(SHEET), Rect2(top_left, size), Rect2(Vector2.ZERO, size), _base_color
 	)
 	if _keep_feet:
-		draw_texture_rect_region(_apply_palette(_feet_texture), Rect2(-8, 8, 16, 8), FEET, _base_color)
+		draw_texture_rect_region(
+			_apply_palette(_feet_texture), Rect2(-8, 8, 16, 8), FEET, _base_color
+		)

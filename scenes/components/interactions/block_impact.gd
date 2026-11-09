@@ -42,7 +42,7 @@ func _close() -> void:
 	_attacker = null
 
 
-func _try_hit_actor() -> bool:
+func _rank_receivers() -> Array[Dictionary]:
 	var strip := global_transform * Rect2(-width / 2.0, -2.0, width, 4.0)
 	var canvas := get_canvas()
 	var level := BaseLevel.containing(_source)
@@ -66,6 +66,11 @@ func _try_hit_actor() -> bool:
 		var slot := registry.get_slot(category, entity) if registry != null else -1
 		candidates.append({"receiver": receiver, "category": priority, "slot": slot})
 	candidates.sort_custom(_comes_before)
+	return candidates
+
+
+func _try_hit_actor() -> bool:
+	var candidates := _rank_receivers()
 	var origin := _attacker if is_instance_valid(_attacker) else _source
 	for candidate in candidates:
 		if not is_instance_valid(candidate.receiver):

@@ -1,5 +1,7 @@
 extends Node
 
+const SANDBOX_LEVEL := preload("res://tests/fixtures/sandbox_level.tscn")
+
 
 func _ready() -> void:
 	for path in [
@@ -13,7 +15,7 @@ func _ready() -> void:
 	assert(stage.entity_scenes.has(&"one_up_spawner"))
 	stage.free()
 
-	var level := preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	var level := SANDBOX_LEVEL.instantiate() as BaseLevel
 	level.player_start_configuration = MarioFormPresentation.SMALL
 	level.entity_layout.clear()
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
@@ -83,7 +85,7 @@ func _ready() -> void:
 	level.queue_free()
 	await get_tree().process_frame
 
-	level = preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	level = SANDBOX_LEVEL.instantiate() as BaseLevel
 	add_one_up_placement(level, Vector2i(8, 12))
 	add_one_up_placement(level, Vector2i(10, 12))
 	add_child(level)
