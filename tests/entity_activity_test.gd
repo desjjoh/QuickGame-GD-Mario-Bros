@@ -8,7 +8,8 @@ func ticks(count: int = 3) -> void:
 
 
 func _ready() -> void:
-	var area := load("res://scenes/levels/areas/base_area.tscn").instantiate() as BaseLevelArea
+	var area_scene := load("res://scenes/levels/areas/base_area.tscn") as PackedScene
+	var area := area_scene.instantiate() as BaseLevelArea
 	area.get_node("Camera2D").position = Vector2(128, 120)
 	add_child(area)
 	var camera := area.get_node("Camera2D") as Camera2D
@@ -125,9 +126,8 @@ func _ready() -> void:
 	var old_ticks: int = resident.physics_ticks
 	await ticks()
 	assert(resident.physics_ticks == old_ticks and not resident.can_read_controller_input())
-	var spawner := (
-		load("res://scenes/entities/spawners/goomba_spawner.tscn").instantiate() as EntitySpawner
-	)
+	var spawner_scene := load("res://scenes/entities/spawners/goomba_spawner.tscn") as PackedScene
+	var spawner := spawner_scene.instantiate() as EntitySpawner
 	spawner.position = Vector2(600, 120)
 	area.get_node("WorldObjects").add_child(spawner)
 	area.update_camera_activity()
@@ -155,9 +155,7 @@ func _ready() -> void:
 		"An attempted placement stays spent until area reload."
 	)
 	# A fresh placement supplies a live actor to verify area-unload cleanup.
-	var fresh := (
-		load("res://scenes/entities/spawners/goomba_spawner.tscn").instantiate() as EntitySpawner
-	)
+	var fresh := spawner_scene.instantiate() as EntitySpawner
 	fresh.position = spawner.position
 	area.get_node("WorldObjects").add_child(fresh)
 	area.update_camera_activity()
@@ -172,9 +170,7 @@ func _ready() -> void:
 	assert(area._activity_entities.is_empty() and area._spawners.is_empty())
 	area.free()
 	# Authored residents must retain their default processing flags across templates.
-	var authored_area := (
-		load("res://scenes/levels/areas/base_area.tscn").instantiate() as BaseLevelArea
-	)
+	var authored_area := area_scene.instantiate() as BaseLevelArea
 	authored_area.get_node("Camera2D").position = Vector2(128, 120)
 	var authored := packed.instantiate() as BaseEntity
 	authored.name = "Resident"
@@ -201,9 +197,7 @@ func _ready() -> void:
 	add_child(level)
 	level.set_physics_process(false)
 	level.player.set_physics_process(false)
-	var gated_spawner := (
-		load("res://scenes/entities/spawners/goomba_spawner.tscn").instantiate() as EntitySpawner
-	)
+	var gated_spawner := spawner_scene.instantiate() as EntitySpawner
 	gated_spawner.position = Vector2(120, 120)
 	level.active_area.get_node("WorldObjects").add_child(gated_spawner)
 	level.active_area.update_camera_activity()

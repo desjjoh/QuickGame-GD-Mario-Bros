@@ -195,25 +195,27 @@ var camera_correction_x: float = 0.0
 
 
 func move_body(gravity_after_motion: bool = false) -> void:
-	var rising := body.velocity.y < 0.0
-	var next_vertical_speed := body.velocity.y
+	var delta := get_physics_process_delta_time()
+	var vertical_speed := body.velocity.y
+	var rising := vertical_speed < 0.0
+	var next_vertical_speed := vertical_speed
 	if gravity_after_motion:
-		next_vertical_speed = vertical_movement.prepare_step(
-			motion_values, get_physics_process_delta_time()
-		)
+		next_vertical_speed = vertical_movement.prepare_step(motion_values, delta)
 	var previous_position := body.global_position
 	var horizontal_speed := body.velocity.x
-	var corrected_landing := corner_correction.prepare(
-		body, collision_shape, get_physics_process_delta_time()
-	)
-	var intended_x := horizontal_speed * get_physics_process_delta_time()
+	var corrected_landing := corner_correction.prepare(body, collision_shape, delta, vertical_speed)
+	var intended_x := horizontal_speed * delta
 	var prepared_x := body.global_position.x - previous_position.x
 	camera_correction_x += prepared_x - (intended_x if corrected_landing else 0.0)
 	var before_slide_x := body.global_position.x
 	if corrected_landing:
 		# The correction already consumed this tick's horizontal displacement.
 		body.velocity.x = 0.0
+		body.velocity.y = maxf(body.velocity.y, 0.0)
 	body.move_and_slide()
+	if corrected_landing:
+		# Commit the floor contact even on ticks with no downward sweep.
+		body.apply_floor_snap()
 	var slide_x := body.global_position.x - before_slide_x
 	var requested_x := 0.0 if corrected_landing else intended_x
 	var movement_x := clampf(slide_x, minf(0.0, requested_x), maxf(0.0, requested_x))

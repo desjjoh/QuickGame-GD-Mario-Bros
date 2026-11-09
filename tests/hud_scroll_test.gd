@@ -1,5 +1,7 @@
 extends Node
 
+const FINISH_TEST := preload("res://tests/fixtures/finish_test.gd")
+
 var camera: LevelCamera
 var running: bool = false
 var step: int = 0
@@ -71,9 +73,9 @@ func _ready() -> void:
 	await get_tree().process_frame
 	if DisplayServer.get_name() == "headless":
 		print("PASS: fixed screen-space HUD setup; rendered glyph checks skipped in headless mode.")
-		await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+		await FINISH_TEST.finish(get_tree())
 		return
 	print(
 		"PASS: HUD foreground glyph pixels remain fixed through physics-driven acceleration/braking at a separate render cadence."
 	)
-	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+	await FINISH_TEST.finish(get_tree())

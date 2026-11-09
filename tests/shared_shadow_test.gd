@@ -41,7 +41,8 @@ func reference_blur(source: Image, point: Vector2, radius: float) -> float:
 
 
 func _ready() -> void:
-	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	var game_scene := load("res://scenes/main/game.tscn") as PackedScene
+	var game := game_scene.instantiate() as Node
 	game.shadow_shader_enabled = true
 	game.start_with_title = false
 	game.transitions_enabled = false
@@ -172,7 +173,7 @@ func _ready() -> void:
 	game.free()
 	await get_tree().process_frame
 	# The saved Inspector switch must also work before Game._ready executes.
-	game = load("res://scenes/main/game.tscn").instantiate() as Node
+	game = game_scene.instantiate() as Node
 	game.shadow_shader_enabled = false
 	game.start_with_title = false
 	game.transitions_enabled = false

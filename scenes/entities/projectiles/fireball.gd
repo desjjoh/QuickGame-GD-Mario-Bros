@@ -3,6 +3,7 @@ extends Node2D
 ## Moves in integer pixels with the NES's separate position and speed fractions.
 
 const BURST := preload("res://assets/items/fireworks.png")
+const TERRAIN_PROBE := preload("res://scenes/components/interactions/terrain_probe.gd")
 const PROBE := Vector2(4, 6)
 const SUBPIXEL := 256
 const GRAVITY := 0x50
@@ -108,7 +109,7 @@ func _hit_enemies(view: Rect2) -> void:
 		var enemy := node as BaseEnemy
 		if not _area.is_ancestor_of(enemy) or not enemy.can_contact_fireball():
 			continue
-		var bounds := enemy.fireball_bounds()
+		var bounds := enemy.projectile_target_bounds()
 		var origin_x := enemy.body.global_position.x - 8.0
 		if (
 			not bounds.has_area()
@@ -160,12 +161,4 @@ func _hits_projectile_barrier() -> bool:
 
 func _touches_terrain() -> bool:
 	_probe.position = global_position + PROBE + Vector2(0.01, 0.01)
-	var space := get_world_2d().direct_space_state
-	_probe.canvas_instance_id = 0
-	if not space.intersect_point(_probe, 1).is_empty():
-		return true
-	var canvas := get_canvas_layer_node()
-	if canvas == null:
-		return false
-	_probe.canvas_instance_id = canvas.get_instance_id()
-	return not space.intersect_point(_probe, 1).is_empty()
+	return TERRAIN_PROBE.hits_terrain(self, _probe)

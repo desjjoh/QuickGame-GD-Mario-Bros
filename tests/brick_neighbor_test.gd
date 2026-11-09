@@ -35,9 +35,8 @@ func _ready() -> void:
 	level.active_area.set_physics_process(false)
 	p = level.player as Mario
 	p.set_physics_process(false)
-	var block := (
-		load("res://scenes/entities/blocks/brick/brick_block.tscn").instantiate() as BaseBlock
-	)
+	var brick_scene := load("res://scenes/entities/blocks/brick/brick_block.tscn") as PackedScene
+	var block := brick_scene.instantiate() as BaseBlock
 	block.position = Vector2(128, 128)
 	level.world_objects.add_child(block)
 	await get_tree().physics_frame
@@ -55,10 +54,7 @@ func _ready() -> void:
 					previous.free()
 			row.clear()
 			for x in [112.0, 128.0, 144.0]:
-				var brick := (
-					load("res://scenes/entities/blocks/brick/brick_block.tscn").instantiate()
-					as BaseBlock
-				)
+				var brick := brick_scene.instantiate() as BaseBlock
 				brick.position = Vector2(x, 128)
 				level.world_objects.add_child(brick)
 				row.append(brick)

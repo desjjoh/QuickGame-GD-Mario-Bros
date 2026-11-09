@@ -20,7 +20,8 @@ func koopa(x: float) -> BaseEnemy:
 
 
 func _ready() -> void:
-	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
+	var game_scene := load("res://tests/fixtures/silent_game.tscn") as PackedScene
+	var game: Node = game_scene.instantiate()
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(game)
 	level = GameHandler.current_level
@@ -91,10 +92,9 @@ func _ready() -> void:
 	assert(survivor.reactions == 1 and not survivor._defeated)
 	assert(GameHandler.player_status.score == survivor_score and shell.shell_chain == 0)
 	survivor.free()
+	var goomba_scene := load("res://scenes/entities/enemies/goomba/goomba.tscn") as PackedScene
 	for index in range(9):
-		var target := (
-			load("res://scenes/entities/enemies/goomba/goomba.tscn").instantiate() as BaseEnemy
-		)
+		var target := goomba_scene.instantiate() as BaseEnemy
 		target.position = Vector2(180, 192)
 		level.world_objects.add_child(target)
 		var before := GameHandler.player_status.score
@@ -113,9 +113,7 @@ func _ready() -> void:
 	assert(shell.receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)))
 	assert(shell.receive_hit(EntityHit.new(player, &"kick", Vector2.ZERO)))
 	assert(shell.shell_chain == retained_chain)
-	var squashed := (
-		load("res://scenes/entities/enemies/goomba/goomba.tscn").instantiate() as BaseEnemy
-	)
+	var squashed := goomba_scene.instantiate() as BaseEnemy
 	squashed.position = Vector2(180, 192)
 	level.world_objects.add_child(squashed)
 	var defeat_events: Array[EntityHit] = []
@@ -152,7 +150,7 @@ func _ready() -> void:
 	game.queue_free()
 	await ticks(2)
 	# A fresh side overlap with a moving shell damages Mario.
-	game = load("res://tests/fixtures/silent_game.tscn").instantiate()
+	game = game_scene.instantiate()
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(game)
 	level = GameHandler.current_level
@@ -171,16 +169,14 @@ func _ready() -> void:
 	game.queue_free()
 	await ticks(2)
 	# A real physics overlap, including enemies already touching when kicked.
-	game = load("res://tests/fixtures/silent_game.tscn").instantiate()
+	game = game_scene.instantiate()
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(game)
 	level = GameHandler.current_level
 	level.player.body.global_position = Vector2(40, 180)
 	shell = koopa(140)
 	assert(shell.receive_hit(EntityHit.new(level.player, &"stomp", Vector2.DOWN)))
-	var overlap := (
-		load("res://scenes/entities/enemies/goomba/goomba.tscn").instantiate() as BaseEnemy
-	)
+	var overlap := goomba_scene.instantiate() as BaseEnemy
 	overlap.position = Vector2(146, 192)
 	level.world_objects.add_child(overlap)
 	await ticks(6)

@@ -1,5 +1,6 @@
 extends Node
 
+const FINISH_TEST := preload("res://tests/fixtures/finish_test.gd")
 const LEVEL := preload("res://tests/fixtures/sandbox_level.tscn")
 const LUIGI := preload("res://scenes/player/luigi/luigi.tscn")
 const FLAGPOLE := preload("res://scenes/entities/climbables/flagpole/flagpole.tscn")
@@ -84,7 +85,7 @@ func _ready() -> void:
 	if DisplayServer.get_name() != "headless":
 		await check_rendered_pose()
 		print("PASS: Rendered Fire throw pixels in both directions.")
-		await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+		await FINISH_TEST.finish(get_tree())
 		return
 	ControllerHandler.set_physics_process(false)
 	await check_trace(false, false)
@@ -111,7 +112,7 @@ func _ready() -> void:
 	ControllerHandler.set_physics_process(true)
 	GameHandler.clear_session()
 	print("PASS: Mesen fireball motion, slot release, and Mario/Luigi throw poses.")
-	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+	await FINISH_TEST.finish(get_tree())
 
 
 func _physics_process(_delta: float) -> void:

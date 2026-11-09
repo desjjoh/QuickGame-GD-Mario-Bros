@@ -25,21 +25,16 @@ func notified(level: BaseLevel) -> void:
 	assert(not level.can_transport())
 
 
-func make_game(animated: bool) -> Node:
+func make_game(animated: bool, sandbox_scene: PackedScene) -> Node:
 	var game: Node = load("res://scenes/main/game.tscn").instantiate()
-	game.stages.assign(
-		[
-			load("res://scenes/levels/worlds/world 1/1-1.tscn"),
-			load("res://tests/fixtures/sandbox_level.tscn")
-		]
-	)
+	game.stages.assign([load("res://scenes/levels/worlds/world 1/1-1.tscn"), sandbox_scene])
 	game.start_with_title = false
 	game.transitions_enabled = animated
 	return game
 
 
-func replace_on_completion() -> void:
-	assert(GameHandler.load_level(load("res://tests/fixtures/sandbox_level.tscn")))
+func replace_on_completion(sandbox_scene: PackedScene) -> void:
+	assert(GameHandler.load_level(sandbox_scene))
 
 
 func _ready() -> void:
@@ -49,9 +44,10 @@ func _ready() -> void:
 	for stage in definition.stages:
 		stage.minimum_frames = 2
 	director.get_definition(&"finish").minimum_frames = 2
+	var sandbox_scene := load("res://tests/fixtures/sandbox_level.tscn") as PackedScene
 	for animated in [false, true]:
 		GameHandler.clear_session()
-		var game := make_game(animated)
+		var game := make_game(animated, sandbox_scene)
 		add_child(game)
 		await wait_idle()
 		assert(GameHandler.current_stage_index == 0)
@@ -85,7 +81,9 @@ func _ready() -> void:
 		await wait_idle()
 		assert(GameHandler.current_stage_index == 1)
 		assert(GameHandler.flow == GameHandler.GameFlow.PLAYING)
-		assert(GameHandler.current_level.scene_file_path == "res://tests/fixtures/sandbox_level.tscn")
+		assert(
+			GameHandler.current_level.scene_file_path == "res://tests/fixtures/sandbox_level.tscn"
+		)
 		assert(GameHandler.player_status.score == 1234 and GameHandler.player_status.coins == 7)
 		assert(
 			(
@@ -121,7 +119,7 @@ func _ready() -> void:
 		await ticks(2)
 	assert(notifications == 2)
 	# Warp skips completion presentation, but keeps the destination intro.
-	var warp_game := make_game(true)
+	var warp_game := make_game(true, sandbox_scene)
 	add_child(warp_game)
 	await wait_idle()
 	var warp_source := GameHandler.current_level
@@ -137,7 +135,7 @@ func _ready() -> void:
 	warp_game.free()
 	await ticks(2)
 	# Reusing one scene in adjacent entries still advances and clears its old visit.
-	var repeated := make_game(false)
+	var repeated := make_game(false, sandbox_scene)
 	repeated.stages[1] = repeated.stages[0]
 	add_child(repeated)
 	var repeated_key := GameHandler.current_level._progress_key
@@ -152,17 +150,17 @@ func _ready() -> void:
 	repeated.free()
 	await ticks(2)
 	# An unlisted override has no implicit next stage.
-	var game := make_game(false)
+	var game := make_game(false, sandbox_scene)
 	game.start_with_title = true
 	game.stages.resize(1)
 	add_child(game)
-	assert(GameHandler.start_new_game(load("res://tests/fixtures/sandbox_level.tscn")))
+	assert(GameHandler.start_new_game(sandbox_scene))
 	assert(GameHandler.current_stage_index == -1)
 	assert(GameHandler.current_level.on_complete())
 	assert(GameHandler.flow == GameHandler.GameFlow.TITLE)
 	assert(GameHandler.start_new_game())
 	var source := GameHandler.current_level
-	source.completion_started.connect(replace_on_completion)
+	source.completion_started.connect(replace_on_completion.bind(sandbox_scene))
 	assert(not source.on_complete())
 	assert(GameHandler.flow == GameHandler.GameFlow.PLAYING)
 	assert(GameHandler.current_level.scene_file_path == "res://tests/fixtures/sandbox_level.tscn")

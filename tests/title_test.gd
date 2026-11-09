@@ -1,4 +1,6 @@
 extends Node
+
+const SANDBOX_LEVEL := preload("res://tests/fixtures/sandbox_level.tscn")
 var starts: Array[StringName] = []
 
 
@@ -78,9 +80,11 @@ func run_checks() -> void:
 	definition.stages[0].minimum_frames = 4
 	definition.stages[1].minimum_frames = 2
 	director.started.connect(record_start)
+	var game_scene := load("res://scenes/main/game.tscn") as PackedScene
+	var title_scene := load("res://scenes/ui/title/title_screen.tscn") as PackedScene
 	for keyboard in [true, false]:
 		starts.clear()
-		var game: Node = load("res://scenes/main/game.tscn").instantiate()
+		var game: Node = game_scene.instantiate()
 		add_child(game)
 		assert(game.start_with_title)
 		assert(
@@ -207,7 +211,7 @@ func run_checks() -> void:
 			)
 		assert(label.get_theme_color(&"font_color") == Color.WHITE)
 		# A title created with an Underground background joins the correct theme.
-		var themed_title: Control = load("res://scenes/ui/title/title_screen.tscn").instantiate()
+		var themed_title: Control = title_scene.instantiate()
 		game.get_node("UI/ScreenContainer").add_child(themed_title)
 		assert(
 			(themed_title.get_node("Cursor") as Sprite2D).texture.resource_path.contains(
@@ -241,7 +245,7 @@ func run_checks() -> void:
 		assert(copyright_label.get_theme_font(&"font") == expected_accent)
 		assert(title_card.texture == expected_card)
 		assert(cursor.texture == expected)
-		var source_title: Control = load("res://scenes/ui/title/title_screen.tscn").instantiate()
+		var source_title: Control = title_scene.instantiate()
 		assert(
 			(source_title.get_node("Cursor") as Sprite2D).texture.resource_path.contains(
 				"/palettes/overworld/"
@@ -355,9 +359,9 @@ func run_checks() -> void:
 			)
 		)
 	# Alternate destinations remain available independently of visible menu entries.
-	var alternate: Node = load("res://scenes/main/game.tscn").instantiate()
+	var alternate: Node = game_scene.instantiate()
 	add_child(alternate)
-	assert(GameHandler.start_new_game(load("res://tests/fixtures/sandbox_level.tscn")))
+	assert(GameHandler.start_new_game(SANDBOX_LEVEL))
 	await wait_for_play()
 	assert(GameHandler.current_level.scene_file_path == "res://tests/fixtures/sandbox_level.tscn")
 	assert(GameHandler.title_flow.first_stage == alternate.stages[0])
@@ -365,7 +369,7 @@ func run_checks() -> void:
 	alternate.free()
 	await tick(2)
 	# Detaching during Start must not recreate the title over a freed Game.
-	var closing: Node = load("res://scenes/main/game.tscn").instantiate()
+	var closing: Node = game_scene.instantiate()
 	add_child(closing)
 	assert(GameHandler.start_new_game())
 	closing.free()
@@ -402,7 +406,7 @@ func check_luigi_run(game: Node) -> void:
 	assert(GameHandler.current_level != level and GameHandler.current_player != luigi)
 	assert(GameHandler.current_player.name == &"Luigi")
 	assert(GameHandler.player_character == GameHandler.PlayerCharacter.LUIGI)
-	assert(GameHandler.transition_to_level(preload("res://tests/fixtures/sandbox_level.tscn")))
+	assert(GameHandler.transition_to_level(SANDBOX_LEVEL))
 	while GameHandler.transitions.busy:
 		await tick(1)
 	assert(GameHandler.current_player.name == &"Luigi")

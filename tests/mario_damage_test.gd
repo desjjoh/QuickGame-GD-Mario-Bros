@@ -17,7 +17,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	ControllerHandler.set_physics_process(false)
 	GameHandler.animation_clock.set_physics_process(false)
-	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	var level_scene := load("res://tests/fixtures/sandbox_level.tscn") as PackedScene
+	var level := level_scene.instantiate() as BaseLevel
 	level.player_start_configuration = MarioFormPresentation.SUPER
 	level.process_mode = Node.PROCESS_MODE_PAUSABLE
 	level.entity_layout.clear()
@@ -28,9 +29,8 @@ func _ready() -> void:
 	mario.set_physics_process(false)
 	mario.form_presentation.set_physics_process(false)
 	mario.damage.set_physics_process(false)
-	var goomba := (
-		load("res://scenes/entities/enemies/goomba/goomba.tscn").instantiate() as BaseEnemy
-	)
+	var goomba_scene := load("res://scenes/entities/enemies/goomba/goomba.tscn") as PackedScene
+	var goomba := goomba_scene.instantiate() as BaseEnemy
 	goomba.position = Vector2(120, 192)
 	level.world_objects.add_child(goomba)
 	goomba.set_physics_process(false)
@@ -78,9 +78,7 @@ func _ready() -> void:
 	assert(not goomba._player_contact_latched)
 	assert(not mario.is_dead and GameHandler.player_status.lives == lives)
 	# Protection prevents injury, while normal descending stomps still work.
-	var stomp_target := (
-		load("res://scenes/entities/enemies/goomba/goomba.tscn").instantiate() as BaseEnemy
-	)
+	var stomp_target := goomba_scene.instantiate() as BaseEnemy
 	stomp_target.position = Vector2(200, 192)
 	level.world_objects.add_child(stomp_target)
 	stomp_target.set_physics_process(false)
@@ -115,7 +113,7 @@ func _ready() -> void:
 	level.free()
 	# Walking Koopas and moving shells use the same ordinary damage entry point.
 	for moving_shell in [false, true]:
-		level = load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+		level = level_scene.instantiate() as BaseLevel
 		level.player_start_configuration = MarioFormPresentation.SUPER
 		level.entity_layout.clear()
 		level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
@@ -143,7 +141,7 @@ func _ready() -> void:
 		assert(mario.form_presentation.active and mario.damage.is_protected() and not mario.is_dead)
 		level.free()
 	# Protection must never intercept the level's lethal hazard path.
-	level = load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	level = level_scene.instantiate() as BaseLevel
 	level.player_start_configuration = MarioFormPresentation.SUPER
 	level.entity_layout.clear()
 	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()

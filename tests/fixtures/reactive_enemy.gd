@@ -5,6 +5,12 @@ var reactions := 0
 var nested_hit_accepted := false
 
 
+func _ready() -> void:
+	# Replacing the scene's script clears its exported sprite reference.
+	sprite = $Body/Sprite2D
+	super()
+
+
 func _accept_hit(hit: EntityHit) -> bool:
 	match hit.maneuver:
 		&"react", &"shell":

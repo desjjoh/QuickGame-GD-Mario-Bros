@@ -3,6 +3,10 @@ extends Node
 signal reward_voice_changed(occupied: bool)
 
 const NES_MIX_BUS: StringName = &"NES_Mix"
+const SAMPLE_RATE := 44100
+const SAMPLES_PER_FRAME := 735
+const CPU_HZ := 1789773.0
+const PEAK_SAMPLE := 5900
 
 var _sounds: Dictionary[StringName, AudioStream] = {}
 var _square_two := AudioStreamPlayer.new()
@@ -14,20 +18,25 @@ func _ready() -> void:
 	_pause_voice.bus = NES_MIX_BUS
 	_pause_voice.process_mode = Node.PROCESS_MODE_ALWAYS
 	add_child(_pause_voice)
+	_sounds[&"pause"] = _build_pause_cue()
+	_square_two.name = "Square2Sfx"
+	_square_two.bus = NES_MIX_BUS
+	add_child(_square_two)
+	_square_two.finished.connect(func(): reward_voice_changed.emit(false))
+	_register_square_two_cues()
+	_register_action_cues()
+
+
+static func _build_pause_cue() -> AudioStreamWAV:
 	# NES SoundEngine: offsets $44/$64, 6/6/6/24 frames, control $84.
 	# Each register reload restarts the volume envelope.
 	var pause_pcm := PackedByteArray()
 	for note: Array in [[0x54, 6], [0x6a, 6], [0x54, 6], [0x6a, 24]]:
 		pause_pcm.append_array(_build_pulse([note[0]], [note[1]], 0.5, 5).data)
-	var pause_sound := AudioStreamWAV.new()
-	pause_sound.format = AudioStreamWAV.FORMAT_16_BITS
-	pause_sound.mix_rate = 44100
-	pause_sound.data = pause_pcm
-	_sounds[&"pause"] = pause_sound
-	_square_two.name = "Square2Sfx"
-	_square_two.bus = NES_MIX_BUS
-	add_child(_square_two)
-	_square_two.finished.connect(func(): reward_voice_changed.emit(false))
+	return _pcm_stream(pause_pcm)
+
+
+func _register_square_two_cues() -> void:
 	_sounds[&"coin"] = _build_pulse([113, 84], [5, 48], 0.5, 14, true)
 	_sounds[&"extra_life"] = _build_pulse([84, 71, 42, 53, 47, 35], [8, 8, 8, 8, 8, 8], 0.5, 3)
 	# ContinuePowerUpGrab traverses its 27-entry frequency table backward,
@@ -82,6 +91,8 @@ func _ready() -> void:
 	blast.data = blast_pcm
 	_sounds[&"fireworks"] = blast
 
+
+func _register_action_cues() -> void:
 	_sounds[&"jump_small"] = _build_swept_pulse(
 		0x0fe, [3, 5, 32], [0x82, 0x5f, 0x48], [0xa7, 0xf6, 0xbc]
 	)
@@ -91,7 +102,9 @@ func _ready() -> void:
 	)
 	_sounds[&"bump"] = _build_swept_pulse(0x23a, [4, 6], [0x9e, 0x9e], [0x93, 0xbb])
 	_sounds[&"fireball"] = _build_swept_pulse(0x23a, [5], [0x9e], [0x99])
-	_sounds[&"brick_shatter"] = _build_brick_shatter()
+	_sounds[&"brick_shatter"] = (
+		load("res://assets/audio/effects/brick_shatter.wav") as AudioStreamWAV
+	)
 	_sounds[&"enemy_smack"] = _build_swept_pulse(
 		0xef,
 		[14],
@@ -113,7 +126,7 @@ func _ready() -> void:
 	_sounds[&"flagpole"] = _build_swept_pulse(0x1fc, [64], [0x99], [0xbc])
 	var pipe_data := PackedByteArray()
 	# The first trigger occurs three frames into the 47-frame sound.
-	pipe_data.resize(3 * 735 * 2)
+	pipe_data.resize(3 * SAMPLES_PER_FRAME * 2)
 	var pipe: AudioStreamWAV
 	for frames: int in [4, 12, 4, 12, 4, 8]:
 		pipe = _build_swept_pulse(0x54, [frames], [0x9a], [0x91])
@@ -160,11 +173,6 @@ func stop_reward(cue: StringName = &"") -> void:
 	reward_voice_changed.emit(false)
 
 
-## Cached standalone cue; no per-frame synthesis or shared music voice.
-static func _build_brick_shatter() -> AudioStreamWAV:
-	return load("res://assets/audio/effects/brick_shatter.wav") as AudioStreamWAV
-
-
 static func _build_pulse(
 	periods: Array[int],
 	note_frames: Array[int],
@@ -172,10 +180,6 @@ static func _build_pulse(
 	envelope_ticks: int = 0,
 	sustain_envelope: bool = false
 ) -> AudioStreamWAV:
-	const SAMPLE_RATE := 44100
-	const SAMPLES_PER_FRAME := 735
-	const CPU_HZ := 1789773.0
-	const PEAK_SAMPLE := 5900
 	var pcm := PackedByteArray()
 	var phase := 0.0
 	for note in range(periods.size()):
@@ -193,11 +197,7 @@ static func _build_pulse(
 			var amplitude := roundi(PEAK_SAMPLE * gain)
 			pcm.encode_s16(offset + sample * 2, amplitude if phase < duty else -amplitude)
 			phase = fposmod(phase + phase_step, 1.0)
-	var stream := AudioStreamWAV.new()
-	stream.format = AudioStreamWAV.FORMAT_16_BITS
-	stream.mix_rate = SAMPLE_RATE
-	stream.data = pcm
-	return stream
+	return _pcm_stream(pcm)
 
 
 # Render pulse control and sweep changes on a nominal 60 Hz clock.
@@ -210,10 +210,6 @@ static func _build_swept_pulse(
 	period_low_byte_writes: Dictionary[int, int] = {},
 	square_one: bool = true
 ) -> AudioStreamWAV:
-	const SAMPLE_RATE := 44100
-	const SAMPLES_PER_FRAME := 735
-	const CPU_HZ := 1789773.0
-	const PEAK_SAMPLE := 5900
 	var pcm := PackedByteArray()
 	var phase := 0.0
 	for section in range(frames.size()):
@@ -248,6 +244,10 @@ static func _build_swept_pulse(
 			var amplitude := roundi(PEAK_SAMPLE * volume / 15.0) if period >= 8 else 0
 			pcm.encode_s16(offset + sample * 2, amplitude if phase < duty else -amplitude)
 			phase = fposmod(phase + CPU_HZ / (16.0 * (period + 1) * SAMPLE_RATE), 1.0)
+	return _pcm_stream(pcm)
+
+
+static func _pcm_stream(pcm: PackedByteArray) -> AudioStreamWAV:
 	var stream := AudioStreamWAV.new()
 	stream.format = AudioStreamWAV.FORMAT_16_BITS
 	stream.mix_rate = SAMPLE_RATE

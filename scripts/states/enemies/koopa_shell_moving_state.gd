@@ -85,7 +85,7 @@ func _screen_contact_box(enemy: BaseEnemy, view: Rect2) -> Rect2:
 	):
 		return Rect2()
 	# Shells and fireballs use the same reference enemy boxes.
-	var bounds := enemy.fireball_bounds()
+	var bounds := enemy.projectile_target_bounds()
 	if not bounds.has_area():
 		return Rect2()
 	bounds.position += pixel - body_position

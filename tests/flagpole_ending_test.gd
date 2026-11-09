@@ -1,5 +1,7 @@
 extends Node
 
+const PAUSE_CHECK := preload("res://tests/fixtures/pause_check.gd")
+
 signal tick_finished
 var changes: Array[int] = []
 
@@ -33,8 +35,9 @@ func make_game(manual: bool) -> Node:
 	fixture.set_editable_instance(ending, true)
 	if manual:
 		ending.music = null
-		ending.get_node("Score").set_script(load("res://tests/fixtures/manual_ending_step.gd"))
-		ending.get_node("Fireworks").set_script(load("res://tests/fixtures/manual_ending_step.gd"))
+		var manual_step := load("res://tests/fixtures/manual_ending_step.gd") as Script
+		ending.get_node("Score").set_script(manual_step)
+		ending.get_node("Fireworks").set_script(manual_step)
 	var packed := PackedScene.new()
 	for area in fixture.get_node("Areas").get_children():
 		fixture.set_editable_instance(area, true)
@@ -91,7 +94,7 @@ func _ready() -> void:
 				assert(not ending._score_popup.is_physics_interpolated())
 	)
 	await grab(level)
-	await preload("res://tests/fixtures/pause_check.gd").check(level)
+	await PAUSE_CHECK.check(level)
 	assert(ending.grab_height == 92.0 and ending.remaining_time_at_contact == time_before)
 	assert(ending.grab_points == 2000 and GameHandler.player_status.score == score_before)
 	assert(ending._score_popup.visible and ending._score_popup.region_rect == Rect2(16, 8, 16, 8))
@@ -148,7 +151,7 @@ func _ready() -> void:
 	var retired: WeakRef = weakref(player)
 	assert(ending._walk_endpoint == ending._castle.doorway.global_position)
 	var walk_steps := 0
-	await preload("res://tests/fixtures/pause_check.gd").check(level)
+	await PAUSE_CHECK.check(level)
 	for frame in range(400):
 		walk_steps += 1
 		var previous_camera := camera.global_position.x
@@ -253,7 +256,7 @@ func _ready() -> void:
 	ending = level.ending_presentation as FlagpoleEndingPresentation
 	await grab(level, 190.0)
 	await wait_phase(ending, FlagpoleEndingPresentation.Phase.SCORE)
-	await preload("res://tests/fixtures/pause_check.gd").check(level)
+	await PAUSE_CHECK.check(level)
 	var stale := ending.score_step.current_ticket
 	var cancelled_popup: WeakRef = weakref(ending._score_popup)
 	level.cancel_ending()

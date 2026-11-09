@@ -1,5 +1,7 @@
 extends Node
 
+const FINISH_TEST := preload("res://tests/fixtures/finish_test.gd")
+
 
 func render_frame() -> void:
 	await get_tree().process_frame
@@ -9,7 +11,7 @@ func render_frame() -> void:
 func _ready() -> void:
 	if DisplayServer.get_name() == "headless":
 		print("koopa_shadow_test: PASS")
-		await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+		await FINISH_TEST.finish(get_tree())
 		return
 	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
 	level.entity_layout.clear()
@@ -90,4 +92,4 @@ func _ready() -> void:
 	level.queue_free()
 	await get_tree().process_frame
 	print("koopa_shadow_test: PASS")
-	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+	await FINISH_TEST.finish(get_tree())

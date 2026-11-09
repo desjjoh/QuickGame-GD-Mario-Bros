@@ -11,12 +11,14 @@ func check_background(label: String) -> void:
 
 
 func _ready() -> void:
-	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	var level_scene := load("res://tests/fixtures/silent_level.tscn") as PackedScene
+	var fixture := level_scene.instantiate() as BaseLevel
 	fixture.stage_label = "MENU"
 	var custom := PackedScene.new()
 	assert(custom.pack(fixture) == OK)
 	fixture.free()
-	var game = load("res://scenes/main/game.tscn").instantiate()
+	var game_scene := load("res://scenes/main/game.tscn") as PackedScene
+	var game = game_scene.instantiate()
 	var first_stage: PackedScene = game.stages[0]
 	game.title_background = custom
 	game.transitions_enabled = false
@@ -29,7 +31,7 @@ func _ready() -> void:
 	assert(GameHandler.current_level.on_complete())
 	check_background("MENU")
 	# Re-read the Game selection on later returns, not a cached title-scene default.
-	fixture = load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	fixture = level_scene.instantiate() as BaseLevel
 	fixture.stage_label = "ALT MENU"
 	var alternate := PackedScene.new()
 	assert(alternate.pack(fixture) == OK)
@@ -47,7 +49,7 @@ func _ready() -> void:
 	game.free()
 	await get_tree().process_frame
 	# The same fallback applies at startup.
-	game = load("res://scenes/main/game.tscn").instantiate()
+	game = game_scene.instantiate()
 	game.title_background = null
 	game.transitions_enabled = false
 	add_child(game)

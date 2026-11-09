@@ -4,6 +4,7 @@ const LEVEL := preload("res://tests/fixtures/sandbox_level.tscn")
 const FLOWER := preload("res://scenes/entities/powerups/fire_flower.tscn")
 const LUIGI := preload("res://scenes/player/luigi/luigi.tscn")
 const QUESTION := preload("res://scenes/entities/blocks/question/question_block.tscn")
+const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd")
 const FORMS := [
 	MarioFormPresentation.SMALL, MarioFormPresentation.SUPER, MarioFormPresentation.FIRE
 ]
@@ -43,9 +44,8 @@ func check_pickup(is_luigi: bool, index: int) -> void:
 	level.world_objects.add_child(block)
 	assert(block.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP)))
 	var flower := level.world_objects.get_node("FireFlower") as PowerUp
-	var neighboring_block := QUESTION.instantiate() as QuestionBlock
-	neighboring_block.position = block.position + Vector2(16, 0)
-	level.world_objects.add_child(neighboring_block)
+	var world := level.get_node("Areas") as CanvasItem
+	assert(not world.z_as_relative and world.z_index == DRAW_ORDER.WORLD)
 	flower.set_physics_process(false)
 	assert(not flower.sprite.visible and not flower.pickup.monitoring)
 	assert(
@@ -61,8 +61,8 @@ func check_pickup(is_luigi: bool, index: int) -> void:
 		var rise := tick / 4
 		assert(flower.position == Vector2(128, 128 - rise))
 		assert(flower.sprite.visible == (rise > 0))
-		assert((flower.get_index() > neighboring_block.get_index()) == (rise == 16))
-		assert((flower.get_index() > block.get_index()) == (rise == 16))
+		var priority := DRAW_ORDER.AVAILABLE_ITEM if rise == 16 else DRAW_ORDER.BEHIND_WORLD
+		assert(not flower.sprite.z_as_relative and flower.sprite.z_index == priority)
 		if rise > 0 and rise < 16:
 			assert(flower.sprite.region_enabled)
 			assert(flower.sprite.region_rect == Rect2(0, 0, 16, rise))

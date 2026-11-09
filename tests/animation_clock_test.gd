@@ -34,9 +34,10 @@ func _ready() -> void:
 	var hud := load("res://scenes/ui/hud/hud.tscn").instantiate() as Control
 	add_child(hud)
 	var coin := hud.get_node("Coin") as AnimatedSprite2D
-	var first := (
-		load("res://scenes/entities/blocks/question/question_block.tscn").instantiate() as BaseBlock
+	var question_scene := (
+		load("res://scenes/entities/blocks/question/question_block.tscn") as PackedScene
 	)
+	var first := question_scene.instantiate() as BaseBlock
 	add_child(first)
 	var world_coin_scene := load("res://scenes/entities/coin/coin.tscn") as PackedScene
 	var world_coin := world_coin_scene.instantiate() as BaseEntity
@@ -45,14 +46,12 @@ func _ready() -> void:
 	var later: BaseBlock
 	for tick in range(96):
 		if tick == 29:
-			later = (
-				load("res://scenes/entities/blocks/question/question_block.tscn").instantiate()
-				as BaseBlock
-			)
-			later.visual_theme = load("res://assets/themes/underground.tres")
+			later = question_scene.instantiate() as BaseBlock
+			var underground_theme := load("res://assets/themes/underground.tres") as AreaTheme
+			later.visual_theme = underground_theme
 			add_child(later)
 			lower_coin = world_coin_scene.instantiate() as BaseEntity
-			lower_coin.visual_theme = load("res://assets/themes/underground.tres")
+			lower_coin.visual_theme = underground_theme
 			add_child(lower_coin)
 		if tick == 35:
 			first.set_gameplay_suspended(true)
@@ -111,10 +110,7 @@ func _ready() -> void:
 	if DisplayServer.get_name() != "headless":
 		while cycle.phase_at(clock.tick_count) != 2:
 			await RenderingServer.frame_post_draw
-		var late_block := (
-			load("res://scenes/entities/blocks/question/question_block.tscn").instantiate()
-			as BaseBlock
-		)
+		var late_block := question_scene.instantiate() as BaseBlock
 		late_block.position = Vector2(128, 64)
 		GameHandler.current_level.world_objects.add_child(late_block)
 		check_pair(late_block, target_coin, clock, cycle)

@@ -3,6 +3,7 @@ extends PowerUp
 
 const DELAYED_REWARD := preload("res://scenes/components/interactions/delayed_reward.gd")
 const RISING_REWARD_POPUP := preload("res://scenes/components/presentation/rising_reward_popup.gd")
+const TERRAIN_PROBE := preload("res://scenes/components/interactions/terrain_probe.gd")
 const BOUNCE_SPEED := -180.0
 const TRAVEL_SPEED := 60.0
 
@@ -38,15 +39,7 @@ func _advance_available(delta: float) -> void:
 
 func _solid_at(point: Vector2) -> bool:
 	_probe.position = point + Vector2(0.01, 0.01)
-	var space := get_world_2d().direct_space_state
-	_probe.canvas_instance_id = 0
-	if not space.intersect_point(_probe, 1).is_empty():
-		return true
-	var canvas := get_canvas_layer_node()
-	if canvas == null:
-		return false
-	_probe.canvas_instance_id = canvas.get_instance_id()
-	return not space.intersect_point(_probe, 1).is_empty()
+	return TERRAIN_PROBE.hits_terrain(self, _probe)
 
 
 func _grant_reward(player: BasePlayer) -> void:

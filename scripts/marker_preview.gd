@@ -1,6 +1,13 @@
 extends RefCounted
 ## Shared offline preview rendering; scenes never enter the live tree.
 
+const THEME_NAMES := ["overworld", "underground", "castle"]
+
+
+static func output_path(theme_name: String, marker: String) -> String:
+	var prefix := theme_name + "/" if theme_name != "overworld" else ""
+	return "res://assets/tileset/" + prefix + "previews/" + marker + ".png"
+
 
 static func texture_image(texture: Texture2D) -> Image:
 	if texture is AtlasTexture:

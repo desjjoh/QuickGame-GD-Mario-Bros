@@ -8,10 +8,9 @@ func ticks(count: int) -> void:
 
 
 func _ready() -> void:
+	var koopa_scene := load("res://scenes/entities/enemies/koopa/green_koopa.tscn") as PackedScene
 	for theme in ["overworld", "underground", "castle"]:
-		var preview := (
-			load("res://scenes/entities/enemies/koopa/green_koopa.tscn").instantiate() as BaseEnemy
-		)
+		var preview := koopa_scene.instantiate() as BaseEnemy
 		preview.visual_theme = load("res://assets/themes/%s.tres" % theme)
 		add_child(preview)
 		assert(
@@ -87,9 +86,7 @@ func _ready() -> void:
 	await ticks(45)
 	assert(koopa.body.is_on_floor())
 	# A late join samples the same global frame and shares enemy reversal.
-	var other := (
-		load("res://scenes/entities/enemies/koopa/green_koopa.tscn").instantiate() as BaseEnemy
-	)
+	var other := koopa_scene.instantiate() as BaseEnemy
 	other.position = Vector2(160, 192)
 	level.world_objects.add_child(other)
 	assert(other.sprite.frame == koopa.sprite.frame)

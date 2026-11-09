@@ -56,7 +56,7 @@ func is_moving_shell() -> bool:
 	return state_machine.current_state == $StateMachine/ShellMoving
 
 
-func fireball_bounds() -> Rect2:
+func projectile_target_bounds() -> Rect2:
 	if state_machine.current_state == $StateMachine/Walking:
 		return super()
 	return Rect2(body.global_position + SHELL_CONTACT_BOUNDS.position, SHELL_CONTACT_BOUNDS.size)

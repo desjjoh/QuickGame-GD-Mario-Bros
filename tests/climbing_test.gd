@@ -260,10 +260,8 @@ func _ready() -> void:
 	assert(player.climbing.get_surface() == null)
 	assert(player.state_machine.current_state != player.climb_state)
 	# A fresh base surface exercises death and transport cleanup too.
-	var extra := (
-		load("res://scenes/entities/climbables/flagpole/flagpole.tscn").instantiate()
-		as BaseClimbable
-	)
+	var pole_scene := load("res://scenes/entities/climbables/flagpole/flagpole.tscn") as PackedScene
+	var extra := pole_scene.instantiate() as BaseClimbable
 	extra.position = Vector2(96, 32)
 	level.active_area.get_node("WorldObjects").add_child(extra)
 	player.body.global_position = Vector2(113, 130)
@@ -279,15 +277,15 @@ func _ready() -> void:
 		)
 	)
 	# Timeout/death must exit climbing before its presentation owns the body.
-	var lower_pole := (
-		load("res://scenes/entities/climbables/flagpole/flagpole.tscn").instantiate()
-		as BaseClimbable
-	)
+	var lower_pole := pole_scene.instantiate() as BaseClimbable
 	lower_pole.global_position = Vector2(96, 32)
 	level.active_area.get_node("WorldObjects").add_child(lower_pole)
 	lower_pole.global_position = player.body.global_position + Vector2(-17, -90)
 	player.body.velocity = Vector2.ZERO
-	await ticks(5)
+	await ticks(player.arrival_control_ticks_remaining)
+	assert(player.can_read_controller_input())
+	# Climb checks run before the arrival countdown advances.
+	await ticks()
 	assert(player.state_machine.current_state == player.climb_state)
 	level.death_sound = null
 	assert(level.on_death(player, true))
