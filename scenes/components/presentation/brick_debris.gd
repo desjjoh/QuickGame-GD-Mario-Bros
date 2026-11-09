@@ -28,6 +28,7 @@ func _ready() -> void:
 	_update_chunks()
 	var audio := AudioStreamPlayer.new()
 	audio.name = "ShatterSound"
+	audio.bus = SoundHandler.NES_MIX_BUS
 	audio.stream = SoundHandler.get_sound(&"brick_shatter")
 	add_child(audio)
 	audio.play()

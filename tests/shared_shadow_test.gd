@@ -157,11 +157,11 @@ func _ready() -> void:
 	game.shadow_shader_enabled = true
 	assert(composer.material == original_material)
 	game.shadow_shader_enabled = false
-	# Pipe travel retains the authored draw order without reparenting gameplay nodes.
-	level.move_child(level.players, level.get_node("Areas").get_index())
+	# Pipe travel changes render priority while gameplay nodes retain their parents.
+	level.player_behind_world = true
 	composer.sync_rendering()
 	assert(composer._players_behind_world)
-	level.move_child(level.players, level.get_child_count() - 1)
+	level.player_behind_world = false
 	composer.sync_rendering()
 	assert(not composer._players_behind_world and level.players.get_parent() == level)
 	assert(GameHandler.load_level(game.stages[0]))

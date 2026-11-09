@@ -3,6 +3,7 @@ extends Node2D
 ## Render-only grouping. Gameplay nodes retain their scene ownership and transforms.
 
 const SHADOW_PADDING: int = 12
+const DRAW_ORDER = preload("res://scenes/components/presentation/draw_order.gd")
 const HORIZONTAL_SHADER = preload("res://scenes/ui/shaders/shadow_horizontal.gdshader")
 const COMPOSITE_SHADER = preload("res://scenes/ui/shaders/shadow_composite.gdshader")
 
@@ -30,6 +31,7 @@ var _routed_background: ColorRect
 func configure(world: Node2D, screen: Control) -> void:
 	world_root = world
 	screen_root = screen
+	DRAW_ORDER.apply(screen_root, DRAW_ORDER.HUD)
 	_create_passes()
 	RenderingServer.canvas_item_set_parent(world_root.get_canvas_item(), _foreground_parent())
 	RenderingServer.canvas_item_set_draw_index(world_root.get_canvas_item(), 0)
@@ -63,6 +65,8 @@ func _unbind_level() -> void:
 	_routed_decorations = null
 	if is_instance_valid(_routed_players) and is_instance_valid(_level):
 		var item := _routed_players.get_canvas_item()
+		_routed_players.z_index = 0
+		_routed_players.z_as_relative = true
 		RenderingServer.canvas_item_set_parent(item, _level.get_canvas_item())
 		RenderingServer.canvas_item_set_transform(item, _routed_players.transform)
 		RenderingServer.canvas_item_set_interpolated(
@@ -215,16 +219,14 @@ func sync_rendering() -> void:
 	if not is_instance_valid(_level) or not is_instance_valid(_level.players):
 		return
 	var players := _level.players
-	var behind_world := players.get_index() < _level.get_node("Areas").get_index()
+	var behind_world := _level.player_behind_world
 	if _routed_players != players or behind_world != _players_behind_world:
 		RenderingServer.canvas_item_set_interpolated(players.get_canvas_item(), false)
 		_routed_players = players
 		_players_behind_world = behind_world
+		DRAW_ORDER.apply(players, DRAW_ORDER.BEHIND_WORLD if behind_world else DRAW_ORDER.PLAYER)
 		var render_parent := _level.get_canvas_item() if behind_world else _foreground_parent()
 		RenderingServer.canvas_item_set_parent(players.get_canvas_item(), render_parent)
-	RenderingServer.canvas_item_set_draw_index(
-		players.get_canvas_item(), players.get_index() if behind_world else 2
-	)
 	var render_transform := (
 		players.transform
 		if behind_world

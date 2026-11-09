@@ -40,6 +40,7 @@ func begin(
 			(entity as BaseEntity).set_gameplay_suspended(true)
 	if _has_sound:
 		_audio = AudioStreamPlayer.new()
+		_audio.bus = SoundHandler.NES_MIX_BUS
 		_audio.stream = SoundHandler.one_shot_copy(sound)
 		add_child(_audio)
 		_audio.finished.connect(_on_audio_finished)

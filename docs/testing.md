@@ -63,7 +63,7 @@ Activity tests check both suspension orders, preservation of collision/state, pr
 - `brick_neighbor_test` checks 20 full-jump cases, reaction gating, and directional outcomes. `brick_break_test` / `brick_debris_test` cover capability selection, temporary collision, scoring, theme, pause, and effect cleanup.
 - `block_top_coin_test` covers Small bumps and Super breaks across both canvas hierarchies. It checks same-cell pickup, adjacent coin exclusion, duplicate collection, rollover, effect origin and pause, and coin persistence after an area round trip.
 - `enemy_boundary_test` covers activation-column rounding, cleanup thresholds, and simultaneous paired movement. `shell_spawn_contact_test` verifies retry after rejected contact, exactly-once chain rewards, and a moving shell passing the far Goomba of a pair beyond the right edge.
-- `score_popup_test` checks placement, optional rise/cleanup, pause, display-only lifetime, and absence of reward side effects. Entity callers retain reward ownership; flagpole and block-coin lifetimes remain separate.
+- `score_popup_test` checks placement, one-pixel rise, the 48-tick lifetime, pause, display-only lifetime, and absence of reward side effects. Entity callers retain reward ownership; flagpole and block-coin lifetimes remain separate.
 - `camera_arrival_test`, `corner_correction_test`, and `area_background_test` cover return-pipe framing, correction-excluded camera progress, background bounds, and shadow routing.
 
 Pipe entry/transfer, sideways-pipe, climbing, and flagpole-ending tests also accept `-- --super` for their Super configuration. Their timing/contact assertions should remain meaningful when fixtures are isolated from authored stage settings.
@@ -120,3 +120,5 @@ The former playable Test Level is retained only as `tests/fixtures/sandbox_level
 `block_hit_receiver_test` verifies acknowledged enemy/mushroom delivery, repeated recoverable hits, permanent-defeat rejection, unbound/freed callbacks, emergence and suspension guards, and unchanged launch direction/velocity.
 
 `block_receiver_order_test` checks 12 receiver arrangements for both bump and break on normal and CanvasLayer-backed levels (48 combinations): slot/tree ordering, slot reuse, category priority, rejected and out-of-range receivers, unregistered fallback, emerging power-ups, the tenth enemy slot, no accepted receiver, and exactly one delayed entity reward.
+
+The same test covers five Goomba arrival cases. It checks a late landing on a bouncing brick, a walk-on from an adjacent brick, an arrival after the bounce, a landing on the tick after shatter, and a later arrival after the broken tile is removed. A second Goomba verifies that a consumed bounce cannot hit again.

@@ -6,6 +6,7 @@ signal enemy_contact(other: BaseEnemy)
 signal defeated(hit: EntityHit)
 
 const DELAYED_REWARD := preload("res://scenes/components/interactions/delayed_reward.gd")
+const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd")
 const FIREBALL_TARGETS := &"fireball_targets"
 const PLAYER_CONTACT := preload("res://scenes/components/interactions/player_contact.gd")
 const STOMP_REBOUND := -240.0
@@ -27,6 +28,7 @@ var _player_contact_latched := false
 
 func _ready() -> void:
 	super()
+	DRAW_ORDER.apply(sprite, DRAW_ORDER.ENEMY)
 	add_to_group(FIREBALL_TARGETS)
 	_enemy_contact_area.area_entered.connect(_on_enemy_contact)
 	_block_hits.hit_handler = receive_hit
@@ -137,6 +139,13 @@ func _accepts_defeated_hit(_hit: EntityHit) -> bool:
 	return false
 
 
+## First drawn popup center, derived from the pre-reaction body origin.
+func reward_popup_position(launch := false) -> Vector2:
+	# The centered terrain body is 16 pixels below the NES enemy Y origin.
+	# The first OAM row draws eight pixels above that origin, plus the two-pixel launch lift.
+	return body.global_position.round() - Vector2(0, 22 if launch else 20)
+
+
 func award_stomp(hit: EntityHit, world_position: Vector2) -> void:
 	if hit.attacker is BasePlayer:
 		hit.attacker.award_enemy_stomp(self, world_position)
@@ -145,14 +154,19 @@ func award_stomp(hit: EntityHit, world_position: Vector2) -> void:
 
 
 func award_score(
-	points: int, world_position: Vector2, delay_ticks: int = DELAYED_REWARD.DELAY_TICKS
+	points: int,
+	world_position: Vector2,
+	delay_ticks: int = DELAYED_REWARD.DELAY_TICKS,
+	defer_popup := false
 ) -> void:
-	RISING_REWARD_POPUP.show_score(get_parent(), points, world_position)
+	_configure_reward_popup(
+		RISING_REWARD_POPUP.show_score(get_parent(), points, world_position, defer_popup)
+	)
 	DELAYED_REWARD.schedule(self, GameHandler.add_score.bind(points), delay_ticks)
 
 
-func award_smack_defeat(points: int) -> void:
-	award_score(points, sprite.global_position, 5)
+func award_smack_defeat(points: int, world_position: Vector2) -> void:
+	award_score(points, world_position, 5)
 	play_sound_effect(SoundHandler.get_sound(&"enemy_smack"))
 
 
@@ -193,9 +207,15 @@ func away_from_attacker(hit: EntityHit) -> float:
 	return -1.0 if body.global_position.x < origin.x else 1.0
 
 
-func award_extra_life(world_position: Vector2) -> void:
-	RISING_REWARD_POPUP.show_one_up(get_parent(), world_position)
+func award_extra_life(world_position: Vector2, defer_popup := false) -> void:
+	_configure_reward_popup(
+		RISING_REWARD_POPUP.show_one_up(get_parent(), world_position, defer_popup)
+	)
 	DELAYED_REWARD.schedule(self, _grant_extra_life)
+
+
+func _configure_reward_popup(_popup: Sprite2D) -> void:
+	pass
 
 
 static func _grant_extra_life() -> void:

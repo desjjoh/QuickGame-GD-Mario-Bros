@@ -5,7 +5,7 @@ const RISING_REWARD_POPUP := preload("res://scenes/components/presentation/risin
 
 
 func _grant_reward(_player: BasePlayer) -> void:
-	RISING_REWARD_POPUP.show_one_up(get_parent(), sprite.global_position)
+	RISING_REWARD_POPUP.show_one_up(get_parent(), reward_popup_position())
 	DELAYED_REWARD.schedule(self, _award_life)
 
 

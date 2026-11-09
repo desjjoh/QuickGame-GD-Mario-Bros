@@ -130,7 +130,7 @@ func _ready() -> void:
 	assert(not lower.runtime_loaded)
 	assert(player.state_machine.current_state == player.pipe_enter_state)
 	assert(player.body.collision_mask == 0)
-	assert(level.players.get_index() < level.get_node("Areas").get_index())
+	assert(level.player_behind_world)
 	assert(
 		early_idle[0] == 0,
 		"Handoff must not briefly activate normal controls between entry and exit."
@@ -173,7 +173,7 @@ func _ready() -> void:
 	assert(player.state_machine.current_state != player.pipe_enter_state)
 	assert(player.body.collision_mask == original_mask)
 	assert(player.sprite.visible)
-	assert(level.players.get_index() > level.get_node("Areas").get_index())
+	assert(not level.player_behind_world)
 	assert(player.arrival_control_ticks_remaining == 0)
 	await ticks(2)
 	assert(

@@ -53,7 +53,7 @@ func _ready() -> void:
 		mushroom._physics_process(1.0 / 60.0)
 	assert(mushroom.position == Vector2(64, 128))
 	assert(mushroom._emergence_remaining == 0 and not mushroom.sprite.region_enabled)
-	var pickup_position := mushroom.sprite.global_position
+	var pickup_position := mushroom.sprite.global_position.round() - Vector2(0, 21)
 	await ticks(2)
 	# Actual overlap grants the reward once and starts growth on this same actor.
 	mario.body.global_position = mushroom.body.global_position + Vector2(0, 8)

@@ -17,6 +17,7 @@ var _loops: Dictionary[int, AudioStreamWAV] = {}
 
 func _ready() -> void:
 	_voice.name = "BackgroundMusic"
+	_voice.bus = SoundHandler.NES_MIX_BUS
 	add_child(_voice)
 	for track: int in STREAMS:
 		var stream := STREAMS[track].duplicate() as AudioStreamWAV

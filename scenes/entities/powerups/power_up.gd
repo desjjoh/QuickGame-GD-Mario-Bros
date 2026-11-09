@@ -4,6 +4,7 @@ extends SpawnableEntity
 
 const EMERGENCE_HEIGHT := 16.0
 const EMERGENCE_STEP_TIME := 4.0 / 60.0
+const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd")
 const PLAYER_CONTACT := preload("res://scenes/components/interactions/player_contact.gd")
 
 var _removing := false
@@ -22,6 +23,9 @@ func _ready() -> void:
 		is_zero_approx(_emergence_remaining) or minimum_pickup_rise < EMERGENCE_HEIGHT
 	)
 	super()
+	DRAW_ORDER.apply(
+		sprite, DRAW_ORDER.BEHIND_WORLD if _emergence_remaining > 0.0 else DRAW_ORDER.AVAILABLE_ITEM
+	)
 	if _emergence_remaining > 0.0:
 		sprite.hide()
 		SoundHandler.play_reward(&"power_up_reveal")
@@ -57,8 +61,7 @@ func _advance_emergence(delta: float) -> void:
 	_emergence_remaining -= rise
 	_update_emergence_sprite()
 	if _emergence_remaining == 0.0:
-		# Draw over blocks within the world layer once the item clears its source.
-		get_parent().move_child(self, -1)
+		DRAW_ORDER.apply(sprite, DRAW_ORDER.AVAILABLE_ITEM)
 		physics_interpolation_mode = _previous_interpolation_mode
 		reset_physics_interpolation()
 		pickup.set_deferred("monitoring", true)
@@ -114,6 +117,11 @@ func _check_pickup() -> void:
 
 func _begin_collection(_player: BasePlayer) -> bool:
 	return true
+
+
+## The first draw is 17 pixels above the top of the 16-pixel item sprite.
+func reward_popup_position() -> Vector2:
+	return sprite.global_position.round() - Vector2(0, 21)
 
 
 func _grant_reward(_player: BasePlayer) -> void:

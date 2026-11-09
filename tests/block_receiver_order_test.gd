@@ -3,6 +3,8 @@ extends Node
 const GOOMBA := preload("res://scenes/entities/enemies/goomba/goomba.tscn")
 const KOOPA := preload("res://scenes/entities/enemies/koopa/green_koopa.tscn")
 const MUSHROOM := preload("res://scenes/entities/powerups/one_up_mushroom.tscn")
+const BRICK := preload("res://scenes/entities/blocks/brick/brick_block.tscn")
+const QUESTION_BLOCK := preload("res://scenes/entities/blocks/question/question_block.tscn")
 
 
 func ticks(count: int) -> void:
@@ -40,6 +42,11 @@ func _ready() -> void:
 		for breaking in [false, true]:
 			for scenario in range(12):
 				await check_case(wrapped, breaking, scenario)
+	await check_arrival(BRICK, false, false, 1, true)
+	await check_arrival(QUESTION_BLOCK, false, true, 1, true)
+	await check_arrival(QUESTION_BLOCK, false, false, 20, false)
+	await check_arrival(BRICK, true, false, 1, true)
+	await check_arrival(BRICK, true, false, 2, false)
 	print("block_receiver_order_test: PASS")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
@@ -47,20 +54,7 @@ func _ready() -> void:
 func check_case(wrapped: bool, breaking: bool, scenario: int) -> void:
 	var container: Node = CanvasLayer.new() if wrapped else Node2D.new()
 	add_child(container)
-	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
-	level.player_start_configuration = load(
-		(
-			"res://assets/player/forms/super.tres"
-			if breaking
-			else "res://assets/player/forms/small.tres"
-		)
-	)
-	level.entity_layout.clear()
-	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
-	container.add_child(level)
-	level.set_physics_process(false)
-	level.player.process_mode = Node.PROCESS_MODE_DISABLED
-	level.player.body.global_position = Vector2(40, 100)
+	var level := _make_level(container, breaking)
 	var actors: Array[BaseEntity] = []
 	var expected: BaseEntity
 	match scenario:
@@ -131,9 +125,7 @@ func check_case(wrapped: bool, breaking: bool, scenario: int) -> void:
 			var item := mushroom(level)
 			item._removing = true
 			actors.assign([actor, item])
-	var block := (
-		load("res://scenes/entities/blocks/brick/brick_block.tscn").instantiate() as BaseBlock
-	)
+	var block := BRICK.instantiate() as BaseBlock
 	block.position = Vector2(192, 112)
 	level.world_objects.add_child(block)
 	await ticks(2)
@@ -173,3 +165,70 @@ func check_case(wrapped: bool, breaking: bool, scenario: int) -> void:
 	)
 	container.free()
 	await get_tree().process_frame
+
+
+func check_arrival(
+	scene: PackedScene, breaking: bool, walk_on: bool, arrival_tick: int, expect_hit: bool
+) -> void:
+	var level := _make_level(self, breaking)
+	var block := scene.instantiate() as BaseBlock
+	block.position = Vector2(192, 112)
+	level.world_objects.add_child(block)
+	var actor := enemy(level)
+	if walk_on:
+		var support := BRICK.instantiate() as BaseBlock
+		support.position = Vector2(208, 112)
+		level.world_objects.add_child(support)
+		# Start just outside the impact strip with room above the floor recovery margin.
+		actor.body.global_position = Vector2(215.25, 103.9)
+	else:
+		actor.body.global_position = Vector2(200, 101.5)
+	var next_actor := enemy(level)
+	next_actor.body.global_position = Vector2(240, 104)
+	await ticks(2)
+	await get_tree().physics_frame
+	assert(block.receive_hit(EntityHit.new(level.player, &"bonk", Vector2.UP)))
+	assert(not actor._defeated)
+	for tick in range(arrival_tick):
+		await get_tree().physics_frame
+	if breaking and arrival_tick > 1:
+		assert(not is_instance_valid(block))
+	elif not breaking:
+		assert(block.bounce.is_running() == expect_hit)
+	if not walk_on:
+		actor.body.velocity.y = 180.0
+	(actor.state_machine.current_state as EntityState).process_physics(1.0 / 60.0)
+	if not walk_on and is_instance_valid(block):
+		assert(actor.body.is_on_floor())
+	var hit_tick := Engine.get_physics_frames()
+	await get_tree().process_frame
+	assert(
+		actor._defeated == expect_hit,
+		"Arrival on tick %d (break=%s, walk=%s)" % [arrival_tick, breaking, walk_on]
+	)
+	if expect_hit and not breaking:
+		await get_tree().physics_frame
+		assert(Engine.get_physics_frames() == hit_tick + 1 and block.bounce.is_running())
+		next_actor.body.global_position = Vector2(202, 104)
+		await ticks(2)
+		assert(not next_actor._defeated)
+	level.free()
+	await get_tree().process_frame
+
+
+func _make_level(parent: Node, breaking: bool) -> BaseLevel:
+	var level := load("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	level.player_start_configuration = load(
+		(
+			"res://assets/player/forms/super.tres"
+			if breaking
+			else "res://assets/player/forms/small.tres"
+		)
+	)
+	level.entity_layout.clear()
+	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
+	parent.add_child(level)
+	level.set_physics_process(false)
+	level.player.process_mode = Node.PROCESS_MODE_DISABLED
+	level.player.body.global_position = Vector2(40, 100)
+	return level

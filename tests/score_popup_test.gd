@@ -34,17 +34,22 @@ func _ready() -> void:
 	world.add_child(animated)
 	assert(animated.show_score(1000, Vector2(100, 100)))
 	animated.rise_and_free()
-	for tick in range(12):
+	for tick in range(1, 13):
 		await get_tree().physics_frame
-	assert(animated.global_position.y < 100.0 and animated.global_position.y > 76.0)
+		await get_tree().process_frame
+		assert(animated.global_position == Vector2(100, 100 - tick))
 	get_tree().paused = true
 	var paused_position: Vector2 = animated.global_position
 	for tick in range(4):
 		await get_tree().process_frame
 	assert(animated.global_position == paused_position)
 	get_tree().paused = false
-	for tick in range(48):
+	for tick in range(13, 48):
 		await get_tree().physics_frame
+		await get_tree().process_frame
+		assert(animated.global_position == Vector2(100, 100 - tick))
+	await get_tree().physics_frame
+	await get_tree().process_frame
 	assert(not is_instance_valid(animated), "The opted-in rise must free its popup")
 	assert(
 		is_instance_valid(extra_life) and extra_life.global_position == Vector2(120, 128),

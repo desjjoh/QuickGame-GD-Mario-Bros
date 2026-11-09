@@ -4,7 +4,6 @@ extends Node
 
 var input_locked: bool = false
 var pending: bool = false
-var _players_draw_index: int = -1
 var _transport_state: PlayerTransportState = null
 var _transport_trip: Dictionary = {}
 var _transport_exiting: bool = false
@@ -132,8 +131,7 @@ func _start_transport_state(state: PlayerTransportState) -> void:
 	_transport_completion_callback = _on_transport_finished.bind(_transport_phase)
 	state.travel_finished.connect(_transport_completion_callback)
 	state.exited.connect(_restore_player_draw_order)
-	_players_draw_index = level.players.get_index()
-	level.move_child(level.players, level.get_node("Areas").get_index())
+	level.player_behind_world = true
 	var suspended := level.player.state_machine.gameplay_suspended
 	level.player.state_machine.gameplay_suspended = false
 	var changed := level.player.state_machine.change_state(state)
@@ -345,12 +343,4 @@ func cancel(resume_player: bool) -> void:
 
 
 func _restore_player_draw_order() -> void:
-	if _players_draw_index < 0:
-		return
-	var original_index := _players_draw_index
-	_players_draw_index = -1
-	# Do not reorder siblings while a dying player/level exits the tree.
-	if level.is_shutdown or not is_instance_valid(level.player) or level.player.is_shutdown:
-		return
-	if is_instance_valid(level.players) and level.players.get_parent() == level:
-		level.move_child(level.players, mini(original_index, level.get_child_count() - 1))
+	level.player_behind_world = false

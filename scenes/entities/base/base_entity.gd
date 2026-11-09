@@ -109,6 +109,7 @@ func play_sound_effect(sound: AudioStream) -> AudioStreamPlayer:
 		_active_sound_effect.stop()
 		_active_sound_effect.queue_free()
 	var audio := AudioStreamPlayer.new()
+	audio.bus = SoundHandler.NES_MIX_BUS
 	_active_sound_effect = audio
 	audio.stream = sound
 	get_effects_parent().add_child(audio)

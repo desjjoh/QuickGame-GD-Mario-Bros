@@ -3,6 +3,7 @@ extends Sprite2D
 
 const TEXTURE := preload("res://assets/items/block-coin.png")
 const SCORE_POPUP := preload("res://scenes/components/presentation/score_popup.tscn")
+const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd")
 const INITIAL_SPEED := -300.0
 const GRAVITY := 1125.0
 const END_SPEED := 300.0
@@ -16,6 +17,7 @@ var _popup: Sprite2D
 
 
 func _ready() -> void:
+	DRAW_ORDER.apply(self, DRAW_ORDER.REWARD_EFFECT)
 	texture = TEXTURE
 	hframes = 4
 
