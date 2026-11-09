@@ -53,7 +53,3 @@ Run focused headless regression scenes from PowerShell:
 ```
 
 See [Testing](docs/testing.md) for individual scenarios and manual checks.
-
-## License
-
-[MIT](LICENSE).
