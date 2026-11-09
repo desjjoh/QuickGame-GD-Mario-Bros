@@ -6,10 +6,9 @@ const COIN_FRAME := Rect2(0, 0, 16, 16)
 const COIN_TINT := Color(1, 1, 1, 0.65)
 const ONE_UP_SCENE := preload("res://scenes/entities/powerups/one_up_mushroom.tscn")
 const ONE_UP_TEXTURE := preload("res://assets/palettes/overworld/misc/green-mushroom.png")
-const SUPER_SCENE := preload("res://scenes/entities/powerups/super_mushroom.tscn")
 const SUPER_TEXTURE := preload("res://assets/items/red-mushroom.png")
 
-enum Brush { TILES, COIN, ONE_UP, TIMED_COINS, SUPER }
+enum Brush { TILES, COIN, ONE_UP, TIMED_COINS, TIERED }
 
 var _brush: OptionButton
 var _layer: TileMapLayer
@@ -21,7 +20,7 @@ func _enter_tree() -> void:
 	_brush.add_item("Apply Coin Reward", Brush.COIN)
 	_brush.add_item("Apply 1-Up Reward", Brush.ONE_UP)
 	_brush.add_item("Apply Timed Coins Reward", Brush.TIMED_COINS)
-	_brush.add_item("Apply Super Mushroom Reward", Brush.SUPER)
+	_brush.add_item("Apply Tiered Power-Up Reward", Brush.TIERED)
 	_brush.tooltip_text = "Choose a reward, then click a painted reward block."
 	add_control_to_container(CONTAINER_CANVAS_EDITOR_MENU, _brush)
 	_brush.hide()
@@ -70,15 +69,14 @@ func _apply_reward(cell: Vector2i) -> void:
 	var reward: BlockReward
 	if _brush.get_selected_id() != Brush.COIN:
 		reward = BlockReward.new()
-		reward.kind = (
-			BlockReward.Kind.TIMED_COINS
-			if _brush.get_selected_id() == Brush.TIMED_COINS
-			else BlockReward.Kind.POWER_UP
-		)
-		if reward.kind == BlockReward.Kind.POWER_UP:
-			reward.power_up_scene = (
-				SUPER_SCENE if _brush.get_selected_id() == Brush.SUPER else ONE_UP_SCENE
-			)
+		match _brush.get_selected_id():
+			Brush.TIMED_COINS:
+				reward.kind = BlockReward.Kind.TIMED_COINS
+			Brush.TIERED:
+				reward.kind = BlockReward.Kind.TIERED_POWER_UP
+			Brush.ONE_UP:
+				reward.kind = BlockReward.Kind.POWER_UP
+				reward.power_up_scene = ONE_UP_SCENE
 	var previous := area.question_block_rewards
 	var old := BlockReward.resolve(previous.get(cell))
 	var selected := BlockReward.resolve(reward)
@@ -148,11 +146,16 @@ func _forward_canvas_force_draw_over_viewport(overlay: Control) -> void:
 							COIN_TINT
 						)
 				elif (
-					reward.kind == BlockReward.Kind.POWER_UP
-					and reward.power_up_scene in [ONE_UP_SCENE, SUPER_SCENE]
+					reward.kind == BlockReward.Kind.TIERED_POWER_UP
+					or (
+						reward.kind == BlockReward.Kind.POWER_UP
+						and reward.power_up_scene == ONE_UP_SCENE
+					)
 				):
 					var base_texture := (
-						SUPER_TEXTURE if reward.power_up_scene == SUPER_SCENE else ONE_UP_TEXTURE
+						SUPER_TEXTURE
+						if reward.kind == BlockReward.Kind.TIERED_POWER_UP
+						else ONE_UP_TEXTURE
 					)
 					var texture := (
 						area.theme.resolve_texture(base_texture) if area.theme else base_texture

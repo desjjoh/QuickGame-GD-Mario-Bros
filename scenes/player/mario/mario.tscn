@@ -26,6 +26,7 @@
 [ext_resource type="Script" path="res://scripts/player/mario_form_controller.gd" id="form_controller"]
 [ext_resource type="Script" path="res://scripts/player/mario_form_presentation.gd" id="form_presentation"]
 [ext_resource type="Script" path="res://scripts/player/mario_damage.gd" id="damage"]
+[ext_resource type="Script" path="res://scripts/player/fire_throw_pose.gd" id="throw_pose"]
 
 [ext_resource type="Script" path="res://scripts/player/mario_terrain.gd" id="mario_terrain"]
 
@@ -94,6 +95,10 @@ shape = SubResource("RectangleShape2D_small_mario")
 [node name="Sprite2D" type="Sprite2D" parent="Body" index="1" unique_id=432554422]
 position = Vector2(0, -7)
 texture = ExtResource("6_nrfpf")
+
+[node name="ThrowPose" type="Node2D" parent="Body/Sprite2D"]
+visible = false
+script = ExtResource("throw_pose")
 
 [node name="EnemyHurtbox" type="Area2D" parent="Body"]
 position = Vector2(0, -6)

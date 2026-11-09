@@ -9,6 +9,8 @@ var _launch_presentation := (
 
 func enter() -> void:
 	var was_flipped := entity.sprite.flip_v
+	if fireball_launch:
+		entity.sprite.position.y += 2.0
 	super.enter()
 	if not block_launch:
 		entity.sprite.frame = 0
@@ -37,6 +39,7 @@ func process_physics(delta: float) -> BaseState:
 
 
 func exit() -> void:
+	super.exit()
 	if _launch_presentation.is_holding():
 		_launch_presentation.cancel(entity.sprite)
 	elif block_launch:

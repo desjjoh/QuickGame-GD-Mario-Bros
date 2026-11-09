@@ -27,6 +27,7 @@ var input_down: float = 0.0
 var input_primary: bool = false
 var input_primary_just_pressed: bool = false
 var input_secondary: bool = false
+var input_secondary_just_pressed: bool = false
 var input_start: bool = false
 var input_start_just_pressed: bool = false
 var _primary_requires_release: bool = false
@@ -59,6 +60,9 @@ func _physics_process(_delta: float) -> void:
 		input_primary = Input.is_action_pressed(primary_action)
 		input_primary_just_pressed = Input.is_action_just_pressed(primary_action)
 	input_secondary = _is_action_pressed(secondary_action)
+	input_secondary_just_pressed = (
+		input_secondary and Input.is_action_just_pressed(secondary_action)
+	)
 	input_start = _is_action_pressed(start_action)
 	input_start_just_pressed = (
 		not _start_requires_release
@@ -103,6 +107,7 @@ func _clear_input() -> void:
 	input_primary = false
 	input_primary_just_pressed = false
 	input_secondary = false
+	input_secondary_just_pressed = false
 	input_start = false
 	input_start_just_pressed = false
 	input_select = false

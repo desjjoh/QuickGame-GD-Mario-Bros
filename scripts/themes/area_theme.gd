@@ -11,6 +11,8 @@ extends Resource
 @export var entity_markers: TileSet
 @export var enemy_markers: TileSet
 @export var texture_overrides: Dictionary[String, Texture2D] = {}
+## Replacement artwork for Fire transformation slots 1 through 3.
+@export var fire_transform_palettes: Array[PlayerPalette] = []
 
 
 func resolve_texture(texture: Texture2D) -> Texture2D:

@@ -34,6 +34,12 @@
 
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/enemies/koopa.png" id="koopa"]
 
+[ext_resource type="Resource" path="res://assets/player/forms/fire_palettes/palette_5.tres" id="fire_5"]
+[ext_resource type="Resource" path="res://assets/player/forms/fire_palettes/palette_3.tres" id="fire_3"]
+[ext_resource type="Resource" path="res://assets/player/forms/fire_palettes/palette_7.tres" id="fire_7"]
+
+[ext_resource type="Script" path="res://scripts/player/player_palette.gd" id="fire_palette_script"]
+
 [resource]
 script = ExtResource("1")
 display_name = "Castle"
@@ -70,3 +76,4 @@ texture_overrides = Dictionary[String, Texture2D]({
 "res://assets/palettes/overworld/ui/start-cursor.png": ExtResource("title_cursor"),
 "res://assets/palettes/overworld/ui/start-title.png": ExtResource("title_card")
 })
+fire_transform_palettes = Array[ExtResource("fire_palette_script")]([ExtResource("fire_5"), ExtResource("fire_3"), ExtResource("fire_7")])

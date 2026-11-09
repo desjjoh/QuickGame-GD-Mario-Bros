@@ -30,6 +30,9 @@ sources/2 = SubResource("TileSetAtlasSource_2al3u")
 [sub_resource type="RectangleShape2D" id="solid"]
 size = Vector2(16, 16)
 
+[sub_resource type="RectangleShape2D" id="projectile_barrier"]
+size = Vector2(2, 144)
+
 [node name="Flagpole" unique_id=192651015 instance=ExtResource("base")]
 texture_filter = 1
 script = ExtResource("script")
@@ -42,6 +45,14 @@ position = Vector2(24, 8)
 [node name="CollisionShape2D" parent="Interactions/Detection"]
 position = Vector2(24, 82)
 shape = SubResource("capture")
+
+[node name="ProjectileBarrier" type="StaticBody2D" parent="Interactions"]
+position = Vector2(24, 88)
+collision_layer = 2048
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactions/ProjectileBarrier"]
+shape = SubResource("projectile_barrier")
 
 [node name="Presentation" parent="."]
 

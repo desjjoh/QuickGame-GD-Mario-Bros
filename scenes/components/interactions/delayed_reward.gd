@@ -8,8 +8,9 @@ var _reward: Callable
 var _level: BaseLevel
 
 
-static func schedule(source: Node, reward: Callable) -> void:
+static func schedule(source: Node, reward: Callable, delay_ticks: int = DELAY_TICKS) -> void:
 	var pending := new()
+	pending._remaining_ticks = maxi(1, delay_ticks)
 	pending._reward = reward
 	pending._created_tick = Engine.get_physics_frames()
 	pending.process_mode = Node.PROCESS_MODE_PAUSABLE

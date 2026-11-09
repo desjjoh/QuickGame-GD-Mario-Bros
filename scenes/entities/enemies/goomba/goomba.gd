@@ -12,6 +12,7 @@ func _accept_hit(hit: EntityHit) -> bool:
 			var knocked_out = $StateMachine/KnockedOut
 			knocked_out.launch_direction = away_from_attacker(hit)
 			knocked_out.block_launch = hit.maneuver == &"block_bump"
+			knocked_out.fireball_launch = hit.maneuver == &"fireball"
 			if not state_machine.change_state(knocked_out):
 				return false
 		_:
@@ -23,6 +24,8 @@ func _accept_hit(hit: EntityHit) -> bool:
 		award_stomp(hit, sprite.global_position)
 	elif hit.maneuver == &"block_bump":
 		award_score(100, sprite.global_position)
+	elif hit.maneuver == &"fireball":
+		award_fireball_defeat(100)
 	return true
 
 

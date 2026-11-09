@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PlayerPalette" format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player_palette.gd" id="script"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 2/idle.png" id="idle"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 2/walk.png" id="walk"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 2/jump.png" id="jump"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 2/crouch.png" id="crouch"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 2/slide.png" id="slide"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 2/climb.png" id="climb"]
+
+[resource]
+script = ExtResource("script")
+sheets = Dictionary[StringName, Texture2D]({
+&"idle.png": ExtResource("idle"),
+&"walk.png": ExtResource("walk"),
+&"jump.png": ExtResource("jump"),
+&"crouch.png": ExtResource("crouch"),
+&"slide.png": ExtResource("slide"),
+&"climb.png": ExtResource("climb"),
+})
