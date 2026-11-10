@@ -77,6 +77,8 @@ Use typed GameHandler methods/properties and `player_status` for score, coins, l
 
 LevelSpawnRegistry keeps ten enemy slots and one independent power-up slot. These are code-defined limits. Ordinary painted spawners attempt once per area load and do not retry after rejection. Reward blocks may explicitly replace the current power-up. Unlisted categories remain unlimited and untracked.
 
+Paint one **Goomba Pair Spawner**, **Goomba Triplet Spawner**, or **Green Koopa Pair Spawner** marker on the 16×16 **EnemyLayout** at the first member's placement. The marker creates the group together at the camera's right edge, with members 24 pixels apart. If the group runs out of enemy slots during activation, the remaining members are skipped for that area load.
+
 ## Deliberate gameplay differences
 
 Enemy stomp scoring omits the NES shared StompTimer score modifier. A stomped Koopa instead has a shell-local 12-tick grace window; a kick does not refresh it. These rules are separate from the independent timed-coin windows above.

@@ -1,0 +1,4 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://tests/blocks/block_receiver_order_test.gd" id="script"]
+[node name="BlockReceiverOrderTest" type="Node"]
+script = ExtResource("script")

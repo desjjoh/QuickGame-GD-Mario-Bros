@@ -1,4 +1,0 @@
-[gd_scene format=3]
-[ext_resource type="Script" path="res://tests/delayed_reward_test.gd" id="script"]
-[node name="DelayedRewardTest" type="Node"]
-script = ExtResource("script")

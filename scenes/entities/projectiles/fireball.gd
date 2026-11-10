@@ -100,6 +100,7 @@ func advance() -> void:
 	if (
 		global_position.x <= view.position.x
 		or global_position.x + 8 >= view.end.x
+		or global_position.y < view.position.y
 		or global_position.y + 8 >= view.end.y
 	):
 		queue_free()

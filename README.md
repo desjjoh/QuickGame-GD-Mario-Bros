@@ -32,6 +32,16 @@ Open `scenes/levels/worlds/world 1/1-1.tscn` and expand **Areas → MainArea →
 
 Open `scenes/levels/worlds/world 1/1-1.tscn` and press **F6** to run 1-1 directly.
 
+## Checks
+
+Run focused headless regression scenes from PowerShell:
+
+```powershell
+./scripts/run_tests.ps1 -GodotPath 'C:/path/to/Godot_console.exe' -TestName @('block_test', 'area_streaming_test')
+```
+
+See [Testing](docs/testing.md) for individual scenarios and manual checks.
+
 ## Documentation
 
 | Guide                                  | Contents                                           |
@@ -43,13 +53,3 @@ Open `scenes/levels/worlds/world 1/1-1.tscn` and press **F6** to run 1-1 directl
 | [Security](docs/security.md)           | Local data and trust boundaries                    |
 | [Deployment](docs/deployment.md)       | Windows export and release checks                  |
 | [Backlog](docs/backlog.md)             | Open work and known issues                         |
-
-## Checks
-
-Run focused headless regression scenes from PowerShell:
-
-```powershell
-./scripts/run_tests.ps1 -GodotPath 'C:/path/to/Godot_console.exe' -TestName @('block_test', 'area_streaming_test')
-```
-
-See [Testing](docs/testing.md) for individual scenarios and manual checks.

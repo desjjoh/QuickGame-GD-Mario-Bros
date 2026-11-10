@@ -111,7 +111,7 @@ func detach(player: BasePlayer) -> void:
 		surface.notify_detached(player)
 
 
-func step(player: BasePlayer, axis: Vector2, delta: float) -> bool:
+func step(player: BasePlayer, axis: Vector2, delta: float, vertical_step: float = NAN) -> bool:
 	var surface := get_surface()
 	if not is_instance_valid(surface) or not surface.is_available():
 		return false
@@ -140,8 +140,9 @@ func step(player: BasePlayer, axis: Vector2, delta: float) -> bool:
 		# A side switch is a discrete placement, not motion across the shaft.
 		player.body.reset_physics_interpolation()
 	var speed := (-upward_speed if axis.y < 0.0 else downward_speed) if axis.y != 0.0 else 0.0
+	var displacement := speed * delta if is_nan(vertical_step) else vertical_step
 	var target_y := clampf(
-		feet.y + speed * delta,
+		feet.y + displacement,
 		surface.climb_top.global_position.y,
 		surface.climb_bottom.global_position.y
 	)

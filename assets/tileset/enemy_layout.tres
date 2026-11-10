@@ -23,9 +23,25 @@ texture_region_size = Vector2i(16, 32)
 0:0/0/texture_origin = Vector2i(0, 8)
 0:0/0/custom_data_0 = "green_koopa_spawner"
 
+[sub_resource type="TileSetAtlasSource" id="triplet"]
+resource_name = "Goomba Triplet Spawner"
+texture = ExtResource("goomba")
+0:0/0 = 0
+0:0/0/custom_data_0 = "goomba_triplet_spawner"
+
+[sub_resource type="TileSetAtlasSource" id="koopa_pair"]
+resource_name = "Green Koopa Pair Spawner"
+texture = ExtResource("koopa")
+texture_region_size = Vector2i(16, 32)
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(0, 8)
+0:0/0/custom_data_0 = "green_koopa_pair_spawner"
+
 [resource]
 custom_data_layer_0/name = "entity_id"
 custom_data_layer_0/type = 4
 sources/0 = SubResource("single")
 sources/1 = SubResource("pair")
 sources/2 = SubResource("koopa")
+sources/3 = SubResource("triplet")
+sources/4 = SubResource("koopa_pair")
