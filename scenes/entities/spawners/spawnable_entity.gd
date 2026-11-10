@@ -4,6 +4,9 @@ extends BaseEntity
 
 signal consumed
 
+## A repeating source can own camera retirement and replacement together.
+var spawner_manages_activity := false
+
 
 func report_consumed() -> void:
 	consumed.emit()

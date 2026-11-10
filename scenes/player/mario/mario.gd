@@ -19,6 +19,7 @@ var _fireballs := FIREBALL_LAUNCHER.new()
 var _throw_timer_reload := 7
 var _floor_supported := false
 var _floor_position := Vector2.INF
+var _lift_support: MovingLift
 
 
 func receive_damage(source: BaseEntity = null) -> bool:
@@ -218,10 +219,31 @@ func move_body(gravity_after_motion: bool = false) -> void:
 
 
 func has_floor_support() -> bool:
+	if is_instance_valid(_lift_support) and can_contact_lift() and _lift_support.supports(self):
+		return true
 	# Placements and scripted motion can move the body outside the normal step.
 	if _uses_floor_probes() and _floor_position == body.global_position:
 		return _floor_supported
 	return super.has_floor_support()
+
+
+func can_contact_lift() -> bool:
+	return not is_shutdown and not gameplay_suspended and _uses_floor_probes()
+
+
+func land_on_lift(lift: MovingLift) -> void:
+	_lift_support = lift
+	body.global_position.y = lift.global_position.y
+	vertical_movement.finish_step_on_support(motion_values, 0.0, true)
+	stomp_chain = 0
+	var jump := state_machine.current_state as MarioJumpState
+	if jump != null:
+		state_machine.change_state(jump.landing_state(get_movement_axis().x))
+
+
+func release_lift_support(lift: MovingLift) -> void:
+	if _lift_support == lift:
+		_lift_support = null
 
 
 func _uses_floor_probes() -> bool:
@@ -270,6 +292,7 @@ func get_climb_query_bounds() -> Rect2:
 func on_area_arrival(through_pipe: bool = false) -> void:
 	super.on_area_arrival(through_pipe)
 	_floor_position = Vector2.INF
+	_lift_support = null
 	if through_pipe:
 		starman.clear()
 	_throw_pose.clear()

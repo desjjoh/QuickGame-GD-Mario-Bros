@@ -1,5 +1,7 @@
 extends Node
 
+const GOOMBA := preload("res://scenes/entities/enemies/goomba/goomba.tscn")
+
 
 func ticks(count: int) -> void:
 	for frame in range(count):
@@ -110,6 +112,7 @@ func _ready() -> void:
 	level.queue_free()
 	await ticks(2)
 	await check_center_foot_ledges(koopa_scene)
+	await check_low_clearance(koopa_scene)
 	print("koopa_walking_test: PASS")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
@@ -134,8 +137,7 @@ func check_center_foot_ledges(koopa_scene: PackedScene) -> void:
 	area.set_physics_process(false)
 	await ticks(2)
 
-	var goomba_scene := preload("res://scenes/entities/enemies/goomba/goomba.tscn")
-	for scene in [goomba_scene, koopa_scene]:
+	for scene in [GOOMBA, koopa_scene]:
 		for direction in [-1, 1]:
 			var player_x := 136.0 if direction > 0 else 320.0
 			level.player.body.global_position = area.to_global(Vector2(player_x, 208))
@@ -166,5 +168,55 @@ func check_center_foot_ledges(koopa_scene: PackedScene) -> void:
 				level.player.body.global_position = area.to_global(Vector2(other_x, 208))
 				walking.process_physics(1.0 / 60.0)
 				assert(enemy.body.velocity.x == landing_direction * 30.0)
+			enemy.free()
+	canvas.free()
+
+
+func check_low_clearance(green_scene: PackedScene) -> void:
+	var canvas := CanvasLayer.new()
+	add_child(canvas)
+	var level := preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	var area := level.get_node("Areas/MainArea") as BaseLevelArea
+	area.position = Vector2(160, 237)
+	area.get_node("Layouts/EnemyLayout").clear()
+	var floor := area.get_node("Layouts/GroundLayout") as TileMapLayer
+	floor.clear()
+	for column in range(24):
+		floor.set_cell(Vector2i(column, 13), 0, Vector2i.ZERO)
+	level.entity_layout.clear()
+	level.entity_layout.set_cell(Vector2i(8, 11), 1, Vector2i.ZERO)
+	level.entity_layout.set_cell(Vector2i(13, 12), 1, Vector2i.ZERO)
+	canvas.add_child(level)
+	level.set_physics_process(false)
+	level.player.set_physics_process(false)
+	area.set_physics_process(false)
+	await ticks(2)
+
+	var red_scene := preload("res://scenes/entities/enemies/koopa/red_koopa.tscn")
+	for scene in [GOOMBA, green_scene, red_scene]:
+		for direction in [-1, 1]:
+			var enemy := scene.instantiate() as BaseEnemy
+			var walking := enemy.get_node("StateMachine/Walking")
+			walking.initial_direction = direction
+			var start_x := 152.0 if direction < 0 else 120.0
+			level.world_objects.add_child(enemy)
+			enemy.set_physics_process(false)
+			enemy.body.global_position = area.to_global(Vector2(start_x, 200))
+			for tick in range(64):
+				walking.process_physics(1.0 / 60.0)
+				assert(walking.has_center_support)
+				assert(walking._direction == direction, "Walker turned under a one-tile gap.")
+				var local := area.to_local(enemy.body.global_position)
+				assert(floori(local.x) == floori(start_x + direction * (tick + 1) * 0.5))
+				assert(local.y == 200.0)
+
+			var wall_start := 232.0 if direction < 0 else 200.0
+			enemy.body.global_position = area.to_global(Vector2(wall_start, 200))
+			# These positions use the same offset from the wall as the Mesen cases.
+			var wall_trace := [231, 232] if direction < 0 else [199, 199]
+			for center: int in wall_trace:
+				walking.process_physics(1.0 / 60.0)
+				assert(floori(area.to_local(enemy.body.global_position).x) == center)
+			assert(walking._direction == -direction, "Walker must turn at a floor-level wall.")
 			enemy.free()
 	canvas.free()

@@ -16,9 +16,9 @@ func claim(category: StringName, expected_slot: int) -> Node2D:
 func _ready() -> void:
 	registry = REGISTRY.new()
 	add_child(registry)
-	assert(LevelSpawnRegistry.SPAWN_LIMITS[&"enemy"] == 10)
+	assert(registry.enemy_limit == 5)
 	var enemies: Array[Node2D] = []
-	for slot in range(10):
+	for slot in range(5):
 		enemies.append(claim(&"enemy", slot))
 	assert(not registry.has_capacity(&"enemy"))
 	var rejected := Node2D.new()
@@ -41,7 +41,7 @@ func _ready() -> void:
 	assert(registry.has_capacity(&"enemy"))
 	var reused_one := claim(&"enemy", 1)
 	var reused_three := claim(&"enemy", 3)
-	for slot in [0, 2, 4, 5, 6, 7, 8, 9]:
+	for slot in [0, 2, 4]:
 		assert(registry.get_slot(&"enemy", enemies[slot]) == slot)
 	assert(not registry.has_capacity(&"enemy"))
 	# Make slot0 the newest actor. Replacement must still remove oldest slot2.
@@ -84,5 +84,30 @@ func _ready() -> void:
 	assert(registry._spawn_slots[&"enemy"].is_empty())
 	assert(registry._spawn_slots[&"power_up"].is_empty())
 	registry.free()
+	_test_game_enemy_limit()
 	print("spawn_registry_test: PASS")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+
+
+func _test_game_enemy_limit() -> void:
+	var game := preload("res://tests/fixtures/silent_game.tscn").instantiate()
+	assert(game.enemy_limit == 5)
+	game.enemy_limit = 2
+	add_child(game)
+	var level := GameHandler.current_level
+	for slot in range(2):
+		var actor := Node2D.new()
+		assert(level.try_claim_spawn_slot(&"enemy", actor))
+		assert(level.spawn_registry.get_slot(&"enemy", actor) == slot)
+		level.add_child(actor)
+	assert(not level.has_spawn_capacity(&"enemy"))
+	assert(level.has_spawn_capacity(&"power_up"))
+	game.free()
+
+	var disabled := REGISTRY.new()
+	disabled.enemy_limit = 0
+	var rejected := Node2D.new()
+	assert(not disabled.has_capacity(&"enemy"))
+	assert(not disabled.try_claim(&"enemy", rejected, true))
+	rejected.free()
+	disabled.free()

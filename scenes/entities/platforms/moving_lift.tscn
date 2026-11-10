@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/platforms/moving_lift.gd" id="lift"]
+[ext_resource type="Texture2D" path="res://assets/items/moving-platform.png" id="art"]
+
+[node name="MovingLift" instance=ExtResource("base")]
+script = ExtResource("lift")
+persist_progress = false
+texture_filter = 1
+
+[node name="Presentation" type="Node2D" parent="."]
+
+[node name="Left" type="Sprite2D" parent="Presentation"]
+texture = ExtResource("art")
+centered = false
+
+[node name="Middle" type="Sprite2D" parent="Presentation"]
+position = Vector2(16, 0)
+texture = ExtResource("art")
+centered = false
+
+[node name="Right" type="Sprite2D" parent="Presentation"]
+position = Vector2(32, 0)
+texture = ExtResource("art")
+centered = false

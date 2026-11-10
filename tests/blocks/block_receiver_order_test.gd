@@ -109,10 +109,10 @@ func check_case(wrapped: bool, breaking: bool, scenario: int) -> void:
 			outside.body.global_position.x = 120
 			actors.assign([outside, mushroom(level)])
 			expected = actors[1]
-		10:  # The tenth enemy slot still precedes power-up slot0.
-			for slot in range(10):
+		10:  # The last enemy slot still precedes power-up slot0.
+			for slot in range(5):
 				var actor := enemy(level)
-				if slot < 9:
+				if slot < 4:
 					actor.body.global_position.x = 120
 				else:
 					expected = actor

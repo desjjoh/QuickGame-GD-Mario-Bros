@@ -14,7 +14,9 @@ const TILE_SIZE := 16.0
 ## Artwork faces left by default; symmetric enemies can leave this disabled.
 @export var face_movement: bool = false
 @export var use_center_foot_support := false
+@export var use_leading_side_probe := false
 @export var turn_toward_player_on_landing := false
+@export var turn_at_ledges := false
 
 var has_center_support := false
 var _direction: int
@@ -69,11 +71,16 @@ func _advance_center_foot_walk(delta: float) -> void:
 	var player := level.player if is_instance_valid(level) else null
 	_terrain_probe.exclude = [player.body.get_rid()] if is_instance_valid(player) else []
 	var depth := fposmod(_terrain_probe.position.y - grid_origin.y, TILE_SIZE)
+	var was_supported := has_center_support
 	has_center_support = (
 		body.velocity.y >= 0.0
 		and depth < FLOOR_DEPTH
 		and TERRAIN_PROBE.hits_terrain(enemy, _terrain_probe)
 	)
+	if turn_at_ledges and was_supported and not has_center_support:
+		_turn_around()
+		_move_center_foot_horizontal(body, delta, false, grid_origin)
+		return
 	var landed := _falling and has_center_support
 	if has_center_support:
 		if landed and turn_toward_player_on_landing and is_instance_valid(player):
@@ -94,9 +101,15 @@ func _advance_center_foot_walk(delta: float) -> void:
 
 
 func _move_center_foot_horizontal(
-	body: CharacterBody2D, delta: float, _landed: bool, _grid_origin: Vector2
+	body: CharacterBody2D, delta: float, landed: bool, grid_origin: Vector2
 ) -> void:
-	# Walking enemies keep the rectangle for walls.
+	if use_leading_side_probe:
+		if has_center_support and not landed and _has_leading_side_terrain(body, grid_origin):
+			_turn_around()
+		body.velocity.x = walk_speed * _direction
+		body.global_position.x += body.velocity.x * delta
+		return
+
 	body.velocity.x = walk_speed * _direction
 	var horizontal_step := Vector2(body.velocity.x * delta, 0.0)
 	var travel_direction := signf(horizontal_step.x)
@@ -113,6 +126,14 @@ func _move_center_foot_horizontal(
 		_turn_around()
 	else:
 		body.global_position.x += horizontal_step.x
+
+
+func _has_leading_side_terrain(body: CharacterBody2D, grid_origin: Vector2) -> bool:
+	var epsilon := Vector2(0.001, 0.001)
+	var pixel := (body.global_position - grid_origin + epsilon).floor() + grid_origin
+	# The reference samples the leading side four pixels above the feet.
+	_terrain_probe.position = pixel + Vector2(8.0 * _direction, 4.0) + epsilon
+	return TERRAIN_PROBE.hits_terrain(body, _terrain_probe)
 
 
 func _move_with_horizontal_speed(delta: float, horizontal_speed: float) -> void:

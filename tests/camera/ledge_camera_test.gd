@@ -71,45 +71,27 @@ func _ready() -> void:
 							player.state_machine.process_physics(1.0 / 60.0)
 							camera.follow_target(player.body)
 							var displacement := player.body.global_position.x - before
-							var expected := player.body.velocity.x / 60.0
+							var expected: float = direction * speed / 60.0
 							var label := (
 								"width=%s speed=%s dir=%s phase=%s penetration=%s"
 								% [width, speed, direction, phase, penetration]
 							)
-							var should_land: bool = penetration + 180.0 / 60.0 <= 4.0
-							if (
-								should_land
-								and (
-									absf(displacement - expected) > 0.1
-									or not player.body.is_on_floor()
+							var shallow: bool = penetration + 180.0 / 60.0 <= 4.0
+							# The 0.25 and 0.75 phases touch only the outer body edge.
+							# At 1.25 the leading foot reaches the platform.
+							var should_land: bool = shallow and phase == 1.25
+							if shallow and absf(displacement - expected) > 0.1:
+								failures.append(
+									label
+									+ " horizontal step: %s expected %s" % [displacement, expected]
 								)
-							):
-								(
-									failures
-									. append(
-										(
-											label
-											+ (
-												" landing lost/doubled horizontal step: %s expected %s floor=%s"
-												% [
-													displacement,
-													expected,
-													player.body.is_on_floor()
-												]
-											)
-										)
-									)
-								)
+							if player.body.is_on_floor() != should_land:
+								failures.append(label + " expected floor support: %s" % should_land)
 							if (
 								not should_land
-								and (
-									player.body.is_on_floor()
-									or player.body.global_position.y < 160.0 + penetration
-								)
+								and player.body.global_position.y < 160.0 + penetration
 							):
-								failures.append(
-									label + " must reject excessive post-motion penetration"
-								)
+								failures.append(label + " unsupported contact snapped upward")
 							# Reference side-collision gating suppresses scroll on blocked contacts.
 							var camera_expected := (
 								displacement
@@ -129,6 +111,6 @@ func _ready() -> void:
 		get_tree().quit(1)
 		return
 	print(
-		"PASS: 48 accepted jump-state ledge landings preserve one horizontal step; 24 over-depth contacts reject rescue; all 72 retain matching right-only camera motion."
+		"PASS: 16 ledge landings and 32 outer-edge grazes preserve one horizontal step; 24 over-depth contacts reject landing; all 72 preserve right-only camera motion."
 	)
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

@@ -1,5 +1,7 @@
 extends Node
 
+const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd")
+
 
 func _ready() -> void:
 	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
@@ -30,6 +32,8 @@ func _ready() -> void:
 	var block := level.get_node("Areas/MainArea/WorldObjects/brick_4_9") as BaseBlock
 	assert(block.body is StaticBody2D and block.sprite.texture != null)
 	assert(block.state_machine.current_state.name == &"Active")
+	var original_z_index := block.sprite.z_index
+	var original_z_as_relative := block.sprite.z_as_relative
 	var player := level.player
 	player.body.global_position.x = 72.0
 	for frame in range(5):
@@ -45,12 +49,28 @@ func _ready() -> void:
 		await get_tree().process_frame
 		bumped = bumped or player.body.is_on_ceiling()
 		sprite_bounced = sprite_bounced or block.sprite.position.y < 8.0
+		if block.bounce.is_running():
+			assert(
+				not block.sprite.z_as_relative and block.sprite.z_index == DRAW_ORDER.BOUNCING_BLOCK
+			)
+			assert(
+				(
+					DRAW_ORDER.WORLD < block.sprite.z_index
+					and block.sprite.z_index < DRAW_ORDER.AVAILABLE_ITEM
+				)
+			)
 		assert(block.body.global_transform == body_transform)
 		assert(player.body.global_position.y >= 173.8)
 	Input.action_release(ControllerHandler.primary_action)
 	assert(bumped and sprite_bounced and player.body.is_on_floor())
 	assert(block.state_machine.current_state.name == &"Active")
 	assert(block.sprite.position == Vector2(8, 8))
+	assert(
+		(
+			block.sprite.z_index == original_z_index
+			and block.sprite.z_as_relative == original_z_as_relative
+		)
+	)
 	assert(not block.receive_hit(EntityHit.new(player, &"dash", Vector2.UP)))
 	assert(not block.receive_hit(EntityHit.new(player, &"bonk", Vector2.DOWN)))
 	# A second real jump must bounce the same brick again.
@@ -71,6 +91,12 @@ func _ready() -> void:
 	assert(block.global_position == Vector2(64, 144))
 	level.shutdown()
 	assert(block.is_shutdown and block.sprite.position == Vector2(8, 8))
+	assert(
+		(
+			block.sprite.z_index == original_z_index
+			and block.sprite.z_as_relative == original_z_as_relative
+		)
+	)
 	game.free()
 	# Layout generation also supports non-solid entities and a transformed level.
 	var plain := load("res://scenes/levels/base/base_level.tscn").instantiate() as BaseLevel

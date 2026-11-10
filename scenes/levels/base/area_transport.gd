@@ -111,7 +111,8 @@ func begin(
 			not is_instance_valid(source)
 			or not source.is_inside_tree()
 			or not level.can_transport()
-			or source.get_parent().get_parent() != level.active_area
+			or level.active_area == null
+			or not level.active_area.is_ancestor_of(source)
 			or not source.can_start_transport(traveler)
 		):
 			return false

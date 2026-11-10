@@ -32,6 +32,7 @@
 [ext_resource type="Texture2D" uid="uid://c7psk8vqg64p0" path="res://assets/palettes/underground/ui/hud-coin.png" id="hud_coin"]
 [ext_resource type="Texture2D" uid="uid://dgylwq14okd7f" path="res://assets/palettes/underground/enemies/koopa.png" id="koopa"]
 [ext_resource type="Texture2D" uid="uid://djwa8a77btioc" path="res://assets/palettes/underground/misc/green-mushroom.png" id="one_up"]
+[ext_resource type="Texture2D" uid="uid://cgfw5ndyfg74f" path="res://assets/palettes/underground/enemies/piranha-plant.png" id="piranha_plant"]
 [ext_resource type="Texture2D" uid="uid://dg6alpwa557uc" path="res://assets/palettes/underground/misc/starman.png" id="starman"]
 [ext_resource type="FontFile" uid="uid://cnagecrnf8opo" path="res://assets/palettes/underground/ui/alphabet-alt.fnt" id="title_accent"]
 [ext_resource type="Texture2D" uid="uid://b3asgrqfa0i4r" path="res://assets/palettes/underground/ui/start-title.png" id="title_card"]
@@ -49,6 +50,7 @@ enemy_markers = ExtResource("enemy_markers")
 texture_overrides = Dictionary[String, Texture2D]({
 "res://assets/palettes/overworld/enemies/goomba.png": ExtResource("goomba"),
 "res://assets/palettes/overworld/enemies/koopa.png": ExtResource("koopa"),
+"res://assets/palettes/overworld/enemies/piranha-plant.png": ExtResource("piranha_plant"),
 "res://assets/palettes/overworld/interactibles/blocks/brick-alternate.tres": ExtResource("art_0"),
 "res://assets/palettes/overworld/interactibles/blocks/brick.tres": ExtResource("art_1"),
 "res://assets/palettes/overworld/interactibles/blocks/question-block-2.tres": ExtResource("art_2"),

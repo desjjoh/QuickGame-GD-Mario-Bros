@@ -31,6 +31,7 @@ var actors_suspended := false
 @export var background_music: MusicHandler.Track = MusicHandler.Track.OVERWORLD
 @export var transport_points: Array[TransportPlacement] = []
 @export var question_block_rewards: Dictionary[Vector2i, Resource] = {}
+@export var pipe_spawns: Dictionary[Vector2i, Resource] = {}
 var _transport_cells: Dictionary[Vector2i, StringName] = {}
 
 @export var pipe_routes: Array[PipeRoute] = []
@@ -181,8 +182,8 @@ func find_transport_entity(id: StringName) -> TransportEntity:
 	if not runtime_loaded:
 		return null
 	var selected: TransportEntity = null
-	for child in $WorldObjects.get_children():
-		if child is TransportEntity and child.transport_id == id:
+	for child: TransportEntity in $WorldObjects.find_children("*", "TransportEntity", true, false):
+		if child.transport_id == id:
 			if selected != null:
 				return null
 			selected = child
@@ -207,7 +208,14 @@ func prepare_runtime() -> void:
 
 func _set_branch_owner(node: Node, root: Node) -> void:
 	for child in node.get_children():
-		child.owner = root
+		# An instance already recreates its own nodes when the branch loads.
+		var scene_owner := child.owner
+		if (
+			scene_owner == null
+			or scene_owner.scene_file_path.is_empty()
+			or not root.is_ancestor_of(scene_owner)
+		):
+			child.owner = root
 		_set_branch_owner(child, root)
 
 
@@ -246,7 +254,7 @@ func unload_runtime() -> void:
 
 func register_activity_entity(entity: BaseEntity) -> void:
 	# Players belong to the level, even if a custom scene nests one in an area.
-	if entity is BasePlayer:
+	if entity is BasePlayer or (entity is SpawnableEntity and entity.spawner_manages_activity):
 		return
 	_activity_entities[entity.get_instance_id()] = weakref(entity)
 	if is_active and entity is BaseEnemy:
@@ -287,16 +295,12 @@ func get_enemy_group_origin_x() -> float:
 	return floorf(get_activity_region(false).end.x - activation_buffer) - 1.0
 
 
-## Ordinary Goomba/Koopa OffscreenBoundsCheck, including its borrow/carry.
 func enemy_outside_cleanup(enemy: BaseEnemy) -> bool:
 	var view := get_activity_region(false).grow(-activation_buffer)
 	var left := floorf(view.position.x)
 	var right := floorf(view.end.x) - 1.0
-	var anchor := floorf(enemy.body.global_position.x - 8.0)
-	var right_extension := 73.0 if left >= 73.0 else 72.0
 	return (
-		anchor < left - 73.0
-		or anchor >= right + right_extension
+		enemy.is_outside_horizontal_cleanup(left, right)
 		or enemy.get_activity_rect().end.y <= get_activity_region(true).position.y
 		or enemy.get_activity_rect().position.y >= get_activity_region(true).end.y
 	)

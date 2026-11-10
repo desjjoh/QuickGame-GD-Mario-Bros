@@ -208,6 +208,13 @@ func is_moving_shell() -> bool:
 	return false
 
 
+## Ordinary Goomba/Koopa OffscreenBoundsCheck, including its borrow/carry.
+func is_outside_horizontal_cleanup(left: float, right: float) -> bool:
+	var anchor := floorf(body.global_position.x - 8.0)
+	var right_extension := 73.0 if left >= 73.0 else 72.0
+	return anchor < left - 73.0 or anchor >= right + right_extension
+
+
 func away_from_attacker(hit: EntityHit) -> float:
 	var origin := body.global_position
 	if hit.attacker is BaseEnemy or hit.attacker is BasePlayer:

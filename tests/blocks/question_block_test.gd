@@ -133,10 +133,13 @@ func _ready() -> void:
 			mushroom = object
 	assert(mushroom != null and mushroom.position == reward_block.position)
 	assert(not mushroom.sprite.visible)
-	assert(not mushroom.pickup.monitoring and not level.has_spawn_capacity(&"power_up"))
+	assert(not mushroom._can_pick_up_at_current_height())
+	assert(not level.has_spawn_capacity(&"power_up"))
 	for frame in range(32):
 		await get_tree().physics_frame
-	assert(mushroom.position.y < reward_block.position.y and not mushroom.pickup.monitoring)
+		var rise := reward_block.position.y - mushroom.position.y
+		assert(mushroom._can_pick_up_at_current_height() == (rise >= 4.0))
+	assert(mushroom._can_pick_up_at_current_height())
 	assert(mushroom.sprite.region_enabled and mushroom.sprite.visible)
 	var revealed_bottom := mushroom.sprite.global_position.y + mushroom.sprite.get_rect().end.y
 	assert(is_equal_approx(revealed_bottom, reward_block.global_position.y))
@@ -144,7 +147,7 @@ func _ready() -> void:
 	for frame in range(36):
 		await get_tree().physics_frame
 	assert(mushroom.position.y == reward_block.position.y - 17.0)
-	assert(mushroom.pickup.monitoring and mushroom.body.velocity.x > 0.0)
+	assert(mushroom._can_pick_up_at_current_height() and mushroom.body.velocity.x > 0.0)
 	assert(not mushroom.sprite.region_enabled and mushroom.sprite.offset.y == 1.0)
 	assert(GameHandler.player_status.lives == lives_before)
 	assert(reward_block.capture_area_state() == {"state": &"Inactive"})

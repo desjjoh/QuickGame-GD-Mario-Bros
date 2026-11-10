@@ -2,11 +2,24 @@ class_name PipeEntrance
 extends TransportEntity
 ## Shared upright and left-facing 2x2 pipe entrance.
 
+const UPRIGHT_MOUTH := Vector2(16, 0)
+const SPAWNER := preload("res://scenes/entities/spawners/pipe_occupant_spawner.tscn")
+
 @export var sideways: bool = false
 
 @export var destination_area_id: StringName = &"lower"
 @export var destination_endpoint_id: StringName = &"arrival"
 @export var alignment_tolerance: float = 4.0
+
+
+func attach_pipe_spawn(spawn: PipeSpawn) -> void:
+	if sideways or spawn == null or spawn.actor_scene == null:
+		return
+	var placement := SPAWNER.instantiate() as EntitySpawner
+	placement.actor_scene = spawn.actor_scene
+	placement.spawn_category = spawn.spawn_category
+	placement.actor_offsets = [UPRIGHT_MOUTH]
+	add_child(placement)
 
 
 func _physics_process(delta: float) -> void:
@@ -15,7 +28,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if not _level.can_transport():
 		return
-	if _level.active_area != get_parent().get_parent():
+	if _level.active_area == null or not _level.active_area.is_ancestor_of(self):
 		return
 	var player := _level.player
 	if not is_instance_valid(player) or player.is_shutdown:
@@ -28,7 +41,11 @@ func _physics_process(delta: float) -> void:
 
 
 func can_start_entry(player: BasePlayer) -> bool:
-	return is_instance_valid(player) and player.can_read_controller_input() and _can_reach_mouth(player)
+	return (
+		is_instance_valid(player)
+		and player.can_read_controller_input()
+		and _can_reach_mouth(player)
+	)
 
 
 func _can_reach_mouth(player: BasePlayer) -> bool:
@@ -71,7 +88,7 @@ func _touches_side_mouth(player_body: CharacterBody2D) -> bool:
 
 
 func entry_position() -> Vector2:
-	return to_global(Vector2(-6, 32) if sideways else Vector2(16, 0))
+	return to_global(Vector2(-6, 32) if sideways else UPRIGHT_MOUTH)
 
 
 func entry_direction() -> Vector2:
@@ -97,7 +114,7 @@ func get_transport_state(player: BasePlayer) -> PlayerTransportState:
 
 
 func exit_position() -> Vector2:
-	return to_global(Vector2(-8, 32) if sideways else Vector2(16, 0))
+	return to_global(Vector2(-8, 32) if sideways else UPRIGHT_MOUTH)
 
 
 func exit_direction() -> Vector2:

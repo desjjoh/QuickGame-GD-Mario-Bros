@@ -41,6 +41,8 @@
 
 [ext_resource type="Script" path="res://scripts/player/player_palette.gd" id="fire_palette_script"]
 
+[ext_resource type="Texture2D" path="res://assets/palettes/castle/enemies/piranha-plant.png" id="piranha_plant"]
+
 [resource]
 script = ExtResource("1")
 display_name = "Castle"
@@ -52,6 +54,7 @@ enemy_markers = ExtResource("enemy_markers")
 texture_overrides = Dictionary[String, Texture2D]({
 "res://assets/palettes/overworld/enemies/koopa.png": ExtResource("koopa"),
 "res://assets/palettes/overworld/enemies/goomba.png": ExtResource("goomba"),
+"res://assets/palettes/overworld/enemies/piranha-plant.png": ExtResource("piranha_plant"),
 "res://assets/palettes/overworld/interactibles/blocks/brick-alternate.tres": ExtResource("art_0"),
 "res://assets/palettes/overworld/interactibles/blocks/brick.tres": ExtResource("art_1"),
 "res://assets/palettes/overworld/interactibles/blocks/question-block-2.tres": ExtResource("art_2"),

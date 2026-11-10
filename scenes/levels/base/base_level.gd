@@ -117,6 +117,8 @@ func try_claim_spawn_slot(category: StringName, actor: Node, replace_oldest := f
 
 
 func _ready() -> void:
+	if GameHandler.current_level == self and is_instance_valid(GameHandler.current_game):
+		spawn_registry.enemy_limit = GameHandler.current_game.enemy_limit
 	GameHandler.pause_controller.register_level(self)
 	level_timer.expired.connect(_on_timer_expired)
 	level_timer.hurry_started.connect(_on_hurry_started)

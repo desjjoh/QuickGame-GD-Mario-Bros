@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="QuickGAME-GD Mario Bros"
+config/name="Super Mario GD"
 run/main_scene="res://scenes/main/game.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 run/max_fps=60

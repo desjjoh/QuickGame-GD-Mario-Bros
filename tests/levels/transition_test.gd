@@ -5,6 +5,7 @@ var operation_ran: bool = false
 
 const Definition = preload("res://scripts/transitions/transition_definition.gd")
 const Stage = preload("res://scripts/transitions/transition_stage.gd")
+const SCREEN_PIXEL := preload("res://tests/fixtures/screen_pixel.gd")
 
 
 func wait_until_idle() -> void:
@@ -77,14 +78,11 @@ func _ready() -> void:
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
 		var image := get_viewport().get_texture().get_image()
-		var expected_bg := Color8(
-			roundi(prior_clear.r * 255), roundi(prior_clear.g * 255), roundi(prior_clear.b * 255)
-		)
+		var backdrop := SCREEN_PIXEL.sample(image, 0, 0)
 		assert(
-			image.get_pixel(0, 0).is_equal_approx(expected_bg),
-			"Existing background changed: %s expected %s" % [image.get_pixel(0, 0), expected_bg]
+			backdrop.is_equal_approx(Color.BLACK), "Expected a black Game backdrop, got %s" % backdrop
 		)
-		assert(image.get_pixel(24, 16).is_equal_approx(expected_bg))
+		assert(SCREEN_PIXEL.sample(image, 24, 16).is_equal_approx(Color.BLACK))
 		assert(image.save_png("res://.godot/validation/transition-quick.png") == OK)
 	while director.phase != &"card":
 		await get_tree().process_frame
@@ -286,6 +284,6 @@ func _ready() -> void:
 	assert(RenderingServer.get_default_clear_color() == prior_clear)
 	RenderingServer.set_default_clear_color(original_clear)
 	print(
-		"PASS: named definitions, arbitrary presentations, snapshots, unchanged background, no Cover node, rendered visibility, minimum frames, slow loading, startup/respawn cards, real pipe transfer, control/visibility restoration, overlap rejection and stale/cancelled transaction safety."
+		"PASS: named definitions, arbitrary presentations, snapshots, black Game backdrop, preserved clear color, rendered visibility, minimum frames, slow loading, startup/respawn cards, real pipe transfer, control/visibility restoration, overlap rejection and stale/cancelled transaction safety."
 	)
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

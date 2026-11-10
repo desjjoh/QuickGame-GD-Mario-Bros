@@ -45,12 +45,8 @@ func update_activity(wake_region: Rect2, sleep_region: Rect2, theme: AreaTheme) 
 func _spawn_actor(offset: Vector2, sleep_region: Rect2, theme: AreaTheme) -> bool:
 	if _level != null and not _level.has_spawn_capacity(spawn_category):
 		return false
-	var instance := actor_scene.instantiate() if actor_scene != null else null
-	var actor := instance as SpawnableEntity
+	var actor := _instantiate_actor()
 	if actor == null:
-		if instance != null:
-			instance.free()
-		push_error("EntitySpawner requires a SpawnableEntity scene.")
 		return false
 	if _level != null and not _level.try_claim_spawn_slot(spawn_category, actor):
 		actor.free()
@@ -58,17 +54,31 @@ func _spawn_actor(offset: Vector2, sleep_region: Rect2, theme: AreaTheme) -> boo
 	actor.position = offset
 	if spawn_category == &"enemy" and actor_offsets.size() > 1 and is_instance_valid(_area):
 		actor.position.x += _area.get_enemy_group_origin_x() - global_position.x
+	_attach_actor(actor, theme)
+	# A group activates at its marker. Members inside the outer buffer start
+	# together even when an offset puts one beyond the inner wake region.
+	if actor_offsets.size() > 1 and sleep_region.intersects(actor.get_activity_rect()):
+		actor.set_activity_suspended(false)
+	return true
+
+
+func _instantiate_actor() -> SpawnableEntity:
+	var instance := actor_scene.instantiate() if actor_scene != null else null
+	var actor := instance as SpawnableEntity
+	if actor == null:
+		if instance != null:
+			instance.free()
+		push_error("EntitySpawner requires a SpawnableEntity scene.")
+	return actor
+
+
+func _attach_actor(actor: SpawnableEntity, theme: AreaTheme) -> void:
 	actor.visual_theme = theme
 	actor.consumed.connect(_on_actor_consumed.bind(actor), CONNECT_ONE_SHOT)
 	add_child(actor)
 	if is_instance_valid(_area):
 		actor.set_gameplay_suspended(_area.actors_suspended)
-	# A group activates at its marker. Members inside the outer buffer start
-	# together even when an offset puts one beyond the inner wake region.
-	if actor_offsets.size() > 1 and sleep_region.intersects(actor.get_activity_rect()):
-		actor.set_activity_suspended(false)
 	actor.reset_physics_interpolation()
-	return true
 
 
 func _on_actor_consumed(actor: SpawnableEntity) -> void:

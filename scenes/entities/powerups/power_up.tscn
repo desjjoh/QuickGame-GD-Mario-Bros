@@ -1,34 +1,35 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cqys1kqc2ceht"]
 
 [ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="base"]
-[ext_resource type="Script" path="res://scenes/entities/powerups/power_up.gd" id="power_up"]
-
-[sub_resource type="RectangleShape2D" id="pickup_shape"]
-size = Vector2(12, 12)
+[ext_resource type="Script" uid="uid://bckp2wycleero" path="res://scenes/entities/powerups/power_up.gd" id="power_up"]
 
 [sub_resource type="RectangleShape2D" id="body_shape"]
 size = Vector2(14, 16)
 
-[node name="PowerUp" node_paths=PackedStringArray("sprite", "pickup") instance=ExtResource("base")]
-script = ExtResource("power_up")
-sprite = NodePath("Body/Sprite2D")
-pickup = NodePath("Body/Pickup")
+[sub_resource type="RectangleShape2D" id="pickup_shape"]
+size = Vector2(12, 12)
 
-[node name="Body" type="CharacterBody2D" parent="."]
+[node name="PowerUp" unique_id=430929464 node_paths=PackedStringArray("pickup", "sprite") instance=ExtResource("base")]
+script = ExtResource("power_up")
+pickup = NodePath("Body/Pickup")
+minimum_pickup_rise = 4
+sprite = NodePath("Body/Sprite2D")
+
+[node name="Body" type="CharacterBody2D" parent="." index="1" unique_id=92935277]
 position = Vector2(8, 8)
 collision_layer = 0
 floor_snap_length = 0.0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body" index="0" unique_id=1009033465]
 shape = SubResource("body_shape")
 
-[node name="Sprite2D" type="Sprite2D" parent="Body"]
+[node name="Sprite2D" type="Sprite2D" parent="Body" index="1" unique_id=1967430893]
 
-[node name="Pickup" type="Area2D" parent="Body"]
+[node name="Pickup" type="Area2D" parent="Body" index="2" unique_id=1884251833]
 position = Vector2(0, -1)
 collision_layer = 0
 collision_mask = 1024
 monitorable = false
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/Pickup"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/Pickup" index="0" unique_id=1291809488]
 shape = SubResource("pickup_shape")

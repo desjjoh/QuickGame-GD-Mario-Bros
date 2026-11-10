@@ -9,7 +9,7 @@ func _ready() -> void:
 	var layout := level.get_node("Areas/MainArea/Layouts/EnemyLayout") as TileMapLayer
 	layout.clear()
 	level.entity_layout.clear()
-	for x in range(4, 15):
+	for x in range(4, 10):
 		layout.set_cell(Vector2i(x, 12), 0, Vector2i.ZERO)
 	add_one_up_placement(level, Vector2i(12, 12))
 
@@ -34,7 +34,7 @@ func _ready() -> void:
 			skipped = placement
 		else:
 			active.append(enemy)
-	assert(active.size() == 10 and skipped != null)
+	assert(active.size() == 5 and skipped != null)
 	assert(not level.has_spawn_capacity(&"enemy"))
 	var power_up := level.world_objects.get_node("one_up_spawner_12_12/OneUpMushroom")
 	assert(power_up is PowerUp and not level.has_spawn_capacity(&"power_up"))

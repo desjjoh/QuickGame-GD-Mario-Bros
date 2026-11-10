@@ -25,6 +25,8 @@ func wait_phase(phase: StringName) -> void:
 
 func make_game() -> Node:
 	var game: Node = load("res://tests/fixtures/silent_game.tscn").instantiate()
+	# Ordinary deaths must preserve progress so game over can prove it clears that progress.
+	game.save_entity_state_through_death = true
 	var fixture := game.stages[0].instantiate() as BaseLevel
 	fixture.death_sound = null
 	fixture.death_fallback_delay = 0.05

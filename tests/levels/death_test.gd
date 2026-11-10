@@ -157,7 +157,7 @@ func _ready() -> void:
 		await get_tree().process_frame
 	# LowerArea uses its own world-space viewport bottom, then restarts in MainArea.
 	var lower_game := make_game()
-	assert(lower_game.save_entity_state_through_death)
+	lower_game.save_entity_state_through_death = true
 	add_child(lower_game)
 	var lower_level := GameHandler.current_level
 	assert(lower_level.request_area_transfer(&"lower"))

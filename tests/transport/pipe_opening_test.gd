@@ -13,7 +13,9 @@ func _ready() -> void:
 	process_physics_priority = 200
 	var preview := STAGE.instantiate() as BaseLevel
 	var preview_opening := preview.opening_presentation
-	var placement := preview_opening.intro_area.transport_points[0].duplicate() as TransportPlacement
+	var placement := (
+		preview_opening.intro_area.transport_points[0].duplicate() as TransportPlacement
+	)
 	placement.target_id = &"preview_pipe"
 	preview_opening.intro_area.transport_points[0] = placement
 	preview_opening.entrance_id = placement.target_id
@@ -127,8 +129,19 @@ func _ready() -> void:
 	assert(restarted != null and restarted != level)
 	assert(restarted.active_area.area_id == &"main")
 	var respawned := restarted.player as Mario
-	assert(respawned.form_controller.current_form == respawned.small_form)
-	assert(GameHandler.player_status.powerup_form == PlayerStatus.PowerupForm.SMALL)
+	var start_form := restarted.player_start_configuration as MarioForm
+	assert(
+		(
+			respawned.form_controller.current_form
+			== (start_form if start_form else respawned.small_form)
+		)
+	)
+	var expected_status := PlayerStatus.PowerupForm.SMALL
+	if start_form == respawned.fire_form:
+		expected_status = PlayerStatus.PowerupForm.FIRE
+	elif start_form == respawned.super_form:
+		expected_status = PlayerStatus.PowerupForm.SUPER
+	assert(GameHandler.player_status.powerup_form == expected_status)
 	assert(not restarted.player.scripted_motion_step.is_valid())
 	assert(
 		restarted.player.body.global_position.is_equal_approx(
@@ -193,7 +206,9 @@ func _enter_pipe(level: BaseLevel, source_id: StringName) -> void:
 	var pipe := level.active_area.find_transport_entity(source_id) as PipeEntrance
 	assert(pipe != null)
 	var player := level.player
-	player.body.global_position = pipe.entry_position() - Vector2(12.0 if pipe.sideways else 0.0, 0.0)
+	player.body.global_position = (
+		pipe.entry_position() - Vector2(12.0 if pipe.sideways else 0.0, 0.0)
+	)
 	player.body.velocity = Vector2.ZERO
 	var camera := get_viewport().get_camera_2d() as LevelCamera
 	camera.snap_to_arrival(player.body)
@@ -215,9 +230,10 @@ func _enter_pipe(level: BaseLevel, source_id: StringName) -> void:
 func _finish_surface(level: BaseLevel) -> void:
 	var ending := level.ending_presentation as FlagpoleEndingPresentation
 	assert(ending != null and ending.area_id == level.active_area.area_id)
-	var pole := level.area_content.find_layout_entity(
-		level.active_area, &"flagpole", ending.flagpole_cell
-	) as FlagpoleEntity
+	var pole := (
+		level.area_content.find_layout_entity(level.active_area, &"flagpole", ending.flagpole_cell)
+		as FlagpoleEntity
+	)
 	assert(pole != null)
 	var player := level.player
 	player.body.global_position = pole.climb_top.global_position + Vector2(-7.0, 60.0)
@@ -253,6 +269,29 @@ func _check_warps() -> void:
 		GameHandler.set_player_form(PlayerStatus.PowerupForm.FIRE)
 		GameHandler.set_score(1230)
 		GameHandler.set_coins(7)
+		var zone := source.world_objects.get_node("WarpZone")
+		var banner := zone.get_node("Presentation") as Node2D
+		var camera := source.active_area.get_node("Camera2D") as LevelCamera
+		var marker := zone.get_node("RevealMarker") as Marker2D
+		var half_width := source.get_viewport_rect().size.x / (2.0 * camera.zoom.x)
+		var pipe := source.active_area.find_transport_entity(pipe_id) as WarpZonePipe
+		assert(pipe != null and not pipe.entrance_enabled and not banner.visible)
+		traveler.body.global_position = pipe.entry_position()
+		camera.follow_enabled = false
+		var reveal_center := marker.global_position.x + half_width
+		if pipe_id == &"warp_4":
+			camera.global_position.x = reveal_center - 1.0
+			for frame in range(2):
+				await tick_finished
+			assert(not banner.visible and not pipe.entrance_enabled)
+		camera.global_position.x = reveal_center
+		for frame in range(2):
+			await tick_finished
+		assert(banner.visible and pipe.entrance_enabled)
+		for warp: WarpZonePipe in zone.get_node("Pipes").get_children():
+			var number := warp.get_node("WorldNumber") as Label
+			assert(number.visible and number.text == "1")
+			assert(not warp.has_node("OccupantSpawner"))
 		await _enter_pipe(source, pipe_id)
 		assert(GameHandler.current_level == source and not source.completion_in_progress)
 		for frame in range(300):
@@ -260,7 +299,9 @@ func _check_warps() -> void:
 				break
 			await tick_finished
 		assert(GameHandler.current_level != source and not GameHandler.transitions.busy)
-		assert(GameHandler.current_level.stage_label == "1-1" and GameHandler.current_stage_index == 0)
+		assert(
+			GameHandler.current_level.stage_label == "1-1" and GameHandler.current_stage_index == 0
+		)
 		assert(GameHandler.current_level.entry_mode == BaseLevel.EntryMode.STAGE_START)
 		var arrived := GameHandler.current_player as Mario
 		assert(arrived.scene_file_path == "res://scenes/player/luigi/luigi.tscn")

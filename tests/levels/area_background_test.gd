@@ -1,5 +1,7 @@
 extends Node
 
+const SCREEN_PIXEL := preload("res://tests/fixtures/screen_pixel.gd")
+
 
 func frames() -> void:
 	for i in range(4):
@@ -19,7 +21,7 @@ func _ready() -> void:
 	await frames()
 	assert(preview_area.get_node("Background").color == preview_area.background_color)
 	if DisplayServer.get_name() != "headless":
-		var preview := get_viewport().get_texture().get_image().get_pixel(40, 80)
+		var preview := SCREEN_PIXEL.sample(get_viewport().get_texture().get_image(), 40, 80)
 		assert(absf(preview.b - preview_area.background_color.b) < 0.01)
 	standalone.free()
 	await frames()
@@ -57,13 +59,13 @@ func _ready() -> void:
 	await frames()
 	if DisplayServer.get_name() != "headless":
 		var image := get_viewport().get_texture().get_image()
-		var inside := image.get_pixel(40, 80)
+		var inside := SCREEN_PIXEL.sample(image, 40, 80)
 		assert(absf(inside.b - main.background_color.b) < 0.01)
-		assert(image.get_pixel(16, 80).is_equal_approx(Color.BLACK))
-		assert(image.get_pixel(225, 80).is_equal_approx(Color.BLACK))
-		assert(image.get_pixel(103, 83).is_equal_approx(Color.RED))
+		assert(SCREEN_PIXEL.sample(image, 16, 80).is_equal_approx(Color.BLACK))
+		assert(SCREEN_PIXEL.sample(image, 225, 80).is_equal_approx(Color.BLACK))
+		assert(SCREEN_PIXEL.sample(image, 103, 83).is_equal_approx(Color.RED))
 		assert(
-			image.get_pixel(109, 89).b < inside.b - 0.05,
+			SCREEN_PIXEL.sample(image, 109, 89).b < inside.b - 0.05,
 			"Foreground shadow must fall on area fill."
 		)
 		assert(image.save_png("res://.godot/validation/area-background-crisp.png") == OK)
@@ -72,7 +74,7 @@ func _ready() -> void:
 	await frames()
 	if DisplayServer.get_name() != "headless":
 		var image := get_viewport().get_texture().get_image()
-		assert(image.get_pixel(40, 80).is_equal_approx(image.get_pixel(16, 80)))
+		assert(SCREEN_PIXEL.sample(image, 40, 80).is_equal_approx(SCREEN_PIXEL.sample(image, 16, 80)))
 	# Repositioning the area keeps its camera bounds and fill attached.
 	var lower := level.get_node("Areas/LowerArea") as BaseLevelArea
 	lower.position += Vector2(64, 32)

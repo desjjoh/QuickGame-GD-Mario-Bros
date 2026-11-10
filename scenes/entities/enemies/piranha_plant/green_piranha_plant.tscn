@@ -1,0 +1,44 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/enemies/base/base_enemy.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/enemies/piranha_plant/piranha_plant.gd" id="plant"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/enemies/piranha-plant.png" id="art"]
+
+[sub_resource type="RectangleShape2D" id="player_contact"]
+size = Vector2(10, 6)
+
+[node name="GreenPiranhaPlant" instance=ExtResource("base")]
+script = ExtResource("plant")
+
+[node name="Body" parent="."]
+position = Vector2(0, 0)
+collision_mask = 0
+
+[node name="CollisionShape2D" parent="Body"]
+disabled = true
+
+[node name="Sprite2D" parent="Body"]
+position = Vector2(0, 12)
+texture = ExtResource("art")
+region_enabled = true
+region_rect = Rect2(0, 8, 16, 24)
+
+[node name="EnemyContact" parent="Body"]
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape2D" parent="Body/BlockHitReceiver"]
+disabled = true
+
+[node name="PlayerContact" type="Area2D" parent="Body"]
+position = Vector2(0, 17)
+collision_layer = 0
+collision_mask = 1024
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/PlayerContact"]
+shape = SubResource("player_contact")
+
+[editable path="Body/BlockHitReceiver"]

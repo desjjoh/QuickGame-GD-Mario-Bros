@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/green_koopa_spawner.tscn" id="green_koopa"]
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/green_koopa_pair_spawner.tscn" id="green_koopa_pair"]
+[ext_resource type="PackedScene" path="res://scenes/entities/spawners/red_koopa_spawner.tscn" id="red_koopa"]
 
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/goomba_pair_spawner.tscn" id="goomba_pair"]
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/goomba_triplet_spawner.tscn" id="goomba_triplet"]
@@ -61,6 +62,7 @@ entity_scenes = Dictionary[StringName, PackedScene]({
 &"one_up_spawner": ExtResource("one_up"),
 &"pipe_entrance": ExtResource("entity_pipe_entrance"),
 &"question_block": ExtResource("entity_question_block"),
+&"red_koopa_spawner": ExtResource("red_koopa"),
 &"reward_brick": ExtResource("reward_brick"),
 &"reward_brick_alternate": ExtResource("reward_brick_alt"),
 &"sideways_pipe_entrance": ExtResource("entity_sideways_pipe_entrance")

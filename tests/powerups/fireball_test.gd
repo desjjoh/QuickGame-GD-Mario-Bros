@@ -92,6 +92,7 @@ func _ready() -> void:
 	await check_trace(false, false)
 	await check_trace(true, false)
 	await check_trace(false, true)
+	await check_low_ceiling()
 	await check_camera_vertical_edges()
 	await check_flagpole()
 	await check_slots()
@@ -120,7 +121,7 @@ func _physics_process(_delta: float) -> void:
 	physics_finished.emit()
 
 
-func make_level(wall: bool, luigi: bool = false) -> BaseLevel:
+func make_level(wall: bool, luigi: bool = false, low_ceiling: bool = false) -> BaseLevel:
 	var level := LEVEL.instantiate() as BaseLevel
 	level.player_start_configuration = MarioFormPresentation.FIRE
 	if luigi:
@@ -134,6 +135,9 @@ func make_level(wall: bool, luigi: bool = false) -> BaseLevel:
 	if wall:
 		for row in range(8, 13):
 			ground.set_cell(Vector2i(11, row), 0, Vector2i.ZERO)
+	if low_ceiling:
+		for column in [6, 7]:
+			level.entity_layout.set_cell(Vector2i(column, 11), 1, Vector2i.ZERO)
 	add_child(level)
 	level.set_physics_process(false)
 	level.player.set_physics_process(false)
@@ -166,6 +170,36 @@ func check_trace(left: bool, wall: bool) -> void:
 		assert(shot.is_queued_for_deletion() == (tick == release))
 	await get_tree().process_frame
 	assert(not is_instance_valid(shot))
+	level.queue_free()
+	await get_tree().process_frame
+
+
+func check_low_ceiling() -> void:
+	var level := await make_level(false, false, true)
+	var player := level.player as Mario
+	# Reproduce the 1-2 overhang with one tile of clearance above the floor.
+	for direction: int in [-1, 1]:
+		var feet_x := 160 if direction < 0 else 64
+		player.body.global_position = Vector2(feet_x, 208)
+		player.sprite.flip_h = direction < 0
+		var shot := player._fireballs.try_launch(player)
+		assert(shot != null)
+		shot.set_physics_process(false)
+		for tick in range(26):
+			if tick > 0:
+				shot.advance()
+			var x := feet_x - 4 + direction * 4 * (tick + 1)
+			assert(shot.global_position == Vector2(x, TRACE_Y[tick]))
+			assert(shot.vertical_speed == TRACE_SPEED[tick] and shot.bouncing == (tick == 7))
+			assert(shot.burst_tick == -1, "A floor bounce should clear the low bricks.")
+		shot.free()
+
+	# A shot from directly beside the brick samples solid terrain on launch.
+	player.body.global_position = Vector2(92, 208)
+	var close_shot := player._fireballs.try_launch(player)
+	assert(close_shot != null and close_shot.bouncing and close_shot.burst_tick == -1)
+	close_shot.advance()
+	assert(close_shot.burst_tick == 0 and close_shot.global_position == Vector2(96, 173))
 	level.queue_free()
 	await get_tree().process_frame
 

@@ -29,6 +29,12 @@ Set **Stage Scene** on a transport destination for a cross-stage warp. After pip
 
 Mario and Luigi carry their current form through normal stage completion and cross-stage warps. The next stage applies the form before the first pose or opening presentation. Death respawns use the stage's starting form.
 
+### Place a Warp Zone
+
+Instance `scenes/entities/warp_zone/warp_zone.tscn` under the area's **WorldObjects**. Position **RevealMarker** where the camera's left edge should reveal the banner. Place one or more `warp_zone_pipe.tscn` instances under **Pipes**. Set each pipe's **Display Text** and **Destination → Stage Scene** independently. The text follows the pipe when it moves.
+
+Set **Pipe Occupant** on the zone to give its pipes plants before the reveal. Revealing the zone removes those occupants and enables the configured entrances. The 1-2 instance shows **1 1 1** because each pipe routes to 1-1.
+
 **Presentations → FlagpoleEnding** binds to the painted flagpole and castle by area ID and cell. In 1-2, the ending uses the SurfaceArea markers. The castle in IntroArea provides the opening doorway.
 
 ## Area background colour
@@ -63,6 +69,12 @@ Choose **Apply Starman Reward** in the same brush to paint a fixed star reward. 
 
 Timed multi-coin rewards use independent, fixed 231-physics-tick windows instead of the NES's shared, phase-dependent timer. Loading or hitting another block cannot alter an existing window. Pause and unloaded areas freeze remaining time; death follows the existing progress-reset policy.
 
+## Paint pipe occupants
+
+Select **EntityLayout** and paint a vertical **Pipe Entrance (2×2)**. In the 2D toolbar, choose **Apply Green Piranha Plant** and click either half of the pipe mouth. A translucent preview uses the area theme and stays visible when you switch brushes. Use **Clear Pipe Spawn** on the mouth to remove it. Both brushes support undo and redo.
+
+Each mouth has one occupant entry. Decorative, entrance, and exit pipes can all host a plant. Pipe destinations are configured separately. The plant uses an enemy slot and shares the one-attempt-per-area-load rule with other painted enemies.
+
 ## Shared entity registry
 
 Add standard marker-to-scene mappings to **BaseLevel: Entity Scenes** in scenes/levels/base/base_level.tscn. Levels inherit this registry. Do not create a per-level dictionary override: Godot replaces the inherited dictionary rather than merging entries. Levels own their painted placements and reward overrides.
@@ -75,9 +87,17 @@ The game uses 256×240 logical framing with window-resolution canvas_items rende
 
 Use typed GameHandler methods/properties and `player_status` for score, coins, lives, form, top score, stage label, and timer values. Generic `set_session_value()` / `get_session_value()` are for run metadata such as area/arrival IDs; reserved-key writes are rejected. The existing `session_value_changed` signal carries both typed-value and metadata notifications.
 
-LevelSpawnRegistry keeps ten enemy slots and one independent power-up slot. These are code-defined limits. Ordinary painted spawners attempt once per area load and do not retry after rejection. Reward blocks may explicitly replace the current power-up. Unlisted categories remain unlimited and untracked.
+In `scenes/main/game.tscn`, select **Game → Gameplay → Enemy Limit** to set the number of enemies that can be active at once. The default is **5** and standalone level previews also use five. Set it to **0** to disable enemy spawns. The single power-up slot is independent. Ordinary painted spawners attempt once per area load and do not retry after rejection. Reward blocks may explicitly replace the current power-up. Unlisted categories remain unlimited and untracked.
 
 Paint one **Goomba Pair Spawner**, **Goomba Triplet Spawner**, or **Green Koopa Pair Spawner** marker on the 16×16 **EnemyLayout** at the first member's placement. The marker creates the group together at the camera's right edge, with members 24 pixels apart. If the group runs out of enemy slots during activation, the remaining members are skipped for that area load.
+
+Paint **Red Koopa Spawner** on **EnemyLayout** in the cell immediately above its support. A walking Red Koopa turns at ledges, and its kicked shell can roll off them.
+
+## Place a vertical lift
+
+Instance `scenes/entities/spawners/lift_spawner.tscn` under the area's **WorldObjects**. Its X position is the lift's left edge. Put the marker at the incoming edge and set **Direction** to **Up** or **Down**. For a 240 px view starting at Y=0, use Y=248 for Up or Y=−8 for Down.
+
+**Initial Offset** sets how far along the path the lift starts, in pixels from the marker in its travel direction. Each lane has one lift and runs independently of the enemy limit. When the lift exits the far edge, its replacement starts at the incoming edge.
 
 ## Deliberate gameplay differences
 

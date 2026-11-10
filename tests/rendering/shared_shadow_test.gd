@@ -1,5 +1,8 @@
 extends Node
 
+const SCREEN_PIXEL := preload("res://tests/fixtures/screen_pixel.gd")
+const SOFT_SHADOW := preload("res://assets/shadows/soft.tres")
+
 
 func box(parent: Node, at: Vector2, dimensions: Vector2, color: Color) -> ColorRect:
 	var rect := ColorRect.new()
@@ -44,6 +47,7 @@ func _ready() -> void:
 	var game_scene := load("res://scenes/main/game.tscn") as PackedScene
 	var game := game_scene.instantiate() as Node
 	game.shadow_shader_enabled = true
+	game.shadow_style = SOFT_SHADOW
 	game.start_with_title = false
 	game.transitions_enabled = false
 	add_child(game)
@@ -79,18 +83,19 @@ func _ready() -> void:
 		await RenderingServer.frame_post_draw
 		var shot := get_viewport().get_texture().get_image()
 		assert(
-			shot.get_pixel(77, 94).is_equal_approx(Color.GREEN), "Player foreground must cover HUD."
+			SCREEN_PIXEL.sample(shot, 77, 94).is_equal_approx(Color.GREEN),
+			"Player foreground must cover HUD."
 		)
 		assert(
-			shot.get_pixel(85, 94).is_equal_approx(Color.WHITE),
+			SCREEN_PIXEL.sample(shot, 85, 94).is_equal_approx(Color.WHITE),
 			"World shadows cannot darken HUD foreground."
 		)
 		assert(
-			shot.get_pixel(66, 82).is_equal_approx(Color.RED),
+			SCREEN_PIXEL.sample(shot, 66, 82).is_equal_approx(Color.RED),
 			"HUD shadow cannot cover world foreground."
 		)
-		var background := shot.get_pixel(110, 110)
-		var shadow := shot.get_pixel(90, 106)
+		var background := SCREEN_PIXEL.sample(shot, 110, 110)
+		var shadow := SCREEN_PIXEL.sample(shot, 90, 106)
 		assert(shadow.r < background.r - 0.05, "HUD must contribute to the shared shadow.")
 		assert(shot.save_png("res://.godot/validation/shared-shadow-overlap.png") == OK)
 		# Fractional camera motion must not move the HUD or inherit interpolation twice.
@@ -99,7 +104,7 @@ func _ready() -> void:
 			camera.force_update_scroll()
 			await RenderingServer.frame_post_draw
 			shot = get_viewport().get_texture().get_image()
-			assert(shot.get_pixel(85, 94).is_equal_approx(Color.WHITE))
+			assert(SCREEN_PIXEL.sample(shot, 85, 94).is_equal_approx(Color.WHITE))
 	if DisplayServer.get_name() != "headless":
 		material.set_shader_parameter("blur_radius", 4.5)
 		composer.sync_rendering()
@@ -107,7 +112,7 @@ func _ready() -> void:
 			await RenderingServer.frame_post_draw
 		var foreground := composer._source.get_texture().get_image()
 		var blurred := get_viewport().get_texture().get_image()
-		var backdrop := blurred.get_pixel(110, 110)
+		var backdrop := SCREEN_PIXEL.sample(blurred, 110, 110)
 		var padding := Vector2.ONE * composer.SHADOW_PADDING
 		for point in [
 			Vector2i(89, 101),
@@ -123,7 +128,7 @@ func _ready() -> void:
 			)
 			var expected := backdrop.r * (1.0 - shadow_alpha)
 			assert(
-				absf(blurred.get_pixelv(point).r - expected) < 0.02,
+				absf(SCREEN_PIXEL.sample(blurred, point.x, point.y).r - expected) < 0.02,
 				"Separable blur must match the original Gaussian alpha."
 			)
 		assert(blurred.save_png("res://.godot/validation/shared-shadow-two-pass.png") == OK)
@@ -136,7 +141,7 @@ func _ready() -> void:
 			await RenderingServer.frame_post_draw
 			var current := get_viewport().get_texture().get_image()
 			assert(
-				current.get_pixel(200 + frame, 160).is_equal_approx(marker.color),
+				SCREEN_PIXEL.sample(current, 200 + frame, 160).is_equal_approx(marker.color),
 				"Blur passes must not delay the foreground by a frame."
 			)
 		marker.free()
@@ -152,8 +157,9 @@ func _ready() -> void:
 		await RenderingServer.frame_post_draw
 		await RenderingServer.frame_post_draw
 		var unshaded := get_viewport().get_texture().get_image()
-		assert(unshaded.get_pixel(85, 94).is_equal_approx(Color.WHITE))
-		assert(unshaded.get_pixel(90, 106).is_equal_approx(unshaded.get_pixel(110, 110)))
+		assert(SCREEN_PIXEL.sample(unshaded, 85, 94).is_equal_approx(Color.WHITE))
+		var background := SCREEN_PIXEL.sample(unshaded, 110, 110)
+		assert(SCREEN_PIXEL.sample(unshaded, 90, 106).is_equal_approx(background))
 		assert(unshaded.save_png("res://.godot/validation/shared-shadow-disabled.png") == OK)
 	game.shadow_shader_enabled = true
 	assert(composer.material == original_material)
