@@ -77,12 +77,13 @@ func _ready() -> void:
 			player.body.global_position = Vector2(57, 157)
 			player.body.velocity = Vector2(180, 0)
 			player.move_body()
-			assert(not player.bonk_action.deliver(player))
+			assert(not player.bonk_action.check_ceiling(player, Vector2(57, 157), Vector2(3, 0)))
 		await sweep_finished
 		game.free()
 		await get_tree().physics_frame
 		await get_tree().process_frame
 	await _test_hidden_block()
+	await _test_crouched_brick_corners()
 	print(
 		"PASS: Regular bonk edges and seams, hidden-block side and top pass-through, shared bonk response, and used-block landing."
 	)
@@ -134,3 +135,44 @@ func _test_hidden_block() -> void:
 		assert(player.body.is_on_floor())
 	await sweep_finished
 	level.free()
+
+
+func _test_crouched_brick_corners() -> void:
+	var level := preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	level.entity_layout.clear()
+	level.player_start_configuration = MarioFormPresentation.SUPER
+	var canvas := CanvasLayer.new()
+	add_child(canvas)
+	canvas.add_child(level)
+	var player := level.player as Mario
+	player.set_physics_process(false)
+	var brick_scene := preload("res://scenes/entities/blocks/brick/brick_block.tscn")
+	for trial in [
+		[Vector2(79.75, 174), 150.0, false],
+		[Vector2(64.25, 174), -150.0, false],
+		[Vector2(63, 175), 150.0, false],
+		[Vector2(82, 175), -150.0, false],
+		[Vector2(80, 174), -150.0, false],
+		[Vector2(63, 177), 150.0, true],
+		[Vector2(72, 173), 0.0, false],
+		[Vector2(72, 177), 0.0, true],
+	]:
+		var brick := brick_scene.instantiate() as BaseBlock
+		brick.position = Vector2(64, 144)
+		level.world_objects.add_child(brick)
+		await get_tree().physics_frame
+		pending_sweep = func():
+			player.form_controller.set_crouched(true)
+			player.bonk_action.reset_reaction_gate()
+			player.vertical_movement.reset_fraction()
+			player.body.global_position = trial[0]
+			player.body.velocity = Vector2(trial[1], -240)
+			player.move_body()
+			assert(
+				(brick.state_machine.current_state.name == &"Broken") == trial[2],
+				"Crouched brick contact at %s with horizontal speed %s" % [trial[0], trial[1]]
+			)
+			assert((player.body.velocity.y < 0.0) == trial[2])
+		await sweep_finished
+		brick.free()
+	canvas.free()

@@ -225,6 +225,7 @@ func move_body(gravity_after_motion: bool = false) -> void:
 	if gravity_after_motion:
 		next_vertical_speed = vertical_movement.prepare_step(motion_values, delta)
 	var previous_position := body.global_position
+	var intended_motion := body.velocity * delta
 	_sweep_motion(delta, vertical_speed)
 	var supported := has_floor_support()
 	if supported:
@@ -232,9 +233,7 @@ func move_body(gravity_after_motion: bool = false) -> void:
 	if gravity_after_motion:
 		vertical_movement.finish_step_on_support(motion_values, next_vertical_speed, supported)
 	var hidden_hit := rising and bonk_action.deliver_hidden(self, previous_position)
-	if rising and (hidden_hit or body.is_on_ceiling()):
-		if not hidden_hit:
-			bonk_action.deliver(self)
+	if rising and (hidden_hit or bonk_action.check_ceiling(self, previous_position, intended_motion)):
 		respond_to_ceiling()
 
 

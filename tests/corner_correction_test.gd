@@ -123,7 +123,8 @@ func _ready() -> void:
 	mario.body.global_position = Vector2(63.75, 110.2)
 	mario.body.velocity = Vector2(0, -240)
 	mario.move_body()
-	assert(is_equal_approx(mario.body.velocity.y, 3.75), "Blocked escape must still bump.")
+	assert(mario.body.is_on_ceiling(), "A blocked escape still collides with the ceiling.")
+	assert(is_zero_approx(mario.body.velocity.y), "The outer corner must not add bonk velocity.")
 	# Actual walking still scrolls after correction offsets have accumulated.
 	mario.body.global_position = Vector2(200, 120)
 	mario.body.velocity = Vector2(120, 0)

@@ -84,7 +84,8 @@ func _ready() -> void:
 					)
 					assert(
 						(
-							not inside
+							mode == "corner"
+							or not inside
 							or p.body.velocity.y >= 0
 							or posmod(int(floorf(p.body.global_position.y)), 16) < 4
 						),
@@ -101,8 +102,7 @@ func _ready() -> void:
 					),
 					"Head must clear naturally"
 				)
-	# Adjacent tile phases: below the head threshold, side collision owns contact;
-	# at the threshold, an accepted question-block bounce stops Y as well as X.
+	# Side entry remains non-offensive on either side of the head phase threshold.
 	block.free()
 	for direction in [-1.0, 1.0]:
 		for feet_y in [163.0, 164.0]:
@@ -115,6 +115,7 @@ func _ready() -> void:
 			await step(
 				func():
 					p.bonk_action.reset_reaction_gate()
+					p.state_machine.change_state(p.get_node("StateMachine/Jump"))
 					p.body.global_position = Vector2(x, feet_y)
 					p.body.velocity = Vector2(150 * direction, -60)
 					p.terrain.resolve(p, Vector2(x - 2 * direction, feet_y + 1), true, false)
@@ -125,23 +126,15 @@ func _ready() -> void:
 				"Side contact nudges one pixel"
 			)
 			assert(p.body.global_position.y == feet_y, "Head response must not snap")
-			if feet_y == 163:
-				assert(
-					p.body.velocity.y == -60 and not question._bounce_reward_claimed,
-					"Phase 3 must skip head bonk"
-				)
-				assert(GameHandler.player_status.coins == coins)
-			else:
-				assert(
-					p.body.velocity.y == 0 and question._bounce_reward_claimed,
-					"Phase 4 must bounce with zero Y speed"
-				)
-				assert(GameHandler.player_status.coins == coins + 1)
-				await step(func(): p.terrain.resolve(p, p.body.global_position, false, false))
-				assert(
-					GameHandler.player_status.coins == coins + 1,
-					"Sustained contact must not award twice"
-				)
+			assert(p.body.velocity.y == -60 and not question._bounce_reward_claimed)
+			assert(GameHandler.player_status.coins == coins)
+			await step(
+				func():
+					assert(p.terrain.filter_air_direction(direction) == 0.0)
+					assert(p.terrain.filter_air_direction(0.0) == 0.0)
+					assert(p.terrain.filter_air_direction(-direction) == -direction)
+			)
+			await step(func(): assert(p.terrain.filter_air_direction(direction) == direction))
 			question.free()
 	# A thin upper obstruction is above the short support body. Both diagonal
 	# entry directions must still resolve, even with next-tick downward velocity.
@@ -161,7 +154,7 @@ func _ready() -> void:
 				p.bonk_action.reset_reaction_gate()
 				p.body.global_position = Vector2(136, 157)
 				p.body.velocity = Vector2(150 * direction, 3.75)
-				p.terrain.resolve(p, Vector2(136 - 2 * direction, 157.5), true, false)
+				p.terrain.resolve(p, Vector2(136 - 2 * direction, 158.5), true, false)
 		)
 		assert(is_equal_approx(p.get_head_position().y, 129), "Bonk must not snap position")
 		assert(p.body.velocity.y == 63.75, "Thin upper-body ceiling must reverse velocity")

@@ -83,6 +83,7 @@ func _ready() -> void:
 							ControllerHandler.input_primary = true
 							ControllerHandler.input_primary_just_pressed = false
 					)
+					var sound := player._active_sound_effect
 					await step(func(): player._physics_process(1.0 / 60.0))
 					var context := "%s canvas=%s feet=%s dir=%s" % [kind, wrapped, feet, direction]
 					assert(player.body.global_position.y == feet - 1, "No head snap: " + context)
@@ -99,9 +100,10 @@ func _ready() -> void:
 							"Exact underside boundary must remain unbonked"
 						)
 						await step(func(): player._physics_process(1.0 / 60.0))
-					var bounce: bool = feet != 164 and kind in ["brick", "question"]
-					if feet == 164:
-						assert(player.body.velocity.y < 0, "Phase 3 must retain rise: " + context)
+					var bounce: bool = feet == 173 and kind in ["brick", "question"]
+					if feet < 173:
+						assert(player.body.velocity.y < 0, "Side hit must retain rise: " + context)
+						assert(player._active_sound_effect == sound, "Side hit must stay silent: " + context)
 					else:
 						if bounce:
 							assert(
