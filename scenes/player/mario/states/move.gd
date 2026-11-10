@@ -40,7 +40,7 @@ func process_physics(delta: float) -> BaseState:
 	var next := ground_transition(jump_state, self)
 	if next != null:
 		return continue_physics(next, delta)
-	if not player.body.is_on_floor():
+	if not player.has_floor_support():
 		return _process_falling(player, direction, delta)
 
 	if player.slide_action.can_start(player.body, direction):
@@ -52,7 +52,7 @@ func process_physics(delta: float) -> BaseState:
 
 	player.horizontal_movement.apply(player.body, player.motion_values, direction, delta)
 	player.face_direction(direction)
-	player.vertical_movement.apply_gravity(player.motion_values, delta)
+	player.body.velocity.y = 0.0
 	player.move_body()
 
 	var mario := player as Mario
@@ -88,7 +88,7 @@ func _process_falling(player: BasePlayer, direction: float, delta: float) -> Bas
 		player.move_body(true)
 	var mario := player as Mario
 	_update_walk_animation(mario)
-	if player.body.is_on_floor():
+	if player.has_floor_support():
 		player.air_movement.end(player.motion_values)
 		player.motion_values.remove_modifier(&"passive_fall")
 		_falling = false
@@ -98,7 +98,7 @@ func _process_falling(player: BasePlayer, direction: float, delta: float) -> Bas
 
 
 func _update_walk_animation(mario: Mario) -> void:
-	if mario.body.is_on_floor():
+	if mario.has_floor_support():
 		mario.walk_animation.apply(mario.animation_player, mario.body.velocity.x)
 	else:
 		# Preserve both the current texture and loop position during passive falls.

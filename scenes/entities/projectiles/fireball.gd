@@ -3,6 +3,7 @@ extends Node2D
 ## Moves in integer pixels with the NES's separate position and speed fractions.
 
 const BURST := preload("res://assets/items/fireworks.png")
+const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd")
 const TERRAIN_PROBE := preload("res://scenes/components/interactions/terrain_probe.gd")
 const PROBE := Vector2(4, 6)
 const SUBPIXEL := 256
@@ -30,6 +31,10 @@ var _barrier_probe := PhysicsRayQueryParameters2D.new()
 @onready var sprite: Sprite2D = $Presentation/Sprite
 
 
+func _ready() -> void:
+	DRAW_ORDER.apply(sprite, DRAW_ORDER.FIREBALL)
+
+
 func launch(shooter: Mario, area: BaseLevelArea) -> void:
 	_shooter = shooter
 	_area = area
@@ -39,7 +44,12 @@ func launch(shooter: Mario, area: BaseLevelArea) -> void:
 	_probe.exclude = [shooter.body.get_rid()]
 	_barrier_probe.collision_mask = PROJECTILE_BARRIER_LAYER
 	_barrier_probe.hit_from_inside = true
-	global_position = shooter.body.global_position.floor() - Vector2(4, 32)
+	var feet := shooter.body.global_position
+	var origin := feet.floor()
+	# Godot's floor contact can leave the feet fractionally above the surface.
+	if shooter.has_floor_support():
+		origin.y = roundf(feet.y)
+	global_position = origin - Vector2(4, 32)
 	_launch_frame = Engine.get_physics_frames()
 	advance()
 	reset_physics_interpolation()

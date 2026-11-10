@@ -38,5 +38,33 @@ func _ready() -> void:
 			if not is_instance_valid(debris):
 				break
 		assert(not is_instance_valid(debris), "Chunks must free after falling below the screen")
+	_check_camera_below_origin()
 	print("brick_debris_test: PASS")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+
+
+func _check_camera_below_origin() -> void:
+	var canvas := CanvasLayer.new()
+	add_child(canvas)
+	var camera := LevelCamera.new()
+	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
+	camera.position = Vector2(128, 360)
+	add_child(camera)
+	camera.make_current()
+	var debris := DEBRIS.new()
+	debris.position = Vector2(128, 368)
+	canvas.add_child(debris)
+	debris.set_physics_process(false)
+	var cutoff := camera.global_position.y + get_viewport_rect().size.y / 2.0 + 8.0
+	for tick in range(180):
+		debris._physics_process(1.0 / 60.0)
+		var chunk_y: float = debris.global_position.y + debris._y[0]
+		assert(
+			debris.is_queued_for_deletion() == (chunk_y > cutoff),
+			"Debris cleanup must follow the active camera in an offset area"
+		)
+		if debris.is_queued_for_deletion():
+			break
+	assert(debris.is_queued_for_deletion())
+	canvas.queue_free()
+	camera.queue_free()

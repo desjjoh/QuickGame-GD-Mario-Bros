@@ -56,7 +56,7 @@ func _ready() -> void:
 	var main := fixture.get_node("Areas/MainArea") as BaseLevelArea
 	main.pipe_routes = []
 	main.transport_points = []
-	main.get_node("Camera2D").world_right = 256
+	main.get_node("Camera2D").area_right = 256
 	for area in fixture.get_node("Areas").get_children():
 		fixture.set_editable_instance(area, true)
 	var packed := PackedScene.new()

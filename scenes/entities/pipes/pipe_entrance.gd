@@ -44,7 +44,7 @@ func can_start_entry(player: BasePlayer) -> bool:
 	):
 		return false
 	var state := player.state_machine.current_state as PlayerState
-	if state == null or not state.controls_enabled or not player.body.is_on_floor():
+	if state == null or not state.controls_enabled or not player.has_floor_support():
 		return false
 	var feet := to_local(player.body.global_position)
 	if sideways:

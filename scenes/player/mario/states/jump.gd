@@ -28,7 +28,7 @@ func process_physics(delta: float) -> BaseState:
 	)
 	player.air_movement.apply(player.motion_values, direction, delta)
 	player.move_body(true)
-	if player.body.is_on_floor():
+	if player.has_floor_support():
 		return (
 			move_state
 			if not is_zero_approx(direction) or not is_zero_approx(player.body.velocity.x)

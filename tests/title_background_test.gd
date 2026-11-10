@@ -20,6 +20,7 @@ func _ready() -> void:
 	var game_scene := load("res://scenes/main/game.tscn") as PackedScene
 	var game = game_scene.instantiate()
 	var first_stage: PackedScene = game.stages[0]
+	game.stages.assign([first_stage])
 	game.title_background = custom
 	game.transitions_enabled = false
 	add_child(game)
@@ -51,10 +52,15 @@ func _ready() -> void:
 	# The same fallback applies at startup.
 	game = game_scene.instantiate()
 	game.title_background = null
+	game.start_stage_override = game.stages[1]
 	game.transitions_enabled = false
 	add_child(game)
 	assert(GameHandler.current_level.scene_file_path == game.stages[0].resource_path)
 	check_background(GameHandler.current_level.stage_label)
+	assert(GameHandler.start_new_game())
+	assert(GameHandler.current_level.scene_file_path == game.start_stage_override.resource_path)
+	assert(GameHandler.current_stage_index == 1 and GameHandler.current_level.stage_label == "1-2")
+	assert(GameHandler.current_level.active_area.area_id == &"intro")
 	game.free()
 	await get_tree().process_frame
 	print("title_background_test: PASS")

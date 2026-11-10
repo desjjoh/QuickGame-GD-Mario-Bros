@@ -11,6 +11,11 @@ func populate(area: BaseLevelArea, saved_entities: Dictionary) -> void:
 	populate_layout(area, area.get_node("Layouts/EnemyLayout"), {})
 
 
+func find_layout_entity(area: BaseLevelArea, entity_id: StringName, cell: Vector2i) -> BaseEntity:
+	var objects := area.get_node("WorldObjects")
+	return objects.get_node_or_null(NodePath(_entity_name(entity_id, cell))) as BaseEntity
+
+
 func populate_layout(area: BaseLevelArea, layout: TileMapLayer, saved_entities: Dictionary) -> void:
 	var objects := area.get_node("WorldObjects") as Node2D
 	# Markers remain editable in the scene, but only entities render at runtime.

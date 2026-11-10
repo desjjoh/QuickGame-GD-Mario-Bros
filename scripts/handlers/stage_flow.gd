@@ -74,7 +74,7 @@ func _restart_death_now(level: BaseLevel, progress_key: String) -> bool:
 	level.shutdown()
 	if GameHandler.current_level != level:
 		return false
-	if GameHandler.reset_progress_on_death:
+	if not GameHandler.current_game.save_entity_state_through_death:
 		GameHandler.forget_area_progress(progress_key)
 	return GameHandler.load_level(scene, false, -2, entry_mode)
 

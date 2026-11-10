@@ -53,7 +53,6 @@ _data = {&"palette": SubResource("palette_animation")}
 [node name="Starman" node_paths=PackedStringArray("animation_player") instance=ExtResource("base")]
 script = ExtResource("star")
 animation_player = NodePath("Body/AnimationPlayer")
-minimum_pickup_rise = 4
 
 [node name="Sprite2D" parent="Body" index="1"]
 texture = SubResource("phase0")

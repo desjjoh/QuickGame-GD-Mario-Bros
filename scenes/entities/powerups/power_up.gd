@@ -1,6 +1,6 @@
 class_name PowerUp
 extends SpawnableEntity
-## An available power-up accepts one valid player contact.
+## A power-up accepts one valid player contact once it has risen far enough.
 
 const EMERGENCE_HEIGHT := 16.0
 const EMERGENCE_STEP_TIME := 4.0 / 60.0
@@ -14,7 +14,7 @@ var _previous_interpolation_mode: PhysicsInterpolationMode
 var _level: BaseLevel
 
 @export var pickup: Area2D
-@export_range(0, 16) var minimum_pickup_rise: int = 16
+@export_range(0, 16) var minimum_pickup_rise: int = 4
 
 
 func _ready() -> void:
@@ -32,7 +32,7 @@ func _ready() -> void:
 	set_process(false)
 
 
-## Configure before entering the tree so pickup starts disabled.
+## Configure before entering the tree so pickup follows the emergence threshold.
 func begin_emergence() -> void:
 	_emergence_remaining = EMERGENCE_HEIGHT
 	_previous_interpolation_mode = physics_interpolation_mode
@@ -61,10 +61,18 @@ func _advance_emergence(delta: float) -> void:
 	_emergence_remaining -= rise
 	_update_emergence_sprite()
 	if _emergence_remaining == 0.0:
+		var clearance := _emergence_clearance()
+		# Keep the settling step in physics and align the artwork to the NES scanline.
+		position.y -= clearance
+		sprite.offset.y += clearance
 		DRAW_ORDER.apply(sprite, DRAW_ORDER.AVAILABLE_ITEM)
 		physics_interpolation_mode = _previous_interpolation_mode
 		reset_physics_interpolation()
 		pickup.set_deferred("monitoring", true)
+
+
+func _emergence_clearance() -> float:
+	return 0.0
 
 
 func _can_pick_up_at_current_height() -> bool:
@@ -119,7 +127,7 @@ func _begin_collection(_player: BasePlayer) -> bool:
 	return true
 
 
-## The first draw is 17 pixels above the top of the 16-pixel item sprite.
+## The first draw is 17 pixels above the top of the item frame before artwork offsets.
 func reward_popup_position() -> Vector2:
 	return sprite.global_position.round() - Vector2(0, 21)
 

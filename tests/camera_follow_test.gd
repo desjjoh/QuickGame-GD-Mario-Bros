@@ -7,8 +7,8 @@ func make_game() -> Node:
 	var level := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	var camera := level.get_node("Areas/MainArea/Camera2D") as LevelCamera
 	camera.position = Vector2(0, 120)
-	camera.world_left = -128.0
-	camera.world_right = 768.0
+	camera.area_left = -128.0
+	camera.area_right = 768.0
 	level.find_child("PlayerSpawn", true, false).position = Vector2(-88, 208)
 	var ground := level.get_node("Areas/MainArea/Layouts/GroundLayout") as TileMapLayer
 	ground.clear()
@@ -82,6 +82,10 @@ func _ready() -> void:
 	assert(
 		camera.global_position == Vector2(640, 120), "Stop at right world boundary; Y stays fixed."
 	)
+	level.active_area.position.x += 256.0
+	body.global_position.x = 4000.0
+	camera.snap_to_arrival(body)
+	assert(camera.global_position == Vector2(896, 120))
 	game.free()
 	game = make_game()
 	add_child(game)

@@ -3,8 +3,17 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/powerups/power_up.tscn" id="base"]
 [ext_resource type="Script" path="res://scenes/entities/powerups/mushroom.gd" id="mushroom"]
 [ext_resource type="PackedScene" path="res://scenes/components/interactions/block_hit_receiver.tscn" id="hits"]
+[ext_resource type="Script" path="res://scenes/components/motion/motion_values.gd" id="motion"]
+[ext_resource type="Script" path="res://scenes/components/motion/vertical_movement.gd" id="vertical"]
 
 [node name="Mushroom" instance=ExtResource("base")]
 script = ExtResource("mushroom")
 
 [node name="BlockHitReceiver" parent="Body" index="3" instance=ExtResource("hits")]
+
+[node name="Motion" type="Node" parent="." node_paths=PackedStringArray("body")]
+script = ExtResource("motion")
+body = NodePath("../Body")
+
+[node name="VerticalMovement" type="Node" parent="Motion"]
+script = ExtResource("vertical")

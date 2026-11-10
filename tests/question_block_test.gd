@@ -143,9 +143,9 @@ func _ready() -> void:
 	assert(is_zero_approx(mushroom.body.velocity.x))
 	for frame in range(36):
 		await get_tree().physics_frame
-	assert(mushroom.position.y == reward_block.position.y - 16.0)
+	assert(mushroom.position.y == reward_block.position.y - 17.0)
 	assert(mushroom.pickup.monitoring and mushroom.body.velocity.x > 0.0)
-	assert(not mushroom.sprite.region_enabled and mushroom.sprite.offset.y == 0.0)
+	assert(not mushroom.sprite.region_enabled and mushroom.sprite.offset.y == 1.0)
 	assert(GameHandler.player_status.lives == lives_before)
 	assert(reward_block.capture_area_state() == {"state": &"Inactive"})
 	# Shutdown during the entry reaction restores presentation and rejects hits.

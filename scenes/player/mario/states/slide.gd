@@ -38,7 +38,7 @@ func process_physics(delta: float) -> BaseState:
 	var stopped := player.slide_action.apply(
 		player.motion_values, delta, direction, previous_facing
 	)
-	player.vertical_movement.apply_gravity(player.motion_values, delta)
+	player.body.velocity.y = 0.0
 	player.move_body()
 	# A solid wall stops physical velocity immediately, but retain this tick's
 	# skid pose using the pre-collision braking result. Resolve it next tick.

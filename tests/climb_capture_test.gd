@@ -34,7 +34,7 @@ func _ready() -> void:
 	var main := fixture.get_node("Areas/MainArea") as BaseLevelArea
 	main.pipe_routes = []
 	main.transport_points = []
-	main.get_node("Camera2D").world_right = 256
+	main.get_node("Camera2D").area_right = 256
 	var ground := main.get_node("Layouts/GroundLayout") as TileMapLayer
 	ground.clear()
 	for x in range(16):

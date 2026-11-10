@@ -18,11 +18,14 @@ func _ready() -> void:
 	await check_painted_reward()
 	await check_movement(false)
 	await check_movement(true)
+	await check_player_contact()
 	check_themed_frames()
 	ControllerHandler.set_physics_process(true)
 	GameHandler.animation_clock.set_physics_process(true)
 	GameHandler.clear_session()
-	print("PASS: Starman painted reward, four-pixel pickup, palette, bounce, and wall reversal.")
+	print(
+		"PASS: Starman painted reward, four-pixel pickup, final rise, palette, bounce, and wall reversal."
+	)
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
@@ -101,7 +104,9 @@ func check_movement(wall: bool) -> void:
 	level.set_physics_process(false)
 	level.player.set_physics_process(false)
 	var star := STAR.instantiate() as Starman
-	star.position = Vector2(144, 192) if wall else Vector2(128, 111)
+	star.position = Vector2(144, 192) if wall else Vector2(128, 128)
+	if not wall:
+		star.begin_emergence()
 	level.world_objects.add_child(star)
 	star.set_physics_process(false)
 	await get_tree().physics_frame
@@ -118,6 +123,14 @@ func check_movement(wall: bool) -> void:
 		}
 	)
 	var body := star._motion.body
+	if not wall:
+		for tick in range(1, 65):
+			star._physics_process(STEP)
+			if tick >= 59:
+				var sprite_top := star.sprite.to_global(star.sprite.get_rect().position).y
+				assert(sprite_top == (114.0 if tick == 59 else (113.0 if tick < 64 else 112.0)))
+		assert(star._emergence_remaining == 0.0 and star.position == Vector2(128, 111))
+		assert(is_zero_approx(body.velocity.x))
 	for tick in range(1, 18 if wall else 98):
 		star._physics_process(STEP)
 		if samples.has(tick):
@@ -130,4 +143,38 @@ func check_movement(wall: bool) -> void:
 		if wall and tick == 16:
 			assert(body.velocity.x == -60.0 and body.velocity.y < 0.0)
 	level.queue_free()
+	await get_tree().process_frame
+
+
+func check_player_contact() -> void:
+	var canvas := CanvasLayer.new()
+	add_child(canvas)
+	var level := LEVEL.instantiate() as BaseLevel
+	level.player_start_configuration = MarioFormPresentation.SMALL
+	level.entity_layout.clear()
+	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
+	canvas.add_child(level)
+	level.set_physics_process(false)
+	var player := level.player as Mario
+	player.set_physics_process(false)
+	player.body.global_position = Vector2(168, 208)
+
+	var star := STAR.instantiate() as Starman
+	star.position = Vector2(145, 192)
+	level.world_objects.add_child(star)
+	star.set_physics_process(false)
+	await physics_finished
+	await physics_finished
+	# The side probe reaches Mario's body before the pickup rectangles touch.
+	star._advance_available(STEP)
+	assert(star._motion.body.velocity.x > 0.0, "Mario must not turn Starman like a wall.")
+	assert(not player.starman.is_active())
+	star.set_physics_process(true)
+	for tick in range(8):
+		await physics_finished
+		if player.starman.is_active():
+			break
+	assert(player.starman.is_active(), "The approaching Starman should be collected.")
+	assert(not is_instance_valid(star) or star.is_queued_for_deletion())
+	canvas.queue_free()
 	await get_tree().process_frame

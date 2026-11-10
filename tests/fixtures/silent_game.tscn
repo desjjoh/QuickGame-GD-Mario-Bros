@@ -3,5 +3,6 @@
 [ext_resource type="PackedScene" path="res://tests/fixtures/silent_level.tscn" id="2"]
 [node name="Game" instance=ExtResource("1")]
 stages = Array[PackedScene]([ExtResource("2")])
+start_stage_override = null
 transitions_enabled = false
 start_with_title = false

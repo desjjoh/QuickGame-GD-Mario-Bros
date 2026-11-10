@@ -105,7 +105,8 @@ func _test_goomba_contact() -> void:
 		await get_tree().physics_frame
 		assert(left.sprite.frame == right.sprite.frame)
 	assert(left.body.velocity.x == -30.0 and right.body.velocity.x == 30.0)
-	assert(left.body.is_on_floor() and right.body.is_on_floor())
+	assert(left.get_node("StateMachine/Walking").has_center_support)
+	assert(right.get_node("StateMachine/Walking").has_center_support)
 	assert(left.body.global_position.x < right.body.global_position.x)
 	left.body.global_position = Vector2(150, 200)
 	right.body.global_position = Vector2(128, 200)

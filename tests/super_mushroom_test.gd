@@ -38,7 +38,7 @@ func _ready() -> void:
 		assert(block.receive_hit(EntityHit.new(mario, &"bonk", Vector2.UP)))
 		mushroom = level.world_objects.get_node("SuperMushroom") as SuperMushroom
 		mushroom.set_physics_process(false)
-		assert(mushroom._emergence_remaining == 16 and not mushroom.pickup.monitoring)
+		assert(mushroom._emergence_remaining == 16 and not mushroom._can_pick_up_at_current_height())
 		assert(mario.body in mushroom.body.get_collision_exceptions())
 		mushroom._check_pickup()
 		assert(not mushroom._removing and GameHandler.player_status.score == score)
@@ -51,7 +51,7 @@ func _ready() -> void:
 	assert(voice.stream == SoundHandler.get_sound(&"power_up_reveal"))
 	for index in range(64):
 		mushroom._physics_process(1.0 / 60.0)
-	assert(mushroom.position == Vector2(64, 128))
+	assert(mushroom.position == Vector2(64, 127))
 	assert(mushroom._emergence_remaining == 0 and not mushroom.sprite.region_enabled)
 	var pickup_position := mushroom.sprite.global_position.round() - Vector2(0, 21)
 	await ticks(2)
@@ -126,6 +126,8 @@ func _ready() -> void:
 	level.world_objects.add_child(mushroom)
 	mushroom.set_physics_process(false)
 	var before := mushroom.body.global_position
+	mushroom._physics_process(1.0 / 60.0)
+	assert(mushroom.body.global_position.x > before.x and mushroom._falling)
 	mushroom._physics_process(1.0 / 60.0)
 	assert(mushroom.body.global_position.x > before.x and mushroom.body.velocity.y > 0)
 	var cleanup := level.active_area.get_activity_region(true)

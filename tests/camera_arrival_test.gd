@@ -10,6 +10,7 @@ func ticks(n: int) -> void:
 func _ready() -> void:
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
 	game.start_with_title = false
+	game.start_stage_override = null
 	game.transitions_enabled = false
 	add_child(game)
 	var level := GameHandler.current_level

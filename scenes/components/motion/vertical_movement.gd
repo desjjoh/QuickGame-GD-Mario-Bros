@@ -61,16 +61,20 @@ func prepare_step(values: MotionValues, delta: float, grid_origin: float = 0.0) 
 
 
 func finish_step(values: MotionValues, next_speed: float) -> void:
+	finish_step_on_support(values, next_speed, values.body.is_on_floor())
+
+
+func finish_step_on_support(values: MotionValues, next_speed: float, supported: bool) -> void:
 	# Keep integer NES position when Godot applies a subpixel safe-margin recovery.
 	# Never override an actual floor/ceiling collision or a larger obstruction.
-	if _fixed_step and not values.body.is_on_floor() and not values.body.is_on_ceiling():
+	if _fixed_step and not supported and not values.body.is_on_ceiling():
 		if absf(values.body.global_position.y - _target_y) < 0.5:
 			values.body.global_position.y = _target_y
 	var velocity := values.velocity
-	velocity.y = 0.0 if values.body.is_on_floor() else next_speed
+	velocity.y = 0.0 if supported else next_speed
 	values.velocity = velocity
 	_published = velocity.y
-	if values.body.is_on_floor():
+	if supported:
 		integer_speed = 0
 		speed_fraction = 0
 

@@ -47,7 +47,7 @@ func check_pickup(is_luigi: bool, index: int) -> void:
 	var world := level.get_node("Areas") as CanvasItem
 	assert(not world.z_as_relative and world.z_index == DRAW_ORDER.WORLD)
 	flower.set_physics_process(false)
-	assert(not flower.sprite.visible and not flower.pickup.monitoring)
+	assert(not flower.sprite.visible and not flower._can_pick_up_at_current_height())
 	assert(
 		(
 			(SoundHandler.get_node("Square2Sfx") as AudioStreamPlayer).stream

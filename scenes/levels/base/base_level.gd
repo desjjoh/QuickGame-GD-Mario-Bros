@@ -14,6 +14,7 @@ var completion_in_progress: bool = false
 var ending_in_progress: bool = false
 var completion_dispatched: bool = false
 @export var ending_presentation: LevelEndingPresentation
+@export var opening_presentation: PipeOpening
 var completion_mode: CompletionMode = CompletionMode.NORMAL
 
 enum DeathReason { NORMAL, TIMEOUT }
@@ -21,6 +22,7 @@ enum EntryMode { STAGE_START, RESPAWN, HALFWAY_RESPAWN }
 
 signal level_started
 var has_started: bool = false
+var _start_deferred: bool = false
 var timer_expired: bool:
 	get:
 		return level_timer.has_expired
@@ -129,25 +131,45 @@ func _ready() -> void:
 	_progress_key = scene_file_path if _persistent_progress else "runtime:%s" % get_instance_id()
 	if GameHandler.current_level == self or not is_instance_valid(GameHandler.current_level):
 		GameHandler.select_level_progress(_progress_key)
-	active_area = $Areas/MainArea
+	var main_area := $Areas/MainArea as BaseLevelArea
+	var main_camera := main_area.get_node("Camera2D") as LevelCamera
+	# Cache the stage-wide threshold before streaming out the main area.
+	if main_camera.halfway_check_enabled:
+		_halfway_camera_left = main_camera.world_halfway_camera_left
+	active_area = main_area
+	var spawn_marker := halfway_spawn if entry_mode == EntryMode.HALFWAY_RESPAWN else player_spawn
+	if (
+		entry_mode == EntryMode.STAGE_START
+		and opening_presentation != null
+		and opening_presentation.intro_area != null
+	):
+		var intro := opening_presentation.intro_area
+		_load_area(intro)
+		var doorway := opening_presentation.resolve_spawn(area_content)
+		if doorway != null:
+			active_area = intro
+			spawn_marker = doorway
+		else:
+			push_error("The opening presentation needs a castle at its configured cell.")
 	for area in $Areas.get_children():
 		if area is BaseLevelArea:
 			area.prepare_runtime()
 			if area != active_area:
 				area.unload_runtime()
 	_load_area(active_area)
-	spawn_player(halfway_spawn if entry_mode == EntryMode.HALFWAY_RESPAWN else player_spawn)
+	spawn_player(spawn_marker)
+	if opening_presentation != null and entry_mode == EntryMode.RESPAWN and player != null:
+		player.begin_arrival_control_lock()
 	_record_active_area()
 	var initial_camera := active_area.get_node("Camera2D") as LevelCamera
-	# The main area camera can unload while Mario is in a side room.
-	if initial_camera.halfway_check_enabled:
-		_halfway_camera_left = initial_camera.halfway_camera_left
 	initial_camera.enabled = true
 	initial_camera.make_current()
 	var camera := get_viewport().get_camera_2d() as LevelCamera
 	if camera != null and is_instance_valid(player):
 		if entry_mode == EntryMode.STAGE_START:
 			camera.reset_target(player.body)
+		elif camera.halfway_left_limit_active:
+			camera.snap_to_left_limit(player.body)
 		else:
 			camera.snap_to_arrival(player.body, LevelCamera.LEFT_ARRIVAL_SPRITE_X)
 	if not is_shutdown:
@@ -180,6 +202,8 @@ func _physics_process(_delta: float) -> void:
 		camera.follow_target(player.body)
 	clamp_player_to_camera()
 	_check_fall_death()
+	if _start_deferred and not _opening_blocks_gameplay_start():
+		on_level_start()
 	_update_level_timer()
 
 
@@ -194,13 +218,33 @@ func on_level_start() -> bool:
 		return false
 	if GameHandler.current_level != self or GameHandler.flow != GameHandler.GameFlow.PLAYING:
 		return false
+	if _opening_blocks_gameplay_start():
+		# The intro pipe and the underground fall need active actors before the timer starts.
+		initialize_actors(false)
+		_start_deferred = true
+		return false
 	# load_level initialized the value once. Start only the local countdown phase.
 	initialize_actors(false)
+	_start_deferred = false
 	has_started = true
 	level_timer.start(GameHandler.animation_clock.tick_count, timer_enabled)
 	_play_area_music(level_timer.is_hurry)
 	level_started.emit()
 	return true
+
+
+func _is_opening_area() -> bool:
+	return opening_presentation != null and active_area == opening_presentation.intro_area
+
+
+func _opening_blocks_gameplay_start() -> bool:
+	return (
+		opening_presentation != null
+		and (
+			_is_opening_area()
+			or (is_instance_valid(player) and player.arrival_control_ticks_remaining > 0)
+		)
+	)
 
 
 func initialize_actors(suspended: bool) -> void:
@@ -441,6 +485,10 @@ func _load_area(area: BaseLevelArea) -> void:
 		return
 	var snapshot := GameHandler.get_area_progress(_progress_key, area.area_id)
 	area.load_runtime(snapshot)
+	# The camera is recreated when returning to a streamed-out area.
+	if entry_mode == EntryMode.HALFWAY_RESPAWN and area == $Areas/MainArea:
+		var camera := area.get_node("Camera2D") as LevelCamera
+		camera.halfway_left_limit_active = camera.halfway_check_enabled
 	area_content.populate(area, snapshot.get("entities", {}))
 	_spawned_areas[area.get_instance_id()] = true
 
@@ -612,6 +660,8 @@ func on_death(
 
 
 func _select_death_restart_entry() -> EntryMode:
+	if _is_opening_area():
+		return EntryMode.STAGE_START
 	if not is_instance_valid(halfway_spawn):
 		return EntryMode.RESPAWN
 	var camera := get_viewport().get_camera_2d() as LevelCamera

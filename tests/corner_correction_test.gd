@@ -4,8 +4,8 @@ extends Node
 func _ready() -> void:
 	var camera := LevelCamera.new()
 	camera.process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
-	camera.world_left = -1024
-	camera.world_right = 2048
+	camera.area_left = -1024
+	camera.area_right = 2048
 	camera.position = Vector2(-80, 120)
 	add_child(camera)
 	var platform := StaticBody2D.new()
@@ -57,7 +57,7 @@ func _ready() -> void:
 		mario.body.global_position = Vector2(30, 120)
 		mario.body.velocity = Vector2(0, -60)
 		mario.body.move_and_slide()
-		mario.body.global_position = Vector2(58 if side < 0 else 87, 78.5)
+		mario.body.global_position = Vector2(58 if side < 0 else 86.5, 78.5)
 		mario.body.velocity = Vector2(-side * 120, 180)
 		mario.move_body()
 		assert(mario.body.is_on_floor(), "A descending top crossing must land on the current tick.")
@@ -66,6 +66,12 @@ func _ready() -> void:
 			is_equal_approx(mario.body.velocity.x, -side * 120),
 			"A top crossing must preserve horizontal momentum."
 		)
+	# The wider body reaches the right edge, but neither inset foot reaches it.
+	mario.body.global_position = Vector2(87, 78.5)
+	mario.body.velocity = Vector2(-120, 180)
+	mario.move_body()
+	assert(not mario.has_floor_support(), "A body-only corner touch must not grant support.")
+	assert(is_equal_approx(mario.body.velocity.x, -120.0))
 	mario.body.global_position = Vector2(72, 110.2)
 	mario.body.velocity = Vector2(0, -240)
 	mario.move_body()

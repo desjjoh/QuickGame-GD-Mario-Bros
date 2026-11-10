@@ -105,7 +105,7 @@ func refresh_posture_art() -> void:
 	if state == null:
 		return
 	var crouch_pose := is_crouched and state.name in [&"Idle", &"Move", &"Jump", &"PipeEnter"]
-	if state.name == &"Move" and not _player.body.is_on_floor():
+	if state.name == &"Move" and not _player.has_floor_support():
 		crouch_pose = false
 	if crouch_pose:
 		_player.animation_player.pause()

@@ -14,6 +14,6 @@ func process_physics(delta: float) -> BaseState:
 		return continue_physics(next, delta)
 	if not is_zero_approx(direction) or not is_zero_approx(player.body.velocity.x):
 		return continue_physics(move_state, delta)
-	player.vertical_movement.apply_gravity(player.motion_values, delta)
+	player.body.velocity.y = 0.0
 	player.move_body()
 	return null

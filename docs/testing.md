@@ -74,6 +74,8 @@ Pipe entry/transfer, sideways-pipe, climbing, and flagpole-ending tests also acc
 
 `fire_flower_test` checks block emergence and crop, four global palette phases, stationary motion, pickup for both characters in all three forms, and the delayed 1,000-point reward. A rendered run captures the flower partway through emergence.
 
+`tiered_reward_test` holds each mushroom and the Fire Flower in overlapping contact on an eligible tick. It checks that collection is rejected through three pixels of rise and accepted at four, with a one-pixel rise every four updates.
+
 `starman_test` checks release from painted reward data, all four item frames in each theme, emergence clipping, collection at four pixels of rise, the five-tick score delay, and bounce and wall-reversal positions from Mesen.
 
 `starman_effect_test` checks two complete Mesen timing traces, enemy damage protection, the music handoff, refresh, and pause. Run it with a renderer to also check the recolored sprite pixels and Fire throw overlay. The pipe transfer and flagpole ending tests check that protection, palette, and music clear at their respective handoffs.
@@ -82,7 +84,7 @@ Pipe entry/transfer, sideways-pipe, climbing, and flagpole-ending tests also acc
 
 `hurry_music_test` checks the warning at 100 → 99, starts at 101, 100, 75 and zero, a disabled timer, pulse priority during the warning, pause, Starman handoff, fast music through the secret pipe, and flagpole cancellation during the warning and fast music.
 
-`fireball_test` compares per-tick positions, vertical speeds, and bounce flags with the Mesen right, left, and wall traces. It checks burst frame selection and release timing, fresh versus held Run input, alternating slot rejection and reuse, and player limits of zero, one, and two.
+`fireball_test` compares per-tick positions, vertical speeds, and bounce flags with the Mesen right, left, and wall traces. It checks burst frame selection and release timing, fresh versus held Run input, alternating slot rejection and reuse, and player limits of zero, one, and two. Throw-pose cases also check the first shot position and its absolute draw priority.
 
 The same test checks Fire throw duration and pose selection for both characters while standing, walking, running, and jumping with or without horizontal movement. A rendered run checks each pixel of the full throw and the two partial compositions in both directions.
 
@@ -109,11 +111,13 @@ Successful scenes call `await preload("res://tests/fixtures/finish_test.gd").fin
 - Finish with timer endings 1, 3, and 6; check fireworks, 500 points per burst, pause, score conversion, and music handoff.
 - Compare audio with Mesen at the same playback level. Investigate note period, envelope, cutoff, retrigger, and channel interaction before changing pitch or amplitude.
 
-`arrival_control_test` verifies exactly 17 locked movement ticks followed by held-input response, continued falling, controller disconnection/reconnection, pause preservation, direct-placement timing, a stationary 17-tick pre-emergence hold, immediate control after animated exit, cancellation, and unchanged start/respawn eligibility. Pipe entry/transfer, sideways travel, camera return, transport lifecycle, death, title, and pause scenes cover the affected integrations.
+`arrival_control_test` verifies exactly 17 locked movement ticks followed by held-input response, continued falling, controller disconnection/reconnection, pause preservation, direct-placement timing, a stationary 17-tick pre-emergence hold, immediate control after animated exit, cancellation, and unchanged start/respawn eligibility for ordinary levels. Pipe entry/transfer, sideways travel, camera return, transport lifecycle, death, title, and pause scenes cover the affected integrations.
 
-`halfway_restart_test` uses 1-1 with transitions enabled. It checks deaths at camera-left X=1279 and X=1280, a second death immediately after the halfway restart, a timeout in the original secret room, and a death after moving that room past the threshold. It verifies the spawn and camera while the transition covers the restart and checks control after the reveal.
+`pipe_opening_test` clears 1-1 through the flagpole and verifies that the configured Game advances to the 1-2 castle doorway. It also walks into the painted pipe in standalone and game flow, checks the underground input handoff, and verifies the early restart at PlayerSpawn.
 
-`title_background_test` verifies a Game-selected backdrop on startup and stage-completion return, suspended backdrop actors, an unchanged gameplay stage list, and a different backdrop selection on a later menu return. Default-backdrop, game-over, and animated-return paths remain covered by the title/lifecycle regressions.
+`halfway_restart_test` uses 1-1 with transitions enabled. It checks deaths at camera-left X=1279 and X=1280, a second death immediately after the halfway restart, and forward scrolling from the halfway line. It uses the secret room's authored return destination to verify pipe-exit framing and reinstatement of the main area's checkpoint limit. It also checks a timeout in the original secret room and a death after moving that room past the threshold.
+
+`title_background_test` verifies a Game-selected backdrop on startup and stage-completion return, suspended backdrop actors, and a different backdrop selection on a later menu return. It also checks that a run can start at 1-2 through the override while the title backdrop still uses 1-1. Game-over and animated-return paths remain covered by the title/lifecycle regressions.
 
 The former playable Test Level is retained only as `tests/fixtures/sandbox_level.tscn`. Regression scenes use its stable geometry independently of 1-1 and the configured title backdrop.
 

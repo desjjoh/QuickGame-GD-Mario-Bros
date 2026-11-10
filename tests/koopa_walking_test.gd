@@ -84,7 +84,7 @@ func _ready() -> void:
 	assert(is_equal_approx(koopa.body.velocity.y, 857.8125 / 60.0))
 	assert(koopa.body.velocity.x == -30)
 	await ticks(45)
-	assert(koopa.body.is_on_floor())
+	assert(walking.has_center_support)
 	# A late join samples the same global frame and shares enemy reversal.
 	var other := koopa_scene.instantiate() as BaseEnemy
 	other.position = Vector2(160, 192)
@@ -109,5 +109,62 @@ func _ready() -> void:
 	assert(spawner.get_node_or_null("GreenKoopa") == null)
 	level.queue_free()
 	await ticks(2)
+	await check_center_foot_ledges(koopa_scene)
 	print("koopa_walking_test: PASS")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+
+
+func check_center_foot_ledges(koopa_scene: PackedScene) -> void:
+	var canvas := CanvasLayer.new()
+	add_child(canvas)
+	var level := preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	var area := level.get_node("Areas/MainArea") as BaseLevelArea
+	area.position = Vector2(160, 237)
+	level.entity_layout.clear()
+	area.get_node("Layouts/EnemyLayout").clear()
+	var floor := area.get_node("Layouts/GroundLayout") as TileMapLayer
+	floor.clear()
+	for column in range(24):
+		floor.set_cell(Vector2i(column, 13), 0, Vector2i.ZERO)
+	for column in range(10, 15):
+		level.entity_layout.set_cell(Vector2i(column, 9), 1, Vector2i.ZERO)
+	canvas.add_child(level)
+	level.set_physics_process(false)
+	level.player.set_physics_process(false)
+	area.set_physics_process(false)
+	await ticks(2)
+
+	var goomba_scene := preload("res://scenes/entities/enemies/goomba/goomba.tscn")
+	for scene in [goomba_scene, koopa_scene]:
+		for direction in [-1, 1]:
+			var player_x := 136.0 if direction > 0 else 320.0
+			level.player.body.global_position = area.to_global(Vector2(player_x, 208))
+			var enemy := scene.instantiate() as BaseEnemy
+			var walking := enemy.get_node("StateMachine/Walking")
+			walking.initial_direction = direction
+			enemy.position = Vector2(226.0 if direction > 0 else 157.5, 128)
+			level.world_objects.add_child(enemy)
+			enemy.set_physics_process(false)
+			for tick in range(12):
+				walking.process_physics(1.0 / 60.0)
+			assert(walking.has_center_support)
+			assert(area.to_local(enemy.body.global_position).y + 8.0 == 144.0)
+			walking.process_physics(1.0 / 60.0)
+			assert(not walking.has_center_support and enemy.body.velocity.y > 0.0)
+			for tick in range(27):
+				walking.process_physics(1.0 / 60.0)
+			assert(not walking.has_center_support)
+			assert(area.to_local(enemy.body.global_position).y + 8.0 == 210.0)
+			walking.process_physics(1.0 / 60.0)
+			var landing_direction: int = -direction if scene == koopa_scene else direction
+			assert(walking.has_center_support and enemy.body.velocity.x == landing_direction * 30.0)
+			assert(area.to_local(enemy.body.global_position).y + 8.0 == 208.0)
+			if scene == koopa_scene:
+				assert(enemy.sprite.flip_h == (landing_direction > 0))
+				# Changing Mario's side while grounded must not turn the Koopa again.
+				var other_x := 320.0 if direction > 0 else 136.0
+				level.player.body.global_position = area.to_global(Vector2(other_x, 208))
+				walking.process_physics(1.0 / 60.0)
+				assert(enemy.body.velocity.x == landing_direction * 30.0)
+			enemy.free()
+	canvas.free()

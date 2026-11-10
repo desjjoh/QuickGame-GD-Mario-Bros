@@ -33,7 +33,7 @@ func _ready() -> void:
 	level.world_objects.add_child(shell_spawner)
 	level.active_area.update_camera_activity()
 	var shell := shell_spawner.get_node("GreenKoopa") as BaseEnemy
-	shell.body.global_position = Vector2(802, 208)
+	shell.body.global_position = Vector2(802, 200)
 	var pair := (
 		load("res://scenes/entities/spawners/goomba_pair_spawner.tscn").instantiate()
 		as EntitySpawner

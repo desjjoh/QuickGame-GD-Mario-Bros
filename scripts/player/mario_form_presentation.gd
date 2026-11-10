@@ -219,7 +219,7 @@ func _apply_growth_normal(form: MarioForm) -> void:
 
 func _finish() -> void:
 	var growth := not shrinking and not _igniting
-	var airborne := not _mario.body.is_on_floor()
+	var airborne := not _mario.has_floor_support()
 	var velocity := _mario.body.velocity
 	cancel()
 	if growth and not _mario.is_dead and not _mario.is_shutdown:

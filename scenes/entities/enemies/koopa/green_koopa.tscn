@@ -43,6 +43,8 @@ initial_state = NodePath("Walking")
 
 [node name="Walking" type="Node" parent="StateMachine" node_paths=PackedStringArray("synchronized_animation")]
 script = ExtResource("walking")
+use_center_foot_support = true
+turn_toward_player_on_landing = true
 face_movement = true
 synchronized_animation = NodePath("../../Presentation/WalkAnimationSync")
 frame_updates_enabled = false
@@ -62,6 +64,7 @@ position = Vector2(0, -8)
 
 [node name="ShellMoving" type="Node" parent="StateMachine"]
 script = ExtResource("shell_moving")
+use_center_foot_support = true
 walk_speed = 180.0
 stop_animation_on_enter = true
 frame_updates_enabled = false

@@ -33,8 +33,13 @@ func _ready() -> void:
 			player.body.velocity.x = direction * 150.0
 			player.face_direction(direction)
 			player.state_machine.change_state(player.state_machine.get_state(&"Move"))
+			var left_support := false
 			for frame in range(25):
 				await tick()
+				if not left_support and not player.has_floor_support():
+					left_support = true
+					assert(is_zero_approx(player.body.velocity.y))
+					assert(absf(player.body.global_position.y - 208.0) < 0.2)
 				assert(
 					player.body.global_position.y < 212.0, "Run must recover shallow one-tile gaps."
 				)
@@ -56,7 +61,7 @@ func _ready() -> void:
 						]
 					)
 				)
-			assert(player.body.is_on_floor())
+			assert(left_support and player.has_floor_support())
 			Input.action_release(action)
 			Input.action_release(ControllerHandler.secondary_action)
 			game.free()

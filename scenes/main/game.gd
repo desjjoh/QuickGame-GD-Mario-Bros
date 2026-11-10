@@ -3,8 +3,14 @@ extends Node
 
 ## Ordered gameplay stages; the title background is configured separately.
 @export var stages: Array[PackedScene] = []
+## Optional BaseLevel scene for new runs. Empty uses the first stage.
+@export var start_stage_override: PackedScene
 @export var start_with_title: bool = true
 @export var transitions_enabled: bool = true
+
+@export_group("Gameplay")
+## Preserve saved area progress when restarting a stage after losing a life.
+@export var save_entity_state_through_death: bool = true
 
 @export_group("Starting Player Status")
 @export_range(0, 999999) var starting_score: int = PlayerStatus.DEFAULT_SCORE
@@ -43,7 +49,8 @@ func _ready() -> void:
 		push_error("Game needs a nonempty Stages list without empty entries.")
 		return
 
-	if not GameHandler.start_game_flow(stages[0], start_with_title):
+	var first_stage := start_stage_override if start_stage_override != null else stages[0]
+	if not GameHandler.start_game_flow(first_stage, start_with_title):
 		push_error("Game startup could not create its initial screen.")
 
 

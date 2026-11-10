@@ -8,6 +8,8 @@
 
 Open `scenes/levels/worlds/world 1/1-1.tscn` and press **F6** to run 1-1 directly. It is also the default title backdrop, with gameplay disabled. Leave **Game → Presentation → Title Background** empty to use the first entry in **Stages**, or assign another level to override it.
 
+Clearing 1-1 loads 1-2 at its castle doorway. To start a run at 1-2 or another level, open `scenes/main/game.tscn` and set **Game → Start Stage Override** to that scene. Clear the field to start at 1-1 again.
+
 ## Controls
 
 | Action | Keyboard | Controller |
@@ -19,7 +21,7 @@ Open `scenes/levels/worlds/world 1/1-1.tscn` and press **F6** to run 1-1 directl
 | Start | Enter | Start / Menu |
 | Pause / resume during gameplay | Enter | Start / Menu |
 
-Hold Jump for a higher jump. Press the opposite direction while moving to skid. Sideways pipe entrances activate when you walk into their opening. Area arrivals include a 17-physics-tick hold. Direct placements ignore movement input while Mario falls normally; pipe arrivals wait inside the exit for 17 ticks before emerging, with immediate control after the animation. Pause freezes the hold. Level starts and respawns do not use it.
+Hold Jump for a higher jump. Press the opposite direction while moving to skid. Sideways pipe entrances activate when you walk into their opening. Area arrivals include a 17-physics-tick hold. Direct placements ignore movement input while Mario falls normally. Animated pipe arrivals wait inside the exit for 17 ticks before emerging, with immediate control after the animation. Pause freezes the hold. 1-2 also applies the hold when an early death restarts Mario at the underground drop.
 
 Pause keeps the current screen visible and freezes gameplay, animation, and ordinary audio. Release Start, then press it again to resume. A short lockout prevents rapid toggles. Pause is unavailable on the title screen and during active screen transitions. Pipe entry/emergence, death, and level-ending animations remain pausable. Standalone F6 levels also support pause.
 

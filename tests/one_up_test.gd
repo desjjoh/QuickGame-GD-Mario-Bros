@@ -57,7 +57,7 @@ func _ready() -> void:
 	for tick in range(35):
 		await get_tree().physics_frame
 		reversed = reversed or mushroom.body.velocity.x < 0.0
-	assert(reversed and mushroom.body.is_on_floor())
+	assert(reversed and not mushroom._falling and mushroom.body.global_position.y == 200.0)
 	mushroom.body.global_position = spawn_position
 	var previous_lives := GameHandler.player_status.lives
 	var voice := SoundHandler.get_node("Square2Sfx") as AudioStreamPlayer
