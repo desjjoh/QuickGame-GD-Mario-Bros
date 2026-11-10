@@ -4,6 +4,7 @@ enum Track { OVERWORLD, UNDERGROUND, NONE }
 enum Pace { NORMAL, FAST, WARNING }
 
 const STARMAN_TRACK := Track.NONE + 1
+const PIPE_OPENING_CUE := preload("res://assets/audio/music/pipe_opening.wav")
 const STREAMS = {
 	Track.OVERWORLD: preload("res://assets/audio/music/overworld.wav"),
 	Track.UNDERGROUND: preload("res://assets/audio/music/underground.wav"),
@@ -54,6 +55,11 @@ func _make_loops(streams: Dictionary) -> Dictionary[int, AudioStreamWAV]:
 		stream.loop_end = roundi(stream.get_length() * stream.mix_rate)
 		loops[track] = stream
 	return loops
+
+
+func play_pipe_opening(level: Node) -> void:
+	_owner_id = level.get_instance_id()
+	_play_stream(PIPE_OPENING_CUE)
 
 
 func play_area(level: Node, track: Track, starman: bool = false, pace: Pace = Pace.NORMAL) -> void:

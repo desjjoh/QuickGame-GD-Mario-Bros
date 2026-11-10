@@ -21,7 +21,7 @@ Set **Background Music** independently to Overworld, Underground, or None. Overw
 
 Set **Transport Points** and **Pipe Routes** on the source area to link placed pipes to explicit area and destination IDs. A destination pipe supplies its exit pose. The reserved `player_spawn` target returns to the main area’s spawn. Standalone arrival markers are useful where an area needs a separate landing point.
 
-For 1-2's opening, **Presentations → PipeOpening** identifies the intro area and painted castle cell. A fresh entry spawns at the castle's doorway. The sideways pipe targets `main / player_spawn`, so moving **Players → PlayerSpawn** changes both the first underground arrival and the early respawn.
+Configure **Presentations → PipeOpening** with the intro area, painted castle cell, and the sideways pipe's **Entrance ID**. A fresh entry spawns at the castle doorway and walks into that pipe automatically. In 1-2, the pipe targets `main / arrival`, which uses **Areas → MainArea → Arrival**. Early deaths restart at **Players → PlayerSpawn**. Move each marker to set its placement independently.
 
 ## Area background colour
 
@@ -73,4 +73,4 @@ LevelSpawnRegistry keeps ten enemy slots and one independent power-up slot. Thes
 
 Enemy stomp scoring omits the NES shared StompTimer score modifier. A stomped Koopa instead has a shell-local 12-tick grace window; a kick does not refresh it. These rules are separate from the independent timed-coin windows above.
 
-Area and pipe arrivals use a shared 17-active-physics-tick hold (about 0.28 seconds at 60 Hz), including grounded arrivals. Animated exits wait before emergence and release controls immediately afterward. Direct arrivals apply the input lock after placement. 1-2 also uses the hold for early respawns at its underground entrance, matching the observed duration in Mesen. The NES underground entrance releases input at a Y threshold. Ordinary starts and other respawns retain immediate normal control.
+Area and pipe arrivals use a shared 17-active-physics-tick hold (about 0.28 seconds at 60 Hz), including grounded arrivals. Animated exits wait before emergence and release controls immediately afterward. Direct arrivals apply the input lock after placement. Death respawns restore control when the stage is revealed.

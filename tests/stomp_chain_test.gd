@@ -68,6 +68,35 @@ func _ready() -> void:
 	assert(fresh.receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)))
 	await ticks(6)
 	assert(GameHandler.player_status.score == before + 100 and player.stomp_chain == 1)
+
+	# Two Goombas 16 pixels apart can both overlap the same descending player.
+	var goomba_scene := preload("res://scenes/entities/enemies/goomba/goomba.tscn")
+	var pair: Array[BaseEnemy] = []
+	player.body.global_position = Vector2(128, 100)
+	player.body.velocity = Vector2(0, 120)
+	player.stomp_chain = 0
+	before = GameHandler.player_status.score
+	for offset in [-8, 8]:
+		var goomba := goomba_scene.instantiate() as BaseEnemy
+		level.world_objects.add_child(goomba)
+		goomba.body.global_position = player.body.global_position + Vector2(offset, 0)
+		pair.append(goomba)
+	await ticks(2)
+	for goomba in pair:
+		assert(goomba.state_machine.current_state == goomba.get_node("StateMachine/Squashed"))
+	assert(player.body.velocity.y == BaseEnemy.STOMP_REBOUND and not level.death_in_progress)
+	assert(player.stomp_chain == 2)
+	await ticks(6)
+	assert(GameHandler.player_status.score == before + 100 + 400)
+
+	# A later stomp uses the third chain entry, with no leftover same-tick bonus.
+	var next_goomba := goomba_scene.instantiate() as BaseEnemy
+	next_goomba.position = Vector2(192, 160)
+	level.world_objects.add_child(next_goomba)
+	assert(next_goomba.receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)))
+	await ticks(6)
+	assert(GameHandler.player_status.score == before + 100 + 400 + 400)
+	assert(player.stomp_chain == 3)
 	player.begin_death()
 	assert(player.stomp_chain == 0)
 	game.queue_free()

@@ -1,4 +1,4 @@
-"""Render the area loops using the existing pulse and triangle renderer."""
+"""Render the area loops and pipe opening cue."""
 from pathlib import Path
 import struct
 import wave
@@ -166,7 +166,11 @@ def write_area_tracks(folder, suffix, area_lengths, star_lengths):
 def main():
     folder = Path(__file__).resolve().parents[1] / "assets" / "audio" / "music"
     folder.mkdir(parents=True, exist_ok=True)
-    write_area_tracks(folder, "", NORMAL_LENGTHS, CLEAR_LENGTHS)
+    ground_sections = write_area_tracks(folder, "", NORMAL_LENGTHS, CLEAR_LENGTHS)
+    # PipeIntroMusic uses the normal ground lead-in header and plays it once.
+    with wave.open(str(folder / "pipe_opening.wav"), "wb") as stream:
+        stream.setparams((1, 2, SAMPLE_RATE, 0, "NONE", "not compressed"))
+        stream.writeframes(ground_sections[0])
     fast_sections = write_area_tracks(folder, "_fast", CLEAR_LENGTHS, FAST_STARMAN_LENGTHS)
     start_frames = []
     frame = 0

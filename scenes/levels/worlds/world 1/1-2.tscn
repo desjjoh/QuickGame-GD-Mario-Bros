@@ -48,7 +48,7 @@ power_up_scene = ExtResource("5_c1du6")
 [sub_resource type="Resource" id="OpeningDestination"]
 script = ExtResource("transport_destination")
 area_id = &"main"
-target_id = &"player_spawn"
+target_id = &"arrival"
 
 [sub_resource type="Resource" id="OpeningPipe"]
 script = ExtResource("transport_placement")
@@ -181,7 +181,7 @@ area_right = 256.0
 
 [node name="SurfaceArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="3" unique_id=923250838 instance=ExtResource("area")]
 process_physics_priority = 110
-position = Vector2(800, -336)
+position = Vector2(2368, -336)
 background_color = Color(0.5803922, 0.5803922, 1, 1)
 area_id = &"surface"
 theme = ExtResource("overworld")
@@ -217,7 +217,7 @@ area_right = 256.0
 position = Vector2(160, -32)
 
 [node name="PlayerSpawn" parent="Players" index="0" unique_id=321075723]
-position = Vector2(48, 32)
+position = Vector2(48, 208)
 
 [node name="PipeOpening" type="Node" parent="Presentations" index="0" unique_id=113248238 node_paths=PackedStringArray("intro_area")]
 script = ExtResource("opening")

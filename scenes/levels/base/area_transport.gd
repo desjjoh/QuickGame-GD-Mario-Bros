@@ -247,9 +247,7 @@ func _area_transition_complete(success: bool) -> void:
 	level._play_area_music()
 
 
-func _start_player_state(arrived: bool = false) -> void:
-	if arrived:
-		level.player.begin_arrival_control_lock()
+func _start_player_state() -> void:
 	var suspended := level.player.state_machine.gameplay_suspended
 	level.player.state_machine.gameplay_suspended = false
 	level.player.state_machine.start()
@@ -304,11 +302,10 @@ func _commit_transport(phase: int, under_cover: bool = false) -> void:
 		arrival_state.configure(
 			arrival["position"], arrival["direction"], true, arrival["distance"]
 		)
-		level.player.begin_arrival_control_lock()
 		_start_transport_state(arrival_state)
 	else:
 		pending = false
-		_start_player_state(true)
+		_start_player_state()
 
 
 func _disconnect_transport_state() -> void:
@@ -343,6 +340,8 @@ func cancel(resume_player: bool) -> void:
 		level.player.state_machine.stop(false)
 		if resume_player and not level.is_shutdown and not level.player.is_shutdown:
 			_start_player_state()
+			if level.opening_presentation != null and level.opening_presentation.resume_walk():
+				input_locked = false
 
 
 func _restore_player_draw_order() -> void:

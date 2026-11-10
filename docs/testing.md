@@ -113,7 +113,7 @@ Successful scenes call `await preload("res://tests/fixtures/finish_test.gd").fin
 
 `arrival_control_test` verifies exactly 17 locked movement ticks followed by held-input response, continued falling, controller disconnection/reconnection, pause preservation, direct-placement timing, a stationary 17-tick pre-emergence hold, immediate control after animated exit, cancellation, and unchanged start/respawn eligibility for ordinary levels. Pipe entry/transfer, sideways travel, camera return, transport lifecycle, death, title, and pause scenes cover the affected integrations.
 
-`pipe_opening_test` clears 1-1 through the flagpole and verifies that the configured Game advances to the 1-2 castle doorway. It also walks into the painted pipe in standalone and game flow, checks the underground input handoff, and verifies the early restart at PlayerSpawn.
+`pipe_opening_test` clears 1-1 through the flagpole and verifies that the configured Game advances to the 1-2 castle doorway. It checks the automatic walk in standalone and game flow, including an alternate entrance ID and opposing input. It also verifies the underground input handoff and the early restart at PlayerSpawn.
 
 `halfway_restart_test` uses 1-1 with transitions enabled. It checks deaths at camera-left X=1279 and X=1280, a second death immediately after the halfway restart, and forward scrolling from the halfway line. It uses the secret room's authored return destination to verify pipe-exit framing and reinstatement of the main area's checkpoint limit. It also checks a timeout in the original secret room and a death after moving that room past the threshold.
 

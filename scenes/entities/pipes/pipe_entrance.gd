@@ -28,12 +28,15 @@ func _physics_process(delta: float) -> void:
 
 
 func can_start_entry(player: BasePlayer) -> bool:
+	return is_instance_valid(player) and player.can_read_controller_input() and _can_reach_mouth(player)
+
+
+func _can_reach_mouth(player: BasePlayer) -> bool:
 	if (
 		not entrance_enabled
 		or not can_read_controller_input()
 		or not is_instance_valid(player)
 		or player.is_shutdown
-		or not player.can_read_controller_input()
 	):
 		return false
 	# The reference filters Down with horizontal input before moving the player.
@@ -83,6 +86,9 @@ func get_destination() -> TransportDestination:
 
 
 func can_start_transport(player: BasePlayer) -> bool:
+	var opening := _level.opening_presentation if is_instance_valid(_level) else null
+	if opening != null and opening.is_walking_into(player, self):
+		return _can_reach_mouth(player)
 	return can_start_entry(player)
 
 

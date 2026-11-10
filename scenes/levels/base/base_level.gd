@@ -158,8 +158,6 @@ func _ready() -> void:
 				area.unload_runtime()
 	_load_area(active_area)
 	spawn_player(spawn_marker)
-	if opening_presentation != null and entry_mode == EntryMode.RESPAWN and player != null:
-		player.begin_arrival_control_lock()
 	_record_active_area()
 	var initial_camera := active_area.get_node("Camera2D") as LevelCamera
 	initial_camera.enabled = true
@@ -174,6 +172,8 @@ func _ready() -> void:
 			camera.snap_to_arrival(player.body, LevelCamera.LEFT_ARRIVAL_SPRITE_X)
 	if not is_shutdown:
 		active_area.enter_area()
+		if _is_opening_area() and entry_mode == EntryMode.STAGE_START and player != null:
+			opening_presentation.begin(self, player)
 		if not is_instance_valid(GameHandler.current_game):
 			initialize_actors(false)
 			_create_standalone_shadow()
@@ -220,6 +220,8 @@ func on_level_start() -> bool:
 		return false
 	if _opening_blocks_gameplay_start():
 		# The intro pipe and the underground fall need active actors before the timer starts.
+		if _is_opening_area() and not _start_deferred:
+			MusicHandler.play_pipe_opening(self)
 		initialize_actors(false)
 		_start_deferred = true
 		return false
@@ -382,6 +384,8 @@ func shutdown() -> void:
 		return
 	if is_instance_valid(player_presentation):
 		player_presentation.cancel()
+	if opening_presentation != null:
+		opening_presentation.cancel()
 	is_shutdown = true
 	GameHandler.pause_controller.clear_for_level(self)
 	MusicHandler.stop_area(self)
@@ -427,6 +431,7 @@ func request_area_transfer(
 func _commit_area_arrival(
 	area: BaseLevelArea, target_id: StringName, arrival: Dictionary, under_cover: bool
 ) -> bool:
+	var leaving_opening := _is_opening_area() and active_area != area
 	player.state_machine.stop(false)
 	player.on_area_arrival(arrival.get("through_pipe", false))
 	player.body.velocity = Vector2.ZERO
@@ -442,6 +447,10 @@ func _commit_area_arrival(
 	camera.snap_to_arrival(player.body, arrival.get("camera_sprite_x", -1.0))
 	var previous_area := active_area
 	active_area = area
+	player.begin_arrival_control_lock()
+	if leaving_opening:
+		MusicHandler.stop_area(self)
+		opening_presentation.cancel()
 	active_target_id = target_id
 	active_endpoint = arrival["endpoint"]
 	if previous_area != area:
@@ -640,6 +649,8 @@ func on_death(
 		return false
 	if is_instance_valid(player_presentation):
 		player_presentation.cancel()
+	if _is_opening_area():
+		opening_presentation.cancel()
 	death_reason = reason
 	death_in_progress = true
 	death_restart_entry = _select_death_restart_entry()

@@ -15,6 +15,7 @@ func _ready() -> void:
 	mario.set_physics_process(false)
 	var presentation := mario.form_presentation
 	presentation.set_physics_process(false)
+	mario.starman.set_physics_process(false)
 	var actor_id := mario.get_instance_id()
 	var state := mario.state_machine.current_state
 	var witness := (
@@ -35,6 +36,9 @@ func _ready() -> void:
 			var feet := mario.body.global_position
 			var velocity := mario.body.velocity
 			GameHandler.animation_clock.tick_count = phase
+			var with_starman: bool = not shrink and phase == 0
+			if with_starman:
+				mario.starman.begin()
 			assert(mario.shrink() if shrink else mario.grow())
 			assert(not presentation.begin(shrink))
 			assert(witness.gameplay_suspended and already_suspended.gameplay_suspended)
@@ -43,6 +47,11 @@ func _ready() -> void:
 			for elapsed in range(1, 0xff - end_timer + 2):
 				GameHandler.animation_clock.tick_count += 1
 				presentation._physics_process(1.0 / 60.0)
+				if with_starman:
+					mario.starman._physics_process(1.0 / 60.0)
+					var palette_slot := ((elapsed - 1) >> 1) & 3
+					assert(mario.starman.palette_slot == palette_slot)
+					assert(mario._throw_pose.visible == (palette_slot != 0))
 				if presentation.blocks_actor_motion():
 					mario._physics_process(1.0 / 60.0)
 				assert(presentation.timer == (0xff - elapsed if elapsed < 0xff - end_timer else 0))
@@ -84,6 +93,8 @@ func _ready() -> void:
 			assert(not presentation.active and level.player_presentation == null)
 			assert(not witness.gameplay_suspended and already_suspended.gameplay_suspended)
 			assert(mario.sprite.visible and not mario.state_machine.gameplay_suspended)
+			if with_starman:
+				mario.starman.clear()
 	# Real SceneTree pause stops the component even though the test keeps processing.
 	mario.form_controller.configure(mario, MarioFormPresentation.SMALL)
 	assert(mario.grow())

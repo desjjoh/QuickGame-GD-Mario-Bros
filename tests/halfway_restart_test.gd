@@ -11,6 +11,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	process_physics_priority = 200
 	var game := preload("res://scenes/main/game.tscn").instantiate()
+	game.start_stage_override = null
 	game.start_with_title = false
 	game.starting_lives = 6
 	add_child(game)

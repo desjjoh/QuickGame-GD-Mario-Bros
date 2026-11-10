@@ -12,11 +12,16 @@ func _physics_process(_delta: float) -> void:
 func _ready() -> void:
 	process_physics_priority = 200
 	var preview := STAGE.instantiate() as BaseLevel
+	var preview_opening := preview.opening_presentation
+	var placement := preview_opening.intro_area.transport_points[0].duplicate() as TransportPlacement
+	placement.target_id = &"preview_pipe"
+	preview_opening.intro_area.transport_points[0] = placement
+	preview_opening.entrance_id = placement.target_id
 	add_child(preview)
 	assert(preview.active_area.area_id == &"intro")
 	var preview_doorway := preview.opening_presentation.resolve_spawn(preview.area_content)
 	assert(preview.player.body.global_position.is_equal_approx(preview_doorway.global_position))
-	await _walk_into_pipe(preview.player)
+	await _wait_for_pipe(preview.player)
 	for frame in range(120):
 		if preview.active_area.area_id == &"main":
 			break
@@ -27,6 +32,7 @@ func _ready() -> void:
 
 	var game := preload("res://scenes/main/game.tscn").instantiate()
 	game.start_with_title = false
+	game.start_stage_override = null
 	add_child(game)
 	for frame in range(240):
 		if GameHandler.current_level != null and not GameHandler.transitions.busy:
@@ -63,24 +69,40 @@ func _ready() -> void:
 	assert(doorway != null and player.body.global_position.is_equal_approx(doorway.global_position))
 	assert(get_viewport().get_camera_2d() == level.active_area.get_node("Camera2D"))
 	assert(not level.has_started and GameHandler.time_remaining == 400)
+	var opening_cue := MusicHandler.PIPE_OPENING_CUE
+	assert(MusicHandler._voice.stream == opening_cue and MusicHandler._voice.playing)
+	assert(opening_cue.loop_mode == AudioStreamWAV.LOOP_DISABLED)
+	assert(is_equal_approx(opening_cue.get_length(), 144.0 / 60.0))
 
-	await _walk_into_pipe(player)
+	# Opposing input must not stop the automatic walk into the pipe.
+	Input.action_press(ControllerHandler.left_action)
+	await _wait_for_pipe(player)
+	Input.action_release(ControllerHandler.left_action)
 	assert(level.active_area.area_id == &"intro" and GameHandler.time_remaining == 400)
 
 	for frame in range(240):
 		if level.active_area.area_id == &"main":
 			break
+		assert(not player.can_read_controller_input())
 		await tick_finished
-	assert(level.active_area.area_id == &"main" and level.active_target_id == &"player_spawn")
+	assert(level.active_area.area_id == &"main" and level.active_target_id == &"arrival")
 	assert(level.player == player)
-	assert(player.body.global_position.is_equal_approx(level.player_spawn.global_position))
+	assert(not player.scripted_motion_step.is_valid())
+	var arrival := level.active_area.get_node("Arrival") as AreaEndpoint
+	assert(not arrival.global_position.is_equal_approx(level.player_spawn.global_position))
+	assert(level.active_endpoint == arrival)
+	assert(player.body.global_position.is_equal_approx(arrival.global_position))
 	assert(player.arrival_control_ticks_remaining == BasePlayer.ARRIVAL_CONTROL_TICKS)
 	assert(not level.has_started)
+	assert(MusicHandler._voice.stream == null)
 	for frame in range(120):
 		if level.has_started:
 			break
+		assert(not player.can_read_controller_input())
 		await tick_finished
 	assert(level.has_started and GameHandler.time_remaining == 400)
+	var underground_music: AudioStreamWAV = MusicHandler._loops[MusicHandler.Track.UNDERGROUND]
+	assert(MusicHandler._voice.stream == underground_music)
 	assert(player.can_read_controller_input() and not player.body.is_on_floor())
 
 	level.death_sound = null
@@ -94,28 +116,31 @@ func _ready() -> void:
 	var restarted := GameHandler.current_level
 	assert(restarted != null and restarted != level)
 	assert(restarted.active_area.area_id == &"main")
+	assert(not restarted.player.scripted_motion_step.is_valid())
 	assert(
 		restarted.player.body.global_position.is_equal_approx(
 			restarted.player_spawn.global_position
 		)
 	)
-	assert(restarted.player.arrival_control_ticks_remaining == BasePlayer.ARRIVAL_CONTROL_TICKS)
+	assert(restarted.player.arrival_control_ticks_remaining == 0)
 	for frame in range(240):
-		if restarted.has_started:
+		if not GameHandler.transitions.busy:
 			break
 		await tick_finished
+	assert(not GameHandler.transitions.busy)
 	assert(restarted.has_started and restarted.player.can_read_controller_input())
+	assert(MusicHandler._voice.stream == underground_music)
 	game.free()
 	await tick_finished
-	print("PASS: 1-1 flagpole clear, 1-2 castle spawn, sideways pipe, and early respawn")
+	print("PASS: 1-1 handoff, configurable automatic pipe opening, and underground respawn")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
-func _walk_into_pipe(player: BasePlayer) -> void:
-	Input.action_press(ControllerHandler.right_action)
-	for frame in range(160):
+func _wait_for_pipe(player: BasePlayer) -> void:
+	assert(player.scripted_motion_step.is_valid())
+	for frame in range(300):
+		assert(not player.can_read_controller_input())
 		if player.state_machine.current_state == player.pipe_enter_state:
 			break
 		await tick_finished
-	Input.action_release(ControllerHandler.right_action)
 	assert(player.state_machine.current_state == player.pipe_enter_state)

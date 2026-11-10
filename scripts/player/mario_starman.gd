@@ -50,7 +50,7 @@ func _physics_process(_delta: float) -> void:
 	if _music_pending:
 		_music_pending = false
 		MusicHandler.play_starman(_level)
-	if _mario.form_presentation.active:
+	if _mario.form_presentation.owns_palette():
 		_set_palette(0)
 	elif _palette_intervals > 0 and not _mario.gameplay_suspended:
 		# The visible palette uses the count from before this update's interval step.

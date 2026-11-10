@@ -46,6 +46,10 @@ func begin_fire() -> bool:
 	return _begin(false, true)
 
 
+func owns_palette() -> bool:
+	return active and (shrinking or _igniting)
+
+
 func _begin(shrink: bool, ignite: bool) -> bool:
 	if active or _mario.is_dead or _mario.is_shutdown or _mario.gameplay_suspended:
 		return false
