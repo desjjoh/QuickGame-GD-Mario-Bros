@@ -29,6 +29,7 @@ func make_game(animated: bool, sandbox_scene: PackedScene) -> Node:
 	var game: Node = load("res://scenes/main/game.tscn").instantiate()
 	game.stages.assign([load("res://scenes/levels/worlds/world 1/1-1.tscn"), sandbox_scene])
 	game.start_with_title = false
+	game.start_stage_override = null
 	game.transitions_enabled = animated
 	return game
 
@@ -85,6 +86,8 @@ func _ready() -> void:
 			GameHandler.current_level.scene_file_path == "res://tests/fixtures/sandbox_level.tscn"
 		)
 		assert(GameHandler.player_status.score == 1234 and GameHandler.player_status.coins == 7)
+		var arrived := GameHandler.current_player as Mario
+		assert(arrived.form_controller.current_form == arrived.super_form)
 		assert(
 			(
 				GameHandler.player_status.lives == 1

@@ -82,6 +82,20 @@ func configure_start(configuration: Resource) -> void:
 
 func _ready() -> void:
 	var form := starting_form
+	var active_level := GameHandler.current_level
+	var gameplay_spawn := (
+		is_instance_valid(active_level)
+		and BaseLevel.containing(self) == active_level
+		and GameHandler.flow != GameHandler.GameFlow.TITLE
+	)
+	if gameplay_spawn and GameHandler.flow == GameHandler.GameFlow.COMPLETING:
+		match GameHandler.player_status.powerup_form:
+			PlayerStatus.PowerupForm.SMALL:
+				form = MarioFormPresentation.SMALL
+			PlayerStatus.PowerupForm.SUPER:
+				form = MarioFormPresentation.SUPER
+			PlayerStatus.PowerupForm.FIRE:
+				form = MarioFormPresentation.FIRE
 	if form == null or form == MarioFormPresentation.SMALL:
 		form = small_form
 	elif form == MarioFormPresentation.SUPER:
@@ -90,6 +104,13 @@ func _ready() -> void:
 		form = fire_form
 	form_controller.configure(self, form)
 	super._ready()
+	if gameplay_spawn:
+		if form == fire_form:
+			GameHandler.set_player_form(PlayerStatus.PowerupForm.FIRE)
+		elif form == super_form:
+			GameHandler.set_player_form(PlayerStatus.PowerupForm.SUPER)
+		else:
+			GameHandler.set_player_form(PlayerStatus.PowerupForm.SMALL)
 
 
 @onready var walk_animation: WalkAnimationComponent = $Presentation/WalkAnimation

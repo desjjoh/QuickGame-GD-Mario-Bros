@@ -25,6 +25,7 @@ func _ready() -> void:
 	await frames()
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
 	game.start_with_title = false
+	game.start_stage_override = null
 	game.transitions_enabled = false
 	game.shadow_shader_enabled = true
 	game.shadow_style = load("res://assets/shadows/crisp.tres")

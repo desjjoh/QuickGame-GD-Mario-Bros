@@ -83,17 +83,28 @@ func begin(
 		or destination == null
 	):
 		return false
-	if destination.area_id == &"" or destination.target_id == &"":
-		return false
-	var area := _resolve_area(destination.area_id)
-	if area == null:
-		return false
-	var definition := _resolve_target(area, destination.target_id)
-	if (
-		definition == null
-		or (area == level.active_area and destination.target_id == level.active_target_id)
-	):
-		return false
+	var stage := destination.stage_scene
+	var area: BaseLevelArea
+	var definition: Object
+	if stage != null:
+		if (
+			source == null
+			or GameHandler.current_level != level
+			or GameHandler.flow != GameHandler.GameFlow.PLAYING
+		):
+			return false
+	else:
+		if destination.area_id == &"" or destination.target_id == &"":
+			return false
+		area = _resolve_area(destination.area_id)
+		if area == null:
+			return false
+		definition = _resolve_target(area, destination.target_id)
+		if (
+			definition == null
+			or (area == level.active_area and destination.target_id == level.active_target_id)
+		):
+			return false
 	var state: PlayerTransportState = null
 	if source != null:
 		if (
@@ -108,8 +119,9 @@ func begin(
 		if state == null:
 			return false
 	_transport_trip = {
-		"area": weakref(area),
-		"definition": weakref(definition),
+		"stage": stage,
+		"area": weakref(area) if area != null else null,
+		"definition": weakref(definition) if definition != null else null,
 		"area_id": destination.area_id,
 		"target_id": destination.target_id,
 		"source": weakref(source) if source != null else null,
@@ -147,15 +159,16 @@ func _transport_trip_valid() -> bool:
 		or level.player.is_shutdown
 	):
 		return false
-	var area := (_transport_trip["area"] as WeakRef).get_ref() as BaseLevelArea
-	var definition: Object = (_transport_trip["definition"] as WeakRef).get_ref()
-	if (
-		not is_instance_valid(area)
-		or not is_instance_valid(definition)
-		or _resolve_area(_transport_trip["area_id"]) != area
-		or _resolve_target(area, _transport_trip["target_id"]) != definition
-	):
-		return false
+	if _transport_trip["stage"] == null:
+		var area := (_transport_trip["area"] as WeakRef).get_ref() as BaseLevelArea
+		var definition: Object = (_transport_trip["definition"] as WeakRef).get_ref()
+		if (
+			not is_instance_valid(area)
+			or not is_instance_valid(definition)
+			or _resolve_area(_transport_trip["area_id"]) != area
+			or _resolve_target(area, _transport_trip["target_id"]) != definition
+		):
+			return false
 	if not _transport_exiting and _transport_trip["source"] != null:
 		var source := (_transport_trip["source"] as WeakRef).get_ref() as TransportEntity
 		return is_instance_valid(source) and not source.is_shutdown
@@ -206,6 +219,10 @@ func _on_transport_finished(phase: int) -> void:
 func _finish_transport(phase: int) -> void:
 	if phase != _transport_phase or level.is_shutdown or not pending:
 		return
+	var stage := _transport_trip["stage"] as PackedScene
+	if stage != null:
+		_finish_stage_warp(stage)
+		return
 	if not _transport_exiting and GameHandler.transitions.available():
 		if (
 			GameHandler.transitions.begin(
@@ -222,6 +239,29 @@ func _finish_transport(phase: int) -> void:
 			MusicHandler.stop_area(level)
 		return
 	_commit_transport(phase)
+
+
+func _finish_stage_warp(stage: PackedScene) -> void:
+	if not _transport_trip_valid() or level.player.state_machine.current_state != _transport_state:
+		cancel(true)
+		return
+	var traveler := level.player
+	var state := _transport_state
+	_disconnect_transport_state()
+	pending = false
+	input_locked = true
+	level.on_complete(stage, BaseLevel.CompletionMode.WARP)
+	# The handoff may replace the level synchronously. Otherwise restore a safe
+	# source position under the cover in case the stage transition is cancelled.
+	if (
+		GameHandler.current_level == level
+		and not level.is_shutdown
+		and is_instance_valid(traveler)
+		and level.player == traveler
+		and traveler.state_machine.current_state == state
+	):
+		traveler.state_machine.stop(false)
+		_start_player_state()
 
 
 func _commit_transport_under_cover(phase: int) -> bool:

@@ -23,6 +23,14 @@ Set **Transport Points** and **Pipe Routes** on the source area to link placed p
 
 Configure **Presentations → PipeOpening** with the intro area, painted castle cell, and the sideways pipe's **Entrance ID**. A fresh entry spawns at the castle doorway and walks into that pipe automatically. In 1-2, the pipe targets `main / arrival`, which uses **Areas → MainArea → Arrival**. Early deaths restart at **Players → PlayerSpawn**. Move each marker to set its placement independently.
 
+In 1-2, the first upright pipe in MainArea leads to BonusArea's Arrival. The sideways pipe at the end of the coin room returns through MainArea's third upright pipe. The sideways pipe near the end of MainArea leads to the upright pipe in SurfaceArea.
+
+Set **Stage Scene** on a transport destination for a cross-stage warp. After pipe entry, the stage completion flow loads that scene at its normal start. All three 1-2 Warp Zone pipes currently share a destination of 1-1.
+
+Mario and Luigi carry their current form through normal stage completion and cross-stage warps. The next stage applies the form before the first pose or opening presentation. Death respawns use the stage's starting form.
+
+**Presentations → FlagpoleEnding** binds to the painted flagpole and castle by area ID and cell. In 1-2, the ending uses the SurfaceArea markers. The castle in IntroArea provides the opening doorway.
+
 ## Area background colour
 
 Select an area such as **Areas → MainArea** and set **Background → Background Color**. Its fill spans **Camera2D → Area Left** and **Area Right**, measured in pixels from the area's origin, and the camera's visible vertical height. Moving the area moves the fill and horizontal camera limits together. Alpha zero reveals Game’s black backdrop during F5; standalone F6 retains the viewport default unless an area supplies a colour. Each area owns its colour independently of its theme and music. The fill sits behind decorations, receives foreground shadows, and never casts a shadow itself in F5 or standalone F6.
