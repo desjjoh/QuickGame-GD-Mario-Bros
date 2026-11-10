@@ -9,6 +9,8 @@ extends Node
 @export var transitions_enabled: bool = true
 
 @export_group("Gameplay")
+## Maximum number of live enemies tracked by each level.
+@export_range(0, 10, 1, "or_greater") var enemy_limit: int = LevelSpawnRegistry.DEFAULT_ENEMY_LIMIT
 ## Preserve saved area progress when restarting a stage after losing a life.
 @export var save_entity_state_through_death: bool = true
 

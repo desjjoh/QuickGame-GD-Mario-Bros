@@ -1,10 +1,11 @@
 @tool
 class_name TransportDestination
 extends Resource
-## An explicit area and target ID, independent of transport presentation.
+## An area endpoint or the stage to load after a warp.
 
 @export var area_id: StringName
 @export var target_id: StringName
+@export var stage_scene: PackedScene
 
 
 static func create(area: StringName, target: StringName) -> TransportDestination:

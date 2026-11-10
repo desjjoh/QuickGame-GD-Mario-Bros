@@ -1,25 +1,24 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://b7tb83hlcg16y"]
 
+[ext_resource type="Texture2D" uid="uid://cfj8ik0hvucpe" path="res://assets/palettes/overworld/enemies/goomba.png" id="art"]
 [ext_resource type="PackedScene" path="res://scenes/entities/enemies/base/base_enemy.tscn" id="base"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/enemies/goomba.png" id="art"]
-[ext_resource type="Script" path="res://scripts/states/enemies/walking_enemy_state.gd" id="walking"]
-[ext_resource type="Script" path="res://scenes/entities/enemies/goomba/goomba.gd" id="goomba"]
-[ext_resource type="Script" path="res://scripts/states/enemies/enemy_defeated_state.gd" id="defeated"]
-[ext_resource type="Script" path="res://scripts/states/enemies/goomba_knocked_out_state.gd" id="knocked_out"]
-[ext_resource type="Script" path="res://scenes/components/presentation/synchronized_animation.gd" id="sync"]
-[ext_resource type="Script" path="res://scenes/components/presentation/cosmetic_animation_cycle.gd" id="cycle"]
-
-[sub_resource type="Resource" id="walk_cycle"]
-script = ExtResource("cycle")
-phase_ticks = PackedInt32Array(8, 8)
+[ext_resource type="Script" uid="uid://bv5b0508e5gt7" path="res://scenes/components/presentation/cosmetic_animation_cycle.gd" id="cycle"]
+[ext_resource type="Script" uid="uid://bayoyjihicsof" path="res://scripts/states/enemies/enemy_defeated_state.gd" id="defeated"]
+[ext_resource type="Script" uid="uid://b2ca86oleao8t" path="res://scenes/entities/enemies/goomba/goomba.gd" id="goomba"]
+[ext_resource type="Script" uid="uid://b0w6j4lth5h2y" path="res://scripts/states/enemies/goomba_knocked_out_state.gd" id="knocked_out"]
+[ext_resource type="Script" uid="uid://d3i1h2wl5j7kf" path="res://scenes/components/presentation/synchronized_animation.gd" id="sync"]
+[ext_resource type="Script" uid="uid://y4kxteci4lu5" path="res://scripts/states/enemies/walking_enemy_state.gd" id="walking"]
 
 [sub_resource type="Animation" id="walk"]
 resource_name = "walk"
 length = 0.26666668
 loop_mode = 1
 tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
 tracks/0/path = NodePath("Sprite2D:frame")
 tracks/0/interp = 1
+tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.13333334),
 "transitions": PackedFloat32Array(1, 1),
@@ -28,32 +27,39 @@ tracks/0/keys = {
 }
 
 [sub_resource type="AnimationLibrary" id="animations"]
-_data = {&"walk": SubResource("walk")}
+_data = {
+&"walk": SubResource("walk")
+}
 
 [sub_resource type="RectangleShape2D" id="player_contact"]
 size = Vector2(10, 6)
 
-[node name="Goomba" instance=ExtResource("base")]
+[sub_resource type="Resource" id="walk_cycle"]
+script = ExtResource("cycle")
+phase_ticks = PackedInt32Array(8, 8)
+
+[node name="Goomba" unique_id=931564358 instance=ExtResource("base")]
 script = ExtResource("goomba")
 
 [node name="StateMachine" parent="." index="0" node_paths=PackedStringArray("initial_state")]
 initial_state = NodePath("Walking")
 
-[node name="Walking" type="Node" parent="StateMachine" node_paths=PackedStringArray("synchronized_animation")]
+[node name="Walking" type="Node" parent="StateMachine" index="0" unique_id=1097357257 node_paths=PackedStringArray("synchronized_animation")]
 script = ExtResource("walking")
 use_center_foot_support = true
+use_leading_side_probe = true
 synchronized_animation = NodePath("../../Presentation/WalkAnimationSync")
 frame_updates_enabled = false
 input_enabled = false
 
-[node name="Squashed" type="Node" parent="StateMachine"]
+[node name="Squashed" type="Node" parent="StateMachine" index="1" unique_id=190285455]
 script = ExtResource("defeated")
 stop_animation_on_enter = true
 sprite_frame = 2
 frame_updates_enabled = false
 input_enabled = false
 
-[node name="KnockedOut" type="Node" parent="StateMachine"]
+[node name="KnockedOut" type="Node" parent="StateMachine" index="2" unique_id=1934425051]
 script = ExtResource("knocked_out")
 launch_speed = -180.0
 horizontal_speed = 60.0
@@ -65,19 +71,19 @@ input_enabled = false
 texture = ExtResource("art")
 hframes = 3
 
-[node name="PlayerContact" type="Area2D" parent="Body"]
+[node name="AnimationPlayer" parent="Body" index="4"]
+libraries/ = SubResource("animations")
+
+[node name="PlayerContact" type="Area2D" parent="Body" index="5" unique_id=740416130]
 position = Vector2(0, 1)
 collision_layer = 0
 collision_mask = 1024
 monitorable = false
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/PlayerContact"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/PlayerContact" index="0" unique_id=616973538]
 shape = SubResource("player_contact")
 
-[node name="AnimationPlayer" parent="Body"]
-libraries = {&"": SubResource("animations")}
-
-[node name="WalkAnimationSync" type="Node" parent="Presentation" node_paths=PackedStringArray("animation_player")]
+[node name="WalkAnimationSync" type="Node" parent="Presentation" index="0" unique_id=1938901467 node_paths=PackedStringArray("animation_player")]
 script = ExtResource("sync")
 cycle = SubResource("walk_cycle")
 animation_player = NodePath("../../Body/AnimationPlayer")

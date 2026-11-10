@@ -16,9 +16,13 @@ $failedTests = @()
 try {
     $env:APPDATA = Join-Path $logDirectory 'appdata'
     $env:LOCALAPPDATA = Join-Path $logDirectory 'localappdata'
-    $testScenes = Get-ChildItem -LiteralPath (Join-Path $projectRoot 'tests') -Filter '*_test.tscn' |
+    $testScenes = Get-ChildItem -LiteralPath (Join-Path $projectRoot 'tests') -File -Recurse -Filter '*_test.tscn' |
         Sort-Object Name
     if ($testScenes.Count -eq 0) { throw 'No test scenes found.' }
+    $duplicateNames = $testScenes | Group-Object BaseName | Where-Object Count -gt 1
+    if ($duplicateNames) {
+        throw ('Duplicate test names: ' + ($duplicateNames.Name -join ', '))
+    }
     if ($TestName.Count -gt 0) {
         $unknown = @($TestName | Where-Object { $_ -notin $testScenes.BaseName })
         if ($unknown.Count -gt 0) { throw ('Unknown test names: ' + ($unknown -join ', ')) }
@@ -27,7 +31,7 @@ try {
 
 
     foreach ($scene in $testScenes) {
-        $scenePath = 'res://tests/' + $scene.Name
+        $scenePath = 'res://' + $scene.FullName.Substring($projectRoot.Length + 1).Replace('\', '/')
         $output = & $enginePath --headless --path $projectRoot $scenePath --max-fps 60 --quit-after 1800 --log-file (Join-Path $logDirectory ($scene.BaseName + '.log')) 2>&1 |
             ForEach-Object { $_.ToString() }
         $engineExitCode = $LASTEXITCODE

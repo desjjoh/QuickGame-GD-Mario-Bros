@@ -10,8 +10,15 @@ var is_dead: bool = false
 var _death_finished: bool = false
 const STOMP_CHAIN_POINTS := [100, 200, 400, 500, 800, 1000, 2000, 4000, 5000, 8000]
 var stomp_chain := 0
+var _stomp_award_tick := -1
+var _stomp_awards_this_tick := 0
 var last_enemy_stomp_tick := -1
+var enemy_stomp_started_descending := false
 var scripted_motion_step: Callable
+var opening_control_locked := false:
+	set(value):
+		opening_control_locked = value
+		_sync_controller_input()
 const ARRIVAL_CONTROL_TICKS := 17
 var arrival_control_ticks_remaining: int = 0
 var _floor_sample_tick := -1
@@ -146,11 +153,18 @@ func shutdown() -> void:
 
 ## Called only after an enemy accepts a stomp, including nonterminal shell stops.
 func award_enemy_stomp(enemy: BaseEnemy, world_position: Vector2) -> void:
-	if stomp_chain < STOMP_CHAIN_POINTS.size():
-		enemy.award_score(STOMP_CHAIN_POINTS[stomp_chain], world_position)
+	var tick := Engine.get_physics_frames()
+	if _stomp_award_tick != tick:
+		_stomp_award_tick = tick
+		_stomp_awards_this_tick = 0
+	# The NES adds a second step for each stomp already scored on this frame.
+	var reward_index := stomp_chain + _stomp_awards_this_tick
+	if reward_index < STOMP_CHAIN_POINTS.size():
+		enemy.award_score(STOMP_CHAIN_POINTS[reward_index], world_position)
 	else:
 		enemy.award_extra_life(world_position)
 	stomp_chain = mini(stomp_chain + 1, STOMP_CHAIN_POINTS.size())
+	_stomp_awards_this_tick += 1
 
 
 ## Reference score controls 3..10, then clamped to repeated 1-Ups.
@@ -211,6 +225,7 @@ func move_body(gravity_after_motion: bool = false) -> void:
 	if gravity_after_motion:
 		next_vertical_speed = vertical_movement.prepare_step(motion_values, delta)
 	var previous_position := body.global_position
+	var intended_motion := body.velocity * delta
 	_sweep_motion(delta, vertical_speed)
 	var supported := has_floor_support()
 	if supported:
@@ -218,9 +233,7 @@ func move_body(gravity_after_motion: bool = false) -> void:
 	if gravity_after_motion:
 		vertical_movement.finish_step_on_support(motion_values, next_vertical_speed, supported)
 	var hidden_hit := rising and bonk_action.deliver_hidden(self, previous_position)
-	if rising and (hidden_hit or body.is_on_ceiling()):
-		if not hidden_hit:
-			bonk_action.deliver(self)
+	if rising and (hidden_hit or bonk_action.check_ceiling(self, previous_position, intended_motion)):
 		respond_to_ceiling()
 
 
@@ -335,7 +348,10 @@ func death_envelope_top() -> float:
 
 func can_read_controller_input() -> bool:
 	return (
-		not is_dead and arrival_control_ticks_remaining == 0 and super.can_read_controller_input()
+		not is_dead
+		and not opening_control_locked
+		and arrival_control_ticks_remaining == 0
+		and super.can_read_controller_input()
 	)
 
 

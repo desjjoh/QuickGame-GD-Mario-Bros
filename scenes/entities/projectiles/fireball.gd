@@ -5,7 +5,8 @@ extends Node2D
 const BURST := preload("res://assets/items/fireworks.png")
 const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd")
 const TERRAIN_PROBE := preload("res://scenes/components/interactions/terrain_probe.gd")
-const PROBE := Vector2(4, 6)
+const TERRAIN_PROBE_OFFSET := Vector2(4, 8)
+const BARRIER_PROBE_OFFSET := Vector2(4, 6)
 const SUBPIXEL := 256
 const GRAVITY := 0x50
 const FALL_CAP := 3 * SUBPIXEL
@@ -100,6 +101,7 @@ func advance() -> void:
 	if (
 		global_position.x <= view.position.x
 		or global_position.x + 8 >= view.end.x
+		or global_position.y < view.position.y
 		or global_position.y + 8 >= view.end.y
 	):
 		queue_free()
@@ -159,16 +161,16 @@ func _begin_burst() -> void:
 
 
 func _hits_projectile_barrier() -> bool:
-	# Sweep the terrain probe's horizontal step at its updated height.
-	_barrier_probe.to = global_position + PROBE
+	# Sweep across the horizontal step at the barrier probe's updated height.
+	_barrier_probe.to = global_position + BARRIER_PROBE_OFFSET
 	_barrier_probe.from = _barrier_probe.to - Vector2(_horizontal_step, 0)
 	var hit := get_world_2d().direct_space_state.intersect_ray(_barrier_probe)
 	if hit.is_empty():
 		return false
-	global_position.x = (hit.position as Vector2).x - PROBE.x
+	global_position.x = (hit.position as Vector2).x - BARRIER_PROBE_OFFSET.x
 	return true
 
 
 func _touches_terrain() -> bool:
-	_probe.position = global_position + PROBE + Vector2(0.01, 0.01)
+	_probe.position = global_position + TERRAIN_PROBE_OFFSET + Vector2(0.01, 0.01)
 	return TERRAIN_PROBE.hits_terrain(self, _probe)

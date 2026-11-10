@@ -56,7 +56,7 @@ func _ready() -> void:
 		if argument.begins_with("--pacing-seconds="):
 			_seconds = clampf(argument.get_slice("=", 1).to_float(), 1.0, 600.0)
 	if _automatic:
-		var factory: Node = load("res://tests/camera_follow_test.gd").new()
+		var factory: Node = load("res://tests/camera/camera_follow_test.gd").new()
 		_game = factory.make_game()
 		factory.free()
 	else:

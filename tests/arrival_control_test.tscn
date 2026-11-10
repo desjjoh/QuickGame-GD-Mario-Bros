@@ -1,4 +1,0 @@
-[gd_scene format=3]
-[ext_resource type="Script" path="res://tests/arrival_control_test.gd" id="s"]
-[node name="ArrivalControlTest" type="Node"]
-script = ExtResource("s")

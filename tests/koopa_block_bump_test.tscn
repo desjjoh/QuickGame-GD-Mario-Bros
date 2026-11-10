@@ -1,5 +1,0 @@
-[gd_scene format=3]
-[ext_resource type="Script" path="res://tests/koopa_block_bump_test.gd" id="test"]
-[node name="KoopaBlockBumpTest" type="Node"]
-process_mode = 3
-script = ExtResource("test")

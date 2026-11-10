@@ -1,6 +1,0 @@
-[gd_scene format=3]
-
-[ext_resource type="Script" path="res://tests/mario_form_presentation_test.gd" id="test"]
-
-[node name="MarioFormPresentationTest" type="Node"]
-script = ExtResource("test")

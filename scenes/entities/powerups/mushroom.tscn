@@ -1,19 +1,22 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://d24m14c3eh67q"]
 
 [ext_resource type="PackedScene" path="res://scenes/entities/powerups/power_up.tscn" id="base"]
-[ext_resource type="Script" path="res://scenes/entities/powerups/mushroom.gd" id="mushroom"]
 [ext_resource type="PackedScene" path="res://scenes/components/interactions/block_hit_receiver.tscn" id="hits"]
-[ext_resource type="Script" path="res://scenes/components/motion/motion_values.gd" id="motion"]
-[ext_resource type="Script" path="res://scenes/components/motion/vertical_movement.gd" id="vertical"]
+[ext_resource type="Script" uid="uid://bb1u3ee2amtj7" path="res://scenes/components/motion/motion_values.gd" id="motion"]
+[ext_resource type="Script" uid="uid://b5qi2k8bc5jbh" path="res://scenes/entities/powerups/mushroom.gd" id="mushroom"]
+[ext_resource type="Script" uid="uid://iie5go2mgxlo" path="res://scenes/components/motion/vertical_movement.gd" id="vertical"]
 
-[node name="Mushroom" instance=ExtResource("base")]
+[node name="Mushroom" unique_id=1627414258 instance=ExtResource("base")]
 script = ExtResource("mushroom")
+walk_speed = 60.0
+gravity = 857.8125
+fall_speed_limit = 180.0
 
-[node name="BlockHitReceiver" parent="Body" index="3" instance=ExtResource("hits")]
+[node name="BlockHitReceiver" parent="Body" parent_id_path=PackedInt32Array(92935277) index="3" unique_id=1576611231 instance=ExtResource("hits")]
 
-[node name="Motion" type="Node" parent="." node_paths=PackedStringArray("body")]
+[node name="Motion" type="Node" parent="." index="2" unique_id=1232180890 node_paths=PackedStringArray("body")]
 script = ExtResource("motion")
 body = NodePath("../Body")
 
-[node name="VerticalMovement" type="Node" parent="Motion"]
+[node name="VerticalMovement" type="Node" parent="Motion" index="0" unique_id=237204028]
 script = ExtResource("vertical")

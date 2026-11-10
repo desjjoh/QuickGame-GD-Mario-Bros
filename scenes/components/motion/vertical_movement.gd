@@ -26,6 +26,13 @@ func speed_after_gravity(values: MotionValues, delta: float) -> float:
 	return minf(values.velocity.y + values.gravity * values.weight * delta, values.max_fall_speed)
 
 
+## Consume a step in 1/256-pixel units and retain the position remainder.
+func consume_displacement(units: int) -> int:
+	var accumulated := position_fraction + units
+	position_fraction = posmod(accumulated, 256)
+	return floori(accumulated / 256.0)
+
+
 ## Prepare integer displacement and next speed without moving the body twice.
 ## A launch can keep its fractional world position by supplying its own grid origin.
 func prepare_step(values: MotionValues, delta: float, grid_origin: float = 0.0) -> float:
@@ -44,9 +51,7 @@ func prepare_step(values: MotionValues, delta: float, grid_origin: float = 0.0) 
 		var units := int(roundf(current / 60.0 * 256.0))
 		integer_speed = floori(units / 256.0)
 		speed_fraction = posmod(units, 256)
-	var accumulated := position_fraction + speed_fraction
-	var displacement := integer_speed + (1 if accumulated >= 256 else 0)
-	position_fraction = accumulated % 256
+	var displacement := consume_displacement(integer_speed * 256 + speed_fraction)
 	var next_units := integer_speed * 256 + speed_fraction + int(roundf(force))
 	var limit := int(roundf(values.max_fall_speed / 60.0))
 	# ImposeGravity allows the low half of the cap's fractional range.

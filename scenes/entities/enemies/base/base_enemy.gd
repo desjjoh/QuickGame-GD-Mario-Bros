@@ -61,12 +61,15 @@ func _check_normal_player_contact(player: BasePlayer) -> void:
 		or not _can_check_player_contact(player)
 	):
 		return
-	if player.last_enemy_stomp_tick == Engine.get_physics_frames():
-		return
 	if not _touches_player_now(player):
 		_player_contact_latched = false
 		return
 	if _player_contact_latched:
+		return
+	if player.last_enemy_stomp_tick == Engine.get_physics_frames():
+		# The rebound changes velocity immediately, but this contact still belongs to the fall.
+		if player.enemy_stomp_started_descending:
+			_player_contact_latched = _receive_stomp(player)
 		return
 	_player_contact_latched = true
 	_handle_player_contact(player)
@@ -87,8 +90,10 @@ func _touches_player_now(player: BasePlayer) -> bool:
 
 
 func _handle_player_contact(player: BasePlayer) -> void:
-	if _can_stomp(player) and receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN)):
+	var descending := player.body.velocity.y > 0.0
+	if _can_stomp(player) and _receive_stomp(player):
 		player.last_enemy_stomp_tick = Engine.get_physics_frames()
+		player.enemy_stomp_started_descending = descending
 		player.body.velocity.y = STOMP_REBOUND
 		player.play_sound_effect(SoundHandler.get_sound(&"stomp"))
 	else:
@@ -97,6 +102,10 @@ func _handle_player_contact(player: BasePlayer) -> void:
 		# dangerous again when its protection ends. Stomps/kicks retain their latch.
 		_player_contact_latched = false
 		player.receive_damage(self)
+
+
+func _receive_stomp(player: BasePlayer) -> bool:
+	return receive_hit(EntityHit.new(player, &"stomp", Vector2.DOWN))
 
 
 ## Specialized enemies may accept a stomp under additional local conditions.
@@ -197,6 +206,13 @@ func _has_player_contact() -> bool:
 
 func is_moving_shell() -> bool:
 	return false
+
+
+## Ordinary Goomba/Koopa OffscreenBoundsCheck, including its borrow/carry.
+func is_outside_horizontal_cleanup(left: float, right: float) -> bool:
+	var anchor := floorf(body.global_position.x - 8.0)
+	var right_extension := 73.0 if left >= 73.0 else 72.0
+	return anchor < left - 73.0 or anchor >= right + right_extension
 
 
 func away_from_attacker(hit: EntityHit) -> float:

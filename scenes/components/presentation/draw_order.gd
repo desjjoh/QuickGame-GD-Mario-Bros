@@ -3,12 +3,13 @@ extends RefCounted
 
 const BEHIND_WORLD := 0
 const WORLD := 1
-const AVAILABLE_ITEM := 2
-const REWARD_EFFECT := 3
-const ENEMY := 4
-const HUD := 5
-const PLAYER := 6
-const FIREBALL := 7
+const BOUNCING_BLOCK := 2
+const AVAILABLE_ITEM := 3
+const REWARD_EFFECT := 4
+const ENEMY := 5
+const HUD := 6
+const PLAYER := 7
+const FIREBALL := 8
 
 
 static func apply(item: CanvasItem, priority: int) -> void:

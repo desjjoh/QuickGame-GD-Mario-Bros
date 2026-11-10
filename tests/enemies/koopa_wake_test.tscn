@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/enemies/koopa_wake_test.gd" id="test"]
+
+[node name="KoopaWakeTest" type="Node"]
+process_mode = 3
+script = ExtResource("test")

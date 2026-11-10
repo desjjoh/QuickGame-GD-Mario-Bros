@@ -53,6 +53,8 @@ func populate_layout(area: BaseLevelArea, layout: TileMapLayer, saved_entities: 
 		instance.visual_theme = area.theme
 		if instance is QuestionBlock:
 			instance.configure_reward(area.question_block_rewards.get(cell))
+		if instance is PipeEntrance:
+			instance.attach_pipe_spawn(area.pipe_spawns.get(cell) as PipeSpawn)
 		instance.name = entity_name
 		instance.restore_area_state(progress.get("state", {}))
 		# Block/entity marker origins are the top-left of each grid cell.

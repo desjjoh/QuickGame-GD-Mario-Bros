@@ -1,0 +1,4 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://tests/powerups/tiered_reward_test.gd" id="script"]
+[node name="TieredRewardTest" type="Node"]
+script = ExtResource("script")

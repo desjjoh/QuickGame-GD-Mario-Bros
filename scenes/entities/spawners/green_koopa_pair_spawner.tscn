@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/spawners/green_koopa_spawner.tscn" id="base"]
+
+[node name="GreenKoopaPairSpawner" instance=ExtResource("base")]
+actor_offsets = Array[Vector2]([Vector2(0, 0), Vector2(24, 0)])

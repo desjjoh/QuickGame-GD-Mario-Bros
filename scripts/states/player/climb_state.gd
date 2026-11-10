@@ -27,10 +27,10 @@ func process_physics(delta: float) -> BaseState:
 	return null
 
 
-func advance_climb(axis: Vector2, delta: float) -> bool:
+func advance_climb(axis: Vector2, delta: float, vertical_step: float = NAN) -> bool:
 	var player := get_player()
 	var before := player.body.global_position
-	if not player.climbing.step(player, axis, delta):
+	if not player.climbing.step(player, axis, delta, vertical_step):
 		return false
 	if player.animation_player != null and animation_name != &"":
 		if not is_equal_approx(before.y, player.body.global_position.y):

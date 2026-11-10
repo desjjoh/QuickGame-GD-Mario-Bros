@@ -147,13 +147,18 @@ func _advance_player_motion(delta: float) -> void:
 	var body := _player.body
 	if phase == Phase.DESCEND:
 		if body.global_position.y < _descent_stop_y:
-			if not _player.climb_state.advance_climb(Vector2.DOWN, delta):
+			# Use the same position fraction that the approach movement left behind.
+			var units := roundi(_player.climbing.downward_speed * delta * 256.0)
+			var pixels := _player.vertical_movement.consume_displacement(units)
+			if not _player.climb_state.advance_climb(Vector2.DOWN, delta, pixels):
 				_level.cancel_ending()
 				return
 			if body.global_position.y >= _descent_stop_y:
 				body.global_position.y = _descent_stop_y
 				body.velocity = Vector2.ZERO
 				_player.climb_state.hold_pose()
+			# Draw each slide step on its own tick, including the first step after the grab.
+			body.reset_physics_interpolation()
 		return
 	if phase == Phase.DISMOUNT:
 		body.velocity = Vector2.ZERO

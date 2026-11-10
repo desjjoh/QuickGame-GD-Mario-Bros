@@ -128,12 +128,8 @@ func _move_center_foot_horizontal(
 	body: CharacterBody2D, delta: float, landed: bool, grid_origin: Vector2
 ) -> void:
 	# A landing tick resumes the stored roll before the next side check.
-	if not landed:
-		var epsilon := Vector2(0.001, 0.001)
-		var pixel := (body.global_position - grid_origin + epsilon).floor() + grid_origin
-		_terrain_probe.position = pixel + Vector2(8.0 * _direction, 4.0) + epsilon
-		if TERRAIN_PROBE.hits_terrain(body, _terrain_probe):
-			_turn_around()
+	if not landed and _has_leading_side_terrain(body, grid_origin):
+		_turn_around()
 
 	var effective_speed := (
 		walk_speed if has_center_support else walk_speed - AIRBORNE_SPEED_ADJUSTMENT

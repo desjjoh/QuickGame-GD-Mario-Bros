@@ -1,0 +1,117 @@
+extends Node
+
+const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd")
+
+
+func _ready() -> void:
+	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
+	# Keep collision assertions independent of the user's painted test stage.
+	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
+	var fixture_layout := fixture.find_child("EntityLayout", true, false) as TileMapLayer
+	fixture_layout.clear()
+	for cell in [Vector2i(4, 9), Vector2i(5, 9), Vector2i(6, 9), Vector2i(11, 9)]:
+		fixture_layout.set_cell(cell, 0, Vector2i.ZERO)
+	var fixture_scene := PackedScene.new()
+	for area in fixture.get_node("Areas").get_children():
+		fixture.set_editable_instance(area, true)
+	assert(fixture_scene.pack(fixture) == OK)
+	fixture.free()
+	game.stages.assign([fixture_scene])
+	add_child(game)
+	var level := GameHandler.current_level
+	assert(level.world_objects.get_child_count() == 4)
+	assert(not level.entity_layout.visible and not level.entity_layout.collision_enabled)
+	assert(level.entity_layout.tile_set.get_physics_layers_count() == 0)
+	var original_blocks := level.world_objects.get_children()
+	level._load_area(level.active_area)
+	assert(level.world_objects.get_child_count() == 4, "Area loading must not duplicate entities.")
+	assert(
+		level.world_objects.get_children() == original_blocks,
+		"An already-loaded area must retain its entities."
+	)
+	var block := level.get_node("Areas/MainArea/WorldObjects/brick_4_9") as BaseBlock
+	assert(block.body is StaticBody2D and block.sprite.texture != null)
+	assert(block.state_machine.current_state.name == &"Active")
+	var original_z_index := block.sprite.z_index
+	var original_z_as_relative := block.sprite.z_as_relative
+	var player := level.player
+	player.body.global_position.x = 72.0
+	for frame in range(5):
+		await get_tree().physics_frame
+		await get_tree().process_frame
+	assert(player.body.is_on_floor())
+	Input.action_press(ControllerHandler.primary_action)
+	var bumped := false
+	var sprite_bounced := false
+	var body_transform := block.body.global_transform
+	for frame in range(60):
+		await get_tree().physics_frame
+		await get_tree().process_frame
+		bumped = bumped or player.body.is_on_ceiling()
+		sprite_bounced = sprite_bounced or block.sprite.position.y < 8.0
+		if block.bounce.is_running():
+			assert(
+				not block.sprite.z_as_relative and block.sprite.z_index == DRAW_ORDER.BOUNCING_BLOCK
+			)
+			assert(
+				(
+					DRAW_ORDER.WORLD < block.sprite.z_index
+					and block.sprite.z_index < DRAW_ORDER.AVAILABLE_ITEM
+				)
+			)
+		assert(block.body.global_transform == body_transform)
+		assert(player.body.global_position.y >= 173.8)
+	Input.action_release(ControllerHandler.primary_action)
+	assert(bumped and sprite_bounced and player.body.is_on_floor())
+	assert(block.state_machine.current_state.name == &"Active")
+	assert(block.sprite.position == Vector2(8, 8))
+	assert(
+		(
+			block.sprite.z_index == original_z_index
+			and block.sprite.z_as_relative == original_z_as_relative
+		)
+	)
+	assert(not block.receive_hit(EntityHit.new(player, &"dash", Vector2.UP)))
+	assert(not block.receive_hit(EntityHit.new(player, &"bonk", Vector2.DOWN)))
+	# A second real jump must bounce the same brick again.
+	await get_tree().physics_frame
+	await get_tree().process_frame
+	Input.action_press(ControllerHandler.primary_action)
+	var bounced_again := false
+	for frame in range(60):
+		await get_tree().physics_frame
+		await get_tree().process_frame
+		bounced_again = bounced_again or block.sprite.position.y < 8.0
+	Input.action_release(ControllerHandler.primary_action)
+	assert(bounced_again and block.state_machine.current_state.name == &"Active")
+	assert(block.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP, 10.0)))
+	assert(not block.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP)))
+	block.bounce.advance(1.0 / 60.0)
+	assert(block.sprite.position.y < 8.0)
+	assert(block.global_position == Vector2(64, 144))
+	level.shutdown()
+	assert(block.is_shutdown and block.sprite.position == Vector2(8, 8))
+	assert(
+		(
+			block.sprite.z_index == original_z_index
+			and block.sprite.z_as_relative == original_z_as_relative
+		)
+	)
+	game.free()
+	# Layout generation also supports non-solid entities and a transformed level.
+	var plain := load("res://scenes/levels/base/base_level.tscn").instantiate() as BaseLevel
+	var layout := plain.find_child("EntityLayout", true, false) as TileMapLayer
+	layout.tile_set = load("res://assets/tileset/entity_layout.tres")
+	plain.position = Vector2(16, 32)
+	layout.set_cell(Vector2i(-1, 2), 0, Vector2i.ZERO)
+	plain.get_node("Areas/MainArea/WorldObjects").position = Vector2(32, 16)
+	plain.entity_scenes[&"brick"] = load("res://scenes/entities/base/base_entity.tscn")
+	add_child(plain)
+	var decoration := plain.world_objects.get_child(0) as BaseEntity
+	assert(decoration.global_position == layout.to_global(Vector2(-16, 32)))
+	assert(decoration.find_children("*", "CollisionObject2D", true, false).is_empty())
+	plain.shutdown()
+	assert(decoration.is_shutdown)
+	plain.free()
+	print("PASS: inherited brick entity, solid ceiling contact, landing, and level-owned shutdown.")
+	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

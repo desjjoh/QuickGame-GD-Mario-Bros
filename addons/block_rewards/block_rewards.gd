@@ -9,8 +9,9 @@ const ONE_UP_TEXTURE := preload("res://assets/palettes/overworld/misc/green-mush
 const SUPER_TEXTURE := preload("res://assets/items/red-mushroom.png")
 const STARMAN_SCENE := preload("res://scenes/entities/powerups/starman.tscn")
 const STARMAN_TEXTURE := preload("res://assets/palettes/overworld/misc/starman.png")
+const GREEN_PLANT := preload("res://assets/pipe_spawns/green_piranha_plant.tres")
 
-enum Brush { TILES, COIN, ONE_UP, TIMED_COINS, TIERED, STARMAN }
+enum Brush { TILES, COIN, ONE_UP, TIMED_COINS, TIERED, STARMAN, GREEN_PLANT, CLEAR_PIPE_SPAWN }
 
 var _brush: OptionButton
 var _layer: TileMapLayer
@@ -24,7 +25,9 @@ func _enter_tree() -> void:
 	_brush.add_item("Apply Timed Coins Reward", Brush.TIMED_COINS)
 	_brush.add_item("Apply Tiered Power-Up Reward", Brush.TIERED)
 	_brush.add_item("Apply Starman Reward", Brush.STARMAN)
-	_brush.tooltip_text = "Choose a reward, then click a painted reward block."
+	_brush.add_item("Apply Green Piranha Plant", Brush.GREEN_PLANT)
+	_brush.add_item("Clear Pipe Spawn", Brush.CLEAR_PIPE_SPAWN)
+	_brush.tooltip_text = "Choose a brush, then click a painted reward block or vertical pipe mouth."
 	add_control_to_container(CONTAINER_CANVAS_EDITOR_MENU, _brush)
 	_brush.hide()
 	set_force_draw_over_forwarding_enabled()
@@ -61,7 +64,12 @@ func _forward_canvas_gui_input(event: InputEvent) -> bool:
 		return false
 	if event.pressed:
 		var local: Vector2 = _layer_to_viewport(_layer).affine_inverse() * event.position
-		_apply_reward(_layer.local_to_map(local))
+		var cell := _layer.local_to_map(local)
+		var brush := _brush.get_selected_id()
+		if brush in [Brush.GREEN_PLANT, Brush.CLEAR_PIPE_SPAWN]:
+			_apply_pipe_spawn(cell, GREEN_PLANT if brush == Brush.GREEN_PLANT else null)
+		else:
+			_apply_reward(cell)
 	return true
 
 
@@ -80,7 +88,26 @@ func _apply_reward(cell: Vector2i) -> void:
 		updated.erase(cell)
 	else:
 		updated[cell] = reward
-	_commit_reward_edit(area, previous, updated)
+	_commit_layout_edit(area, "Paint Block Reward", &"question_block_rewards", previous, updated)
+
+
+func _apply_pipe_spawn(cell: Vector2i, spawn: PipeSpawn) -> void:
+	var area := _layer.get_parent().get_parent() as BaseLevelArea
+	if area == null:
+		return
+	if _entity_id_at(_layer, cell) != "pipe_entrance":
+		cell -= Vector2i.RIGHT
+		if _entity_id_at(_layer, cell) != "pipe_entrance":
+			return
+	var previous := area.pipe_spawns
+	if previous.get(cell) == spawn:
+		return
+	var updated := previous.duplicate()
+	if spawn == null:
+		updated.erase(cell)
+	else:
+		updated[cell] = spawn
+	_commit_layout_edit(area, "Paint Pipe Spawn", &"pipe_spawns", previous, updated)
 
 
 func _reward_for_brush(brush: int) -> BlockReward:
@@ -101,15 +128,17 @@ func _reward_for_brush(brush: int) -> BlockReward:
 	return reward
 
 
-func _commit_reward_edit(
+func _commit_layout_edit(
 	area: BaseLevelArea,
+	action: String,
+	property: StringName,
 	previous: Dictionary[Vector2i, Resource],
 	updated: Dictionary[Vector2i, Resource]
 ) -> void:
 	var history := get_undo_redo()
-	history.create_action("Paint Block Reward", UndoRedo.MERGE_DISABLE, area)
-	history.add_do_property(area, &"question_block_rewards", updated)
-	history.add_undo_property(area, &"question_block_rewards", previous)
+	history.create_action(action, UndoRedo.MERGE_DISABLE, area)
+	history.add_do_property(area, property, updated)
+	history.add_undo_property(area, property, previous)
 	history.add_do_method(self, &"update_overlays")
 	history.add_undo_method(self, &"update_overlays")
 	history.commit_action()
@@ -121,15 +150,17 @@ func _layer_to_viewport(layer: TileMapLayer) -> Transform2D:
 
 
 func _is_reward_block(layer: TileMapLayer, cell: Vector2i) -> bool:
-	if layer.tile_set == null or layer.tile_set.get_custom_data_layer_by_name("entity_id") < 0:
-		return false
-	var data := layer.get_cell_tile_data(cell)
-	if data == null:
-		return false
-	var id := String(data.get_custom_data("entity_id"))
 	return (
-		id in ["question_block", "hidden_question_block", "reward_brick", "reward_brick_alternate"]
+		_entity_id_at(layer, cell)
+		in ["question_block", "hidden_question_block", "reward_brick", "reward_brick_alternate"]
 	)
+
+
+func _entity_id_at(layer: TileMapLayer, cell: Vector2i) -> String:
+	if layer.tile_set == null or layer.tile_set.get_custom_data_layer_by_name("entity_id") < 0:
+		return ""
+	var data := layer.get_cell_tile_data(cell)
+	return String(data.get_custom_data("entity_id")) if data != null else ""
 
 
 func _forward_canvas_force_draw_over_viewport(overlay: Control) -> void:
@@ -157,7 +188,22 @@ func _forward_canvas_force_draw_over_viewport(overlay: Control) -> void:
 				area.question_block_rewards.get(cell) if area != null else null
 			)
 			_draw_reward_preview(overlay, destination, reward, theme)
+		if area != null:
+			_draw_pipe_previews(overlay, layer, area)
 	overlay.draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
+func _draw_pipe_previews(overlay: Control, layer: TileMapLayer, area: BaseLevelArea) -> void:
+	for cell in area.pipe_spawns:
+		var spawn := area.pipe_spawns[cell] as PipeSpawn
+		if spawn == null or spawn.preview == null or _entity_id_at(layer, cell) != "pipe_entrance":
+			continue
+		var texture := (
+			area.theme.resolve_texture(spawn.preview) if area.theme != null else spawn.preview
+		)
+		var origin := layer.map_to_local(cell) - Vector2(layer.tile_set.tile_size) / 2.0
+		var mouth := origin + PipeEntrance.UPRIGHT_MOUTH
+		overlay.draw_texture(texture, mouth - texture.get_size() * Vector2(0.5, 1), PREVIEW_TINT)
 
 
 func _draw_reward_preview(

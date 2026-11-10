@@ -1,0 +1,4 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://tests/rendering/koopa_shadow_test.gd" id="s"]
+[node name="KoopaShadowTest" type="Node"]
+script = ExtResource("s")

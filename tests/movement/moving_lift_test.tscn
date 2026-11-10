@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/movement/moving_lift_test.gd" id="test"]
+
+[node name="MovingLiftTest" type="Node"]
+script = ExtResource("test")

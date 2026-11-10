@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PipeSpawn" format=3 uid="uid://c3foo08jvqc33"]
+
+[ext_resource type="Texture2D" uid="uid://dcvquk8udsnnq" path="res://assets/palettes/overworld/enemies/piranha-plant.png" id="art"]
+[ext_resource type="PackedScene" path="res://scenes/entities/enemies/piranha_plant/green_piranha_plant.tscn" id="plant"]
+[ext_resource type="Script" uid="uid://dxshikgaufu43" path="res://scenes/entities/pipes/pipe_spawn.gd" id="spawn"]
+
+[sub_resource type="AtlasTexture" id="preview"]
+atlas = ExtResource("art")
+region = Rect2(16, 8, 16, 24)
+
+[resource]
+script = ExtResource("spawn")
+actor_scene = ExtResource("plant")
+preview = SubResource("preview")
