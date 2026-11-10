@@ -29,7 +29,7 @@ func prepare_horizontal_motion() -> float:
 		player.motion_values,
 		controller_controls_available() and ControllerHandler.input_secondary,
 		direction,
-		player.body.is_on_floor(),
+		player.has_floor_support(),
 		facing,
 		controller_controls_available() and ControllerHandler.input_down > 0.5,
 		ControllerHandler.get_axis().x if controller_controls_available() else 0.0
@@ -39,7 +39,7 @@ func prepare_horizontal_motion() -> float:
 
 func ground_transition(jump_state: PlayerState, falling_state: PlayerState) -> BaseState:
 	var player := get_player()
-	if not player.body.is_on_floor():
+	if not player.has_floor_support():
 		if falling_state != self:
 			player.air_movement.capture(
 				player.motion_values,
@@ -49,7 +49,7 @@ func ground_transition(jump_state: PlayerState, falling_state: PlayerState) -> B
 			return falling_state
 		return null
 	if controller_controls_available() and ControllerHandler.input_primary_just_pressed:
-		if player.jump_action.begin(player.motion_values):
+		if player.jump_action.begin(player.motion_values, true):
 			player.air_movement.capture(
 				player.motion_values,
 				-1.0 if player.sprite != null and player.sprite.flip_h else 1.0,

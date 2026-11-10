@@ -89,7 +89,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_floor_sample_tick = Engine.get_physics_frames()
-	_grounded_at_tick_start = body.is_on_floor()
+	_grounded_at_tick_start = has_floor_support()
 	if arrival_control_ticks_remaining > 0 and state_machine.current_state is PlayerTransportState:
 		_advance_arrival_control_lock()
 		return
@@ -111,6 +111,10 @@ func _physics_process(delta: float) -> void:
 func was_grounded_at_tick_start() -> bool:
 	if _floor_sample_tick == Engine.get_physics_frames():
 		return _grounded_at_tick_start
+	return has_floor_support()
+
+
+func has_floor_support() -> bool:
 	return body.is_on_floor()
 
 
@@ -207,8 +211,29 @@ func move_body(gravity_after_motion: bool = false) -> void:
 	if gravity_after_motion:
 		next_vertical_speed = vertical_movement.prepare_step(motion_values, delta)
 	var previous_position := body.global_position
+	_sweep_motion(delta, vertical_speed)
+	var supported := has_floor_support()
+	if supported:
+		stomp_chain = 0
+	if gravity_after_motion:
+		vertical_movement.finish_step_on_support(motion_values, next_vertical_speed, supported)
+	var hidden_hit := rising and bonk_action.deliver_hidden(self, previous_position)
+	if rising and (hidden_hit or body.is_on_ceiling()):
+		if not hidden_hit:
+			bonk_action.deliver(self)
+		respond_to_ceiling()
+
+
+func _sweep_motion(delta: float, vertical_speed: float) -> void:
+	_sweep_body(delta, vertical_speed, true)
+
+
+func _sweep_body(delta: float, vertical_speed: float, correct_landing: bool) -> void:
+	var previous_position := body.global_position
 	var horizontal_speed := body.velocity.x
-	var corrected_landing := corner_correction.prepare(body, collision_shape, delta, vertical_speed)
+	var corrected_landing := false
+	if correct_landing or vertical_speed < 0.0:
+		corrected_landing = corner_correction.prepare(body, collision_shape, delta, vertical_speed)
 	var intended_x := horizontal_speed * delta
 	var prepared_x := body.global_position.x - previous_position.x
 	camera_correction_x += prepared_x - (intended_x if corrected_landing else 0.0)
@@ -230,23 +255,12 @@ func move_body(gravity_after_motion: bool = false) -> void:
 	):
 		movement_x = 0.0
 	camera_correction_x += slide_x - movement_x
-	if body.is_on_floor():
-		stomp_chain = 0
-	if gravity_after_motion:
-		# Position uses the current speed; gravity prepares the following tick.
-		# Landing and ceiling response retain authority over the resulting speed.
-		vertical_movement.finish_step(motion_values, next_vertical_speed)
 	if corrected_landing:
 		body.velocity.x = horizontal_speed
 	# ImpedePlayerMove stops momentum into solid sides. Godot can retain
 	# velocity at a floor/wall contact even when displacement is blocked.
 	if body.is_on_wall() and body.velocity.x * body.get_wall_normal().x < 0.0:
 		body.velocity.x = 0.0
-	var hidden_hit := rising and bonk_action.deliver_hidden(self, previous_position)
-	if rising and (hidden_hit or body.is_on_ceiling()):
-		if not hidden_hit:
-			bonk_action.deliver(self)
-		respond_to_ceiling()
 
 
 ## Shared bonk motion/audio after the caller delivers the appropriate head hit.

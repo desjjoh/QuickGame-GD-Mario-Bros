@@ -21,8 +21,8 @@ var falling_gravity: float = 562.5
 var _released: bool = false
 
 
-func begin(values: MotionValues) -> bool:
-	if not values.body.is_on_floor():
+func begin(values: MotionValues, floor_supported: bool = false) -> bool:
+	if not floor_supported and not values.body.is_on_floor():
 		return false
 	if (
 		jump_speeds.size() != speed_thresholds.size() + 1

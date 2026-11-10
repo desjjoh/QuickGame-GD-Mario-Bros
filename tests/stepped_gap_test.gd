@@ -47,6 +47,46 @@ func make_game(direction: float, phase: float) -> Node:
 	return game
 
 
+func verify_retained_fall(direction: float) -> void:
+	# Mesen seeds the running-jump fall force and a half-pixel Y fraction.
+	var contact_ticks := [18, 18, 18, 17, 17] if direction > 0.0 else [18, 18, 17, 17, 17]
+	var blocked_phase := 2 if direction > 0.0 else 1
+	var action := (
+		ControllerHandler.right_action if direction > 0.0 else ControllerHandler.left_action
+	)
+	for phase in range(contact_ticks.size()):
+		var game := make_game(direction, phase / 2.0)
+		add_child(game)
+		var player := GameHandler.current_player
+		await ticks(5)
+		assert(player.has_floor_support())
+		Input.action_press(action)
+		Input.action_press(ControllerHandler.secondary_action)
+		player.body.velocity.x = direction * 150.0
+		player.face_direction(direction)
+		player.state_machine.change_state(player.state_machine.get_state(&"Move"))
+		player.jump_action.falling_gravity = player.jump_action.falling_gravities[4]
+		player.vertical_movement.position_fraction = 128
+		for tick in range(1, contact_ticks[phase]):
+			await ticks(1)
+			assert(is_equal_approx(player.body.velocity.x, direction * 150.0))
+			if tick == contact_ticks[phase] - 1:
+				assert(not player.has_floor_support())
+		await ticks(1)
+		if phase == blocked_phase:
+			assert(not player.has_floor_support())
+			assert(is_zero_approx(player.body.velocity.x))
+			assert(is_equal_approx(player.body.global_position.y, 184.0))
+		else:
+			assert(player.has_floor_support())
+			assert(is_equal_approx(player.body.velocity.x, direction * 150.0))
+			assert(absf(player.body.global_position.y - 176.0) < 0.2)
+		Input.action_release(action)
+		Input.action_release(ControllerHandler.secondary_action)
+		game.free()
+		await get_tree().process_frame
+
+
 func _ready() -> void:
 	process_physics_priority = 200
 	for direction in [1.0, -1.0]:
@@ -96,7 +136,9 @@ func _ready() -> void:
 		push_error("Stepped gap failures:\n" + "\n".join(failures))
 		get_tree().quit(1)
 		return
+	for direction in [1.0, -1.0]:
+		await verify_retained_fall(direction)
 	print(
-		"PASS: two-tile gaps onto a one-tile-lower pipe preserve run momentum and land at eleven subpixel phases in both directions."
+		"PASS: lower-pipe crossings and retained-force shallow landings and deep stops in both directions."
 	)
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())

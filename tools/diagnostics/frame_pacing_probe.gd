@@ -65,7 +65,7 @@ func _ready() -> void:
 	_configure_shadow_capture()
 	if _automatic:
 		var camera := get_viewport().get_camera_2d() as LevelCamera
-		camera.world_right = 8000.0
+		camera.area_right = 8000.0
 		var floor := (
 			GameHandler.current_level.get_node("Areas/MainArea/Layouts/GroundLayout")
 			as TileMapLayer

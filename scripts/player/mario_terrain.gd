@@ -1,12 +1,104 @@
 class_name MarioTerrain
 extends Node
-## The short body supports feet/lower sides; these are Super's additional probes.
+## Mario's terrain probes share the short body with standing head and side checks.
+enum FloorStep { SWEEP, LAND, CLEAR_CORNER }
+
+const FLOOR_DEPTH := 4.0
+const FLOOR_CLEARANCE := 0.125
+const PROBE_EPSILON := 0.001
 const STANDING_HEAD := Vector2(0, -28)
 const SHORT_HEAD := Vector2(0, -14)
 const FEET := [Vector2(-5, 0), Vector2(4, 0)]
 const STANDING_SIDES := [Vector2(-6, -24), Vector2(-6, -8), Vector2(5, -24), Vector2(5, -8)]
 const SHORT_SIDES := [Vector2(-6, -8), Vector2(-6, -8), Vector2(5, -8), Vector2(5, -8)]
 var _last_coin_tick := -1
+
+
+func step_floor(player: BasePlayer, delta: float) -> FloorStep:
+	var body := player.body
+	var start := body.global_position
+	var motion := body.velocity * delta
+	var target := start + motion
+	# Ground support lives on the pixel grid even when Godot leaves a safe margin.
+	var feet := _foot_origin(target)
+	for offset: Vector2 in FEET:
+		var top := _surface_at(body, feet + offset)
+		if not top.is_empty() and _can_cross_at_top(body, motion.x, top.position.y):
+			_settle_on_surface(body, target.x, top.position.y, delta)
+			return FloorStep.LAND
+
+	if is_zero_approx(motion.x):
+		return FloorStep.SWEEP
+	# The rectangle can hit a corner its inset foot has yet to reach.
+	var side := signf(motion.x)
+	var shape := player.collision_shape
+	var half_width := (shape.shape as RectangleShape2D).size.x / 2.0
+	var outer_x := shape.global_position.x + motion.x + side * (half_width + PROBE_EPSILON)
+	var corner := _surface_at(body, Vector2(outer_x, feet.y))
+	if corner.is_empty():
+		return FloorStep.SWEEP
+	var leading_foot := feet + (FEET[1] if side > 0.0 else FEET[0])
+	var point := PhysicsPointQueryParameters2D.new()
+	point.position = leading_foot + Vector2.ONE * PROBE_EPSILON
+	point.collision_mask = body.collision_mask
+	point.exclude = [body.get_rid()]
+	if not _terrain_at(player, point).is_empty():
+		# A deep foot contact belongs to the solid side.
+		return FloorStep.SWEEP
+	if not _can_cross_at_top(body, motion.x, corner.position.y):
+		return FloorStep.SWEEP
+	# Permit only this shallow outer-edge overlap. The inset feet still decide
+	# support, and a subsequent deep foot hit goes through the body sweep.
+	body.global_position = Vector2(target.x, feet.y)
+	return FloorStep.CLEAR_CORNER
+
+
+func _surface_at(body: CharacterBody2D, foot: Vector2) -> Dictionary:
+	var x := foot.x + PROBE_EPSILON
+	var query := PhysicsRayQueryParameters2D.create(
+		Vector2(x, foot.y - FLOOR_DEPTH - PROBE_EPSILON),
+		Vector2(x, foot.y + PROBE_EPSILON),
+		body.collision_mask,
+		[body.get_rid()]
+	)
+	var hit := body.get_world_2d().direct_space_state.intersect_ray(query)
+	if hit.is_empty() or hit.normal.y > -0.7:
+		return {}
+	return hit
+
+
+func _can_cross_at_top(body: CharacterBody2D, step_x: float, top: float) -> bool:
+	var above := body.global_transform
+	above.origin.y = minf(above.origin.y, top - FLOOR_CLEARANCE)
+	# Check the horizontal route above this corner so tall and neighboring walls
+	# keep their normal collision even when a shallow landing wins.
+	return not body.test_move(above, Vector2(step_x, 0), null, body.safe_margin, true)
+
+
+func _settle_on_surface(body: CharacterBody2D, x: float, top: float, delta: float) -> void:
+	var speed_x := body.velocity.x
+	body.global_position = Vector2(x, top - FLOOR_CLEARANCE)
+	body.velocity = Vector2(0, FLOOR_CLEARANCE / delta)
+	body.move_and_slide()
+	body.velocity = Vector2(speed_x, 0)
+
+
+func supports_body(body: CharacterBody2D) -> bool:
+	var feet := _foot_origin(body.global_position)
+	for offset: Vector2 in FEET:
+		var hit := _surface_at(body, feet + offset)
+		if not hit.is_empty() and absf(hit.position.y - body.global_position.y) <= FLOOR_CLEARANCE:
+			return true
+	return false
+
+
+func _foot_origin(position: Vector2) -> Vector2:
+	var level := GameHandler.current_level
+	var origin := Vector2.ZERO
+	if level != null and level.active_area != null:
+		origin = level.active_area.global_position
+	var local := position - origin
+	return origin + Vector2(floorf(local.x + PROBE_EPSILON), roundf(local.y))
 
 
 ## The NES checks coin metatiles through the same size/posture terrain probes.

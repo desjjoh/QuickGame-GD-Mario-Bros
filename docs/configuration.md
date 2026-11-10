@@ -21,9 +21,11 @@ Set **Background Music** independently to Overworld, Underground, or None. Overw
 
 Set **Transport Points** and **Pipe Routes** on the source area to link placed pipes to explicit area and destination IDs. A destination pipe supplies its exit pose. The reserved `player_spawn` target returns to the main area’s spawn. Standalone arrival markers are useful where an area needs a separate landing point.
 
+For 1-2's opening, **Presentations → PipeOpening** identifies the intro area and painted castle cell. A fresh entry spawns at the castle's doorway. The sideways pipe targets `main / player_spawn`, so moving **Players → PlayerSpawn** changes both the first underground arrival and the early respawn.
+
 ## Area background colour
 
-Select an area such as **Areas → MainArea** and set **Background → Background Color**. Its fill spans the camera's World Left/World Right limits and the camera's visible vertical height, including area offsets and zoom. Alpha zero reveals Game’s black backdrop during F5; standalone F6 retains the viewport default unless an area supplies a colour. Each area owns its colour independently of its theme and music. The fill sits behind decorations, receives foreground shadows, and never casts a shadow itself in F5 or standalone F6.
+Select an area such as **Areas → MainArea** and set **Background → Background Color**. Its fill spans **Camera2D → Area Left** and **Area Right**, measured in pixels from the area's origin, and the camera's visible vertical height. Moving the area moves the fill and horizontal camera limits together. Alpha zero reveals Game’s black backdrop during F5; standalone F6 retains the viewport default unless an area supplies a colour. Each area owns its colour independently of its theme and music. The fill sits behind decorations, receives foreground shadows, and never casts a shadow itself in F5 or standalone F6.
 
 ## Start-menu background
 
@@ -31,15 +33,15 @@ Open `scenes/main/game.tscn`, select **Game**, and assign **Presentation → Tit
 
 ## Level rules
 
-- Set camera world bounds on the area camera to define the playable scroll range.
+- Set **Area Left** and **Area Right** on the area camera to define the playable scroll range. A one-screen area starting at its origin uses 0 and 256, wherever it sits in the level scene.
 - Set the timer limit and enable flag on the level. The HUD keeps the TIME label and hides the digits on the start screen, during transitions such as level intro, TIME UP, and GAME OVER, and whenever the timer is disabled.
 - Hurry-up plays once when the timer falls from 100 to 99. A timed stage authored at 1–99 plays the warning at gameplay reveal and then uses the fast music. Starting below 100 is a deliberate extension for authored stages.
-- `GameHandler.reset_progress_on_death` controls whether death clears progress. Each entity’s persistence setting applies to both death and area reload.
+- In `scenes/main/game.tscn`, select **Game → Gameplay → Save Entity State Through Death**. Enabled by default, it carries saved entity state and runtime tile changes into the next attempt. Disable it to reload the stage's authored state after a death. Each entity's persistence setting still controls what is saved between area visits. Score and coins in the HUD carry forward in either mode, and death still costs a life.
 - The Game scene supplies the stage list and the shared shadow master toggle. The first stage is 1-1. Open `scenes/main/game.tscn`, select **Game**, and use **Presentation → Shadow Style** to load `assets/shadows/soft.tres`, `crisp.tres`, or `outer_blur.tres`. Clear the field for no shadow effect. Outer Blur is the current authored Game selection. One selection applies to the title and every stage; standalone F6 previews read the saved Game selection and master toggle. Decorations remain outside the effect.
 
 ### Halfway restarts
 
-Add a `Marker2D` under **Players** at the desired feet position and assign it to the level's **Death → Halfway Spawn** field. On **Areas → MainArea → Camera2D**, enable **Halfway Restart → Halfway Check Enabled** and set **Halfway Camera Left** in world pixels. The 2D editor draws a labeled dashed guide at that X coordinate. At life loss, the active area's camera is measured against this stage-wide threshold.
+Add a `Marker2D` under **Players** at the desired feet position and assign it to the level's **Death → Halfway Spawn** field. On **Areas → MainArea → Camera2D**, enable **Halfway Restart → Halfway Check Enabled** and set **Halfway Camera Left** in pixels from the main area's origin. The 2D editor draws a labeled dashed guide that moves with the area. At life loss, the active camera and the threshold are compared in world coordinates.
 
 1-1 uses a marker at `(1344, 208)` and a camera-left threshold of `1280`. A halfway restart snaps the camera to X=1280 and places Mario's sprite 56 px from the left edge. This places Mario 16 px farther right than the NES halfway restart while keeping page 5 in view. A death before the threshold uses the normal spawn, with camera framing clamped by the main area's bounds. The authored secret room is before the threshold. If a side area's camera is placed at or beyond the threshold, death there uses the halfway marker.
 
@@ -61,7 +63,7 @@ The game uses 256×240 logical framing with window-resolution canvas_items rende
 
 ## Source configuration and ownership
 
-`Game.stages` is the sole ordered gameplay-stage list. The title backdrop is configured separately. Single-stage test fixtures assign `game.stages.assign([scene])`; there is no `initial_level` alias.
+`Game.stages` defines completion order and currently lists 1-1 followed by 1-2. **Game → Start Stage Override** selects the starting BaseLevel scene for new runs. Leave it empty to use the first entry. Selecting a registered scene starts at its position in the list. A scene outside the list returns to the title after ordinary completion. The title backdrop is configured separately. Single-stage test fixtures assign `game.stages.assign([scene])`.
 
 Use typed GameHandler methods/properties and `player_status` for score, coins, lives, form, top score, stage label, and timer values. Generic `set_session_value()` / `get_session_value()` are for run metadata such as area/arrival IDs; reserved-key writes are rejected. The existing `session_value_changed` signal carries both typed-value and metadata notifications.
 
@@ -71,4 +73,4 @@ LevelSpawnRegistry keeps ten enemy slots and one independent power-up slot. Thes
 
 Enemy stomp scoring omits the NES shared StompTimer score modifier. A stomped Koopa instead has a shell-local 12-tick grace window; a kick does not refresh it. These rules are separate from the independent timed-coin windows above.
 
-Area and pipe arrivals use a shared 17-active-physics-tick hold (about 0.28 seconds at 60 Hz), including grounded arrivals. Animated exits wait before emergence and release controls immediately afterward; direct arrivals apply the input lock after placement. The NES underground entrance instead releases input at a Y threshold; the fixed duration and shared coverage are deliberate choices. Level starts and respawns retain immediate normal control. Arrival positions and general air-control constants are unchanged.
+Area and pipe arrivals use a shared 17-active-physics-tick hold (about 0.28 seconds at 60 Hz), including grounded arrivals. Animated exits wait before emergence and release controls immediately afterward. Direct arrivals apply the input lock after placement. 1-2 also uses the hold for early respawns at its underground entrance, matching the observed duration in Mesen. The NES underground entrance releases input at a Y threshold. Ordinary starts and other respawns retain immediate normal control.

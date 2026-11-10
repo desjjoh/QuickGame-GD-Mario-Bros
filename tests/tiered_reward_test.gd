@@ -1,6 +1,8 @@
 extends Node
 
 const LEVEL := preload("res://scenes/levels/worlds/world 1/1-1.tscn")
+const SANDBOX := preload("res://tests/fixtures/sandbox_level.tscn")
+const PLAYER_CONTACT := preload("res://scenes/components/interactions/player_contact.gd")
 const LUIGI := preload("res://scenes/player/luigi/luigi.tscn")
 const MUSHROOM := preload("res://scenes/entities/powerups/super_mushroom.tscn")
 const FLOWER := preload("res://scenes/entities/powerups/fire_flower.tscn")
@@ -15,9 +17,11 @@ func _ready() -> void:
 	for is_luigi in [false, true]:
 		for form_index in range(3):
 			await check_release(is_luigi, form_index)
+	for scene in [MUSHROOM, ONE_UP, FLOWER]:
+		await check_emerging_pickup(scene)
 	ControllerHandler.set_physics_process(true)
 	GameHandler.clear_session()
-	print("PASS: tiered reward selection at release for Mario and Luigi in all three forms.")
+	print("PASS: tiered reward selection and four-pixel pickup for both mushrooms and Fire Flower.")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
@@ -55,5 +59,37 @@ func check_release(is_luigi: bool, form_index: int) -> void:
 	assert(not block.receive_hit(hit))
 	assert(block.capture_area_state().state == &"Inactive")
 	assert(GameHandler.player_status.score == score and GameHandler.player_status.coins == coins)
+	level.queue_free()
+	await get_tree().process_frame
+
+
+func check_emerging_pickup(scene: PackedScene) -> void:
+	var level := SANDBOX.instantiate() as BaseLevel
+	level.player_start_configuration = MarioFormPresentation.SMALL
+	level.entity_layout.clear()
+	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
+	add_child(level)
+	level.set_physics_process(false)
+	var player := level.player
+	player.set_physics_process(false)
+	var item := scene.instantiate() as PowerUp
+	item.position = Vector2(128, 128)
+	item.begin_emergence()
+	level.world_objects.add_child(item)
+	item.set_physics_process(false)
+	player.body.global_position = item.sprite.global_position + Vector2(0, 4)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	if not PLAYER_CONTACT.is_check_tick():
+		await get_tree().physics_frame
+	# Keep the overlap on an eligible contact tick to isolate the rise gate.
+	for tick in range(1, 17):
+		assert(PLAYER_CONTACT.touches(item.pickup, player.enemy_hurtbox))
+		item._physics_process(1.0 / 60.0)
+		var rise := floori(tick / 4.0)
+		assert(item._emergence_remaining == 16 - rise)
+		if rise > 0:
+			assert(item.sprite.region_enabled and item.sprite.region_rect.size.y == rise)
+		assert(item.is_queued_for_deletion() == (tick == 16), scene.resource_path)
 	level.queue_free()
 	await get_tree().process_frame

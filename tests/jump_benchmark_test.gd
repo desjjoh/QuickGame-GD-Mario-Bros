@@ -75,12 +75,13 @@ func _ready() -> void:
 	for frame in range(3):
 		await tick()
 	for trial in [
-		[2876.0, 176.0, 96.0, false],
-		[2879.0, 176.0, 96.0, true],
-		[2882.0, 176.0, 96.0, true],
-		[1630.0, 144.0, 80.0, false],
-		[1634.0, 144.0, 80.0, false],
-		[1636.0, 144.0, 80.0, false]
+		# In Mesen only the last staircase start puts a foot on the Y=96 step.
+		[2876.0, 176.0, 112.0],
+		[2879.0, 176.0, 112.0],
+		[2882.0, 176.0, 96.0],
+		[1630.0, 144.0, 144.0],
+		[1634.0, 144.0, 144.0],
+		[1636.0, 144.0, 144.0]
 	]:
 		player.state_machine.stop(false)
 		player.body.global_position = Vector2(trial[0], trial[1] - 0.1)
@@ -116,9 +117,8 @@ func _ready() -> void:
 				assert(is_equal_approx(player.body.velocity.y, -290.625))
 			if frame > 0 and player.body.is_on_floor():
 				assert(player.jump_action.falling_gravity == 2025.0)
-				var reached := absf(player.body.global_position.y - float(trial[2])) < 0.2
 				assert(
-					reached == trial[3],
+					absf(player.body.global_position.y - float(trial[2])) < 0.2,
 					(
 						"Unexpected benchmark landing at takeoff X=%s, landing=%s"
 						% [trial[0], player.body.global_position]

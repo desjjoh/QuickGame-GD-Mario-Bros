@@ -6,14 +6,15 @@ extends Camera2D
 const LEFT_ARRIVAL_SPRITE_X := 56.0  # NES alternate pipe entrance X ($38).
 
 @export var follow_enabled: bool = true
-@export var world_left: float = -128.0:
+## Horizontal camera limits measured from the parent area's origin.
+@export var area_left: float = -128.0:
 	set(value):
-		world_left = value
+		area_left = value
 		queue_redraw()
 
-@export var world_right: float = 768.0:
+@export var area_right: float = 768.0:
 	set(value):
-		world_right = value
+		area_right = value
 		queue_redraw()
 
 @export var scroll_start: float = 80.0
@@ -26,6 +27,7 @@ const LEFT_ARRIVAL_SPRITE_X := 56.0  # NES alternate pipe entrance X ($38).
 	set(value):
 		halfway_check_enabled = value
 		queue_redraw()
+## Camera-left threshold measured from the main area's origin.
 @export var halfway_camera_left: float = 0.0:
 	set(value):
 		halfway_camera_left = value
@@ -40,6 +42,25 @@ const LEFT_ARRIVAL_SPRITE_X := 56.0  # NES alternate pipe entrance X ($38).
 var _target_x: float
 var _has_target: bool = false
 var _scroll_lock: WeakRef
+var halfway_left_limit_active := false
+
+var world_left: float:
+	get:
+		return _area_origin_x() + area_left
+var world_right: float:
+	get:
+		return _area_origin_x() + area_right
+var world_halfway_camera_left: float:
+	get:
+		return _area_origin_x() + halfway_camera_left
+var scroll_left_limit: float:
+	get:
+		return maxf(world_left, world_halfway_camera_left) if halfway_left_limit_active else world_left
+
+
+func _area_origin_x() -> float:
+	var area := get_parent() as Node2D
+	return area.global_position.x if area != null else 0.0
 
 
 func _ready() -> void:
@@ -64,14 +85,15 @@ func _draw() -> void:
 	var bottom := global_position.y + height / 2.0
 	var font := ThemeDB.fallback_font
 	if halfway_check_enabled:
-		var start := to_local(Vector2(halfway_camera_left, top))
-		var end := to_local(Vector2(halfway_camera_left, bottom))
+		var halfway_x := world_halfway_camera_left
+		var start := to_local(Vector2(halfway_x, top))
+		var end := to_local(Vector2(halfway_x, bottom))
 		var color := Color(1.0, 0.85, 0.25)
 		draw_dashed_line(start, end, color, 1.0, 8.0)
 		draw_string(
 			font,
 			start + Vector2(4.0, 25.0),
-			"Halfway camera left: %s" % halfway_camera_left,
+			"Halfway camera left: %s (area)" % halfway_camera_left,
 			HORIZONTAL_ALIGNMENT_LEFT,
 			-1,
 			10,
@@ -79,13 +101,15 @@ func _draw() -> void:
 		)
 	if not draw_world_bounds:
 		return
-	var edges := [world_left, world_right]
+	var origin_x := _area_origin_x()
+	var edges := [area_left, area_right]
 	var colors := [Color(0.25, 0.9, 0.65), Color(1.0, 0.55, 0.25)]
 	for index in range(2):
-		var start := to_local(Vector2(edges[index], top))
-		var end := to_local(Vector2(edges[index], bottom))
+		var edge_x: float = origin_x + edges[index]
+		var start := to_local(Vector2(edge_x, top))
+		var end := to_local(Vector2(edge_x, bottom))
 		draw_line(start, end, colors[index], -1.0)
-		var label := "World %s: %s" % ["Left" if index == 0 else "Right", edges[index]]
+		var label := "Area %s: %s" % ["Left" if index == 0 else "Right", edges[index]]
 		var text_width := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
 		var text_offset := Vector2(4.0 if index == 0 else -text_width - 4.0, 12.0)
 		draw_string(
@@ -154,7 +178,8 @@ func follow_position(current_x: float, correction_x: float = 0.0) -> void:
 	# steps against a continuously moving player.
 	if screen_x < full_speed_start:
 		advance *= 0.5
-	var next_left := clampf(left + advance, world_left, maxf(world_left, world_right - width))
+	var minimum_left := scroll_left_limit
+	var next_left := clampf(left + advance, minimum_left, maxf(minimum_left, world_right - width))
 	global_position.x = next_left + width / 2.0
 	force_update_scroll()
 
@@ -163,14 +188,20 @@ func snap_to_arrival(target: CharacterBody2D, sprite_screen_x: float = -1.0) -> 
 	# Arrival at another endpoint explicitly resets right-only camera history.
 	if follow_enabled:
 		var width := get_viewport_rect().size.x / zoom.x
+		var minimum_left := scroll_left_limit
 		var left := clampf(
 			(
 				target.global_position.x
 				- target_origin_offset
 				- (sprite_screen_x if sprite_screen_x >= 0 else full_speed_start)
 			),
-			world_left,
-			maxf(world_left, world_right - width)
+			minimum_left,
+			maxf(minimum_left, world_right - width)
 		)
 		global_position.x = left + width / 2.0
+	reset_target(target)
+
+
+func snap_to_left_limit(target: CharacterBody2D) -> void:
+	global_position.x = scroll_left_limit + get_viewport_rect().size.x / (2.0 * zoom.x)
 	reset_target(target)

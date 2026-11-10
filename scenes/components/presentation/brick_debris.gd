@@ -49,7 +49,14 @@ func _physics_process(delta: float) -> void:
 			_speed[pair] = floori(units / 256.0)
 			_speed_fraction[pair] = posmod(units, 256)
 	_update_chunks()
-	var bottom := (get_canvas_transform().affine_inverse() * get_viewport_rect().end).y
+	# Game's CanvasLayer is screen-space. Its transform omits the world camera.
+	var camera := get_viewport().get_camera_2d()
+	var bottom := get_viewport_rect().end.y
+	if camera != null:
+		var center := (
+			camera.global_position if camera is LevelCamera else camera.get_screen_center_position()
+		)
+		bottom = center.y + get_viewport_rect().size.y / camera.zoom.y / 2.0
 	if _speed[0] > 0 and global_position.y + _y[0] > bottom + 8:
 		queue_free()
 

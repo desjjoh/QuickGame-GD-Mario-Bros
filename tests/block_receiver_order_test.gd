@@ -199,7 +199,8 @@ func check_arrival(
 		actor.body.velocity.y = 180.0
 	(actor.state_machine.current_state as EntityState).process_physics(1.0 / 60.0)
 	if not walk_on and is_instance_valid(block):
-		assert(actor.body.is_on_floor())
+		# The retry sees the feet at the block this tick. Walking samples support next tick.
+		assert(actor.body.global_position.y + 8.0 >= block.global_position.y)
 	var hit_tick := Engine.get_physics_frames()
 	await get_tree().process_frame
 	assert(

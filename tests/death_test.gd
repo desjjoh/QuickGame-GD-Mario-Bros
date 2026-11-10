@@ -55,9 +55,9 @@ func _ready() -> void:
 	process_physics_priority = 200
 	for reset in [false, true]:
 		GameHandler.clear_session()
-		GameHandler.reset_progress_on_death = reset
 		GameHandler.set_lives(2)
 		var game := make_game()
+		game.save_entity_state_through_death = not reset
 		add_child(game)
 		await ticks(3)
 		var level := GameHandler.current_level
@@ -82,6 +82,9 @@ func _ready() -> void:
 		await ticks(2)
 		player = level.player
 		block = level.world_objects.get_node("question_block_4_9") as BaseBlock
+		assert(block.state_machine.current_state.name == &"Inactive")
+		coin = level.world_objects.get_node("coin_5_12") as BaseEntity
+		assert(coin.state_machine.current_state.name == &"Collected")
 		for brick_name in ["brick_alternate_6_9", "brick_7_9"]:
 			var reloaded := level.world_objects.get_node(brick_name) as BaseEntity
 			assert(not reloaded.persist_progress)
@@ -99,6 +102,8 @@ func _ready() -> void:
 			assert(not level.death_in_progress)
 		player.body.global_position.y = 289.0
 		var old_player: WeakRef = weakref(player)
+		var score := GameHandler.player_status.score
+		var coins := GameHandler.player_status.coins
 		level._check_fall_death()
 		assert(level.death_in_progress and level.player == null and player.is_shutdown)
 		assert(player.state_machine.current_state == null)
@@ -136,6 +141,7 @@ func _ready() -> void:
 			fresh_coin.state_machine.current_state.name == (&"Active" if reset else &"Collected")
 		)
 		assert(GameHandler.player_status.lives == 1)
+		assert(GameHandler.player_status.score == score and GameHandler.player_status.coins == coins)
 		assert(fresh.request_area_transfer(&"lower"))
 		await ticks(2)
 		assert(
@@ -151,6 +157,7 @@ func _ready() -> void:
 		await get_tree().process_frame
 	# LowerArea uses its own world-space viewport bottom, then restarts in MainArea.
 	var lower_game := make_game()
+	assert(lower_game.save_entity_state_through_death)
 	add_child(lower_game)
 	var lower_level := GameHandler.current_level
 	assert(lower_level.request_area_transfer(&"lower"))
@@ -181,7 +188,6 @@ func _ready() -> void:
 	)
 	lower_game.free()
 	await get_tree().process_frame
-	GameHandler.reset_progress_on_death = false
 	GameHandler.clear_session()
 	# Reversible suspension gates gameplay, but animation advances independently.
 	var question := (

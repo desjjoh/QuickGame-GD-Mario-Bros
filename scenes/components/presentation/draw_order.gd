@@ -8,6 +8,7 @@ const REWARD_EFFECT := 3
 const ENEMY := 4
 const HUD := 5
 const PLAYER := 6
+const FIREBALL := 7
 
 
 static func apply(item: CanvasItem, priority: int) -> void:

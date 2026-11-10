@@ -19,28 +19,36 @@ func _ready() -> void:
 
 	var camera := get_viewport().get_camera_2d() as LevelCamera
 	assert(camera.halfway_check_enabled and camera.halfway_camera_left == 1280.0)
-	assert(level.halfway_spawn.position == Vector2(1344, 208))
+	assert(level.halfway_spawn.position == Vector2(1328, 208))
 
 	_set_camera_left(1279.0)
 	level = await _restart(level, 48.0, 0.0)
 
 	_set_camera_left(1280.0)
-	level = await _restart(level, 1344.0, 1280.0)
+	level = await _restart(level, 1328.0, 1280.0)
 
 	# Die again at the natural halfway framing, without moving the camera.
-	level = await _restart(level, 1344.0, 1280.0)
+	level = await _restart(level, 1328.0, 1280.0)
+
+	camera = get_viewport().get_camera_2d() as LevelCamera
+	assert(camera.scroll_left_limit == 1280.0 and camera.world_left == 0.0)
+	level.player.body.global_position.x += 128.0
+	await tick_finished
+	assert(_camera_left(camera) > 1280.0)
+	await _enter_lower_area(level, 896.0)
+	await _return_from_secret(level)
 
 	await _enter_lower_area(level, 896.0)
 	level = await _restart(level, 48.0, 0.0, BaseLevel.DeathReason.TIMEOUT)
 
 	await _enter_lower_area(level, 1408.0)
-	level = await _restart(level, 1344.0, 1280.0)
+	level = await _restart(level, 1328.0, 1280.0)
 
 	assert(is_instance_valid(level) and GameHandler.player_status.lives == 0)
 	game.free()
 	await tick_finished
 	print(
-		"PASS: halfway restart at 1279 and 1280, repeat death, and lower-area deaths on both sides."
+		"PASS: halfway left limit, forward scrolling, repeat death, secret return, and lower-area deaths."
 	)
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
@@ -61,8 +69,26 @@ func _enter_lower_area(level: BaseLevel, camera_left: float) -> void:
 	assert(not level.transition_in_progress and level.player.body.is_on_floor())
 	var camera := get_viewport().get_camera_2d() as LevelCamera
 	assert(camera == lower_area.get_node("Camera2D"))
-	var half_width := camera.get_viewport_rect().size.x / (2.0 * camera.zoom.x)
-	assert(is_equal_approx(camera.global_position.x - half_width, camera_left))
+	assert(is_equal_approx(_camera_left(camera), camera_left))
+	assert(is_equal_approx(camera.scroll_left_limit, camera_left))
+
+
+func _return_from_secret(level: BaseLevel) -> void:
+	var pipe := level.active_area.find_transport_entity(&"secret_return") as PipeEntrance
+	assert(pipe != null)
+	assert(level.transport(level.player, pipe.get_destination()))
+	for frame in range(240):
+		await tick_finished
+		if level.active_area.area_id == &"main" and not level.area_transport.has_active_state():
+			break
+	assert(level.active_area.area_id == &"main" and level.active_target_id == &"secret_exit")
+	assert(not level.area_transport.has_active_state())
+	var camera := get_viewport().get_camera_2d() as LevelCamera
+	assert(camera.scroll_left_limit == 1280.0)
+	assert(is_equal_approx(level.player.body.global_position.x - _camera_left(camera), 64.0))
+	# An arrival framed left of the checkpoint must still clamp to the painted line.
+	camera.snap_to_arrival(level.player.body, level.player.body.global_position.x)
+	assert(is_equal_approx(_camera_left(camera), 1280.0))
 
 
 func _restart(
@@ -107,12 +133,11 @@ func _wait_for_level_start() -> BaseLevel:
 func _spawn_matches(level: BaseLevel, spawn_x: float, camera_left: float) -> bool:
 	var position := level.player.body.global_position
 	var camera := get_viewport().get_camera_2d() as LevelCamera
-	var half_width := camera.get_viewport_rect().size.x / (2.0 * camera.zoom.x)
 	return (
 		level.active_area.area_id == &"main"
 		and is_equal_approx(position.x, spawn_x)
 		and absf(position.y - 208.0) < 0.2
-		and is_equal_approx(camera.global_position.x - half_width, camera_left)
+		and is_equal_approx(_camera_left(camera), camera_left)
 	)
 
 
@@ -121,3 +146,7 @@ func _set_camera_left(left: float) -> void:
 	var half_width := camera.get_viewport_rect().size.x / (2.0 * camera.zoom.x)
 	camera.global_position.x = left + half_width
 	camera.force_update_scroll()
+
+
+func _camera_left(camera: LevelCamera) -> float:
+	return camera.global_position.x - camera.get_viewport_rect().size.x / (2.0 * camera.zoom.x)

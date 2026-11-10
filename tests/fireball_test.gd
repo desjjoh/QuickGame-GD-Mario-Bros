@@ -1,6 +1,7 @@
 extends Node
 
 const FINISH_TEST := preload("res://tests/fixtures/finish_test.gd")
+const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd")
 const LEVEL := preload("res://tests/fixtures/sandbox_level.tscn")
 const LUIGI := preload("res://scenes/player/luigi/luigi.tscn")
 const FLAGPOLE := preload("res://scenes/entities/climbables/flagpole/flagpole.tscn")
@@ -420,6 +421,14 @@ func check_throw_pose(luigi: bool, speed: float, air: bool, duration: int) -> vo
 	var pose := player._throw_pose
 	for tick in range(duration + 1):
 		player._physics_process(STEP)
+		if tick == 0:
+			var shot := level.world_objects.get_child(0) as Fireball
+			assert(shot != null)
+			var feet := player.body.global_position
+			var expected_x := floorf(feet.x) - (8.0 if luigi else 0.0)
+			var expected_y := floorf(feet.y) - 28.0 if air else 180.0
+			assert(shot.global_position == Vector2(expected_x, expected_y))
+			assert(not shot.sprite.z_as_relative and shot.sprite.z_index == DRAW_ORDER.FIREBALL)
 		assert(pose.visible == (tick < duration), "Throw duration at tick %s" % tick)
 		if pose.visible:
 			assert(pose._ticks_left == duration - tick - (0 if not air and speed > 0.0 else 1))

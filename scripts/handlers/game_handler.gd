@@ -71,8 +71,6 @@ var animation_clock := CosmeticAnimationClock.new()
 var transitions: Variant
 var title_flow: Variant
 var stage_flow: Variant
-# Global world-progress policy; session counters/lives are unaffected.
-var reset_progress_on_death: bool = false
 var _current_level_scene: PackedScene
 
 

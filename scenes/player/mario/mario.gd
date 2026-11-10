@@ -17,6 +17,8 @@ const FIREBALL_LAUNCHER = preload("res://scripts/player/fireball_launcher.gd")
 @onready var _throw_pose: FireThrowPose = $Body/Sprite2D/ThrowPose
 var _fireballs := FIREBALL_LAUNCHER.new()
 var _throw_timer_reload := 7
+var _floor_supported := false
+var _floor_position := Vector2.INF
 
 
 func receive_damage(source: BaseEntity = null) -> bool:
@@ -106,7 +108,7 @@ func _physics_process(delta: float) -> void:
 	if form_presentation.blocks_actor_motion():
 		_throw_pose.clear()
 		return
-	var grounded := body.is_on_floor()
+	var grounded := has_floor_support()
 	var previous_speed := body.velocity.x
 	var state := state_machine.current_state as PlayerState
 	var fire_pressed := (
@@ -119,7 +121,7 @@ func _physics_process(delta: float) -> void:
 	if state != null and not is_dead:
 		if scripted_motion_step.is_valid() or state == climb_state:
 			form_controller.set_crouched(false)
-		elif state.controller_controls_available() and body.is_on_floor():
+		elif state.controller_controls_available() and has_floor_support():
 			form_controller.set_crouched(
 				(
 					form_controller.current_form.can_crouch
@@ -146,7 +148,7 @@ func _physics_process(delta: float) -> void:
 	var launched := fire_pressed and _fireballs.try_launch(self) != null
 	_throw_pose.update_pose(
 		_throw_timer_reload if launched else 0,
-		current_state is MarioMoveState and body.is_on_floor(),
+		current_state is MarioMoveState and has_floor_support(),
 		not is_zero_approx(body.velocity.x) or not is_zero_approx(get_movement_axis().x)
 	)
 
@@ -154,7 +156,7 @@ func _physics_process(delta: float) -> void:
 func get_movement_axis() -> Vector2:
 	var axis := super.get_movement_axis()
 	if (
-		body.is_on_floor()
+		has_floor_support()
 		and ControllerHandler.input_down > 0.5
 		and (ControllerHandler.input_left > 0.0 or ControllerHandler.input_right > 0.0)
 	):
@@ -190,6 +192,44 @@ func move_body(gravity_after_motion: bool = false) -> void:
 	terrain.collect_coins(
 		self, not form_controller.current_form.can_crouch or form_controller.is_crouched
 	)
+	if _uses_floor_probes():
+		_floor_position = body.global_position
+
+
+func has_floor_support() -> bool:
+	# Placements and scripted motion can move the body outside the normal step.
+	if _uses_floor_probes() and _floor_position == body.global_position:
+		return _floor_supported
+	return super.has_floor_support()
+
+
+func _uses_floor_probes() -> bool:
+	if scripted_motion_step.is_valid() or body.collision_mask == 0 or is_dead:
+		return false
+	var state := state_machine.current_state
+	return (
+		state is MarioIdleState
+		or state is MarioMoveState
+		or state is MarioSlideState
+		or state is MarioJumpState
+	)
+
+
+func _sweep_motion(delta: float, vertical_speed: float) -> void:
+	if not _uses_floor_probes():
+		_floor_position = Vector2.INF
+		super._sweep_motion(delta, vertical_speed)
+		return
+	var step := MarioTerrain.FloorStep.SWEEP
+	if vertical_speed >= 0.0:
+		step = terrain.step_floor(self, delta)
+	_floor_supported = step == MarioTerrain.FloorStep.LAND
+	if step == MarioTerrain.FloorStep.SWEEP:
+		_sweep_body(delta, vertical_speed, false)
+		_floor_supported = vertical_speed >= 0.0 and terrain.supports_body(body)
+		if _floor_supported:
+			body.apply_floor_snap()
+	_floor_position = body.global_position
 
 
 func get_side_probe_heights() -> PackedFloat32Array:
@@ -208,6 +248,7 @@ func get_climb_query_bounds() -> Rect2:
 
 func on_area_arrival(through_pipe: bool = false) -> void:
 	super.on_area_arrival(through_pipe)
+	_floor_position = Vector2.INF
 	if through_pipe:
 		starman.clear()
 	_throw_pose.clear()

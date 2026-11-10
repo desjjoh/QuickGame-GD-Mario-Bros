@@ -190,5 +190,86 @@ func _ready() -> void:
 	assert(GameHandler.player_status.score == before + 1000)
 	game.queue_free()
 	await ticks(2)
+	await check_ledge_roll()
 	print("shell_interaction_test: PASS")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+
+
+func check_ledge_roll() -> void:
+	level = preload("res://tests/fixtures/sandbox_level.tscn").instantiate() as BaseLevel
+	level.entity_layout.clear()
+	level.get_node("Areas/MainArea/Layouts/EnemyLayout").clear()
+	var ground := level.get_node("Areas/MainArea/Layouts/GroundLayout") as TileMapLayer
+	ground.clear()
+	for column in range(24):
+		ground.set_cell(Vector2i(column, 13), 0, Vector2i.ZERO)
+	for column in range(8, 13):
+		ground.set_cell(Vector2i(column, 9), 0, Vector2i.ZERO)
+	add_child(level)
+	level.set_physics_process(false)
+	level.active_area.set_physics_process(false)
+	level.player.set_physics_process(false)
+	level.player.body.global_position = Vector2(48, 100)
+	await ticks(2)
+	for direction: int in [-1, 1]:
+		var start_x := 202.0 if direction > 0 else 133.0
+		var shell := seed_rolling_shell(Vector2(start_x, 136.0), direction)
+		var moving := shell.state_machine.current_state
+		for tick in range(2):
+			moving.process_physics(1.0 / 60.0)
+			assert(moving.has_center_support and shell.body.velocity.x == direction * 180.0)
+		assert(shell.body.global_position.x == start_x + direction * 6.0)
+		for tick in range(28):
+			var previous_x := shell.body.global_position.x
+			moving.process_physics(1.0 / 60.0)
+			assert(not moving.has_center_support and shell.body.velocity.x == direction * 90.0)
+			assert(shell.body.global_position.x == previous_x + direction * 1.5)
+		var before_landing := shell.body.global_position.x
+		moving.process_physics(1.0 / 60.0)
+		assert(moving.has_center_support and shell.body.velocity.x == direction * 180.0)
+		assert(shell.body.global_position == Vector2(before_landing + direction * 3.0, 200.0))
+		shell.free()
+	await check_flat_wall_roll(ground)
+	level.free()
+
+
+func check_flat_wall_roll(ground: TileMapLayer) -> void:
+	for column in [4, 12]:
+		for row in [11, 12]:
+			ground.set_cell(Vector2i(column, row), 0, Vector2i.ZERO)
+	await ticks(2)
+	for direction: int in [-1, 1]:
+		var start_x := 170.0 if direction > 0 else 102.0
+		var shell := seed_rolling_shell(Vector2(start_x, 200.0), direction)
+		var moving := shell.state_machine.current_state
+		for tick in range(5):
+			moving.process_physics(1.0 / 60.0)
+			assert(shell.body.velocity.x == direction * 180.0)
+		moving.process_physics(1.0 / 60.0)
+		assert(shell.body.velocity.x == -direction * 180.0)
+		assert(shell.body.global_position.x == start_x + direction * 12.0)
+		shell.free()
+
+	# The right wall is in reach when support returns. It turns the shell on the following tick.
+	var shell := seed_rolling_shell(Vector2(183.5, 199.0), 1)
+	var moving := shell.state_machine.current_state
+	shell.body.velocity.y = 120.0
+	moving.process_physics(1.0 / 60.0)
+	assert(shell.body.global_position == Vector2(185.0, 201.0))
+	moving.process_physics(1.0 / 60.0)
+	assert(shell.body.global_position == Vector2(188.0, 200.0))
+	assert(shell.body.velocity == Vector2(180.0, 0.0))
+	moving.process_physics(1.0 / 60.0)
+	assert(shell.body.global_position == Vector2(185.0, 200.0))
+	assert(shell.body.velocity == Vector2(-180.0, 0.0))
+	shell.free()
+
+
+func seed_rolling_shell(center: Vector2, direction: int) -> BaseEnemy:
+	var shell := koopa(center.x - 8.0)
+	shell.set_physics_process(false)
+	shell.body.global_position = center
+	var moving := shell.get_node("StateMachine/ShellMoving")
+	moving.initial_direction = direction
+	assert(shell.state_machine.change_state(moving))
+	return shell

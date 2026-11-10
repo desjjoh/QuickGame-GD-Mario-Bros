@@ -20,8 +20,14 @@ func _ready() -> void:
 	$Presentation/PaletteAnimation.set_enabled(true)
 
 
+func _emergence_clearance() -> float:
+	return 1.0
+
+
 func _advance_available(delta: float) -> void:
 	var body := _motion.body
+	var player := _level.player if is_instance_valid(_level) else null
+	_probe.exclude = [player.body.get_rid()] if is_instance_valid(player) else []
 	body.velocity.x = TRAVEL_SPEED * _direction
 	var next_speed := _vertical.prepare_step(_motion, delta)
 	body.global_position += body.velocity * delta

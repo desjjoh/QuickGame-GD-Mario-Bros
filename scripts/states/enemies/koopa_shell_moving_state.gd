@@ -124,6 +124,24 @@ func begin_block_launch(direction: int, struck_block: BaseBlock) -> void:
 		_block_launch = BlockLaunch.AIRBORNE
 
 
+func _move_center_foot_horizontal(
+	body: CharacterBody2D, delta: float, landed: bool, grid_origin: Vector2
+) -> void:
+	# A landing tick resumes the stored roll before the next side check.
+	if not landed:
+		var epsilon := Vector2(0.001, 0.001)
+		var pixel := (body.global_position - grid_origin + epsilon).floor() + grid_origin
+		_terrain_probe.position = pixel + Vector2(8.0 * _direction, 4.0) + epsilon
+		if TERRAIN_PROBE.hits_terrain(body, _terrain_probe):
+			_turn_around()
+
+	var effective_speed := (
+		walk_speed if has_center_support else walk_speed - AIRBORNE_SPEED_ADJUSTMENT
+	)
+	body.velocity.x = effective_speed * _direction
+	body.global_position.x += body.velocity.x * delta
+
+
 func _advance_shell(body: CharacterBody2D, delta: float) -> void:
 	if _block_launch == BlockLaunch.HIT_FRAME:
 		# The hit applies the lift. The moving shell only advances horizontally this update.
@@ -148,6 +166,10 @@ func _advance_shell(body: CharacterBody2D, delta: float) -> void:
 			_block_launch = BlockLaunch.NONE
 			_move_with_horizontal_speed(delta, walk_speed * _direction)
 			body.velocity = Vector2(walk_speed * _direction, 0.0)
+			if use_center_foot_support:
+				# The launch already handled its landing and first roll step.
+				_falling = false
+				_vertical.position_fraction = _launch_vertical.position_fraction
 			_release_cleared_brick(body)
 			if not _ignores_struck_block:
 				_struck_block = null

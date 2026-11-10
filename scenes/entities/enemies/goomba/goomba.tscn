@@ -41,6 +41,7 @@ initial_state = NodePath("Walking")
 
 [node name="Walking" type="Node" parent="StateMachine" node_paths=PackedStringArray("synchronized_animation")]
 script = ExtResource("walking")
+use_center_foot_support = true
 synchronized_animation = NodePath("../../Presentation/WalkAnimationSync")
 frame_updates_enabled = false
 input_enabled = false
