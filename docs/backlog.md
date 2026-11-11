@@ -1,8 +1,8 @@
 # Backlog
 
-## Finish the 1-1 feature set
+## World 1-3 verification
 
-- Connect future fireball/star attacks to the existing enemy-hit contract. Moving-shell interactions are already implemented.
+- Play through 1-3 from spawn to the Large Castle ending. Check lift crossings, Red Parakoopa encounters, and the return to title in a normal run.
 
 ## Brick breaking
 

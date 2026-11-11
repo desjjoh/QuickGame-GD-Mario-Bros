@@ -1,12 +1,12 @@
 # Super Mario GD
 
-A Godot 4.7 platformer tutorial and reference in the QuickReference series. The playable 1-1 stage brings reusable scenes, entity state machines, and shared 16×16 terrain and enemy placement grids together in a complete title-to-stage-clear flow.
+A Godot 4.7 platformer tutorial and reference in the QuickReference series. World 1 stages 1-1 through 1-3 share reusable scenes, entity state machines, and 16×16 terrain and enemy placement grids. Play from the title screen through the overworld, underground, and treetop stages.
 
 ## Run the game
 
 1. Open `project.godot` in Godot 4.7.
 2. Press **F5** to launch the title screen.
-3. Use **Tab** or controller **Select** to choose **1 PLAYER GAME** for Mario or **2 PLAYER GAME** for a solo Luigi run, then press **Enter** or controller **Start** to play 1-1. Clear 1-1 to enter 1-2, then clear 1-2 to reach the 1-3 starter scene.
+3. Use **Tab** or controller **Select** to choose **1 PLAYER GAME** for Mario or **2 PLAYER GAME** for a solo Luigi run, then press **Enter** or controller **Start** to play 1-1. Clear 1-1 to enter 1-2, then clear 1-2 to reach 1-3. Clearing 1-3 returns to the title.
 
 | Action                | Keyboard            | Controller             |
 | --------------------- | ------------------- | ---------------------- |

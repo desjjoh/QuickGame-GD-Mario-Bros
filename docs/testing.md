@@ -117,7 +117,7 @@ Successful scenes call `await preload("res://tests/fixtures/finish_test.gd").fin
 
 `arrival_control_test` verifies exactly 17 locked movement ticks followed by held-input response, continued falling, controller disconnection/reconnection, pause preservation, direct-placement timing, a stationary 17-tick pre-emergence hold, immediate control after animated exit, cancellation, and unchanged start/respawn eligibility for ordinary levels. Pipe entry/transfer, sideways travel, camera return, transport lifecycle, death, title, and pause scenes cover the affected integrations.
 
-`pipe_opening_test` clears 1-1 through the flagpole and verifies that the configured Game advances to the 1-2 castle doorway. It checks the automatic walk in standalone and game flow, including an alternate entrance ID and opposing input. It also verifies the underground input handoff, the early restart at PlayerSpawn, and the surface flagpole handoff to the 1-3 starter scene.
+`pipe_opening_test` clears 1-1 through the flagpole and verifies that the configured Game advances to the 1-2 castle doorway. It checks the automatic walk in standalone and game flow, including an alternate entrance ID and opposing input. It also verifies the underground input handoff, the early restart at PlayerSpawn, and the surface flagpole handoff to 1-3.
 
 `piranha_plant_test` checks all seven authored pipe mouths, camera activation, the themed sprite, the traced movement and 32-pixel proximity cutoff, live contact bounds, fireball and Starman defeats, shell and block immunity, damage from above, delayed scoring, and slot release on cleanup.
 
