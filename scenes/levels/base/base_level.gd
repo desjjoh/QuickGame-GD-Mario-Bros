@@ -158,7 +158,7 @@ func _ready() -> void:
 			area.prepare_runtime()
 			if area != active_area:
 				area.unload_runtime()
-	_load_area(active_area)
+	_load_area(active_area, entry_mode == EntryMode.HALFWAY_RESPAWN)
 	spawn_player(spawn_marker)
 	_record_active_area()
 	var initial_camera := active_area.get_node("Camera2D") as LevelCamera
@@ -489,18 +489,22 @@ func can_transport() -> bool:
 	)
 
 
-func _load_area(area: BaseLevelArea) -> void:
+func _load_area(area: BaseLevelArea, starting_at_halfway := false) -> void:
 	if is_instance_valid(player_presentation):
 		player_presentation.cancel()
 	if area.runtime_loaded and _spawned_areas.has(area.get_instance_id()):
 		return
 	var snapshot := GameHandler.get_area_progress(_progress_key, area.area_id)
 	area.load_runtime(snapshot)
+	var enemy_cutoff_x := -INF
 	# The camera is recreated when returning to a streamed-out area.
 	if entry_mode == EntryMode.HALFWAY_RESPAWN and area == $Areas/MainArea:
 		var camera := area.get_node("Camera2D") as LevelCamera
 		camera.halfway_left_limit_active = camera.halfway_check_enabled
-	area_content.populate(area, snapshot.get("entities", {}))
+		if starting_at_halfway and camera.halfway_left_limit_active:
+			var view_width := camera.get_viewport_rect().size.x / camera.zoom.x
+			enemy_cutoff_x = floorf(camera.scroll_left_limit + view_width) - 1.0
+	area_content.populate(area, snapshot.get("entities", {}), enemy_cutoff_x)
 	_spawned_areas[area.get_instance_id()] = true
 
 

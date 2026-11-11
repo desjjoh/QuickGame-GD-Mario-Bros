@@ -3,10 +3,13 @@ extends SpawnableEntity
 ## Moves after the player. Contact uses the old lift position and carry uses the new one.
 
 enum Direction { UP = -1, DOWN = 1 }
+enum Motion { REPEATING, HORIZONTAL, VERTICAL }
 
 const SIZE := Vector2(48, 13)
 const FRACTION_UNITS := 16
 const SPEED_UNITS := 15
+const HORIZONTAL_OSCILLATION = preload("res://scenes/components/motion/horizontal_oscillation.gd")
+const VERTICAL_OSCILLATION = preload("res://scenes/components/motion/vertical_oscillation.gd")
 const PLAYER_CONTACT := preload("res://scenes/components/interactions/player_contact.gd")
 const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd")
 
@@ -14,6 +17,11 @@ const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd"
 
 var fraction := 0
 var outgoing_y := INF
+var motion := Motion.REPEATING
+var _horizontal_motion: HORIZONTAL_OSCILLATION
+var _vertical_motion: VERTICAL_OSCILLATION
+var _top_y := 0
+var _center_y := 0
 var _level: BaseLevel
 
 
@@ -29,13 +37,42 @@ func _physics_process(delta: float) -> void:
 	if is_instance_valid(player) and player.form_presentation.blocks_actor_motion():
 		return
 	var rider := is_instance_valid(player) and player.can_contact_lift() and _check_contact(player)
-	var step := fraction + int(direction) * SPEED_UNITS
-	fraction = posmod(step, FRACTION_UNITS)
-	position.y += floori(float(step) / FRACTION_UNITS)
+	var step := _motion_step(GameHandler.animation_clock.tick_count)
+	position += step
 	if rider and not reached_outgoing_edge():
-		player.land_on_lift(self)
+		player.land_on_lift(self, step.x)
 	elif is_instance_valid(player):
 		player.release_lift_support(self)
+
+
+func configure_oscillation(horizontal: bool, area_y: int) -> void:
+	if horizontal:
+		motion = Motion.HORIZONTAL
+		_horizontal_motion = HORIZONTAL_OSCILLATION.new(14)
+	else:
+		motion = Motion.VERTICAL
+		_vertical_motion = VERTICAL_OSCILLATION.new(5, 10, 3)
+		# Platform motion is local to its spawner. The NES sets its references
+		# from the starting Y byte, even when the area is translated in Godot.
+		var start_y := posmod(area_y, 256)
+		if start_y < 128:
+			_top_y = 0
+			_center_y = 64
+		else:
+			_top_y = 256 - 2 * start_y
+			_center_y = -64
+
+
+func _motion_step(frame: int) -> Vector2:
+	match motion:
+		Motion.HORIZONTAL:
+			return Vector2(_horizontal_motion.step(frame), 0)
+		Motion.VERTICAL:
+			return Vector2(0, _vertical_motion.step(roundi(position.y), _top_y, _center_y, frame))
+		_:
+			var step := fraction + int(direction) * SPEED_UNITS
+			fraction = posmod(step, FRACTION_UNITS)
+			return Vector2(0, floori(float(step) / FRACTION_UNITS))
 
 
 func reached_outgoing_edge() -> bool:

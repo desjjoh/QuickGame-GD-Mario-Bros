@@ -14,14 +14,15 @@ var _dwell_ticks := 0
 func _ready() -> void:
 	super()
 	DRAW_ORDER.apply(sprite, DRAW_ORDER.BEHIND_WORLD)
+	_update_chomp_frame()
 
 
 func _physics_process(delta: float) -> void:
 	super(delta)
 	if _defeated or is_shutdown or gameplay_suspended:
 		return
+	_update_chomp_frame()
 	var tick := Engine.get_physics_frames()
-	sprite.region_rect.position.x = FRAME_WIDTH if (tick & 8) == 0 else 0
 	if _dwell_ticks > 0:
 		_dwell_ticks -= 1
 		if _dwell_ticks > 0:
@@ -38,6 +39,11 @@ func _physics_process(delta: float) -> void:
 	if _rise == 0 or _rise == TRAVEL:
 		_direction = 0
 		_dwell_ticks = DWELL_TICKS
+
+
+func _update_chomp_frame() -> void:
+	var tick := GameHandler.animation_clock.tick_count
+	sprite.region_rect.position.x = FRAME_WIDTH if (tick & 8) == 0 else 0
 
 
 func _player_is_near() -> bool:

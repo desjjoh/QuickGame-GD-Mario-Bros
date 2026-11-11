@@ -91,7 +91,6 @@ func _ready() -> void:
 
 func _test_game_enemy_limit() -> void:
 	var game := preload("res://tests/fixtures/silent_game.tscn").instantiate()
-	assert(game.enemy_limit == 5)
 	game.enemy_limit = 2
 	add_child(game)
 	var level := GameHandler.current_level

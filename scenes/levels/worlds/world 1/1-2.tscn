@@ -123,10 +123,11 @@ cell = Vector2i(3, 11)
 target_id = &"surface_exit"
 entrance_enabled = false
 
-[node name="1-2" unique_id=1696138558 node_paths=PackedStringArray("ending_presentation", "opening_presentation") instance=ExtResource("base")]
+[node name="1-2" unique_id=1696138558 node_paths=PackedStringArray("ending_presentation", "opening_presentation", "halfway_spawn") instance=ExtResource("base")]
 texture_filter = 1
 ending_presentation = NodePath("Presentations/FlagpoleEnding")
 opening_presentation = NodePath("Presentations/PipeOpening")
+halfway_spawn = NodePath("Players/HalfwaySpawn")
 stage_label = "1-2"
 player_scene = ExtResource("player")
 
@@ -174,13 +175,15 @@ tile_set = ExtResource("7_u3lxh")
 [node name="DescendingLifts" parent="Areas/MainArea/WorldObjects" parent_id_path=PackedInt32Array(250103957, 827174942) index="0" unique_id=974125788 instance=ExtResource("15_78tmy")]
 position = Vector2(2236, -8)
 direction = 1
-initial_offset = 120
+initial_offsets = Array[int]([120, 216])
+spawn_category = &""
 actor_offsets = Array[Vector2]([Vector2(0, 0)])
 
 [node name="AscendingLifts" parent="Areas/MainArea/WorldObjects" parent_id_path=PackedInt32Array(250103957, 827174942) index="1" unique_id=369288648 instance=ExtResource("15_78tmy")]
 position = Vector2(2476, 248)
 direction = -1
-initial_offset = 104
+initial_offsets = Array[int]([232, 104])
+spawn_category = &""
 actor_offsets = Array[Vector2]([Vector2(0, 0)])
 
 [node name="WarpZone" parent="Areas/MainArea/WorldObjects" parent_id_path=PackedInt32Array(250103957, 827174942) index="2" unique_id=1999968515 instance=ExtResource("warp_zone")]
@@ -189,7 +192,7 @@ pipe_occupant = ExtResource("green_plant")
 
 [node name="LeftPipe" parent="Areas/MainArea/WorldObjects/WarpZone/Pipes" index="0" unique_id=176095153 instance=ExtResource("warp_pipe")]
 position = Vector2(32, 160)
-display_text = "1"
+display_text = "4"
 sideways = false
 destination_area_id = &"lower"
 destination_endpoint_id = &"arrival"
@@ -200,7 +203,7 @@ exit_distance = 96.0
 
 [node name="MiddlePipe" parent="Areas/MainArea/WorldObjects/WarpZone/Pipes" index="1" unique_id=1773132972 instance=ExtResource("warp_pipe")]
 position = Vector2(96, 160)
-display_text = "1"
+display_text = "3"
 sideways = false
 destination_area_id = &"lower"
 destination_endpoint_id = &"arrival"
@@ -211,7 +214,7 @@ exit_distance = 96.0
 
 [node name="RightPipe" parent="Areas/MainArea/WorldObjects/WarpZone/Pipes" index="2" unique_id=1515794012 instance=ExtResource("warp_pipe")]
 position = Vector2(160, 160)
-display_text = "1"
+display_text = "2"
 sideways = false
 destination_area_id = &"lower"
 destination_endpoint_id = &"arrival"
@@ -228,6 +231,8 @@ position = Vector2(128, 120)
 editor_draw_limits = true
 area_left = 0.0
 area_right = 3072.0
+halfway_check_enabled = true
+halfway_camera_left = 1536.0
 
 [node name="BonusArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="1" unique_id=805413613 instance=ExtResource("area")]
 process_physics_priority = 110
@@ -345,6 +350,9 @@ position = Vector2(160, 240)
 
 [node name="PlayerSpawn" parent="Players" index="0" unique_id=321075723]
 position = Vector2(48, 208)
+
+[node name="HalfwaySpawn" type="Marker2D" parent="Players" index="1"]
+position = Vector2(1584, 208)
 
 [node name="PipeOpening" type="Node" parent="Presentations" index="0" unique_id=113248238 node_paths=PackedStringArray("intro_area")]
 script = ExtResource("opening")

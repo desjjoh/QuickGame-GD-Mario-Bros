@@ -1,6 +1,7 @@
 extends Node
 
 const STAGE := preload("res://scenes/levels/worlds/world 1/1-2.tscn")
+const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd")
 
 signal tick_finished
 
@@ -162,10 +163,11 @@ func _ready() -> void:
 	await _take_pipe(restarted, &"bonus_return", &"main", &"bonus_return_exit")
 	await _take_pipe(restarted, &"surface_entrance", &"surface", &"surface_exit")
 	await _finish_surface(restarted)
+	assert(GameHandler.show_title(game.stages[0]))
 	await _check_warps()
 	game.free()
 	await tick_finished
-	print("PASS: 1-2 opening, respawn, secret round trip, surface ending, and three stage warps")
+	print("PASS: 1-2 opening, respawn, secret round trip, handoff to 1-3, and three stage warps")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
@@ -248,10 +250,16 @@ func _finish_surface(level: BaseLevel) -> void:
 		await tick_finished
 	assert(level.ending_in_progress)
 	for frame in range(1200):
-		if GameHandler.flow == GameHandler.GameFlow.TITLE and not GameHandler.transitions.busy:
+		if GameHandler.current_level != level and not GameHandler.transitions.busy:
 			break
 		await tick_finished
-	assert(GameHandler.flow == GameHandler.GameFlow.TITLE and not GameHandler.transitions.busy)
+	var next := GameHandler.current_level
+	assert(next != null and next != level and next.stage_label == "1-3")
+	assert(GameHandler.current_stage_index == 2 and not GameHandler.transitions.busy)
+	assert(GameHandler.flow == GameHandler.GameFlow.PLAYING and next.has_started)
+	assert(next.get_node("Areas").get_child_count() == 1)
+	assert(next.active_area.area_id == &"main" and next.active_area.theme.display_name == "Overworld")
+	assert(next.player.body.global_position.is_equal_approx(next.player_spawn.global_position))
 
 
 func _check_warps() -> void:
@@ -288,9 +296,11 @@ func _check_warps() -> void:
 		for frame in range(2):
 			await tick_finished
 		assert(banner.visible and pipe.entrance_enabled)
+		assert(not banner.z_as_relative and banner.z_index == DRAW_ORDER.BEHIND_WORLD)
 		for warp: WarpZonePipe in zone.get_node("Pipes").get_children():
 			var number := warp.get_node("WorldNumber") as Label
-			assert(number.visible and number.text == "1")
+			assert(number.visible and number.text == warp.display_text)
+			assert(not number.z_as_relative and number.z_index == DRAW_ORDER.BEHIND_WORLD)
 			assert(not warp.has_node("OccupantSpawner"))
 		await _enter_pipe(source, pipe_id)
 		assert(GameHandler.current_level == source and not source.completion_in_progress)

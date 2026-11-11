@@ -8,7 +8,7 @@
 
 Open `scenes/levels/worlds/world 1/1-1.tscn` and press **F6** to run 1-1 directly. It is also the default title backdrop, with gameplay disabled. Leave **Game → Presentation → Title Background** empty to use the first entry in **Stages**, or assign another level to override it.
 
-Clearing 1-1 starts 1-2 at the castle doorway. The player walks into the opening pipe automatically. To start a run at 1-2 or another level, open `scenes/main/game.tscn` and set **Game → Start Stage Override** to that scene. Clear the field to start at 1-1 again.
+Clearing 1-1 starts 1-2 at the castle doorway. The player walks into the opening pipe automatically. Clearing 1-2 loads the 1-3 starter scene, which has one overworld area with placeholder ground. To start at a later level, set **Game → Start Stage Override** in `scenes/main/game.tscn`. Clear the field to start at 1-1 again.
 
 ## Controls
 
@@ -34,6 +34,8 @@ Paint question blocks, **Reward Brick**, or **Reward Brick Alt** on **EntityLayo
 Paint a pipe stamp, then configure its destination on the area. To test area switching, enter the vertical pipe in 1-1 and walk into the sideways pipe in the secret area. See [configuration](configuration.md#areas-and-pipe-routes).
 
 In the 2D editor, question blocks show a translucent reward icon. Select EntityLayout and choose **Apply 1-Up Reward** from the 2D toolbar, then click a painted question block, hidden question block, or reward brick. Choose **Apply Tiered Power-Up Reward** for a Super Mushroom when Small or a Fire Flower when Super or Fire or **Apply Timed Coins Reward** for a 231-tick multi-coin window, shown as a translucent coin stack. Choose **Apply Coin Reward** to clear an override. Reward edits support undo and redo. Choose **Paint Tiles** to return to normal painting. Reward overrides are keyed by cell, so clear the override before erasing, moving, or replacing a configured block.
+
+For Overworld trees, paint **Tree tops** on **GroundLayout**. Use the left and right caps with repeatable middle tiles. Paint **Tree trunks** on **DecorationLayout** below the top. Trunks allow characters to pass through and stay outside the shadow effect.
 
 EntityLayout is for interactable world elements. Standalone power-up painting is not enabled; use the reward brush to place 1-Ups or tiered power-ups inside blocks.
 

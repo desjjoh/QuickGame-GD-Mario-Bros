@@ -16,16 +16,6 @@ position = Vector2(32, 96)
 mouse_filter = 2
 theme_override_fonts/font = ExtResource("font")
 theme_override_font_sizes/font_size = 8
-text = "WELCOME TO WARP ZONE"
-
-[node name="ExclamationStem" type="Polygon2D" parent="Presentation"]
-polygon = PackedVector2Array(163, 0, 165, 0, 165, 1, 166, 1, 166, 4, 165, 4, 165, 6, 163, 6, 163, 4, 162, 4, 162, 1, 163, 1)
-
-[node name="ExclamationDot" type="ColorRect" parent="Presentation"]
-offset_left = 163.0
-offset_top = 7.0
-offset_right = 165.0
-offset_bottom = 8.0
-mouse_filter = 2
+text = "WELCOME TO WARP ZONE!"
 
 [node name="Pipes" type="Node2D" parent="."]

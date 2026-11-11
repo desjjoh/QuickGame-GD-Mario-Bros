@@ -231,9 +231,17 @@ func can_contact_lift() -> bool:
 	return not is_shutdown and not gameplay_suspended and _uses_floor_probes()
 
 
-func land_on_lift(lift: MovingLift) -> void:
+func is_riding_horizontal_lift() -> bool:
+	return (
+		is_instance_valid(_lift_support)
+		and _lift_support.motion == MovingLift.Motion.HORIZONTAL
+		and _lift_support.supports(self)
+	)
+
+
+func land_on_lift(lift: MovingLift, horizontal_step := 0.0) -> void:
 	_lift_support = lift
-	body.global_position.y = lift.global_position.y
+	body.global_position = Vector2(body.global_position.x + horizontal_step, lift.global_position.y)
 	vertical_movement.finish_step_on_support(motion_values, 0.0, true)
 	stomp_chain = 0
 	var jump := state_machine.current_state as MarioJumpState

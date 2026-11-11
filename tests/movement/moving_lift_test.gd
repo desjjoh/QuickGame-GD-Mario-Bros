@@ -2,6 +2,8 @@ extends Node
 
 const LEVEL := preload("res://tests/fixtures/sandbox_level.tscn")
 const SPAWNER := preload("res://scenes/entities/spawners/lift_spawner.tscn")
+const SINGLE_SPAWNER := preload("res://scenes/entities/spawners/single_lift_spawner.tscn")
+const STAGE_1_2 := preload("res://scenes/levels/worlds/world 1/1-2.tscn")
 const STEP := 1.0 / 60.0
 
 signal stepped
@@ -16,6 +18,9 @@ func _ready() -> void:
 	process_physics_priority = 200
 	await _check_lane(MovingLift.Direction.UP)
 	await _check_lane(MovingLift.Direction.DOWN)
+	await _check_1_2_pairs()
+	await _check_single_lift(true)
+	await _check_single_lift(false)
 	print("moving_lift_test: PASS")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
@@ -134,6 +139,116 @@ func _check_lane(direction: MovingLift.Direction) -> void:
 	var reloaded := level.world_objects.get_node("LiftSpawner") as EntitySpawner
 	assert(reloaded.direction == direction and not reloaded._attempted)
 	assert(reloaded.get_child_count() == 1 and reloaded.has_node("StateMachine"))
+	level.free()
+	await stepped
+
+
+func _check_1_2_pairs() -> void:
+	var level := STAGE_1_2.instantiate() as BaseLevel
+	level.entry_mode = BaseLevel.EntryMode.RESPAWN
+	add_child(level)
+	level.spawn_registry.enemy_limit = 0
+	level.player.set_physics_process(false)
+	var camera := level.active_area.get_node("Camera2D") as LevelCamera
+	camera.follow_enabled = false
+	await _check_1_2_lane(level, &"DescendingLifts", 2236, MovingLift.Direction.DOWN, [112, 208])
+	await _check_1_2_lane(level, &"AscendingLifts", 2476, MovingLift.Direction.UP, [16, 144])
+	level.free()
+	await stepped
+
+
+func _check_1_2_lane(
+	level: BaseLevel,
+	lane_name: StringName,
+	x: int,
+	direction: MovingLift.Direction,
+	heights: Array[int]
+) -> void:
+	var area := level.active_area
+	var camera := area.get_node("Camera2D") as LevelCamera
+	var lane := level.world_objects.get_node(NodePath(lane_name)) as EntitySpawner
+	assert(area.to_local(lane.global_position).x == x)
+	camera.global_position.x = lane.global_position.x - 96.0
+	area.update_camera_activity()
+	assert(not level.has_spawn_capacity(&"enemy"))
+	# One full 256px cycle at 15/16 px per tick exercises both independent wraps.
+	for tick in range(275):
+		var actual: Array[int] = []
+		for child in lane.get_children():
+			var lift := child as MovingLift
+			if lift == null or lift.is_queued_for_deletion():
+				continue
+			assert(lift.direction == direction)
+			assert(level.spawn_registry.get_slot(&"enemy", lift) == -1)
+			var y := roundi(area.to_local(lift.global_position).y)
+			actual.append(posmod(y * 16 + lift.fraction, 256 * 16))
+		var expected: Array[int] = []
+		for height in heights:
+			expected.append(posmod(height * 16 + tick * direction * 15, 256 * 16))
+		actual.sort()
+		expected.sort()
+		assert(actual == expected, "%s tick %d: %s expected %s" % [lane_name, tick, actual, expected])
+		await stepped
+	camera.global_position.x = lane.global_position.x - 480.0
+	area.update_camera_activity()
+	await get_tree().process_frame
+	assert(lane.get_child_count() == 1 and lane.has_node("StateMachine"))
+
+
+func _check_single_lift(horizontal: bool) -> void:
+	var level := LEVEL.instantiate() as BaseLevel
+	level.process_mode = Node.PROCESS_MODE_PAUSABLE
+	level.fall_death_enabled = false
+	level.keep_player_on_screen = false
+	var area := level.get_node("Areas/MainArea") as BaseLevelArea
+	var spawner := SINGLE_SPAWNER.instantiate() as EntitySpawner
+	spawner.axis = 0 if horizontal else 1
+	spawner.position = Vector2(704, 96)
+	area.get_node("WorldObjects").add_child(spawner)
+	spawner.owner = level
+	add_child(level)
+	var player := level.player as Mario
+	player.set_physics_process(false)
+	level.spawn_registry.enemy_limit = 0
+	var camera := area.get_node("Camera2D") as LevelCamera
+	camera.follow_enabled = false
+	assert(not spawner.has_node("MovingLift"))
+	camera.position.x = 640
+	area.update_camera_activity()
+	var lift := spawner.get_node("MovingLift") as MovingLift
+	assert(level.spawn_registry.get_slot(&"enemy", lift) == -1)
+	# Sample the Mesen paths at the recorded birth phases. Horizontal values
+	# use the fresh Godot actor's zero position fraction.
+	var samples := (
+		{0: 0, 3: 0, 4: -1, 108: -52, 131: -52, 229: -1, 240: 0}
+		if horizontal
+		else {0: 0, 10: 0, 11: 1, 159: 131, 324: -7, 336: -6, 384: 0}
+	)
+	var clock := GameHandler.animation_clock
+	var original_tick := clock.tick_count
+	clock.tick_count = 136 if horizontal else 224
+	player.body.velocity = Vector2.ZERO
+	player.body.global_position = lift.global_position + Vector2(24, 0)
+	player.land_on_lift(lift)
+	var cycle_ticks := 240 if horizontal else 384
+	for tick in range(cycle_ticks + 1):
+		assert(player.has_floor_support())
+		assert(player.body.global_position - lift.global_position == Vector2(24, 0))
+		assert(player.body.velocity == Vector2.ZERO)
+		if samples.has(tick):
+			var displacement := lift.position.x if horizontal else lift.position.y
+			assert(displacement == samples[tick], "Single lift motion differs at age %s." % tick)
+		if tick < cycle_ticks:
+			await stepped
+	clock.tick_count = original_tick + cycle_ticks
+	camera.position.x = 1120
+	area.update_camera_activity()
+	assert(lift.is_queued_for_deletion())
+	await get_tree().process_frame
+	assert(not is_instance_valid(lift))
+	camera.position.x = 640
+	area.update_camera_activity()
+	assert(not spawner.has_node("MovingLift"))
 	level.free()
 	await stepped
 

@@ -1,10 +1,15 @@
 extends Node
 
+signal physics_step_finished
+
+
+func _physics_process(_delta: float) -> void:
+	physics_step_finished.emit()
+
 
 func ticks(count: int) -> void:
 	for frame in range(count):
-		await get_tree().physics_frame
-		await get_tree().process_frame
+		await physics_step_finished
 
 
 func bonk(block: QuestionBlock) -> bool:
@@ -12,6 +17,8 @@ func bonk(block: QuestionBlock) -> bool:
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_physics_priority = 2000
 	var reward := BlockReward.new()
 	reward.kind = BlockReward.Kind.TIMED_COINS
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel

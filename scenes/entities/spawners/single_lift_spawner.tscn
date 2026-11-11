@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/spawners/single_lift_spawner.gd" id="spawner"]
+[ext_resource type="PackedScene" path="res://scenes/entities/platforms/moving_lift.tscn" id="lift"]
+
+[node name="SingleLiftSpawner" instance=ExtResource("base")]
+script = ExtResource("spawner")
+persist_progress = false
+actor_scene = ExtResource("lift")

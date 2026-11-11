@@ -2,13 +2,15 @@ extends Node
 
 const TEST_FLOOR := preload("res://tests/fixtures/test_floor.gd")
 
+signal physics_step_finished
 
-func tick() -> void:
-	await get_tree().physics_frame
-	await get_tree().process_frame
+
+func _physics_process(_delta: float) -> void:
+	physics_step_finished.emit()
 
 
 func _ready() -> void:
+	process_physics_priority = 2000
 	var game_scene := load("res://tests/fixtures/silent_game.tscn") as PackedScene
 	for direction in [-1.0, 1.0]:
 		for phase in [0.0, 0.5, 1.0, 1.5, 2.0]:
@@ -24,7 +26,7 @@ func _ready() -> void:
 			var player := level.player
 			player.body.global_position.x = (84.0 if direction > 0 else 124.0) + direction * phase
 			for frame in range(5):
-				await tick()
+				await physics_step_finished
 			var action: StringName = (
 				ControllerHandler.right_action if direction > 0 else ControllerHandler.left_action
 			)
@@ -35,7 +37,7 @@ func _ready() -> void:
 			player.state_machine.change_state(player.state_machine.get_state(&"Move"))
 			var left_support := false
 			for frame in range(25):
-				await tick()
+				await physics_step_finished
 				if not left_support and not player.has_floor_support():
 					left_support = true
 					assert(is_zero_approx(player.body.velocity.y))
@@ -65,6 +67,8 @@ func _ready() -> void:
 			Input.action_release(action)
 			Input.action_release(ControllerHandler.secondary_action)
 			game.free()
+			# Let the viewport release this fixture's camera before creating the next one.
+			await get_tree().process_frame
 	var wide_game := game_scene.instantiate() as Node
 	add_child(wide_game)
 	TEST_FLOOR.extend_floor(wide_game)
@@ -79,13 +83,13 @@ func _ready() -> void:
 	var wide_player := wide_level.player
 	wide_player.body.global_position.x = 84.0
 	for frame in range(5):
-		await tick()
+		await physics_step_finished
 	Input.action_press(ControllerHandler.right_action)
 	Input.action_press(ControllerHandler.secondary_action)
 	wide_player.body.velocity.x = 150.0
 	wide_player.state_machine.change_state(wide_player.state_machine.get_state(&"Move"))
 	for frame in range(25):
-		await tick()
+		await physics_step_finished
 	assert(wide_player.body.global_position.y > 220.0, "A two-tile gap must still cause a fall.")
 	assert(wide_player.state_machine.current_state is MarioMoveState)
 	assert(not wide_player.jump_action.active)

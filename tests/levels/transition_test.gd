@@ -53,6 +53,8 @@ func _ready() -> void:
 	RenderingServer.set_default_clear_color(prior_clear)
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
 	game.start_with_title = false
+	var backdrop_color := Color8(24, 48, 72)
+	game.get_node("Backdrop").color = backdrop_color
 	var fixture := load("res://scenes/levels/worlds/world 1/1-1.tscn").instantiate() as BaseLevel
 	fixture.get_node("Players/PlayerSpawn").position = Vector2(112, 176)
 	var markers := fixture.get_node("Areas/MainArea/Layouts/EntityLayout") as TileMapLayer
@@ -80,9 +82,10 @@ func _ready() -> void:
 		var image := get_viewport().get_texture().get_image()
 		var backdrop := SCREEN_PIXEL.sample(image, 0, 0)
 		assert(
-			backdrop.is_equal_approx(Color.BLACK), "Expected a black Game backdrop, got %s" % backdrop
+			backdrop.is_equal_approx(backdrop_color),
+			"Expected the configured Game backdrop %s, got %s" % [backdrop_color, backdrop]
 		)
-		assert(SCREEN_PIXEL.sample(image, 24, 16).is_equal_approx(Color.BLACK))
+		assert(SCREEN_PIXEL.sample(image, 24, 16).is_equal_approx(backdrop_color))
 		assert(image.save_png("res://.godot/validation/transition-quick.png") == OK)
 	while director.phase != &"card":
 		await get_tree().process_frame
@@ -284,6 +287,6 @@ func _ready() -> void:
 	assert(RenderingServer.get_default_clear_color() == prior_clear)
 	RenderingServer.set_default_clear_color(original_clear)
 	print(
-		"PASS: named definitions, arbitrary presentations, snapshots, black Game backdrop, preserved clear color, rendered visibility, minimum frames, slow loading, startup/respawn cards, real pipe transfer, control/visibility restoration, overlap rejection and stale/cancelled transaction safety."
+		"PASS: named definitions, arbitrary presentations, snapshots, configured Game backdrop, preserved clear color, rendered visibility, minimum frames, slow loading, startup/respawn cards, real pipe transfer, control/visibility restoration, overlap rejection and stale/cancelled transaction safety."
 	)
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
