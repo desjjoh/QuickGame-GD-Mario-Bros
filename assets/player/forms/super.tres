@@ -1,43 +1,41 @@
 [gd_resource type="Resource" script_class="MarioForm" format=3 uid="uid://b5padsqxej18q"]
 
-[ext_resource type="Texture2D" uid="uid://be7tb5ui7xynr" path="res://assets/player/mario (super)/mario-climb.png" id="climb"]
-[ext_resource type="Texture2D" uid="uid://darenasb8ncg" path="res://assets/player/mario (super)/mario-crouch.png" id="crouch"]
-[ext_resource type="Texture2D" uid="uid://cv5c8ujxogpol" path="res://assets/player/mario (super)/mario-idle.png" id="idle"]
-[ext_resource type="Texture2D" uid="uid://2ajqa40s8he6" path="res://assets/player/mario (super)/mario-intermediate.png" id="intermediate"]
-[ext_resource type="Texture2D" uid="uid://wn374lngpjoa" path="res://assets/player/mario (super)/mario-jump.png" id="jump"]
-[ext_resource type="Script" uid="uid://1ugsbwr6iakt" path="res://scripts/player/mario_form.gd" id="script"]
-[ext_resource type="Texture2D" uid="uid://dpcp0s7gwqt0c" path="res://assets/player/mario (super)/mario-slide.png" id="slide"]
-[ext_resource type="Texture2D" uid="uid://ck5x80hok06wv" path="res://assets/player/mario (super)/mario-swim.png" id="swim"]
-[ext_resource type="Texture2D" uid="uid://7y4ghm24l7qc" path="res://assets/player/mario (super)/mario-walk.png" id="walk"]
-
-[sub_resource type="AtlasTexture" id="climb0"]
-atlas = ExtResource("climb")
-region = Rect2(0, 0, 16, 32)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="climb1"]
-atlas = ExtResource("climb")
-region = Rect2(16, 0, 16, 32)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="shrink"]
-atlas = ExtResource("swim")
-region = Rect2(0, 0, 16, 32)
-filter_clip = true
+[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario.png" id="sheet"]
+[ext_resource type="Script" path="res://scripts/player/mario_form.gd" id="script"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-idle.tres" id="idle"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-jump.tres" id="jump"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-slide.tres" id="slide"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-crouch.tres" id="crouch"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-intermediate.tres" id="intermediate"]
 
 [sub_resource type="AtlasTexture" id="walk0"]
-atlas = ExtResource("walk")
-region = Rect2(0, 0, 16, 32)
+atlas = ExtResource("sheet")
+region = Rect2(16, 0, 16, 32)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="walk1"]
-atlas = ExtResource("walk")
-region = Rect2(16, 0, 16, 32)
+atlas = ExtResource("sheet")
+region = Rect2(32, 0, 16, 32)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="walk2"]
-atlas = ExtResource("walk")
-region = Rect2(32, 0, 16, 32)
+atlas = ExtResource("sheet")
+region = Rect2(48, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="climb0"]
+atlas = ExtResource("sheet")
+region = Rect2(112, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="climb1"]
+atlas = ExtResource("sheet")
+region = Rect2(128, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="shrink"]
+atlas = ExtResource("sheet")
+region = Rect2(144, 0, 16, 32)
 filter_clip = true
 
 [resource]

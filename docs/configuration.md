@@ -85,7 +85,7 @@ The game uses 256×240 logical framing with window-resolution canvas_items rende
 
 ## Source configuration and ownership
 
-`Game.stages` defines completion order and currently lists 1-1, 1-2, and the 1-3 starter scene. **Game → Start Stage Override** selects the starting BaseLevel scene for new runs. Leave it empty to use the first entry. Selecting a registered scene starts at its position in the list. A scene outside the list returns to the title after ordinary completion. The title backdrop is configured separately. Single-stage test fixtures assign `game.stages.assign([scene])`.
+`Game.stages` defines completion order and currently lists 1-1, 1-2, and 1-3. Clearing the final registered stage returns to the title. **Game → Start Stage Override** selects the starting BaseLevel scene for new runs. Leave it empty to use the first entry. Selecting a registered scene starts at its position in the list. A scene outside the list returns to the title after ordinary completion. The title backdrop is configured separately. Single-stage test fixtures assign `game.stages.assign([scene])`.
 
 Use typed GameHandler methods/properties and `player_status` for score, coins, lives, form, top score, stage label, and timer values. Generic `set_session_value()` / `get_session_value()` are for run metadata such as area/arrival IDs; reserved-key writes are rejected. The existing `session_value_changed` signal carries both typed-value and metadata notifications.
 
@@ -94,6 +94,8 @@ In `scenes/main/game.tscn`, select **Game → Gameplay → Enemy Limit** to set 
 Paint one **Goomba Pair Spawner**, **Goomba Triplet Spawner**, or **Green Koopa Pair Spawner** marker on the 16×16 **EnemyLayout** at the first member's placement. The marker creates the group together at the camera's right edge, with members 24 pixels apart. If the group runs out of enemy slots during activation, the remaining members are skipped for that area load.
 
 Paint **Red Koopa Spawner** on **EnemyLayout** in the cell immediately above its support. A walking Red Koopa turns at ledges, and its kicked shell can roll off them.
+
+Paint **Red Parakoopa Spawner** on **EnemyLayout** to place a Red Koopa that flies vertically. The marker sets its starting position. Its flight range follows the reference's starting-height rule. The first stomp removes its wings and awards 400 points, after which it walks and uses the shared shell states. In 1-3 the two markers are at (74, 4) and (114, 5).
 
 ## Place moving lifts
 

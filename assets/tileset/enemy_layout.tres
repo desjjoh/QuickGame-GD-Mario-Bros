@@ -46,6 +46,15 @@ texture_region_size = Vector2i(16, 32)
 0:0/0/texture_origin = Vector2i(0, 8)
 0:0/0/custom_data_0 = "red_koopa_spawner"
 
+[sub_resource type="TileSetAtlasSource" id="red_parakoopa"]
+resource_name = "Red Parakoopa Spawner"
+texture = ExtResource("red_koopa_art")
+margins = Vector2i(32, 0)
+texture_region_size = Vector2i(16, 32)
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(0, 8)
+0:0/0/custom_data_0 = "red_parakoopa_spawner"
+
 [resource]
 custom_data_layer_0/name = "entity_id"
 custom_data_layer_0/type = 4
@@ -55,3 +64,4 @@ sources/2 = SubResource("koopa")
 sources/3 = SubResource("triplet")
 sources/4 = SubResource("koopa_pair")
 sources/5 = SubResource("red_koopa")
+sources/6 = SubResource("red_parakoopa")

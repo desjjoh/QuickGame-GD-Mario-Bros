@@ -53,6 +53,7 @@ func _ready() -> void:
 	RenderingServer.set_default_clear_color(prior_clear)
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
 	game.start_with_title = false
+	game.start_stage_override = null
 	var backdrop_color := Color8(24, 48, 72)
 	game.get_node("Backdrop").color = backdrop_color
 	var fixture := load("res://scenes/levels/worlds/world 1/1-1.tscn").instantiate() as BaseLevel

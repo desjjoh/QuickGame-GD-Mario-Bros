@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Texture2D" uid="uid://7nfwfahjj5q1" path="res://assets/player/mario (small)/mario-small-idle.png" id="portrait"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-small-idle.tres" id="portrait"]
 [ext_resource type="Theme" path="res://scenes/ui/hud/hud_theme.tres" id="theme"]
 
 [ext_resource type="Script" path="res://scenes/ui/transitions/level_intro.gd" id="script"]

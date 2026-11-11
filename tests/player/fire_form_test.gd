@@ -72,9 +72,10 @@ func check_fire(is_luigi: bool, theme_name: String) -> void:
 		assert(presentation.timer == (255 - elapsed if elapsed < 63 else 0))
 		var palette := 0
 		if player.sprite.texture != FIRE.idle:
-			var directory := player.sprite.texture.resource_path.get_base_dir().get_file()
-			assert(directory.begins_with("palette "))
-			palette = THEME_PALETTES[theme_name].find(int(directory.trim_prefix("palette ")))
+			var frame := player.sprite.texture as AtlasTexture
+			var sheet := frame.atlas.resource_path.get_file()
+			assert(sheet.begins_with("palette ") and sheet.ends_with(".png"))
+			palette = THEME_PALETTES[theme_name].find(int(sheet.trim_prefix("palette ")) + 1)
 		assert(palette >= 0)
 		var expected_slot := (
 			0 if elapsed in [0, 63] else (GameHandler.animation_clock.tick_count >> 2) & 3
@@ -102,7 +103,9 @@ func check_fire(is_luigi: bool, theme_name: String) -> void:
 	player.form_controller.configure(player, player.super_form)
 	assert(player.state_machine.change_state(player.get_node("StateMachine/Move")))
 	player.animation_player.seek(player.animation_player.get_animation(&"walk").length * 0.5, true)
-	var region := (player.sprite.texture as AtlasTexture).region
+	var walk_index := player.super_form.walk.find(player.sprite.texture)
+	assert(walk_index >= 0)
+	var region := (FIRE.walk[walk_index] as AtlasTexture).region
 	var offset := player.sprite.position
 	assert(player.ignite())
 	GameHandler.animation_clock.tick_count = 4
@@ -111,7 +114,7 @@ func check_fire(is_luigi: bool, theme_name: String) -> void:
 	assert(flashing_frame.region == region and player.sprite.position == offset)
 	assert(
 		flashing_frame.atlas.resource_path.ends_with(
-			"/palette %d/walk.png" % THEME_PALETTES[theme_name][1]
+			"/palette %d.png" % (THEME_PALETTES[theme_name][1] - 1)
 		)
 	)
 	presentation.cancel()

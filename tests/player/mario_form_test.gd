@@ -59,7 +59,7 @@ func _ready() -> void:
 	assert(mario.state_machine.get_instance_id() == machine_id and level.player == mario)
 	mario.form_controller.configure(mario, super_form)
 	assert(mario.state_machine.change_state(mario.get_node("StateMachine/Dead")))
-	assert(mario.sprite.texture.resource_path.ends_with("mario-dead.png"))
+	assert(mario.sprite.texture.resource_path.ends_with("mario-dead.tres"))
 	assert(mario.sprite.position == Vector2(0, -7))
 	# A separate default Mario must not inherit the fixture's resources or overrides.
 	var ordinary := load("res://scenes/player/mario/mario.tscn").instantiate() as Mario

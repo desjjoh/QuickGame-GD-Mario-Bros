@@ -46,7 +46,7 @@ tile_map_data = PackedByteArray("AAAAAAgABgAAAAAAAAAcAAQABwAAAAAAAAAbAAQABwAAAAA
 tile_set = ExtResource("7_nnj03")
 
 [node name="EnemyLayout" parent="Areas/MainArea/Layouts" parent_id_path=PackedInt32Array(250103957, 1417906807) index="3" unique_id=1742010551]
-tile_map_data = PackedByteArray("AAAeAAQABQAAAAAAAAAsAAMAAAAAAAAAAAAuAAMAAAAAAAAAAABQAAUAAAAAAAAAAABuAAYABQAAAAAAAACFAAwABQAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAeAAQABQAAAAAAAAAsAAMAAAAAAAAAAAAuAAMAAAAAAAAAAABQAAUAAAAAAAAAAABuAAYABQAAAAAAAACFAAwABQAAAAAAAABKAAQABgAAAAAAAAByAAUABgAAAAAAAAA=")
 
 [node name="VerticalLift" parent="Areas/MainArea/WorldObjects" parent_id_path=PackedInt32Array(250103957, 827174942) index="0" unique_id=164384331 instance=ExtResource("single_lift")]
 position = Vector2(880, 96)

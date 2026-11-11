@@ -77,7 +77,7 @@ func run_checks() -> void:
 	assert(
 		(
 			player.sprite.texture.resource_path
-			== "res://assets/player/mario (small)/mario-small-slide.png"
+			== "res://assets/player/mario (small)/mario-small-slide.tres"
 		)
 	)
 	assert(player.body.velocity.x > 0.0 and player.body.velocity.x < 150.0)
@@ -108,7 +108,7 @@ func run_checks() -> void:
 	assert(
 		(
 			player.sprite.texture.resource_path
-			== "res://assets/player/mario (small)/mario-small-idle.png"
+			== "res://assets/player/mario (small)/mario-small-idle.tres"
 		)
 	)
 	assert(player.motion_values.acceleration == player.run_action.history_acceleration)
@@ -148,7 +148,7 @@ func run_checks() -> void:
 				assert(
 					(
 						player.sprite.texture.resource_path
-						== "res://assets/player/mario (small)/mario-small-slide.png"
+						== "res://assets/player/mario (small)/mario-small-slide.tres"
 					)
 				)
 				assert(player.sprite.flip_h == skid_facing)
@@ -160,7 +160,7 @@ func run_checks() -> void:
 				assert(
 					(
 						player.sprite.texture.resource_path
-						== "res://assets/player/mario (small)/mario-small-idle.png"
+						== "res://assets/player/mario (small)/mario-small-idle.tres"
 					)
 				)
 				assert(not player.motion_values._modifiers.has(&"slide"))

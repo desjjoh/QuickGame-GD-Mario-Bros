@@ -40,7 +40,7 @@ func run_checks() -> void:
 	assert(animation.loop_mode == Animation.LOOP_LINEAR)
 	assert(animation.track_get_key_count(0) == 3)
 	assert(animation.track_get_path(0) == NodePath("Sprite2D:texture"))
-	assert(mario.sprite.texture.resource_path.ends_with("mario-small-idle.png"))
+	assert(mario.sprite.texture.resource_path.ends_with("mario-small-idle.tres"))
 	# Inspect the authored resource deterministically without automatic playback.
 	await tick(5)
 	assert(mario.body.is_on_floor())
@@ -58,7 +58,7 @@ func run_checks() -> void:
 	assert(mario.sprite.texture.resource_path.ends_with("mario-small-walk-1.tres"))
 	mario.state_machine.change_state(mario.state_machine.get_state(&"Idle"))
 	assert(not mario.animation_player.is_playing() and mario.animation_player.speed_scale == 1.0)
-	assert(mario.sprite.texture.resource_path.ends_with("mario-small-idle.png"))
+	assert(mario.sprite.texture.resource_path.ends_with("mario-small-idle.tres"))
 	mario.animation_player.callback_mode_process = (
 		AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_PHYSICS
 	)
@@ -88,7 +88,7 @@ func run_checks() -> void:
 	await tick(40)
 	assert(mario.state_machine.current_state is MarioIdleState)
 	assert(not mario.animation_player.is_playing())
-	assert(mario.sprite.texture.resource_path.ends_with("mario-small-idle.png"))
+	assert(mario.sprite.texture.resource_path.ends_with("mario-small-idle.tres"))
 	Input.action_release(ControllerHandler.secondary_action)
 	game.free()
 	print(

@@ -1,46 +1,61 @@
 [gd_resource type="Resource" script_class="MarioForm" format=3 uid="uid://vehrckrp5rsd"]
 
-[ext_resource type="Texture2D" uid="uid://dv1ilheyj4iqb" path="res://assets/player/mario + luigi (fire)/climb.png" id="climb"]
-[ext_resource type="Texture2D" uid="uid://mh42rieqwpna" path="res://assets/player/mario + luigi (fire)/crouch.png" id="crouch"]
-[ext_resource type="Texture2D" uid="uid://bbs1teax6cd35" path="res://assets/player/mario + luigi (fire)/idle.png" id="idle"]
-[ext_resource type="Texture2D" uid="uid://d2lijbxdkbaq7" path="res://assets/player/mario + luigi (fire)/jump.png" id="jump"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (fire)/fire-mario.png" id="sheet"]
 [ext_resource type="Script" uid="uid://1ugsbwr6iakt" path="res://scripts/player/mario_form.gd" id="script"]
-[ext_resource type="Texture2D" uid="uid://vl1xho11l3cq" path="res://assets/player/mario + luigi (fire)/slide.png" id="slide"]
-[ext_resource type="Texture2D" uid="uid://wmp86rfpn66e" path="res://assets/player/mario + luigi (fire)/walk.png" id="walk"]
 
-[sub_resource type="AtlasTexture" id="climb0"]
-atlas = ExtResource("climb")
+[sub_resource type="AtlasTexture" id="idle"]
+atlas = ExtResource("sheet")
 region = Rect2(0, 0, 16, 32)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="climb1"]
-atlas = ExtResource("climb")
-region = Rect2(16, 0, 16, 32)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="walk0"]
-atlas = ExtResource("walk")
-region = Rect2(0, 0, 16, 32)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="walk1"]
-atlas = ExtResource("walk")
+atlas = ExtResource("sheet")
 region = Rect2(16, 0, 16, 32)
 filter_clip = true
 
-[sub_resource type="AtlasTexture" id="walk2"]
-atlas = ExtResource("walk")
+[sub_resource type="AtlasTexture" id="walk1"]
+atlas = ExtResource("sheet")
 region = Rect2(32, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="walk2"]
+atlas = ExtResource("sheet")
+region = Rect2(48, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="jump"]
+atlas = ExtResource("sheet")
+region = Rect2(64, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="slide"]
+atlas = ExtResource("sheet")
+region = Rect2(80, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="crouch"]
+atlas = ExtResource("sheet")
+region = Rect2(96, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="climb0"]
+atlas = ExtResource("sheet")
+region = Rect2(112, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="climb1"]
+atlas = ExtResource("sheet")
+region = Rect2(128, 0, 16, 32)
 filter_clip = true
 
 [resource]
 script = ExtResource("script")
 display_name = "Fire"
-idle = ExtResource("idle")
+idle = SubResource("idle")
 walk = Array[Texture2D]([SubResource("walk0"), SubResource("walk1"), SubResource("walk2")])
-skid = ExtResource("slide")
-jump = ExtResource("jump")
-crouch = ExtResource("crouch")
+skid = SubResource("slide")
+jump = SubResource("jump")
+crouch = SubResource("crouch")
 climb = Array[Texture2D]([SubResource("climb0"), SubResource("climb1")])
 jump_cue = &"jump_big"
 sprite_position = Vector2(0, -15)
