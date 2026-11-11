@@ -1,19 +1,19 @@
 [gd_resource type="Resource" script_class="MarioForm" format=3 uid="uid://otqvynpieeyj"]
 
-[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-climb-1.tres" id="climb0"]
-[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-climb-2.tres" id="climb1"]
-[ext_resource type="Texture2D" uid="uid://7nfwfahjj5q1" path="res://assets/player/mario (small)/mario-small-idle.png" id="idle"]
-[ext_resource type="Texture2D" uid="uid://bmcl1wyybp0td" path="res://assets/player/mario (small)/mario-small-air.png" id="jump"]
+[ext_resource type="Texture2D" uid="uid://djfmj57fqs8l0" path="res://assets/player/mario (small)/mario-climb-1.tres" id="climb0"]
+[ext_resource type="Texture2D" uid="uid://2ul3gvmrniiv" path="res://assets/player/mario (small)/mario-climb-2.tres" id="climb1"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-small-idle.tres" id="idle"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-small-air.tres" id="jump"]
 [ext_resource type="Script" uid="uid://1ugsbwr6iakt" path="res://scripts/player/mario_form.gd" id="script"]
-[ext_resource type="Texture2D" uid="uid://1tyquhhwt3l4" path="res://assets/player/mario (small)/mario-small-slide.png" id="skid"]
-[ext_resource type="Texture2D" uid="uid://p6ipke5ukk4l" path="res://assets/player/mario (small)/mario-swim.png" id="swim"]
-[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-small-walk-1.tres" id="walk0"]
-[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-small-walk-2.tres" id="walk1"]
-[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-small-walk-3.tres" id="walk2"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (small)/mario-small-slide.tres" id="skid"]
+[ext_resource type="Texture2D" uid="uid://b8ytgx7c0xb6u" path="res://assets/player/mario (small)/mario.png" id="swim"]
+[ext_resource type="Texture2D" uid="uid://dvl6soxy6bkxc" path="res://assets/player/mario (small)/mario-small-walk-1.tres" id="walk0"]
+[ext_resource type="Texture2D" uid="uid://cmkns8bxfh5ay" path="res://assets/player/mario (small)/mario-small-walk-2.tres" id="walk1"]
+[ext_resource type="Texture2D" uid="uid://sjw3gsixwsy7" path="res://assets/player/mario (small)/mario-small-walk-3.tres" id="walk2"]
 
 [sub_resource type="AtlasTexture" id="shrink"]
 atlas = ExtResource("swim")
-region = Rect2(0, 0, 16, 16)
+region = Rect2(112, 0, 16, 16)
 filter_clip = true
 
 [resource]

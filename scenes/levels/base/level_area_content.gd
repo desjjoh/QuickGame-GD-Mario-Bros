@@ -5,10 +5,10 @@ extends Node
 @onready var level: BaseLevel = $"../.."
 
 
-func populate(area: BaseLevelArea, saved_entities: Dictionary) -> void:
+func populate(area: BaseLevelArea, saved_entities: Dictionary, enemy_cutoff_x := -INF) -> void:
 	area.entity_persistence.clear()
 	populate_layout(area, area.get_node("Layouts/EntityLayout"), saved_entities)
-	populate_layout(area, area.get_node("Layouts/EnemyLayout"), {})
+	populate_layout(area, area.get_node("Layouts/EnemyLayout"), {}, enemy_cutoff_x)
 
 
 func find_layout_entity(area: BaseLevelArea, entity_id: StringName, cell: Vector2i) -> BaseEntity:
@@ -16,7 +16,9 @@ func find_layout_entity(area: BaseLevelArea, entity_id: StringName, cell: Vector
 	return objects.get_node_or_null(NodePath(_entity_name(entity_id, cell))) as BaseEntity
 
 
-func populate_layout(area: BaseLevelArea, layout: TileMapLayer, saved_entities: Dictionary) -> void:
+func populate_layout(
+	area: BaseLevelArea, layout: TileMapLayer, saved_entities: Dictionary, enemy_cutoff_x := -INF
+) -> void:
 	var objects := area.get_node("WorldObjects") as Node2D
 	# Markers remain editable in the scene, but only entities render at runtime.
 	layout.hide()
@@ -61,6 +63,8 @@ func populate_layout(area: BaseLevelArea, layout: TileMapLayer, saved_entities: 
 		var local_origin := layout.map_to_local(cell) - Vector2(layout.tile_set.tile_size) / 2.0
 		instance.position = objects.to_local(layout.to_global(local_origin))
 		objects.add_child(instance)
+		if enemy_cutoff_x != -INF and instance is EntitySpawner:
+			instance.skip_spawn_before(enemy_cutoff_x)
 		if level.ending_presentation != null:
 			level.ending_presentation.bind_entity(instance, cell, area)
 

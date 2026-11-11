@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" path="res://scenes/player/mario/mario.tscn" id="mario"]
 [ext_resource type="Resource" path="res://assets/player/forms/luigi_small.tres" id="small"]
 [ext_resource type="Resource" path="res://assets/player/forms/luigi_super.tres" id="super"]
-[ext_resource type="Texture2D" path="res://assets/player/luigi (small)/luigi-dead.png" id="dead"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (small)/luigi-dead.tres" id="dead"]
 
 [node name="Luigi" instance=ExtResource("mario")]
 small_form = ExtResource("small")

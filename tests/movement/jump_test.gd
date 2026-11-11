@@ -33,7 +33,7 @@ func trial(game_scene: PackedScene, hold_ticks: int, weight: float) -> float:
 			)
 		if index == 3:
 			assert(player.state_machine.current_state is MarioJumpState)
-			assert(player.sprite.texture.resource_path.ends_with("mario-small-air.png"))
+			assert(player.sprite.texture.resource_path.ends_with("mario-small-air.tres"))
 	assert(player.body.is_on_floor())
 	assert(player.state_machine.current_state is MarioIdleState)
 	assert(not player.jump_action.active)

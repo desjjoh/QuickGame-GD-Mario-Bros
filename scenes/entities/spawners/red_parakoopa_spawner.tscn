@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/spawners/red_koopa_spawner.tscn" id="base"]
+[ext_resource type="PackedScene" path="res://scenes/entities/enemies/koopa/red_parakoopa.tscn" id="parakoopa"]
+
+[node name="RedParakoopaSpawner" instance=ExtResource("base")]
+actor_scene = ExtResource("parakoopa")

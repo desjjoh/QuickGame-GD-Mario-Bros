@@ -85,6 +85,7 @@ func run_checks() -> void:
 	for keyboard in [true, false]:
 		starts.clear()
 		var game: Node = game_scene.instantiate()
+		game.start_stage_override = null
 		add_child(game)
 		assert(game.start_with_title)
 		assert(
@@ -364,6 +365,7 @@ func run_checks() -> void:
 		)
 	# Alternate destinations remain available independently of visible menu entries.
 	var alternate: Node = game_scene.instantiate()
+	alternate.start_stage_override = null
 	add_child(alternate)
 	assert(GameHandler.start_new_game(SANDBOX_LEVEL))
 	await wait_for_play()
@@ -430,9 +432,9 @@ func check_character_intro(game: Node, is_mario: bool) -> void:
 	assert(GameHandler.transitions.phase == &"card")
 	var intro := game.get_node("UI/ScreenContainer/TransitionScreen").presentation as Control
 	var expected := (
-		preload("res://assets/player/mario (small)/mario-small-idle.png")
+		preload("res://assets/player/mario (small)/mario-small-idle.tres")
 		if is_mario
-		else preload("res://assets/player/luigi (small)/luigi-idle.png")
+		else preload("res://assets/player/luigi (small)/luigi-idle.tres")
 	)
 	assert(intro.get_node("Portrait").texture == expected)
 	assert(game.get_node("UI/HUD/PlayerName").text == ("MARIO" if is_mario else "LUIGI"))

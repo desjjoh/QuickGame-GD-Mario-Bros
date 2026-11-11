@@ -1,21 +1,12 @@
 [gd_resource type="Resource" script_class="PlayerPalette" format=3]
 
 [ext_resource type="Script" path="res://scripts/player/player_palette.gd" id="script"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 7/idle.png" id="idle"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 7/walk.png" id="walk"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 7/jump.png" id="jump"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 7/crouch.png" id="crouch"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 7/slide.png" id="slide"]
-[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 7/climb.png" id="climb"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman small)/palette 6.png" id="small_sheet"]
+[ext_resource type="Texture2D" path="res://assets/player/mario + luigi (starman)/palette 6.png" id="super_sheet"]
 
 [resource]
 script = ExtResource("script")
-sheets = Dictionary[StringName, Texture2D]({
-&"idle.png": ExtResource("idle"),
-&"walk.png": ExtResource("walk"),
-&"jump.png": ExtResource("jump"),
-&"crouch.png": ExtResource("crouch"),
-&"slide.png": ExtResource("slide"),
-&"climb.png": ExtResource("climb"),
-})
+small_sheet = ExtResource("small_sheet")
+super_sheet = ExtResource("super_sheet")
+super_starman_color_swap = PackedColorArray(0.3882353, 0.3882353, 0.3882353, 1, 0.6784314, 0.6784314, 0.6784314, 1)
 starman_colors = Array[Color]([Color(0.38823529, 0.38823529, 0.38823529, 1), Color(1, 1, 1, 1), Color(0.67843137, 0.67843137, 0.67843137, 1)])

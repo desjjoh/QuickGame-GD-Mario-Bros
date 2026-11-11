@@ -1,48 +1,26 @@
 [gd_resource type="Resource" script_class="MarioForm" format=3 uid="uid://com662bb2lc0h"]
 
-[ext_resource type="Texture2D" uid="uid://5x7mm0nopglo" path="res://assets/player/luigi (small)/luigi-climb.png" id="climb"]
-[ext_resource type="Texture2D" uid="uid://dlhnqlxwrr0ei" path="res://assets/player/luigi (small)/luigi-idle.png" id="idle"]
-[ext_resource type="Texture2D" uid="uid://e7lkk4refum5" path="res://assets/player/luigi (small)/luigi-air.png" id="jump"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (small)/luigi-climb-1.tres" id="climb0"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (small)/luigi-climb-2.tres" id="climb1"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (small)/luigi-idle.tres" id="idle"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (small)/luigi-air.tres" id="jump"]
 [ext_resource type="Script" uid="uid://1ugsbwr6iakt" path="res://scripts/player/mario_form.gd" id="script"]
-[ext_resource type="Texture2D" uid="uid://dqeh87cj4cygn" path="res://assets/player/luigi (small)/luigi-slide.png" id="slide"]
-[ext_resource type="Texture2D" uid="uid://c5am4cj3k2tff" path="res://assets/player/luigi (small)/luigi-swim.png" id="swim"]
-[ext_resource type="Texture2D" uid="uid://dmac3twho6slf" path="res://assets/player/luigi (small)/luigi-walk.png" id="walk"]
-
-[sub_resource type="AtlasTexture" id="climb0"]
-atlas = ExtResource("climb")
-region = Rect2(0, 0, 16, 16)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="climb1"]
-atlas = ExtResource("climb")
-region = Rect2(16, 0, 16, 16)
-filter_clip = true
+[ext_resource type="Texture2D" uid="uid://bwbxtp48wow" path="res://assets/player/luigi (small)/luigi.png" id="sheet"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (small)/luigi-slide.tres" id="slide"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (small)/luigi-walk-1.tres" id="walk0"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (small)/luigi-walk-2.tres" id="walk1"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (small)/luigi-walk-3.tres" id="walk2"]
 
 [sub_resource type="AtlasTexture" id="shrink"]
-atlas = ExtResource("swim")
-region = Rect2(0, 0, 16, 16)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="walk0"]
-atlas = ExtResource("walk")
-region = Rect2(0, 0, 16, 16)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="walk1"]
-atlas = ExtResource("walk")
-region = Rect2(16, 0, 16, 16)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="walk2"]
-atlas = ExtResource("walk")
-region = Rect2(32, 0, 16, 16)
+atlas = ExtResource("sheet")
+region = Rect2(112, 0, 16, 16)
 filter_clip = true
 
 [resource]
 script = ExtResource("script")
 idle = ExtResource("idle")
-walk = Array[Texture2D]([SubResource("walk0"), SubResource("walk1"), SubResource("walk2")])
+walk = Array[Texture2D]([ExtResource("walk0"), ExtResource("walk1"), ExtResource("walk2")])
 skid = ExtResource("slide")
 jump = ExtResource("jump")
-climb = Array[Texture2D]([SubResource("climb0"), SubResource("climb1")])
+climb = Array[Texture2D]([ExtResource("climb0"), ExtResource("climb1")])
 shrink_pose = SubResource("shrink")

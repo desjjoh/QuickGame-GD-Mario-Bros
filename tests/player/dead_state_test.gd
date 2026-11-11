@@ -22,6 +22,7 @@ func record_finish(player: BasePlayer) -> void:
 func make_game() -> Node:
 	var factory: Node = load("res://tests/levels/death_test.gd").new()
 	var game: Node = factory.make_game()
+	game.start_stage_override = null
 	factory.free()
 	return game
 
@@ -57,7 +58,7 @@ func _ready() -> void:
 		assert(not level.on_death(player, true))
 		assert(GameHandler.player_status.lives == 1)
 		assert(player.state_machine.current_state == dead and player.is_dead)
-		assert(player.sprite.texture.resource_path.ends_with("mario-dead.png"))
+		assert(player.sprite.texture.resource_path.ends_with("mario-dead.tres"))
 		assert(player.body.collision_layer == 0 and player.body.collision_mask == 0)
 		assert(not player.can_read_controller_input() and not dead.controls_enabled)
 		for entity in level.find_children("*", "BaseEntity", true, false):

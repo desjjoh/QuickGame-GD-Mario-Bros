@@ -141,7 +141,7 @@ func _ready() -> void:
 	assert((SoundHandler.get_sound(&"power_up_grab") as AudioStreamWAV).data.size() == 54 * 735 * 2)
 	if "--luigi" in OS.get_cmdline_user_args():
 		mario.begin_death(true)
-		assert(mario.sprite.texture == preload("res://assets/player/luigi (small)/luigi-dead.png"))
+		assert(mario.sprite.texture == preload("res://assets/player/luigi (small)/luigi-dead.tres"))
 	level.free()
 	print(
 		"PASS: Super Mushroom releases from all reward blocks, grows Small, awards 1000 once for either form, displays popup/plays cue, and reuses movement/cleanup."

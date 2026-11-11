@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bpuii87lnqeh3" path="res://assets/tileset/previews/castle.png" id="castle"]
 [ext_resource type="Texture2D" uid="uid://dy6q3mjh18ndw" path="res://assets/palettes/overworld/tileset/Palette 4 (Coins and Interactibles).png" id="coin"]
 [ext_resource type="Texture2D" uid="uid://ck8w2kxc4e3gx" path="res://assets/tileset/previews/flagpole.png" id="flagpole"]
+[ext_resource type="Texture2D" uid="uid://b4hv8mt44te7g" path="res://assets/tileset/previews/large_castle.png" id="large_castle"]
 [ext_resource type="Texture2D" uid="uid://b87hu6kqi013q" path="res://assets/tileset/previews/sideways_pipe_entrance.png" id="side"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_brick"]
@@ -33,6 +34,14 @@ texture = ExtResource("3_alternate")
 margins = Vector2i(32, 0)
 0:0/0 = 0
 0:0/0/custom_data_0 = "reward_brick_alternate"
+
+[sub_resource type="TileSetAtlasSource" id="large_castle"]
+resource_name = "Large Castle (10x11)"
+texture = ExtResource("large_castle")
+0:0/size_in_atlas = Vector2i(10, 11)
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(-40, -80)
+0:0/0/custom_data_0 = "large_castle"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_alternate"]
 resource_name = "Alternate brick entity"
@@ -101,3 +110,4 @@ sources/7 = SubResource("coin")
 sources/9 = SubResource("hidden_question")
 sources/12 = SubResource("reward_brick")
 sources/13 = SubResource("reward_brick_alternate")
+sources/14 = SubResource("large_castle")

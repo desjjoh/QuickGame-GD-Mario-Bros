@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/enemies/koopa/red_koopa.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/enemies/koopa/red_parakoopa.gd" id="parakoopa"]
+[ext_resource type="Script" path="res://scripts/states/enemies/red_parakoopa_flight.gd" id="flight"]
+
+[node name="RedParakoopa" instance=ExtResource("base")]
+script = ExtResource("parakoopa")
+
+[node name="StateMachine" parent="." index="0" node_paths=PackedStringArray("initial_state")]
+initial_state = NodePath("Flying")
+
+[node name="Walking" parent="StateMachine" index="0"]
+turn_at_ledges = false
+
+[node name="Flying" type="Node" parent="StateMachine" index="5"]
+script = ExtResource("flight")
+frame_updates_enabled = false
+input_enabled = false

@@ -48,7 +48,7 @@ func _physics_process(delta: float) -> void:
 			player.state_machine.current_state is MarioSlideState,
 			"Retain the collision frame's skid pose."
 		)
-		assert(player.sprite.texture.resource_path.ends_with("mario-small-slide.png"))
+		assert(player.sprite.texture.resource_path.ends_with("mario-small-slide.tres"))
 	elif step == 2:
 		player.state_machine.process_physics(delta)
 		assert(player.state_machine.current_state is MarioMoveState)

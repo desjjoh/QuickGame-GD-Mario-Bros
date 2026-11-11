@@ -23,6 +23,11 @@ margins = Vector2i(48, 0)
 2:1/0 = 0
 3:1/0 = 0
 
+[sub_resource type="TileSetAtlasSource" id="tree_trunks"]
+resource_name = "Tree trunks"
+texture = ExtResource("art_3")
+1:1/0 = 0
+
 [sub_resource type="TileSetAtlasSource" id="Source_3"]
 resource_name = "Hill parts"
 texture = ExtResource("art_1")
@@ -48,3 +53,4 @@ sources/0 = SubResource("Source_0")
 sources/3 = SubResource("Source_3")
 sources/9 = SubResource("Source_9")
 sources/15 = SubResource("Source_15")
+sources/16 = SubResource("tree_trunks")

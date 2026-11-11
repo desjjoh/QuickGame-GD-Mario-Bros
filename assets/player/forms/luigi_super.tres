@@ -1,43 +1,41 @@
 [gd_resource type="Resource" script_class="MarioForm" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-climb.png" id="climb"]
-[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-crouch.png" id="crouch"]
-[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-idle.png" id="idle"]
-[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-intermediate.png" id="intermediate"]
-[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-jump.png" id="jump"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi.png" id="sheet"]
 [ext_resource type="Script" path="res://scripts/player/mario_form.gd" id="script"]
-[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-slide.png" id="slide"]
-[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-swim.png" id="swim"]
-[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-walk.png" id="walk"]
-
-[sub_resource type="AtlasTexture" id="climb0"]
-atlas = ExtResource("climb")
-region = Rect2(0, 0, 16, 32)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="climb1"]
-atlas = ExtResource("climb")
-region = Rect2(16, 0, 16, 32)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="shrink"]
-atlas = ExtResource("swim")
-region = Rect2(0, 0, 16, 32)
-filter_clip = true
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-idle.tres" id="idle"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-jump.tres" id="jump"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-slide.tres" id="slide"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-crouch.tres" id="crouch"]
+[ext_resource type="Texture2D" path="res://assets/player/luigi (super)/luigi-intermediate.tres" id="intermediate"]
 
 [sub_resource type="AtlasTexture" id="walk0"]
-atlas = ExtResource("walk")
-region = Rect2(0, 0, 16, 32)
+atlas = ExtResource("sheet")
+region = Rect2(16, 0, 16, 32)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="walk1"]
-atlas = ExtResource("walk")
-region = Rect2(16, 0, 16, 32)
+atlas = ExtResource("sheet")
+region = Rect2(32, 0, 16, 32)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="walk2"]
-atlas = ExtResource("walk")
-region = Rect2(32, 0, 16, 32)
+atlas = ExtResource("sheet")
+region = Rect2(48, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="climb0"]
+atlas = ExtResource("sheet")
+region = Rect2(112, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="climb1"]
+atlas = ExtResource("sheet")
+region = Rect2(128, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="shrink"]
+atlas = ExtResource("sheet")
+region = Rect2(144, 0, 16, 32)
 filter_clip = true
 
 [resource]

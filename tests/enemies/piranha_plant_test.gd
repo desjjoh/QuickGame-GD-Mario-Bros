@@ -41,8 +41,12 @@ func _ready() -> void:
 	var spawner := pipe.get_node("OccupantSpawner") as EntitySpawner
 	assert(spawner.get_child_count() == 1)
 	camera.global_position.x = pipe.global_position.x
+	var clock := GameHandler.animation_clock
+	var previous_tick := clock.tick_count
+	clock.tick_count = 7
 	area.update_camera_activity()
 	var plant := spawner.get_node("GreenPiranhaPlant") as BaseEnemy
+	assert(plant.sprite.region_rect.position.x == 16.0)
 	assert(plant.body.global_position == pipe.entry_position())
 	assert(plant.sprite.texture.resource_path.contains("/underground/"))
 	assert(plant.sprite.z_index < level.get_node("Areas").z_index)
@@ -53,6 +57,15 @@ func _ready() -> void:
 	plant.set_physics_process(false)
 
 	var mouth := pipe.entry_position()
+	mario.body.global_position = mouth + Vector2(0, -64)
+	# Change only the cosmetic clock to verify phase boundaries independently of movement.
+	var chomp_frames := {0: 16.0, 7: 16.0, 8: 0.0, 15: 0.0, 16: 16.0}
+	for animation_tick in chomp_frames:
+		clock.tick_count = animation_tick
+		plant._physics_process(STEP)
+		assert(plant.sprite.region_rect.position.x == chomp_frames[animation_tick])
+	clock.tick_count = previous_tick
+
 	for offset in [-32, 32]:
 		mario.body.global_position = mouth + Vector2(offset, -64)
 		for tick in range(4):

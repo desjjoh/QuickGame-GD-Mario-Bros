@@ -46,12 +46,70 @@ func _ready() -> void:
 	level = await _restart(level, 1328.0, 1280.0)
 
 	assert(is_instance_valid(level) and GameHandler.player_status.lives == 0)
+	await _check_1_2(game)
 	game.free()
 	await tick_finished
 	print(
-		"PASS: halfway left limit, forward scrolling, repeat death, secret return, and lower-area deaths."
+		"PASS: 1-1 and 1-2 halfway thresholds, left limits, repeat deaths, and side-area framing."
 	)
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+
+
+func _check_1_2(game: Node) -> void:
+	# Exercise the same covered restart path with a shorter card for the added cases.
+	var definition := GameHandler.transitions.get_definition(&"level") as TransitionDefinition
+	var card_frames := definition.stages[0].minimum_frames
+	definition.stages[0].minimum_frames = 8
+	GameHandler.set_lives(4)
+	game.enemy_limit = 8
+	assert(GameHandler.load_level(game.stages[1], true, 1, BaseLevel.EntryMode.RESPAWN))
+	var level := await _wait_for_level_start()
+	assert(level.stage_label == "1-2" and _spawn_matches(level, 48.0, 0.0))
+	var area_origin := level.active_area.global_position.x
+	var camera := get_viewport().get_camera_2d() as LevelCamera
+	assert(camera.halfway_check_enabled and camera.halfway_camera_left == 1536.0)
+	assert(level.halfway_spawn.position == Vector2(1584, 208))
+
+	_set_camera_left(area_origin + 1329.0)
+	level.active_area.update_camera_activity()
+	var triplet := _find_1_2_triplet(level)
+	assert(triplet.get_child_count() == 4, "The normal approach should spawn all three Goombas.")
+
+	_set_camera_left(area_origin + 1535.0)
+	level = await _restart(level, 48.0, 0.0)
+	assert(level.entry_mode == BaseLevel.EntryMode.RESPAWN)
+
+	_set_camera_left(area_origin + 1536.0)
+	level = await _restart(level, 1584.0, 1536.0)
+	assert(level.entry_mode == BaseLevel.EntryMode.HALFWAY_RESPAWN)
+	assert(_find_1_2_triplet(level).get_child_count() == 1)
+	var objects := level.world_objects
+	assert(objects.get_node("goomba_spawner_113_12").get_child_count() == 2)
+	for pipe_name in ["pipe_entrance_103_10", "pipe_entrance_109_9"]:
+		assert(objects.has_node(pipe_name + "/OccupantSpawner/GreenPiranhaPlant"))
+	camera = get_viewport().get_camera_2d() as LevelCamera
+	assert(camera.scroll_left_limit == area_origin + 1536.0)
+	level = await _restart(level, 1584.0, 1536.0)
+	triplet = _find_1_2_triplet(level)
+	_set_camera_left(area_origin + 16.0 + 1536.0)
+	level.active_area.update_camera_activity()
+	assert(triplet.get_child_count() == 1, "The skipped triplet must stay absent as the camera advances.")
+
+	# The authored bonus room lies beyond the threshold in world coordinates.
+	assert(level.request_area_transfer(&"bonus"))
+	for frame in range(120):
+		if level.active_area.area_id == &"bonus" and not level.transition_in_progress:
+			break
+		await tick_finished
+	assert(level.active_area.area_id == &"bonus" and not level.area_transport.pending)
+	level = await _restart(level, 1584.0, 1536.0)
+	assert(level.entry_mode == BaseLevel.EntryMode.HALFWAY_RESPAWN)
+	assert(GameHandler.player_status.lives == 0)
+	definition.stages[0].minimum_frames = card_frames
+
+
+func _find_1_2_triplet(level: BaseLevel) -> EntitySpawner:
+	return level.world_objects.get_node("goomba_triplet_spawner_99_12") as EntitySpawner
 
 
 func _enter_lower_area(level: BaseLevel, camera_left: float) -> void:
@@ -132,13 +190,14 @@ func _wait_for_level_start() -> BaseLevel:
 
 
 func _spawn_matches(level: BaseLevel, spawn_x: float, camera_left: float) -> bool:
-	var position := level.player.body.global_position
+	var area := level.active_area
+	var position := area.to_local(level.player.body.global_position)
 	var camera := get_viewport().get_camera_2d() as LevelCamera
 	return (
-		level.active_area.area_id == &"main"
+		area.area_id == &"main"
 		and is_equal_approx(position.x, spawn_x)
 		and absf(position.y - 208.0) < 0.2
-		and is_equal_approx(_camera_left(camera), camera_left)
+		and is_equal_approx(_camera_left(camera) - area.global_position.x, camera_left)
 	)
 
 

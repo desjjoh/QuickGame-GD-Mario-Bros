@@ -31,6 +31,8 @@ func _ready() -> void:
 	game.transitions_enabled = false
 	game.shadow_shader_enabled = true
 	game.shadow_style = load("res://assets/shadows/crisp.tres")
+	var backdrop_color := Color8(24, 48, 72)
+	game.get_node("Backdrop").color = backdrop_color
 	add_child(game)
 	var level := GameHandler.current_level
 	level.set_physics_process(false)
@@ -61,8 +63,8 @@ func _ready() -> void:
 		var image := get_viewport().get_texture().get_image()
 		var inside := SCREEN_PIXEL.sample(image, 40, 80)
 		assert(absf(inside.b - main.background_color.b) < 0.01)
-		assert(SCREEN_PIXEL.sample(image, 16, 80).is_equal_approx(Color.BLACK))
-		assert(SCREEN_PIXEL.sample(image, 225, 80).is_equal_approx(Color.BLACK))
+		assert(SCREEN_PIXEL.sample(image, 16, 80).is_equal_approx(backdrop_color))
+		assert(SCREEN_PIXEL.sample(image, 225, 80).is_equal_approx(backdrop_color))
 		assert(SCREEN_PIXEL.sample(image, 103, 83).is_equal_approx(Color.RED))
 		assert(
 			SCREEN_PIXEL.sample(image, 109, 89).b < inside.b - 0.05,
@@ -74,7 +76,7 @@ func _ready() -> void:
 	await frames()
 	if DisplayServer.get_name() != "headless":
 		var image := get_viewport().get_texture().get_image()
-		assert(SCREEN_PIXEL.sample(image, 40, 80).is_equal_approx(SCREEN_PIXEL.sample(image, 16, 80)))
+		assert(SCREEN_PIXEL.sample(image, 40, 80).is_equal_approx(backdrop_color))
 	# Repositioning the area keeps its camera bounds and fill attached.
 	var lower := level.get_node("Areas/LowerArea") as BaseLevelArea
 	lower.position += Vector2(64, 32)

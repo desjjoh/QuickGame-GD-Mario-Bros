@@ -2,7 +2,7 @@ class_name FireThrowPose
 extends Node2D
 ## Composes the throw and Starman palette over the live motion pose.
 
-const SHEET := preload("res://assets/player/mario + luigi (fire)/shoot.png")
+const SHEET := preload("res://assets/player/mario + luigi (fire)/fire-throw.tres")
 const FEET := Rect2(0, 24, 16, 8)
 
 var _ticks_left := 0

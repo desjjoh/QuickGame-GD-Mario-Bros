@@ -1,6 +1,8 @@
 extends Node2D
 ## Owns the reveal, its signage, and the pipes for this area visit.
 
+const DRAW_ORDER := preload("res://scenes/components/presentation/draw_order.gd")
+
 @export var pipe_occupant: PipeSpawn
 
 var _area: BaseLevelArea
@@ -20,6 +22,7 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	DRAW_ORDER.apply($Presentation, DRAW_ORDER.BEHIND_WORLD)
 	$Presentation.hide()
 	# Reveal after camera follow and before area spawners run.
 	process_physics_priority = 105

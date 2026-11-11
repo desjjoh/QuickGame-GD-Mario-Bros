@@ -35,7 +35,7 @@ Instance `scenes/entities/warp_zone/warp_zone.tscn` under the area's **WorldObje
 
 Set **Pipe Occupant** on the zone to give its pipes plants before the reveal. Revealing the zone removes those occupants and enables the configured entrances. The 1-2 instance shows **1 1 1** because each pipe routes to 1-1.
 
-**Presentations → FlagpoleEnding** binds to the painted flagpole and castle by area ID and cell. In 1-2, the ending uses the SurfaceArea markers. The castle in IntroArea provides the opening doorway.
+**Presentations → FlagpoleEnding** binds to the painted flagpole and castle by area ID and cell. In 1-2, the ending uses the SurfaceArea markers. The castle in IntroArea provides the opening doorway. In Overworld areas, paint **Large Castle (10x11)** on **EntityLayout** for a tall finish like 1-3. The side walls extend two tiles left of the stamped cell. Set **Castle Cell** to the cell where you painted the stamp. This variant supplies the left doorway and shares the castle flag and fireworks sequence.
 
 ## Area background colour
 
@@ -57,7 +57,9 @@ Open `scenes/main/game.tscn`, select **Game**, and assign **Presentation → Tit
 
 Add a `Marker2D` under **Players** at the desired feet position and assign it to the level's **Death → Halfway Spawn** field. On **Areas → MainArea → Camera2D**, enable **Halfway Restart → Halfway Check Enabled** and set **Halfway Camera Left** in pixels from the main area's origin. The 2D editor draws a labeled dashed guide that moves with the area. At life loss, the active camera and the threshold are compared in world coordinates.
 
-1-1 uses a marker at `(1344, 208)` and a camera-left threshold of `1280`. A halfway restart snaps the camera to X=1280 and places Mario's sprite 56 px from the left edge. This places Mario 16 px farther right than the NES halfway restart while keeping page 5 in view. A death before the threshold uses the normal spawn, with camera framing clamped by the main area's bounds. The authored secret room is before the threshold. If a side area's camera is placed at or beyond the threshold, death there uses the halfway marker.
+1-1 uses a marker at `(1328, 208)` and a camera-left threshold of `1280`. 1-2 uses `(1584, 208)` and `1536`. These coordinates are relative to each stage's main area. At a halfway restart, the camera starts at the threshold and Mario's sprite starts 40 px from the left edge. Main-area deaths before the threshold use PlayerSpawn. Side-area deaths use the active camera's world position, so 1-1's authored secret room restarts at PlayerSpawn and 1-2's authored bonus room uses the halfway marker.
+
+On the first main-area load of a halfway restart, EnemyLayout placements with a spawn trigger left of the last visible pixel are skipped for that area load. In 1-2 this skips the Goomba triplet near the checkpoint. Enemies with triggers at or beyond the right edge and occupants attached to pipes can spawn normally.
 
 ## Known reference differences
 
@@ -83,7 +85,7 @@ The game uses 256×240 logical framing with window-resolution canvas_items rende
 
 ## Source configuration and ownership
 
-`Game.stages` defines completion order and currently lists 1-1 followed by 1-2. **Game → Start Stage Override** selects the starting BaseLevel scene for new runs. Leave it empty to use the first entry. Selecting a registered scene starts at its position in the list. A scene outside the list returns to the title after ordinary completion. The title backdrop is configured separately. Single-stage test fixtures assign `game.stages.assign([scene])`.
+`Game.stages` defines completion order and currently lists 1-1, 1-2, and 1-3. Clearing the final registered stage returns to the title. **Game → Start Stage Override** selects the starting BaseLevel scene for new runs. Leave it empty to use the first entry. Selecting a registered scene starts at its position in the list. A scene outside the list returns to the title after ordinary completion. The title backdrop is configured separately. Single-stage test fixtures assign `game.stages.assign([scene])`.
 
 Use typed GameHandler methods/properties and `player_status` for score, coins, lives, form, top score, stage label, and timer values. Generic `set_session_value()` / `get_session_value()` are for run metadata such as area/arrival IDs; reserved-key writes are rejected. The existing `session_value_changed` signal carries both typed-value and metadata notifications.
 
@@ -93,11 +95,15 @@ Paint one **Goomba Pair Spawner**, **Goomba Triplet Spawner**, or **Green Koopa 
 
 Paint **Red Koopa Spawner** on **EnemyLayout** in the cell immediately above its support. A walking Red Koopa turns at ledges, and its kicked shell can roll off them.
 
-## Place a vertical lift
+Paint **Red Parakoopa Spawner** on **EnemyLayout** to place a Red Koopa that flies vertically. The marker sets its starting position. Its flight range follows the reference's starting-height rule. The first stomp removes its wings and awards 400 points, after which it walks and uses the shared shell states. In 1-3 the two markers are at (74, 4) and (114, 5).
+
+## Place moving lifts
 
 Instance `scenes/entities/spawners/lift_spawner.tscn` under the area's **WorldObjects**. Its X position is the lift's left edge. Put the marker at the incoming edge and set **Direction** to **Up** or **Down**. For a 240 px view starting at Y=0, use Y=248 for Up or Y=−8 for Down.
 
-**Initial Offset** sets how far along the path the lift starts, in pixels from the marker in its travel direction. Each lane has one lift and runs independently of the enemy limit. When the lift exits the far edge, its replacement starts at the incoming edge.
+**Initial Offsets** lists each lift's starting distance from the marker, in pixels along the travel direction. The default is one lift at offset 0. Add distinct offsets to stagger multiple lifts in the same lane. Each lift cycles independently, with a replacement at the incoming edge when it exits the far edge. Lifts use no enemy slots.
+
+For a single back-and-forth lift, instance `scenes/entities/spawners/single_lift_spawner.tscn` under **WorldObjects** and choose **Horizontal** or **Vertical** in **Axis**. Place the node at the left end of the platform's starting surface. A horizontal lift starts moving left. A vertical lift starting in the upper half of the reference playfield moves down first. The camera activates each spawner once per area visit. The lift is freed when it leaves the camera's cleanup bounds.
 
 ## Deliberate gameplay differences
 

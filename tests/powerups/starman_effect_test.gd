@@ -1,6 +1,6 @@
 extends Node
 
-const SMALL_IDLE_TEXTURE := preload("res://assets/player/mario (small)/mario-small-idle.png")
+const SMALL_IDLE_TEXTURE := preload("res://assets/player/mario (small)/mario-small-idle.tres")
 const OVERWORLD_THEME := preload("res://assets/themes/overworld.tres")
 const LEVEL := preload("res://tests/fixtures/sandbox_level.tscn")
 const STEP := 1.0 / 60.0
@@ -62,14 +62,28 @@ func _check_palettes() -> void:
 	var cases := [
 		[OVERWORLD_THEME, SMALL_IDLE_TEXTURE, Color("b53120"), Color("109400")],
 		[
+			preload("res://assets/themes/castle.tres"),
+			preload("res://assets/player/mario (super)/mario-idle.tres"),
+			Color("b53120"),
+			Color("adadad"),
+			2
+		],
+		[
+			preload("res://assets/themes/castle.tres"),
+			SMALL_IDLE_TEXTURE,
+			Color("b53120"),
+			Color("adadad"),
+			2
+		],
+		[
 			preload("res://assets/themes/underground.tres"),
-			preload("res://assets/player/luigi (super)/luigi-idle.png"),
+			preload("res://assets/player/luigi (super)/luigi-idle.tres"),
 			Color.WHITE,
 			Color("007b8c")
 		],
 		[
 			preload("res://assets/themes/castle.tres"),
-			preload("res://assets/player/mario + luigi (fire)/shoot.png"),
+			FireThrowPose.SHEET,
 			Color("f7d8a5"),
 			Color("007b8c")
 		]
@@ -77,9 +91,10 @@ func _check_palettes() -> void:
 	for item: Array in cases:
 		var theme := item[0] as AreaTheme
 		var source := item[1] as Texture2D
-		var recolored := theme.fire_transform_palettes[0].remap_starman(source)
+		var palette := theme.fire_transform_palettes[int(item[4]) if item.size() > 4 else 0]
+		var recolored := palette.remap_starman(source)
 		assert(recolored.get_size() == source.get_size())
-		assert(recolored == theme.fire_transform_palettes[0].remap_starman(source))
+		assert(recolored == palette.remap_starman(source))
 		var original := source.get_image()
 		var result := recolored.get_image()
 		var changed := false
@@ -123,9 +138,7 @@ func _check_rendered_pose() -> void:
 	pose.set_palette(palette)
 	await RenderingServer.frame_post_draw
 	_assert_pixels(viewport, palette.remap_starman(sprite.texture), Rect2i(8, 8, 16, 16))
-	var fire := AtlasTexture.new()
-	fire.atlas = preload("res://assets/player/mario + luigi (fire)/idle.png")
-	fire.region = Rect2(0, 0, 16, 32)
+	var fire := preload("res://assets/player/forms/fire.tres").idle
 	sprite.texture = fire
 	pose.update_pose(7, false, false)
 	await RenderingServer.frame_post_draw
@@ -133,7 +146,7 @@ func _check_rendered_pose() -> void:
 	pose.clear()
 	pose.set_palette(null)
 	await RenderingServer.frame_post_draw
-	_assert_pixels(viewport, fire.atlas, Rect2i(8, 0, 16, 32))
+	_assert_pixels(viewport, fire, Rect2i(8, 0, 16, 32))
 	viewport.queue_free()
 
 
