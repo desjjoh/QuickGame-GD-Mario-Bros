@@ -12,6 +12,7 @@ from build_music_tracks import (
     SAMPLES_PER_FRAME,
     decode,
     render,
+    scale_pcm_samples,
 )
 
 
@@ -177,7 +178,7 @@ AREA_LEVEL_CORRECTIONS_DB = {
 
 def calibrate_pcm(pcm, correction_db):
     scale = 10 ** (correction_db / 20)
-    return b"".join(struct.pack("<h", round(sample * scale)) for (sample,) in struct.iter_unpack("<h", pcm))
+    return scale_pcm_samples((sample for (sample,) in struct.iter_unpack("<h", pcm)), scale)
 
 
 def write_area_tracks(folder, suffix, area_lengths, star_lengths):

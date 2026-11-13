@@ -1,29 +1,16 @@
-extends Node
-## Owns title UI and the pending start transition.
+extends "res://scripts/session/scene_title_flow.gd"
+## Connects Mario's title menu, backdrop, and character selection to the title flow.
 
-var screen: Control
 var first_stage: PackedScene
 var starting_stage: PackedScene
 var starting_character := GameHandler.PlayerCharacter.MARIO
 
 
 func detach() -> void:
-	_clear_title()
+	super()
 	first_stage = null
 	starting_stage = null
 	starting_character = GameHandler.PlayerCharacter.MARIO
-
-
-func reveal() -> void:
-	if is_instance_valid(screen):
-		screen.show()
-
-
-func _clear_title() -> void:
-	if is_instance_valid(screen):
-		screen.hide()
-		screen.queue_free()
-	screen = null
 
 
 func show_title(first_level: PackedScene) -> bool:
@@ -68,9 +55,11 @@ func show_now(first_level: PackedScene) -> bool:
 	GameHandler.current_level.initialize_actors(true)
 	suspend_background()
 	screen.connect(&"start_requested", _start_selected_character)
-	if GameHandler.transitions.busy:
-		screen.hide()
-	GameHandler.current_game.get_node("UI/ScreenContainer").add_child(screen)
+	mount_title(
+		screen,
+		GameHandler.current_game.get_node("UI/ScreenContainer"),
+		GameHandler.transitions.busy
+	)
 	return true
 
 
@@ -93,27 +82,23 @@ func start_new_game(
 	if (
 		GameHandler.flow != GameHandler.GameFlow.TITLE
 		or GameHandler._detaching
-		or not is_instance_valid(screen)
+		or not can_start()
 		or GameHandler.transitions.busy
 	):
-		return false
-	if not screen.is_visible_in_tree():
 		return false
 	starting_stage = destination if destination != null else first_stage
 	starting_character = character
 	ControllerHandler.consume_menu_confirmation()
 	GameHandler._set_flow(GameHandler.GameFlow.STARTING)
-	screen.hide()
-	if GameHandler.transitions.available():
-		var accepted: int = GameHandler.transitions.begin(
-			GameHandler.current_game, _load_starting_stage, &"level", _start_finished
-		)
-		if accepted == 0:
-			_start_finished(false)
-		return accepted > 0
-	var success := _load_starting_stage()
-	_start_finished(success)
-	return success
+	return _run_start(_load_starting_stage)
+
+
+func _get_transition_request() -> Callable:
+	return _request_start_transition if GameHandler.transitions.available() else Callable()
+
+
+func _request_start_transition(operation: Callable, completion: Callable) -> int:
+	return GameHandler.transitions.begin(GameHandler.current_game, operation, &"level", completion)
 
 
 func _load_starting_stage() -> bool:
@@ -133,18 +118,23 @@ func _load_starting_stage() -> bool:
 	return GameHandler.load_level(destination)
 
 
-func _start_finished(success: bool) -> void:
+func _reset_start_selection() -> void:
 	starting_stage = null
 	starting_character = GameHandler.PlayerCharacter.MARIO
-	if GameHandler._detaching or not is_instance_valid(GameHandler.current_game):
-		return
-	if success:
-		_clear_title()
-		GameHandler._set_flow(GameHandler.GameFlow.PLAYING)
-	else:
-		# Cancellation can originate inside a level's _exit_tree. Restore UI
-		# only after that tree operation completes, and only for this Game.
-		_restore_title.call_deferred(weakref(GameHandler.current_game), first_stage)
+
+
+func _can_finish_start() -> bool:
+	return not GameHandler._detaching and is_instance_valid(GameHandler.current_game)
+
+
+func _on_start_succeeded() -> void:
+	GameHandler._set_flow(GameHandler.GameFlow.PLAYING)
+
+
+func _on_start_failed() -> void:
+	# Cancellation can originate inside a level's _exit_tree. Restore UI
+	# only after that tree operation completes, and only for this Game.
+	_restore_title.call_deferred(weakref(GameHandler.current_game), first_stage)
 
 
 func _restore_title(expected_game: WeakRef, first_level: PackedScene) -> void:

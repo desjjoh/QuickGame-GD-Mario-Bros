@@ -23,6 +23,7 @@ func _ready() -> void:
 	game.stages.assign([first_stage])
 	game.title_background = custom
 	game.transitions_enabled = false
+	game.start_stage_override = null
 	add_child(game)
 	check_background("MENU")
 	assert(game.stages[0] == first_stage)

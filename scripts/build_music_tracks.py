@@ -211,8 +211,12 @@ def main():
     )
 
 
+def scale_pcm_samples(samples, scale):
+    return b"".join(struct.pack("<h", round(sample * scale)) for sample in samples)
+
+
 def write_track(path, voices, *, scale=1.0):
-    pcm = b"".join(struct.pack("<h", round(round(sum(sample)) * scale)) for sample in zip(*voices))
+    pcm = scale_pcm_samples((round(sum(sample)) for sample in zip(*voices)), scale)
     with wave.open(str(path), "wb") as stream:
         stream.setparams((1, 2, SAMPLE_RATE, 0, "NONE", "not compressed"))
         stream.writeframes(pcm)

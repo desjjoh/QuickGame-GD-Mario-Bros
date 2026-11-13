@@ -95,6 +95,7 @@ func _handle_player_contact(player: BasePlayer) -> void:
 		player.last_enemy_stomp_tick = Engine.get_physics_frames()
 		player.enemy_stomp_started_descending = descending
 		player.body.velocity.y = STOMP_REBOUND
+		player.jump_action.use_falling_gravity(player.motion_values)
 		player.play_sound_effect(SoundHandler.get_sound(&"stomp"))
 	else:
 		# Damage is guarded by the player, rather than the interaction latch.

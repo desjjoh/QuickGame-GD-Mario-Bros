@@ -73,7 +73,10 @@ func _ready() -> void:
 	var goomba_scene := preload("res://scenes/entities/enemies/goomba/goomba.tscn")
 	var pair: Array[BaseEnemy] = []
 	player.body.global_position = Vector2(128, 100)
+	player.body.velocity.x = 150.0
+	assert(player.jump_action.begin(player.motion_values, true))
 	player.body.velocity = Vector2(0, 120)
+	player.jump_action.update(player.motion_values, true)
 	player.stomp_chain = 0
 	before = GameHandler.player_status.score
 	for offset in [-8, 8]:
@@ -86,6 +89,19 @@ func _ready() -> void:
 		assert(goomba.state_machine.current_state == goomba.get_node("StateMachine/Squashed"))
 	assert(player.body.velocity.y == BaseEnemy.STOMP_REBOUND and not level.death_in_progress)
 	assert(player.stomp_chain == 2)
+	# Keep Jump held through the rebound from a full-speed jump.
+	var stomp_y := player.body.global_position.y
+	var apex_y := stomp_y
+	for frame in range(16):
+		player.jump_action.update(player.motion_values, true)
+		assert(player.motion_values.gravity == 2025.0)
+		player.move_body(true)
+		apex_y = minf(apex_y, player.body.global_position.y)
+		if player.body.velocity.y >= 0.0:
+			break
+		await ticks(1)
+	assert(is_equal_approx(stomp_y - apex_y, 17.0))
+	player.jump_action.end(player.motion_values)
 	await ticks(6)
 	assert(GameHandler.player_status.score == before + 100 + 400)
 

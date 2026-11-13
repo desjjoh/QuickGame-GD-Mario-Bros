@@ -16,6 +16,7 @@ func make_game() -> Node:
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	game.start_with_title = false
+	game.start_stage_override = null
 	game.transitions_enabled = false
 	var fixture := load("res://scenes/levels/worlds/world 1/1-1.tscn").instantiate() as BaseLevel
 	fixture.death_fallback_delay = 0.05

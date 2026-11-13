@@ -6,10 +6,13 @@
 | --- | --- |
 | Game scene | Level container, title and HUD, and shared shadow composition |
 | GameHandler | Session flow, stage list, player status, top score, and active-level progress |
-| TitleFlow | Title screen, backdrop suspension, and new-game transition |
+| SceneTitleFlow | Title visibility, start handoff, and completion cleanup |
+| TitleFlow | Mario menu, backdrop suspension, character selection, and session reset |
 | StageFlow | Restart, TIME UP, Game Over, and stage-handoff operations |
-| PauseController | Gameplay pause eligibility, Start toggle, tree pause, and cleanup |
-| TransitionCoordinator | Covers gameplay, runs the transition operation, and restores presentation and controls |
+| PauseController | Mario pause eligibility, Start input, and pause cue |
+| ScenePauseController | Owner-scoped SceneTree pause, input lockout, and pause change signal |
+| SceneTransitionCoordinator | Cover, operation, timed presentations, and cancellation |
+| TransitionCoordinator | Mario transition presets, HUD, gameplay suspension, pause, and input restoration |
 | BaseLevel | Player spawn and death, timer lifecycle, camera boundaries, area transport, and level completion |
 | AreaTransport | Destination resolution, trip state, entry and exit callbacks, and cancellation |
 | LevelTimer | Countdown phase and expiry notification |
@@ -26,9 +29,13 @@ Game exposes one ordered `stages: Array[PackedScene]` list. Startup validates th
 
 The HUD and title each own an `AreaThemeBinding` child. Their parent `_ready()` connects `theme_changed` and calls `start()` after presentation references are initialized. The component follows existing level and current-area notifications, maintains one subscription to the active area's theme, emits null for missing area/theme fallback, and disconnects on tree exit. Repeated start calls do not duplicate subscriptions. Screens retain asset/font selection and their independent session-value/input handling. The HUD changes atlas artwork without restarting its shared-clock animation. The HUD shows numeric time only when the level timer is enabled and TransitionCoordinator is idle. Existing started/finished signals refresh visibility; the TIME heading follows normal HUD visibility. Countdown state is unchanged. The binding does not poll or own level/game flow.
 
+SceneTransitionCoordinator runs the cover, operation, hold, and presentation sequence. To reuse it, supply a Control running the transition screen host, call `attach_view()`, and provide your own transition definitions. Call `begin()` with an owner node and an operation that returns success. Mario uses TransitionCoordinator to bind the HUD, level replacement, entity suspension, and input to this sequence. Audio stays with Mario's flow and presentation scenes.
+
+SceneTitleFlow manages the title Control through reveal, start, completion, and detach. A new game supplies its own menu with `mount_title()` and connects its start control to `start()` with a gameplay operation that returns success. It can also supply a covered transition request. Mario's TitleFlow configures the backdrop, connects character selection, resets the run, and rebuilds the title after a failed start.
+
 ## Area lifecycle and persistence
 
-GameHandler exposes `is_paused`, `pause_changed`, and `request_pause_toggle()`. Its PauseController child applies SceneTree pause to gameplay and level presentations. The listener uses Always processing so Start can resume; ordinary gameplay, audio, and the shared animation clock remain pausable. SoundHandler owns a separate Always-processing pause cue player. The title screen and active transitions block pause. Level shutdown, session reset, entering Title or Detached flow, and accepted transitions clear pause.
+GameHandler exposes `is_paused`, `pause_changed`, and `request_pause_toggle()`. Its PauseController child supplies the active level as the pause owner, reads the Start action from ControllerHandler, and forwards the pause signal from ScenePauseController. ScenePauseController can run on its own. Set its pause action to an Input Map action, call `set_pause_owner()` with the gameplay node, and connect `pause_changed` to any menu or sound that should respond. The controller clears its pause if the node that owned it is freed. The listener uses Always processing so Start can resume; ordinary gameplay, audio, and the shared animation clock remain pausable. SoundHandler owns a separate Always-processing pause cue player. The title screen and active transitions block pause. Level shutdown, session reset, entering Title or Detached flow, and accepted transitions clear pause.
 
 The level scene groups its children under Areas, Players, Systems, and Presentations. Areas and Players stay in their scene order during pipe travel. AreaTransport requests the behind-world player presentation and clears it on state exit or cancellation. Systems contains LevelDeath, LevelTimer, AreaTransport, LevelAreaContent, and LevelSpawnRegistry. BaseLevel leaves Presentations empty for derived levels. 1-1 supplies FlagpoleEnding. 1-2 supplies PipeOpening. On fresh entry it resolves the painted castle doorway and walks the player to the configured sideways pipe. PipeOpening locks controller input through the walk and pipe entry. Once BaseLevel places the player in the destination area, the shared arrival lock takes over for 17 ticks.
 
@@ -128,7 +135,7 @@ Music, effects, and transition jingles route through `NES_Mix` at 0 dB before re
 
 The music generators bake measured Mesen level corrections into all 14 music programs. Each split program applies the same correction to all of its stems so their relative levels stay consistent. The normal Castle track uses the castle music and flame comparison, and the castle-clear fanfare uses the full cue comparison. Playback stays at default gain.
 
-SoundHandler applies measured per-cue corrections to the generated pulse samples before caching them. Pipe and injury share one calibrated stream. The cached brick-shatter WAV carries its correction in the asset, and Bowser's flame uses its original noise weighting.
+SoundHandler owns the cue definitions, calibrated levels, and playback rules. It uses the standalone NES waveform renderer to generate mono pulse, swept pulse, and noise streams. SoundHandler applies measured per-cue corrections before caching the pulse samples. Pipe and injury share one calibrated stream. The cached brick-shatter WAV carries its correction in the asset, and Bowser's flame uses its original noise weighting.
 
 MusicHandler starts background music when gameplay is revealed. Area transitions restart the destination track, including a transition within the same area. Same-area movement without a transition keeps playback running. Starman overrides the area's track on the update after pickup. At three counts remaining, the current area's track restarts with 63 active ticks of protection left. Pause freezes playback. Death, completion, and level shutdown stop the background loop. The title backdrop is silent.
 

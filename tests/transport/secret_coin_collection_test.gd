@@ -11,6 +11,7 @@ func _ready() -> void:
 	var game = load("res://scenes/main/game.tscn").instantiate()
 	game.start_with_title = false
 	game.transitions_enabled = false
+	game.start_stage_override = null
 	add_child(game)
 	var level: BaseLevel = GameHandler.current_level
 	var mario := level.player as Mario

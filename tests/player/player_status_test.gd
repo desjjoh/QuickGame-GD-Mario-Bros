@@ -21,6 +21,7 @@ func _ready() -> void:
 	var game_scene := load("res://scenes/main/game.tscn") as PackedScene
 	var game: Node = game_scene.instantiate()
 	game.transitions_enabled = false
+	game.start_stage_override = null
 	add_child(game)
 	var hud := game.get_node("UI/HUD")
 	var title := game.get_node("UI/ScreenContainer/TitleScreen")
@@ -149,6 +150,7 @@ func _ready() -> void:
 		)
 	)
 	var configured := game_scene.instantiate() as Node
+	configured.start_stage_override = null
 	configured.transitions_enabled = false
 	configured.starting_score = 125
 	configured.starting_coins = 99
