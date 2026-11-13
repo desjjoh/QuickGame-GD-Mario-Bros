@@ -12,6 +12,7 @@ from build_music_tracks import (
     SAMPLES_PER_FRAME,
     decode,
     render,
+    scale_pcm_samples,
 )
 
 
@@ -91,6 +92,22 @@ UNDERGROUND = (
     "83 1a 18 16 84 14 1a 18 0e 0c 16 83 14 20 1e 1c 28 26 "
     "87 24 1a 12 10 62 0e 80 04 04"
 )
+# Castle uses note-length table offsets 0x00 and 0x08 for normal and hurry.
+CASTLE_LENGTHS = {
+    "": (5, 10, 20, 40, 80, 30, 60, 2),
+    "_fast": (4, 8, 16, 32, 64, 24, 48, 12),
+}
+CASTLE = (
+    "80 22 28 22 26 22 24 22 26 22 28 22 2a 22 28 22 26 22 28 22 26 22 24 "
+    "22 26 22 28 22 2a 22 28 22 26 20 26 20 24 20 26 20 28 20 26 20 28 20 "
+    "26 20 24 20 26 20 24 20 26 20 28 20 26 20 28 20 26 20 24 28 30 28 32 "
+    "28 30 28 2e 28 30 28 2e 28 2c 28 2e 28 30 28 32 28 30 28 2e 28 30 28 "
+    "2e 28 2c 28 2e",
+    "04 70 6e 6c 6e 70 72 70 6e 70 6e 6c 6e 70 72 70 6e 6e 6c 6e 70 6e 70 "
+    "6e 6c 6e 6c 6e 70 6e 70 6e 6c 76 78 76 74 76 74 72 74 76 78 76 74 76 "
+    "74 72 74",
+    "84 1a 83 18 20 84 1e 83 1c 28 26 1c 1a 1c",
+)
 FAST_STARMAN_LENGTHS = (18, 1, 3, 2, 6, 9, 12, 4)
 STARMAN = (
     "84 2c 2c 2c 82 04 2c 04 85 2c 84 2c 2c 2a 2a 2a 82 04 2a 04 85 2a 84 2a 2a",
@@ -129,17 +146,39 @@ def render_noise(pattern, count, lengths=NORMAL_LENGTHS):
     return output
 
 
-def render_section(melody, harmony, bass, beats="", lengths=NORMAL_LENGTHS):
+def render_section(
+    melody, harmony, bass, beats="", lengths=NORMAL_LENGTHS, *, sustain_long_triangle=False,
+):
     notes = list(decode(melody, lengths))
     count = sum(frames for _, frames in notes) * SAMPLES_PER_FRAME
     voices = (
         render(notes, count, area=True),
         render(decode(harmony, lengths, packed=True), count, area=True),
-        render(decode(bass, lengths), count, triangle=True, area=True),
+        render(
+            decode(bass, lengths), count, triangle=True, area=True,
+            sustain_long_triangle=sustain_long_triangle,
+        ),
     )
     if beats:
         voices += (render_noise(beats, count, lengths),)
     return b"".join(struct.pack("<h", round(sum(sample))) for sample in zip(*voices))
+
+
+AREA_LEVEL_CORRECTIONS_DB = {
+    "overworld": -8.01,
+    "overworld_fast": -8.68,
+    "underground": -5.62,
+    "underground_fast": -5.57,
+    "castle": -7.0,
+    "castle_fast": -7.04,
+    "starman": -7.35,
+    "starman_fast": -6.99,
+}
+
+
+def calibrate_pcm(pcm, correction_db):
+    scale = 10 ** (correction_db / 20)
+    return scale_pcm_samples((sample for (sample,) in struct.iter_unpack("<h", pcm)), scale)
 
 
 def write_area_tracks(folder, suffix, area_lengths, star_lengths):
@@ -153,13 +192,17 @@ def write_area_tracks(folder, suffix, area_lengths, star_lengths):
     tracks = {
         "overworld": ground_sections,
         "underground": (render_section(UNDERGROUND, "", UNDERGROUND, lengths=area_lengths),),
+        "castle": (
+            render_section(*CASTLE, lengths=CASTLE_LENGTHS[suffix], sustain_long_triangle=True),
+        ),
         "starman": (render_section(*STARMAN, lengths=star_lengths),),
     }
     for name, sections in tracks.items():
-        with wave.open(str(folder / f"{name}{suffix}.wav"), "wb") as stream:
+        track = f"{name}{suffix}"
+        with wave.open(str(folder / f"{track}.wav"), "wb") as stream:
             stream.setparams((1, 2, SAMPLE_RATE, 0, "NONE", "not compressed"))
             for section in sections:
-                stream.writeframesraw(section)
+                stream.writeframesraw(calibrate_pcm(section, AREA_LEVEL_CORRECTIONS_DB[track]))
     return ground_sections
 
 
@@ -170,7 +213,7 @@ def main():
     # PipeIntroMusic uses the normal ground lead-in header and plays it once.
     with wave.open(str(folder / "pipe_opening.wav"), "wb") as stream:
         stream.setparams((1, 2, SAMPLE_RATE, 0, "NONE", "not compressed"))
-        stream.writeframes(ground_sections[0])
+        stream.writeframes(calibrate_pcm(ground_sections[0], -6.18))
     fast_sections = write_area_tracks(folder, "_fast", CLEAR_LENGTHS, FAST_STARMAN_LENGTHS)
     start_frames = []
     frame = 0

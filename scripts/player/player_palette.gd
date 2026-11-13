@@ -54,10 +54,10 @@ func remap_starman(texture: Texture2D) -> Texture2D:
 			authored_sheet = _starman_sheets[authored_sheet]
 		if frame == null:
 			return authored_sheet
-		var result := frame.duplicate() as AtlasTexture
-		result.atlas = authored_sheet
-		_starman_frames[texture] = result
-		return result
+		var authored_frame := frame.duplicate() as AtlasTexture
+		authored_frame.atlas = authored_sheet
+		_starman_frames[texture] = authored_frame
+		return authored_frame
 	if not _starman_sheets.has(source):
 		_starman_sheets[source] = _recolor_sheet(source)
 	var replacement := _starman_sheets[source]

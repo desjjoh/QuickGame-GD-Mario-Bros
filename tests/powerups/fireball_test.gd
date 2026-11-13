@@ -109,6 +109,7 @@ func _ready() -> void:
 		await check_throw_pose(luigi, 0.0, false, 7)
 		await check_throw_pose(luigi, 75.0, false, 3)
 		await check_throw_pose(luigi, 150.0, false, 1)
+		await check_throw_pose(luigi, 150.0, false, 2, true)
 		await check_throw_pose(luigi, 0.0, true, 7)
 		await check_throw_pose(luigi, 150.0, true, 2)
 	ControllerHandler.set_physics_process(true)
@@ -454,15 +455,15 @@ func sample_run(player: Mario) -> void:
 	player._physics_process(STEP)
 
 
-func check_throw_pose(luigi: bool, speed: float, air: bool, duration: int) -> void:
+func check_throw_pose(luigi: bool, speed: float, air: bool, duration: int, skid := false) -> void:
 	var level := await make_level(false, luigi)
 	var player := level.player as Mario
 	player._physics_process(STEP)
 	assert(player.body.is_on_floor())
 	player.body.velocity.x = -speed if luigi else speed
 	player.sprite.flip_h = luigi
-	ControllerHandler.input_left = 1.0 if luigi and speed > 0.0 else 0.0
-	ControllerHandler.input_right = 1.0 if not luigi and speed > 0.0 else 0.0
+	ControllerHandler.input_left = 1.0 if luigi != skid and speed > 0.0 else 0.0
+	ControllerHandler.input_right = 1.0 if luigi == skid and speed > 0.0 else 0.0
 	ControllerHandler.input_secondary = true
 	if air:
 		player._physics_process(STEP)  # Establish the grounded cadence before takeoff.
@@ -479,20 +480,29 @@ func check_throw_pose(luigi: bool, speed: float, air: bool, duration: int) -> vo
 			var shot := level.world_objects.get_child(0) as Fireball
 			assert(shot != null)
 			var feet := player.body.global_position
-			var expected_x := floorf(feet.x) - (8.0 if luigi else 0.0)
+			var expected_x := floorf(feet.x) - (8.0 if player.sprite.flip_h else 0.0)
 			var expected_y := floorf(feet.y) - 28.0 if air else 180.0
 			assert(shot.global_position == Vector2(expected_x, expected_y))
 			assert(not shot.sprite.z_as_relative and shot.sprite.z_index == DRAW_ORDER.FIREBALL)
 		assert(pose.visible == (tick < duration), "Throw duration at tick %s" % tick)
 		if pose.visible:
-			assert(pose._ticks_left == duration - tick - (0 if not air and speed > 0.0 else 1))
+			var walking := not air and not skid and speed > 0.0
+			assert(pose._ticks_left == duration - tick - (0 if walking else 1))
 			assert(pose._keep_feet == (speed > 0.0))
 			if speed > 0.0:
-				var expected_feet := player.fire_form.jump if air else player.fire_form.walk[0]
-				assert(pose._feet_texture == expected_feet)
+				assert(pose._feet_texture == player.sprite.texture)
+				if skid:
+					assert(player.state_machine.current_state is MarioSlideState)
+					assert(pose._feet_texture == player.fire_form.skid)
 		ControllerHandler.input_secondary_just_pressed = false
 	assert(player.sprite.self_modulate == Color.WHITE)
 	assert(level.world_objects.get_child_count() == 1)
+	if not air and not skid and speed == 75.0:
+		pose.update_pose(4, true, true)
+		player.sprite.texture = player.fire_form.walk[1]
+		pose.update_pose(0, true, true)
+		assert(pose._feet_texture == player.fire_form.walk[1])
+		pose.clear()
 	if not air and speed == 0.0:
 		ControllerHandler.input_secondary_just_pressed = true
 		player._physics_process(STEP)

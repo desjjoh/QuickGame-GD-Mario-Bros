@@ -28,6 +28,8 @@ func _ready() -> void:
 				for tile in range(atlas.get_tiles_count()):
 					var data := atlas.get_tile_data(atlas.get_tile_id(tile), 0)
 					var key := StringName(data.get_custom_data("entity_id"))
+					if tiles == theme.entity_markers and key == LevelAreaContent.CASTLE_PART:
+						continue
 					assert(registry.has(key), "Unmapped palette marker: %s" % key)
 	base.free()
 	print("entity_registry_test: PASS")

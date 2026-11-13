@@ -178,12 +178,13 @@ func award_shell_kick(enemy: BaseEnemy, world_position: Vector2, interval: int) 
 		enemy.award_extra_life(world_position)
 
 
-func advance_scripted_walk(direction: float, delta: float) -> void:
+func advance_scripted_walk(direction: float, delta: float, animate_in_air := true) -> void:
 	horizontal_movement.apply(body, motion_values, direction, delta)
 	face_direction(direction)
 	vertical_movement.apply_gravity(motion_values, delta)
 	move_body()
-	update_scripted_walk_animation()
+	if animate_in_air or has_floor_support():
+		update_scripted_walk_animation()
 
 
 func update_scripted_walk_animation() -> void:

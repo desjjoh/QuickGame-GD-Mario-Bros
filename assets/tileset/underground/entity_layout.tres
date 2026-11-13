@@ -5,7 +5,6 @@
 [ext_resource type="Texture2D" uid="uid://bleoif3h1w3iw" path="res://assets/tileset/underground/previews/castle.png" id="castle"]
 [ext_resource type="Texture2D" uid="uid://ey7pbemvbc8v" path="res://assets/palettes/underground/tileset/Palette 4 (Coins and Interactibles).png" id="coin"]
 [ext_resource type="Texture2D" uid="uid://cthv5vxf3t1mv" path="res://assets/tileset/underground/previews/flagpole.png" id="flagpole"]
-[ext_resource type="Texture2D" uid="uid://dy6q3mjh18ndw" path="res://assets/palettes/overworld/tileset/Palette 4 (Coins and Interactibles).png" id="hidden_art"]
 [ext_resource type="Texture2D" uid="uid://dnvspcge3gjbk" path="res://assets/tileset/underground/previews/sideways_pipe_entrance.png" id="side"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_brick"]
@@ -34,6 +33,25 @@ texture = ExtResource("3_alternate")
 margins = Vector2i(32, 0)
 0:0/0 = 0
 0:0/0/custom_data_0 = "reward_brick_alternate"
+
+[sub_resource type="TileSetAtlasSource" id="castle_parts"]
+resource_name = "Castle parts"
+texture = ExtResource("3_alternate")
+margins = Vector2i(48, 0)
+1:0/0 = 0
+1:0/0/custom_data_0 = "castle_part"
+2:0/0 = 0
+2:0/0/custom_data_0 = "castle_part"
+3:0/0 = 0
+3:0/0/custom_data_0 = "castle_part"
+0:1/0 = 0
+0:1/0/custom_data_0 = "castle_part"
+1:1/0 = 0
+1:1/0/custom_data_0 = "castle_part"
+2:1/0 = 0
+2:1/0/custom_data_0 = "castle_part"
+3:1/0 = 0
+3:1/0/custom_data_0 = "castle_part"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_alternate"]
 resource_name = "Alternate brick entity"
@@ -83,7 +101,7 @@ margins = Vector2i(0, 16)
 
 [sub_resource type="TileSetAtlasSource" id="hidden_question"]
 resource_name = "Hidden Question Block"
-texture = ExtResource("hidden_art")
+texture = ExtResource("coin")
 margins = Vector2i(48, 32)
 0:0/0 = 0
 0:0/0/custom_data_0 = "hidden_question_block"
@@ -102,3 +120,4 @@ sources/7 = SubResource("coin")
 sources/9 = SubResource("hidden_question")
 sources/12 = SubResource("reward_brick")
 sources/13 = SubResource("reward_brick_alternate")
+sources/15 = SubResource("castle_parts")

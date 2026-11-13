@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/items/toad.png" id="toad"]
+[ext_resource type="Theme" path="res://scenes/ui/hud/hud_theme.tres" id="theme"]
+[ext_resource type="Script" path="res://scripts/levels/endings/castle_rescue.gd" id="rescue"]
+
+[node name="CastleRescue" type="Node2D"]
+texture_filter = 1
+script = ExtResource("rescue")
+
+[node name="PlayerStop" type="Marker2D" parent="."]
+position = Vector2(132, 208)
+
+[node name="Toad" type="Sprite2D" parent="."]
+position = Vector2(144, 176)
+texture = ExtResource("toad")
+centered = false
+z_index = 5
+z_as_relative = false
+
+[node name="Messages" type="Node2D" parent="."]
+
+[node name="Thanks" type="Label" parent="Messages"]
+visible = false
+offset_left = 64.0
+offset_top = 80.0
+offset_right = 192.0
+offset_bottom = 88.0
+mouse_filter = 2
+theme = ExtResource("theme")
+text = "THANK YOU MARIO!"
+
+[node name="RescueMessage" type="Label" parent="Messages"]
+visible = false
+offset_left = 40.0
+offset_top = 112.0
+offset_right = 216.0
+offset_bottom = 136.0
+mouse_filter = 2
+theme = ExtResource("theme")
+theme_override_constants/line_spacing = 8
+text = "BUT OUR PRINCESS IS IN\nANOTHER CASTLE!"

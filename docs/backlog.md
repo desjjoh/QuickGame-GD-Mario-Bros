@@ -1,9 +1,5 @@
 # Backlog
 
-## World 1-3 verification
-
-- Play through 1-3 from spawn to the Large Castle ending. Check lift crossings, Red Parakoopa encounters, and the return to title in a normal run.
-
 ## Brick breaking
 
 Breaking physics, themed debris, the cached shatter cue, delayed follow-up bonk, and 50 points without a popup are implemented. Accepted bumps and breaks collect a world coin directly above the block. Goombas, Koopas, shells, and mushrooms share ordered block-hit delivery.
@@ -20,9 +16,12 @@ Keep the accepted cached audio. Live shared noise-channel playback was removed a
 
 ## Presentation and reference checks
 
+- Revisit Fire Bar starting angles. Compare the third bar in 1-4 across different approach speeds before deciding whether to reproduce the NES's reused angle.
+
+- Add the reference Bowser flame spawn cue and verify playback against Mesen. Implement the later castle attack and reveal variants as those stages are built. Review the traced front and rear Starman outcomes before implementing that interaction.
 - Compare castle-firework timing, blast playback, and the final music/hold handoff with Mesen.
 - Compare generated cues and music with Mesen, including loop seams, pulse takeover, and voice balance.
-- Add Castle and Water tracks when stages need them.
+- Add the Water track when a stage needs it.
 - Reproduce occasional camera hitching at high refresh rates in a rendered build.
 - Reproduce the intermittent moving-Koopa stray pixel and investigate fractional-position compositor differences.
 - Reproduce the natural right-edge shell/pair contact report. Controlled rejection tests verify retry behavior but do not establish that the reported encounter is resolved.

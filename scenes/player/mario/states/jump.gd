@@ -31,6 +31,9 @@ func process_physics(delta: float) -> BaseState:
 		air_direction = player.terrain.filter_air_direction(direction)
 	player.air_movement.apply(player.motion_values, air_direction, delta)
 	player.move_body(true)
+	# An axe can claim scripted motion inside the landing probe.
+	if player.scripted_motion_step.is_valid():
+		return null
 	if player.has_floor_support():
 		return landing_state(direction)
 	return null

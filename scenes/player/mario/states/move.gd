@@ -8,25 +8,22 @@ extends PlayerState
 
 var _previous_animation_speed: float = 1.0
 var _falling: bool = false
-var _defer_growth_vertical := false
+var _defer_transformation_vertical := false
 
 
-func defer_growth_fall_step() -> void:
-	_defer_growth_vertical = true
+func defer_transformation_fall_step() -> void:
+	_defer_transformation_vertical = true
 
 
 func enter() -> void:
 	_falling = false
 	var mario := get_player() as Mario
 	_previous_animation_speed = mario.animation_player.speed_scale
-	_update_walk_animation(mario)
-
-	# Apply the initial texture now rather than waiting for another animation tick.
-	mario.animation_player.advance(0.0)
+	mario.walk_animation.begin(mario.animation_player)
 
 
 func exit() -> void:
-	_defer_growth_vertical = false
+	_defer_transformation_vertical = false
 	if _falling:
 		get_player().air_movement.end(get_player().motion_values)
 		get_player().motion_values.remove_modifier(&"passive_fall")
@@ -36,6 +33,7 @@ func exit() -> void:
 
 func process_physics(delta: float) -> BaseState:
 	var player := get_player()
+	var previous_speed := player.body.velocity.x
 	var direction := prepare_horizontal_motion()
 	var next := ground_transition(jump_state, self)
 	if next != null:
@@ -54,9 +52,14 @@ func process_physics(delta: float) -> BaseState:
 	player.face_direction(direction)
 	player.body.velocity.y = 0.0
 	player.move_body()
+	if player.scripted_motion_step.is_valid():
+		return null
 
 	var mario := player as Mario
-	_update_walk_animation(mario)
+	if not mario.form_controller.is_crouched:
+		mario.walk_animation.advance_pose(mario.animation_player, previous_speed)
+	else:
+		mario.walk_animation.pose_index = 0
 
 	if is_zero_approx(direction) and is_zero_approx(player.body.velocity.x):
 		return idle_state
@@ -65,6 +68,7 @@ func process_physics(delta: float) -> BaseState:
 
 
 func _process_falling(player: BasePlayer, direction: float, delta: float) -> BaseState:
+	var previous_speed := player.body.velocity.x
 	if not _falling:
 		player.air_movement.begin(
 			player.motion_values,
@@ -76,30 +80,26 @@ func _process_falling(player: BasePlayer, direction: float, delta: float) -> Bas
 			&"passive_fall", {&"gravity": player.jump_action.falling_gravity}, 250
 		)
 	player.air_movement.apply(player.motion_values, direction, delta)
-	if _defer_growth_vertical:
-		# NES growth first runs a ground-control tick, then detects the fall.
+	if _defer_transformation_vertical:
+		# The NES runs one ground-control tick after transforming, then detects the fall.
 		# Retain upward momentum; vertical integration starts on the next tick.
-		_defer_growth_vertical = false
+		_defer_transformation_vertical = false
 		var vertical_speed := player.body.velocity.y
 		player.body.velocity.y = 0.0
 		player.move_body()
 		player.body.velocity.y = vertical_speed
 	else:
 		player.move_body(true)
+	if player.scripted_motion_step.is_valid():
+		return null
 	var mario := player as Mario
-	_update_walk_animation(mario)
 	if player.has_floor_support():
+		mario.walk_animation.advance_pose(mario.animation_player, previous_speed)
 		player.air_movement.end(player.motion_values)
 		player.motion_values.remove_modifier(&"passive_fall")
 		_falling = false
 		if is_zero_approx(direction) and is_zero_approx(player.body.velocity.x):
 			return idle_state
-	return null
-
-
-func _update_walk_animation(mario: Mario) -> void:
-	if mario.has_floor_support():
-		mario.walk_animation.apply(mario.animation_player, mario.body.velocity.x)
 	else:
-		# Preserve both the current texture and loop position during passive falls.
-		mario.animation_player.speed_scale = 0.0
+		mario.walk_animation.show_pose(mario.animation_player)
+	return null

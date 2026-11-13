@@ -117,27 +117,32 @@ func _hit_enemies(view: Rect2) -> void:
 	var first_x := floorf(view.position.x)
 	var last_x := floorf(view.end.x) - 1.0
 	var targets: Array[BaseEnemy] = []
+	var overlaps: Dictionary[BaseEnemy, Array] = {}
 	for node in get_tree().get_nodes_in_group(BaseEnemy.FIREBALL_TARGETS):
 		var enemy := node as BaseEnemy
 		if not _area.is_ancestor_of(enemy) or not enemy.can_contact_fireball():
 			continue
-		var bounds := enemy.projectile_target_bounds()
-		var origin_x := enemy.body.global_position.x - 8.0
-		if (
-			not bounds.has_area()
-			or origin_x < first_x - ENEMY_LEFT_EDGE_ALLOWANCE
-			or origin_x >= last_x + 1.0
-			or bounds.position.y < view.position.y
-			or bounds.end.y > view.end.y
-		):
-			continue
-		# The NES clamps both inclusive endpoints, even if they land on the same pixel.
-		var left := clampf(bounds.position.x, first_x, last_x)
-		var right := clampf(bounds.end.x, first_x, last_x)
-		bounds.position.x = left
-		bounds.size.x = right - left
-		if shot_bounds.intersects(bounds, true):
-			targets.append(enemy)
+		for bounds: Rect2 in enemy.fireball_target_boxes():
+			var live_box := bounds
+			var origin_x := enemy.fireball_box_origin_x(bounds)
+			if (
+				not bounds.has_area()
+				or origin_x < first_x - ENEMY_LEFT_EDGE_ALLOWANCE
+				or origin_x >= last_x + 1.0
+				or bounds.position.y < view.position.y
+				or bounds.end.y > view.end.y
+			):
+				continue
+			# The NES clamps both inclusive endpoints, even if they land on the same pixel.
+			var left := clampf(bounds.position.x, first_x, last_x)
+			var right := clampf(bounds.end.x, first_x, last_x)
+			bounds.position.x = left
+			bounds.size.x = right - left
+			if shot_bounds.intersects(bounds, true):
+				if not overlaps.has(enemy):
+					targets.append(enemy)
+					overlaps[enemy] = []
+				overlaps[enemy].append(live_box)
 	if targets.is_empty():
 		return
 	targets.sort_custom(
@@ -149,10 +154,12 @@ func _hit_enemies(view: Rect2) -> void:
 	# An eligible overlap consumes the shot even if the receiver resists the hit.
 	burst_tick = 0
 	for enemy in targets:
-		if is_instance_valid(enemy) and enemy.can_contact_fireball():
-			enemy.receive_hit(
-				EntityHit.new(_shooter, &"fireball", Vector2(signf(_horizontal_step), 0))
-			)
+		for bounds: Rect2 in overlaps[enemy]:
+			if not is_instance_valid(enemy) or not enemy.can_contact_fireball():
+				break
+			var hit := EntityHit.new(_shooter, &"fireball", Vector2(signf(_horizontal_step), 0))
+			hit.fireball_target = bounds
+			enemy.receive_hit(hit)
 
 
 func _begin_burst() -> void:

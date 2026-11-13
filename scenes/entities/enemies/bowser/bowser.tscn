@@ -1,0 +1,65 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/enemies/base/base_enemy.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/enemies/bowser/bowser.gd" id="bowser"]
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/enemies/bowser.png" id="art"]
+[ext_resource type="Script" path="res://scenes/components/motion/motion_values.gd" id="motion"]
+[ext_resource type="Script" path="res://scenes/components/motion/vertical_movement.gd" id="vertical"]
+
+[sub_resource type="RectangleShape2D" id="contact"]
+size = Vector2(16, 19)
+
+[node name="Bowser" instance=ExtResource("base")]
+script = ExtResource("bowser")
+
+[node name="Body" parent="."]
+position = Vector2(0, 0)
+collision_mask = 0
+
+[node name="CollisionShape2D" parent="Body"]
+disabled = true
+
+[node name="Sprite2D" parent="Body"]
+position = Vector2(-16, 1)
+texture = ExtResource("art")
+centered = false
+flip_h = true
+hframes = 4
+
+[node name="EnemyContact" parent="Body"]
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape2D" parent="Body/BlockHitReceiver"]
+disabled = true
+
+[node name="PlayerContact" type="Area2D" parent="Body"]
+position = Vector2(8, 11.5)
+collision_layer = 0
+collision_mask = 1024
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/PlayerContact"]
+shape = SubResource("contact")
+
+[node name="RearContact" type="Area2D" parent="Body"]
+position = Vector2(-8, 19.5)
+collision_layer = 0
+collision_mask = 1024
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/RearContact"]
+shape = SubResource("contact")
+
+[node name="Motion" type="Node" parent="." node_paths=PackedStringArray("body")]
+script = ExtResource("motion")
+body = NodePath("../Body")
+base_gravity = 210.9375
+base_max_fall_speed = 120.0
+
+[node name="VerticalMovement" type="Node" parent="Motion"]
+script = ExtResource("vertical")
+
+[editable path="Body/BlockHitReceiver"]

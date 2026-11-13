@@ -505,6 +505,8 @@ func _load_area(area: BaseLevelArea, starting_at_halfway := false) -> void:
 			var view_width := camera.get_viewport_rect().size.x / camera.zoom.x
 			enemy_cutoff_x = floorf(camera.scroll_left_limit + view_width) - 1.0
 	area_content.populate(area, snapshot.get("entities", {}), enemy_cutoff_x)
+	if ending_presentation != null:
+		ending_presentation.bind_area(area)
 	_spawned_areas[area.get_instance_id()] = true
 
 
@@ -635,7 +637,12 @@ func cancel_ending() -> void:
 
 func notify_completion_started() -> void:
 	# GameHandler calls this after claiming completion and before transitioning.
-	MusicHandler.stop_area(self)
+	if (
+		not ending_in_progress
+		or ending_presentation == null
+		or not ending_presentation.keeps_area_music_on_start()
+	):
+		MusicHandler.stop_area(self)
 	completion_started.emit()
 
 

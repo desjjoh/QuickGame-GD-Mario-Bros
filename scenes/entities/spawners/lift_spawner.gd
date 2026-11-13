@@ -1,12 +1,51 @@
+@tool
 extends EntitySpawner
 ## One authored lane, with a separate lifecycle from the enemy registry.
 
 const CYCLE_HEIGHT := 256
 const LIFT_X_OFFSET := 12.0
+const PREVIEW := preload("res://scenes/entities/spawners/lift_preview.gd")
 
-@export var direction: MovingLift.Direction = MovingLift.Direction.UP
+@export var direction: MovingLift.Direction = MovingLift.Direction.UP:
+	set(value):
+		direction = value
+		if Engine.is_editor_hint():
+			queue_redraw()
+@export var platform_width: MovingLift.Width = MovingLift.Width.MEDIUM:
+	set(value):
+		platform_width = value
+		if Engine.is_editor_hint():
+			queue_redraw()
 ## Starting distances from this marker, in pixels along the travel direction.
-@export var initial_offsets: Array[int] = [0]
+@export var initial_offsets: Array[int] = [0]:
+	set(value):
+		initial_offsets = value
+		if Engine.is_editor_hint():
+			queue_redraw()
+
+
+func _ready() -> void:
+	if Engine.is_editor_hint():
+		set_process(false)
+		set_physics_process(false)
+		queue_redraw()
+		return
+	super()
+
+
+func _exit_tree() -> void:
+	if not Engine.is_editor_hint():
+		super()
+
+
+func _draw() -> void:
+	if not Engine.is_editor_hint():
+		return
+	var width := platform_width * MovingLift.TILE_WIDTH
+	PREVIEW.draw_path(self, Vector2.ZERO, Vector2(0, CYCLE_HEIGHT * direction), width)
+	for offset in initial_offsets:
+		var origin := Vector2(0, clampi(offset, 0, CYCLE_HEIGHT - 1) * direction)
+		PREVIEW.draw_surface(self, origin, width)
 
 
 func update_activity(_wake_region: Rect2, _sleep_region: Rect2, theme: AreaTheme) -> void:
@@ -47,5 +86,6 @@ func _spawn_lift(y: float, theme: AreaTheme, fraction := 0) -> void:
 	lift.direction = direction
 	lift.outgoing_y = CYCLE_HEIGHT * direction
 	lift.fraction = fraction
+	lift.platform_width = platform_width
 	lift.spawner_manages_activity = true
 	_attach_actor(lift, theme)

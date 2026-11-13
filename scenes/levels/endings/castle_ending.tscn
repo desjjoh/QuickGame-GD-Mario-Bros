@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/levels/endings/castle_ending.gd" id="ending"]
+[ext_resource type="Script" path="res://scripts/levels/endings/castle_ending_guides.gd" id="guides"]
+
+[node name="CastleEnding" type="Node"]
+script = ExtResource("ending")
+
+[node name="CollapseShatter" type="AudioStreamPlayer" parent="."]
+bus = &"NES_Mix"
+
+[node name="EditorGuides" type="Node2D" parent="."]
+z_index = 100
+script = ExtResource("guides")

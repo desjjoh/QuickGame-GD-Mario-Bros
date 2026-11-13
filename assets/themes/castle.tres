@@ -19,29 +19,27 @@
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/interactibles/pipes/pipe-top-h-1.tres" id="art_14"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/interactibles/pipes/pipe-top-h-2.tres" id="art_15"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/tileset/block.tres" id="art_16"]
+[ext_resource type="Texture2D" uid="uid://2wm1ped6ajgq" path="res://assets/palettes/castle/enemies/bowser.png" id="bowser"]
 [ext_resource type="Texture2D" uid="uid://cg7iopsn3q2hb" path="res://assets/palettes/castle/tileset/Palette 1 (Ground and Stone).png" id="castle_art"]
 [ext_resource type="TileSet" uid="uid://mf4c2d78bbax" path="res://assets/tileset/castle/enemy_layout.tres" id="enemy_markers"]
+[ext_resource type="Resource" uid="uid://b461csymamymg" path="res://assets/player/forms/fire_palettes/palette_3.tres" id="fire_3"]
+[ext_resource type="Resource" uid="uid://c81uarekeqbcv" path="res://assets/player/forms/fire_palettes/palette_5.tres" id="fire_5"]
+[ext_resource type="Resource" path="res://assets/player/forms/fire_palettes/palette_7.tres" id="fire_7"]
+[ext_resource type="Script" uid="uid://btb1x05u3u4un" path="res://scripts/player/player_palette.gd" id="fire_palette_script"]
 [ext_resource type="Texture2D" uid="uid://bmkj4wcy8xcc5" path="res://assets/palettes/castle/misc/flagpole-flag.png" id="flag_banner"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/misc/flagpole-pole.tres" id="flag_pole"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/misc/flagpole-top.tres" id="flag_top"]
 [ext_resource type="Texture2D" uid="uid://ca512sora18x6" path="res://assets/palettes/castle/enemies/goomba.png" id="goomba"]
+[ext_resource type="Texture2D" path="res://assets/palettes/castle/interactibles/blocks/hidden-question-block.tres" id="hidden_question"]
 [ext_resource type="Texture2D" uid="uid://tt0q4hh8heuf" path="res://assets/palettes/castle/ui/hud-coin.png" id="hud_coin"]
+[ext_resource type="Texture2D" uid="uid://benfeb50qnusc" path="res://assets/palettes/castle/enemies/koopa.png" id="koopa"]
 [ext_resource type="Texture2D" uid="uid://ch6isjg8o2hs1" path="res://assets/palettes/castle/misc/green-mushroom.png" id="one_up"]
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/misc/starman.png" id="starman"]
+[ext_resource type="Texture2D" uid="uid://dtpluryis8iqj" path="res://assets/palettes/castle/enemies/piranha-plant.png" id="piranha_plant"]
+[ext_resource type="Texture2D" uid="uid://djog17cms0dqd" path="res://assets/palettes/castle/misc/starman.png" id="starman"]
 [ext_resource type="FontFile" uid="uid://cb8f3xidb7qhn" path="res://assets/palettes/castle/ui/alphabet-alt.fnt" id="title_accent"]
 [ext_resource type="Texture2D" uid="uid://dgoot5f5wt26o" path="res://assets/palettes/castle/ui/start-title.png" id="title_card"]
 [ext_resource type="Texture2D" uid="uid://0vk0wefn4b7g" path="res://assets/palettes/castle/ui/start-cursor.png" id="title_cursor"]
 [ext_resource type="Texture2D" path="res://assets/palettes/castle/interactibles/items/coins.tres" id="world_coin"]
-
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/enemies/koopa.png" id="koopa"]
-
-[ext_resource type="Resource" path="res://assets/player/forms/fire_palettes/palette_5.tres" id="fire_5"]
-[ext_resource type="Resource" path="res://assets/player/forms/fire_palettes/palette_3.tres" id="fire_3"]
-[ext_resource type="Resource" path="res://assets/player/forms/fire_palettes/palette_7.tres" id="fire_7"]
-
-[ext_resource type="Script" path="res://scripts/player/player_palette.gd" id="fire_palette_script"]
-
-[ext_resource type="Texture2D" path="res://assets/palettes/castle/enemies/piranha-plant.png" id="piranha_plant"]
 
 [resource]
 script = ExtResource("1")
@@ -52,11 +50,13 @@ decorations = ExtResource("3")
 entity_markers = ExtResource("4")
 enemy_markers = ExtResource("enemy_markers")
 texture_overrides = Dictionary[String, Texture2D]({
-"res://assets/palettes/overworld/enemies/koopa.png": ExtResource("koopa"),
+"res://assets/palettes/overworld/enemies/bowser.png": ExtResource("bowser"),
 "res://assets/palettes/overworld/enemies/goomba.png": ExtResource("goomba"),
+"res://assets/palettes/overworld/enemies/koopa.png": ExtResource("koopa"),
 "res://assets/palettes/overworld/enemies/piranha-plant.png": ExtResource("piranha_plant"),
 "res://assets/palettes/overworld/interactibles/blocks/brick-alternate.tres": ExtResource("art_0"),
 "res://assets/palettes/overworld/interactibles/blocks/brick.tres": ExtResource("art_1"),
+"res://assets/palettes/overworld/interactibles/blocks/hidden-question-block.tres": ExtResource("hidden_question"),
 "res://assets/palettes/overworld/interactibles/blocks/question-block-2.tres": ExtResource("art_2"),
 "res://assets/palettes/overworld/interactibles/blocks/question-block-3.tres": ExtResource("art_3"),
 "res://assets/palettes/overworld/interactibles/blocks/question-block-4.tres": ExtResource("art_4"),

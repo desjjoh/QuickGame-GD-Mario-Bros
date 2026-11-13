@@ -6,6 +6,8 @@ var attacker: BaseEntity
 var maneuver: StringName
 var direction: Vector2
 var strength: float
+## Live target box selected by the fireball scan, before screen clipping.
+var fireball_target := Rect2()
 ## The block that delivered a bump, separate from the actor that struck it.
 var struck_block: BaseEntity
 

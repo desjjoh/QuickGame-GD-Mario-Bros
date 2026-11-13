@@ -118,9 +118,9 @@ func _ready() -> void:
 
 
 func update_scripted_walk_animation() -> void:
-	if animation_player.current_animation != &"walk":
+	if not animation_player.is_playing() or animation_player.current_animation != &"walk":
 		animation_player.play(&"walk")
-	walk_animation.apply(animation_player, body.velocity.x)
+	walk_animation.apply_scripted_cadence(animation_player, body.velocity.x)
 
 
 @onready var terrain: MarioTerrain = $Motion/MarioTerrain
@@ -130,6 +130,7 @@ func _physics_process(delta: float) -> void:
 	if form_presentation.blocks_actor_motion():
 		_throw_pose.clear()
 		return
+	walk_animation.tick()
 	var grounded := has_floor_support()
 	var previous_speed := body.velocity.x
 	var state := state_machine.current_state as PlayerState

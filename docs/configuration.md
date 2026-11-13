@@ -35,7 +35,7 @@ Instance `scenes/entities/warp_zone/warp_zone.tscn` under the area's **WorldObje
 
 Set **Pipe Occupant** on the zone to give its pipes plants before the reveal. Revealing the zone removes those occupants and enables the configured entrances. The 1-2 instance shows **1 1 1** because each pipe routes to 1-1.
 
-**Presentations → FlagpoleEnding** binds to the painted flagpole and castle by area ID and cell. In 1-2, the ending uses the SurfaceArea markers. The castle in IntroArea provides the opening doorway. In Overworld areas, paint **Large Castle (10x11)** on **EntityLayout** for a tall finish like 1-3. The side walls extend two tiles left of the stamped cell. Set **Castle Cell** to the cell where you painted the stamp. This variant supplies the left doorway and shares the castle flag and fireworks sequence.
+**Presentations → FlagpoleEnding** binds to the painted flagpole and castle by area ID and cell. In 1-2, the ending uses the SurfaceArea markers. The castle in IntroArea provides the opening doorway. In Overworld areas, paint **Large Castle (9x11)** on **EntityLayout** for a tall finish like 1-3. The wall extends two tiles left of the stamped cell. Paint individual **Castle parts** on **EntityLayout** for scenery that participates in the shadow effect. These tiles have no collision. Set **Castle Cell** to the cell where you painted the stamp. This variant supplies the left doorway and shares the castle flag and fireworks sequence.
 
 ## Area background colour
 
@@ -49,6 +49,7 @@ Open `scenes/main/game.tscn`, select **Game**, and assign **Presentation → Tit
 
 - Set **Area Left** and **Area Right** on the area camera to define the playable scroll range. A one-screen area starting at its origin uses 0 and 256, wherever it sits in the level scene.
 - Set the timer limit and enable flag on the level. The HUD keeps the TIME label and hides the digits on the start screen, during transitions such as level intro, TIME UP, and GAME OVER, and whenever the timer is disabled.
+- Set **Background Music** on the area to choose Overworld, Underground, Castle, or None. 1-4 selects Castle, with separately generated normal and hurry-up loops.
 - Hurry-up plays once when the timer falls from 100 to 99. A timed stage authored at 1–99 plays the warning at gameplay reveal and then uses the fast music. Starting below 100 is a deliberate extension for authored stages.
 - In `scenes/main/game.tscn`, select **Game → Gameplay → Save Entity State Through Death**. Enabled by default, it carries saved entity state and runtime tile changes into the next attempt. Disable it to reload the stage's authored state after a death. Each entity's persistence setting still controls what is saved between area visits. Score and coins in the HUD carry forward in either mode, and death still costs a life.
 - The Game scene supplies the stage list and the shared shadow master toggle. The first stage is 1-1. Open `scenes/main/game.tscn`, select **Game**, and use **Presentation → Shadow Style** to load `assets/shadows/soft.tres`, `crisp.tres`, or `outer_blur.tres`. Clear the field for no shadow effect. Outer Blur is the current authored Game selection. One selection applies to the title and every stage; standalone F6 previews read the saved Game selection and master toggle. Decorations remain outside the effect.
@@ -105,8 +106,28 @@ Instance `scenes/entities/spawners/lift_spawner.tscn` under the area's **WorldOb
 
 For a single back-and-forth lift, instance `scenes/entities/spawners/single_lift_spawner.tscn` under **WorldObjects** and choose **Horizontal** or **Vertical** in **Axis**. Place the node at the left end of the platform's starting surface. A horizontal lift starts moving left. A vertical lift starting in the upper half of the reference playfield moves down first. The camera activates each spawner once per area visit. The lift is freed when it leaves the camera's cleanup bounds.
 
+Both spawners offer **Platform Width**. Small, Medium, and Large are 32, 48, and 64 pixels wide. Medium is the default. The width controls both the artwork and the contact surface.
+
+On a single lift, leave **Travel Distance** at −1 to use the original oscillation, or set it to 0 for a fixed platform. A positive value sets the distance from the marker to the turn point, left for horizontal lifts and down for vertical lifts. The lift travels back and forth at 15/16 pixel per physics tick. In 1-4, the Small horizontal lift uses the original oscillation.
+
+The 2D editor draws a cyan travel line and surfaces at the selected width. Single lifts show the travel span and starting surface. Repeating lanes show the full cycle and the starting surfaces from **Initial Offsets**.
+
+## Place a castle bridge
+
+Instance `scenes/entities/castle/castle_bridge.tscn` under the Castle area's **WorldObjects**. Align its origin to the top-left cell of the deck. **Deck** is a solid TileMapLayer, **Chain** is decorative, and **Axe** sits above the step at the far end. The axe shares the global palette animation and emits `touched` once when Mario lands on it.
+
+Instance `scenes/levels/endings/castle_ending.tscn` under **Presentations** and assign it to the level's **Ending Presentation**. Set **Area ID**, **Bridge Path**, and **Rescue Path** to the ending area and its bridge and rescue scenes. The paths start at the area node. **Approach Camera Left** and **Rescue Camera Left** are measured from the area's origin. The axe starts a hold, and the presentation releases the approach stop when the scripted walk starts. In 1-4 the camera holds at 2022 px and scrolls to 2304 px during the walk.
+
+The 2D editor draws labeled guides for **Approach Camera Left**, **Rescue Camera Left**, and **Boss Fall Cutoff Y** on each placed Castle Ending. The vertical lines mark the left edge of each camera position. The horizontal line marks the fall cutoff across the approach view. The guides follow the area selected by **Area ID**.
+
+Set **Boss Path** relative to the ending area to link its boss actor. With a live boss, Castle Ending holds the camera as the bridge removes the chain and then its deck cells from right to left every four physics ticks. Each tile loses its collision, and the final removal emits `collapse_finished`. With an empty path, missing boss, or defeated boss, the axe disappears and the scripted walk begins on tick 3. The deck and chain stay intact.
+
+Instance `scenes/levels/endings/castle_rescue.tscn` in **WorldObjects**. Place its origin at the final camera's top-left so the text aligns with the NES tile grid. Set **CastleRescue → PlayerStop** on the floor where Mario or Luigi should stop and enter Idle. The rescue scene provides Toad and the two messages. Castle Ending starts the castle-clear cue with the walk, reveals the character's thank-you once the camera settles, then shows the rescue message 128 ticks later. The stage list supplies the next stage.
+
 ## Deliberate gameplay differences
 
 Enemy stomp scoring omits the NES shared StompTimer score modifier. A stomped Koopa instead has a shell-local 12-tick grace window; a kick does not refresh it. These rules are separate from the independent timed-coin windows above.
 
 Area and pipe arrivals use a shared 17-active-physics-tick hold (about 0.28 seconds at 60 Hz), including grounded arrivals. Animated exits wait before emergence and release controls immediately afterward. Direct arrivals apply the input lock after placement. Death respawns restore control when the stage is revealed.
+
+Add `scenes/entities/spawners/fire_bar_spawner.tscn` under an area's **WorldObjects**. Place its origin at the pivot and set **Length**, **Speed**, and **Direction** in the Inspector. The editor draws the pivot and nominal tip reach of 40 px for Short or 88 px for Long. To mount a Fire Bar on a spent block, paint the block on **GroundLayout** and put the spawner at the tile center. The first 1-4 bar is centered at (488, 168) pixels, over cell (30, 10).

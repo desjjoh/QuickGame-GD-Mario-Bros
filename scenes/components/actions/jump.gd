@@ -65,5 +65,10 @@ func end(values: MotionValues) -> void:
 	values.remove_modifier(&"jump")
 
 
+func use_falling_gravity(values: MotionValues) -> void:
+	_released = true
+	update(values, false)
+
+
 func reset_falling_gravity() -> void:
 	falling_gravity = entrance_falling_gravity

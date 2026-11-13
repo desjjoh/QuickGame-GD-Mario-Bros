@@ -106,7 +106,7 @@ func enter() -> void:
 		_walking = true
 		_play_animation(walk_animation_name)
 		if walk_cadence != null:
-			walk_cadence.apply(player.animation_player, _speed())
+			walk_cadence.apply_scripted_cadence(player.animation_player, _speed())
 		if player.animation_player != null:
 			player.animation_player.advance(0.0)
 

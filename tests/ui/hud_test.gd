@@ -5,6 +5,7 @@ func _ready() -> void:
 	var game := load("res://scenes/main/game.tscn").instantiate() as Node
 	game.start_with_title = false
 	game.transitions_enabled = false
+	game.start_stage_override = null
 	add_child(game)
 	var ui := game.get_node("UI") as Control
 	var hud := ui.get_node("HUD") as Control

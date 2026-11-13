@@ -41,6 +41,7 @@ func wait_phase(phase: StringName) -> void:
 
 func make_game(starting: int, animated: bool, timer_enabled: bool = true) -> Node:
 	var game: Node = load("res://scenes/main/game.tscn").instantiate()
+	game.start_stage_override = null
 	var fixture := load("res://tests/fixtures/silent_level.tscn").instantiate() as BaseLevel
 	fixture.starting_time = starting
 	fixture.timer_enabled = timer_enabled

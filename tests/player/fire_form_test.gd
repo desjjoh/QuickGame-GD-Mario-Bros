@@ -38,6 +38,15 @@ func check_fire(is_luigi: bool, theme_name: String) -> void:
 	add_child(level)
 	level.set_physics_process(false)
 	var player := level.player as Mario
+	# This palette trial starts grounded. Wait for terrain support before freezing the player.
+	await get_tree().physics_frame
+	await get_tree().process_frame
+	for attempt in range(30):
+		if player.has_floor_support():
+			break
+		await get_tree().physics_frame
+		await get_tree().process_frame
+	assert(player.has_floor_support())
 	player.set_physics_process(false)
 	var presentation := player.form_presentation
 	presentation.set_physics_process(false)
@@ -102,7 +111,8 @@ func check_fire(is_luigi: bool, theme_name: String) -> void:
 	player.damage.clear()
 	player.form_controller.configure(player, player.super_form)
 	assert(player.state_machine.change_state(player.get_node("StateMachine/Move")))
-	player.animation_player.seek(player.animation_player.get_animation(&"walk").length * 0.5, true)
+	player.walk_animation.pose_index = 2
+	player.walk_animation.show_pose(player.animation_player)
 	var walk_index := player.super_form.walk.find(player.sprite.texture)
 	assert(walk_index >= 0)
 	var region := (FIRE.walk[walk_index] as AtlasTexture).region

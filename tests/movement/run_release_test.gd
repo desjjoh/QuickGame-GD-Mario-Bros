@@ -51,6 +51,7 @@ func _ready() -> void:
 	ControllerHandler.enabled = false
 	for direction in [-1.0, 1.0]:
 		var game := make_game()
+		game.start_stage_override = null
 		add_child(game)
 		var player := GameHandler.current_player
 		player.set_physics_process(false)

@@ -33,6 +33,10 @@ func step_floor(player: BasePlayer, delta: float) -> FloorStep:
 		var top := _surface_at(body, feet + offset)
 		if not top.is_empty() and _can_cross_at_top(body, motion.x, top.position.y):
 			_settle_on_surface(body, target.x, top.position.y, delta)
+			var surface := top.collider as StaticBody2D
+			var axe := surface.get_parent() as CastleAxe if surface != null else null
+			if axe != null:
+				axe.touch(player)
 			return FloorStep.LAND
 
 	if is_zero_approx(motion.x):

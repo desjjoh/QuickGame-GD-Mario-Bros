@@ -62,7 +62,8 @@ func _ready() -> void:
 	assert(is_equal_approx(SoundHandler.get_sound(&"extra_life").get_length(), 48.0 / 60.0))
 	var timer_tick := SoundHandler.get_sound(&"timer_tick") as AudioStreamWAV
 	assert(is_equal_approx(timer_tick.get_length(), 6.0 / 60.0))
-	var timer_sample := roundi(5900 * 8.0 / 15.0)
+	var raw_timer_sample := roundi(5900 * 8.0 / 15.0)
+	var timer_sample := roundi(raw_timer_sample * db_to_linear(-11.78))
 	for offset in range(0, timer_tick.data.size(), 2):
 		assert(absi(timer_tick.data.decode_s16(offset)) == timer_sample)
 	SoundHandler.play_reward(&"coin")

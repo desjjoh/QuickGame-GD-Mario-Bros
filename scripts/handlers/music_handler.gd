@@ -1,18 +1,21 @@
 extends Node
 
-enum Track { OVERWORLD, UNDERGROUND, NONE }
+enum Track { OVERWORLD, UNDERGROUND, NONE, CASTLE }
 enum Pace { NORMAL, FAST, WARNING }
 
-const STARMAN_TRACK := Track.NONE + 1
+const STARMAN_TRACK := Track.CASTLE + 1
 const PIPE_OPENING_CUE := preload("res://assets/audio/music/pipe_opening.wav")
+const CASTLE_CLEAR_CUE := preload("res://assets/audio/music/castle_clear.wav")
 const STREAMS = {
 	Track.OVERWORLD: preload("res://assets/audio/music/overworld.wav"),
 	Track.UNDERGROUND: preload("res://assets/audio/music/underground.wav"),
+	Track.CASTLE: preload("res://assets/audio/music/castle.wav"),
 	STARMAN_TRACK: preload("res://assets/audio/music/starman.wav"),
 }
 const FAST_STREAMS = {
 	Track.OVERWORLD: preload("res://assets/audio/music/overworld_fast.wav"),
 	Track.UNDERGROUND: preload("res://assets/audio/music/underground_fast.wav"),
+	Track.CASTLE: preload("res://assets/audio/music/castle_fast.wav"),
 	STARMAN_TRACK: preload("res://assets/audio/music/starman_fast.wav"),
 }
 const FAST_OVERWORLD_SECTIONS := preload("res://assets/audio/music/overworld_fast_sections.tres")
@@ -60,6 +63,11 @@ func _make_loops(streams: Dictionary) -> Dictionary[int, AudioStreamWAV]:
 func play_pipe_opening(level: Node) -> void:
 	_owner_id = level.get_instance_id()
 	_play_stream(PIPE_OPENING_CUE)
+
+
+func play_castle_clear(level: Node) -> void:
+	_owner_id = level.get_instance_id()
+	_play_stream(CASTLE_CLEAR_CUE)
 
 
 func play_area(level: Node, track: Track, starman: bool = false, pace: Pace = Pace.NORMAL) -> void:

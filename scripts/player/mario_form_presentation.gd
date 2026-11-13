@@ -178,16 +178,8 @@ func _remember_walk() -> void:
 	var animation := _mario.animation_player
 	if animation.current_animation != &"walk" or not animation.is_playing():
 		return
-	var form := _mario.form_controller.current_form
-	var index := form.walk.find(_mario.sprite.texture)
-	if index >= 0:
-		# Supplied sheets are cyclically ordered NES frames 1, 2, 0.
-		_walk_frame = (index + 1) % 3
-	var duration := animation.get_animation(&"walk").length / 3.0
-	var remaining := duration - fposmod(animation.current_animation_position, duration)
-	var rate := absf(animation.get_playing_speed())
-	if rate > 0.0:
-		_walk_timer = maxi(0, ceili(remaining / rate * 60.0 - 0.0001))
+	_walk_frame = _mario.walk_animation.pose_index
+	_walk_timer = _mario.walk_animation.ticks_left
 
 
 func _set_pose(texture: Texture2D, form: MarioForm) -> void:
@@ -222,16 +214,16 @@ func _apply_growth_normal(form: MarioForm) -> void:
 
 
 func _finish() -> void:
-	var growth := not shrinking and not _igniting
 	var airborne := not _mario.has_floor_support()
+	var resume_move := not shrinking and (not _igniting or airborne)
 	var velocity := _mario.body.velocity
 	cancel()
-	if growth and not _mario.is_dead and not _mario.is_shutdown:
+	if resume_move and not _mario.is_dead and not _mario.is_shutdown:
 		var next_state := _mario.get_node("StateMachine/Move") as MarioMoveState
 		_mario.state_machine.change_state(next_state)
 		_mario.body.velocity = velocity
 		if airborne:
-			next_state.defer_growth_fall_step()
+			next_state.defer_transformation_fall_step()
 		_seek_reference_walk_start()
 	finished.emit()
 

@@ -71,17 +71,7 @@ func begin(
 	source: TransportEntity,
 	animate_arrival: bool
 ) -> bool:
-	if (
-		level.is_shutdown
-		or level.transition_in_progress
-		or level.death_in_progress
-		or level.completion_in_progress
-		or pending
-		or not is_instance_valid(traveler)
-		or traveler != level.player
-		or traveler.is_shutdown
-		or destination == null
-	):
+	if not _can_begin(traveler, destination):
 		return false
 	var stage := destination.stage_scene
 	var area: BaseLevelArea
@@ -107,27 +97,53 @@ func begin(
 			return false
 	var state: PlayerTransportState = null
 	if source != null:
-		if (
-			not is_instance_valid(source)
-			or not source.is_inside_tree()
-			or not level.can_transport()
-			or level.active_area == null
-			or not level.active_area.is_ancestor_of(source)
-			or not source.can_start_transport(traveler)
-		):
+		if not _can_enter_source(source, traveler):
 			return false
 		state = source.get_transport_state(traveler)
 		if state == null:
 			return false
-	_transport_trip = {
-		"stage": stage,
-		"area": weakref(area) if area != null else null,
-		"definition": weakref(definition) if definition != null else null,
-		"area_id": destination.area_id,
-		"target_id": destination.target_id,
-		"source": weakref(source) if source != null else null,
-		"animate": animate_arrival
-	}
+	return _begin_trip(
+		{
+			"stage": stage,
+			"area": weakref(area) if area != null else null,
+			"definition": weakref(definition) if definition != null else null,
+			"area_id": destination.area_id,
+			"target_id": destination.target_id,
+			"source": weakref(source) if source != null else null,
+			"animate": animate_arrival
+		},
+		source,
+		state
+	)
+
+
+func _can_begin(traveler: BasePlayer, destination: TransportDestination) -> bool:
+	return (
+		not level.is_shutdown
+		and not level.transition_in_progress
+		and not level.death_in_progress
+		and not level.completion_in_progress
+		and not pending
+		and is_instance_valid(traveler)
+		and traveler == level.player
+		and not traveler.is_shutdown
+		and destination != null
+	)
+
+
+func _can_enter_source(source: TransportEntity, traveler: BasePlayer) -> bool:
+	return (
+		is_instance_valid(source)
+		and source.is_inside_tree()
+		and level.can_transport()
+		and level.active_area != null
+		and level.active_area.is_ancestor_of(source)
+		and source.can_start_transport(traveler)
+	)
+
+
+func _begin_trip(trip: Dictionary, source: TransportEntity, state: PlayerTransportState) -> bool:
+	_transport_trip = trip
 	pending = true
 	_transport_phase += 1
 	if source == null:
@@ -308,13 +324,21 @@ func _commit_transport(phase: int, under_cover: bool = false) -> void:
 		cancel(true)
 		return
 	if _transport_exiting:
-		_transport_state.commit_transfer()
-		_disconnect_transport_state()
-		pending = false
-		level.player.state_machine.stop(false)
-		level.player.face_direction(1.0)
-		_start_player_state()
+		_finish_arrival_animation()
 		return
+	_arrive_at_destination(under_cover)
+
+
+func _finish_arrival_animation() -> void:
+	_transport_state.commit_transfer()
+	_disconnect_transport_state()
+	pending = false
+	level.player.state_machine.stop(false)
+	level.player.face_direction(1.0)
+	_start_player_state()
+
+
+func _arrive_at_destination(under_cover: bool) -> void:
 	var trip := _transport_trip.duplicate()
 	var area := (trip["area"] as WeakRef).get_ref() as BaseLevelArea
 	var was_loaded := area.runtime_loaded

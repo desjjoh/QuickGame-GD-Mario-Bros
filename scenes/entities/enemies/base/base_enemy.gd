@@ -95,6 +95,7 @@ func _handle_player_contact(player: BasePlayer) -> void:
 		player.last_enemy_stomp_tick = Engine.get_physics_frames()
 		player.enemy_stomp_started_descending = descending
 		player.body.velocity.y = STOMP_REBOUND
+		player.jump_action.use_falling_gravity(player.motion_values)
 		player.play_sound_effect(SoundHandler.get_sound(&"stomp"))
 	else:
 		# Damage is guarded by the player, rather than the interaction latch.
@@ -137,6 +138,10 @@ func mark_defeated(hit: EntityHit) -> bool:
 	_defeated = true
 	defeated.emit(hit)
 	return true
+
+
+func is_defeated() -> bool:
+	return _defeated
 
 
 func _accept_hit(_hit: EntityHit) -> bool:
@@ -194,6 +199,14 @@ func projectile_target_bounds() -> Rect2:
 	if _player_contact_shape == null:
 		return Rect2()
 	return PLAYER_CONTACT.bounds(_player_contact_shape)
+
+
+func fireball_target_boxes() -> Array[Rect2]:
+	return [projectile_target_bounds()]
+
+
+func fireball_box_origin_x(_bounds: Rect2) -> float:
+	return body.global_position.x - 8.0
 
 
 func _can_hurt_player() -> bool:

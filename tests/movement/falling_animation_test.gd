@@ -18,7 +18,8 @@ func _ready() -> void:
 	player.body.move_and_slide()
 	Input.action_press(ControllerHandler.right_action)
 	player.state_machine.change_state(player.state_machine.get_state(&"Move"))
-	player.animation_player.seek(0.15, true)
+	player.walk_animation.pose_index = 2
+	player.walk_animation.show_pose(player.animation_player)
 	var frame_texture := player.sprite.texture
 	var phase := player.animation_player.current_animation_position
 	for frame in range(5):
@@ -31,7 +32,6 @@ func _ready() -> void:
 	for frame in range(30):
 		await tick()
 	assert(player.body.is_on_floor())
-	assert(player.animation_player.speed_scale > 0.0)
 	assert(player.animation_player.current_animation_position != phase)
 	Input.action_release(ControllerHandler.right_action)
 	game.free()

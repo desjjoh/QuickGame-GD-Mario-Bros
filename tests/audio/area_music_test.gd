@@ -2,7 +2,7 @@ extends Node
 
 
 func _ready() -> void:
-	var game := load("res://scenes/main/game.tscn").instantiate() as Node
+	var game := load("res://tests/fixtures/silent_game.tscn").instantiate() as Node
 	game.start_with_title = false
 	game.transitions_enabled = false
 	add_child(game)
