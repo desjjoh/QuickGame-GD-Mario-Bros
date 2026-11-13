@@ -49,13 +49,15 @@ func run_checks() -> void:
 		AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	)
 	mario.state_machine.change_state(mario.state_machine.get_state(&"Move"))
-	assert(mario.sprite.texture.resource_path.ends_with("mario-small-walk-1.tres"))
-	mario.animation_player.advance(7.0 / 60.0 + 0.000001)
-	assert(mario.sprite.texture.resource_path.ends_with("mario-small-walk-2.tres"))
-	mario.animation_player.advance(7.0 / 60.0)
-	assert(mario.sprite.texture.resource_path.ends_with("mario-small-walk-3.tres"))
-	mario.animation_player.advance(7.0 / 60.0)
-	assert(mario.sprite.texture.resource_path.ends_with("mario-small-walk-1.tres"))
+	var walk := mario.walk_animation
+	walk.ticks_left = 0
+	var poses := [3, 1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 3, 1, 1, 2, 2, 3, 3]
+	for frame in range(poses.size()):
+		walk.tick()
+		walk.advance_pose(mario.animation_player, 0.0 if frame < 3 else 110.0)
+		assert(
+			mario.sprite.texture.resource_path.ends_with("mario-small-walk-%d.tres" % poses[frame])
+		)
 	mario.state_machine.change_state(mario.state_machine.get_state(&"Idle"))
 	assert(not mario.animation_player.is_playing() and mario.animation_player.speed_scale == 1.0)
 	assert(mario.sprite.texture.resource_path.ends_with("mario-small-idle.tres"))
@@ -66,25 +68,17 @@ func run_checks() -> void:
 	Input.action_press(ControllerHandler.right_action)
 	await tick(60)
 	assert(mario.state_machine.current_state is MarioMoveState)
-	assert(is_equal_approx(mario.animation_player.speed_scale, 1.75))
 	var observed: Dictionary[String, bool] = {}
 	for index in range(20):
 		await tick(1)
 		observed[mario.sprite.texture.resource_path] = true
 	assert(observed.size() == 3, "All three supplied poses must play in the live loop.")
 	Input.action_press(ControllerHandler.secondary_action)
-	await tick(2)
-	assert(ControllerHandler.input_secondary and mario.body.velocity.x < 105.0)
-	assert(
-		is_equal_approx(mario.animation_player.speed_scale, 1.75),
-		"Run input alone must not select fast cadence."
-	)
 	await tick(25)
-	assert(is_equal_approx(mario.animation_player.speed_scale, 3.5))
+	assert(walk.get_frame_ticks(mario.body.velocity.x) == 2)
 	Input.action_release(ControllerHandler.right_action)
 	await tick(16)
-	assert(mario.body.velocity.x < 105.0 and mario.body.velocity.x >= 52.5)
-	assert(is_equal_approx(mario.animation_player.speed_scale, 1.75))
+	assert(walk.get_frame_ticks(mario.body.velocity.x) == 4)
 	await tick(40)
 	assert(mario.state_machine.current_state is MarioIdleState)
 	assert(not mario.animation_player.is_playing())

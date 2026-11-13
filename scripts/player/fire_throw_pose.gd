@@ -8,7 +8,6 @@ const FEET := Rect2(0, 24, 16, 8)
 var _ticks_left := 0
 var _base_color := Color.WHITE
 var _keep_feet := false
-var _walk_pose: Texture2D
 var _feet_texture: Texture2D
 var _palette: PlayerPalette
 
@@ -27,16 +26,13 @@ func set_palette(palette: PlayerPalette) -> void:
 func update_pose(timer_reload: int, walking: bool, keep_feet: bool) -> void:
 	if timer_reload > 0:
 		_ticks_left = timer_reload
-		_walk_pose = _base_sprite.texture if walking else null
 	elif _ticks_left == 0 or (walking and _ticks_left == 1):
 		clear()
 		return
 	# Walking reloads its animation timer at zero, ending the throw one tick early.
 	_ticks_left -= 1
-	if not walking:
-		_walk_pose = null
 	_keep_feet = keep_feet
-	_feet_texture = _walk_pose if _walk_pose != null else _base_sprite.texture
+	_feet_texture = _base_sprite.texture
 	_refresh_overlay()
 
 
@@ -44,7 +40,6 @@ func clear() -> void:
 	if _feet_texture == null:
 		return
 	_ticks_left = 0
-	_walk_pose = null
 	_feet_texture = null
 	_refresh_overlay()
 

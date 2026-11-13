@@ -19,10 +19,7 @@ func enter() -> void:
 	_falling = false
 	var mario := get_player() as Mario
 	_previous_animation_speed = mario.animation_player.speed_scale
-	_update_walk_animation(mario)
-
-	# Apply the initial texture now rather than waiting for another animation tick.
-	mario.animation_player.advance(0.0)
+	mario.walk_animation.begin(mario.animation_player)
 
 
 func exit() -> void:
@@ -36,6 +33,7 @@ func exit() -> void:
 
 func process_physics(delta: float) -> BaseState:
 	var player := get_player()
+	var previous_speed := player.body.velocity.x
 	var direction := prepare_horizontal_motion()
 	var next := ground_transition(jump_state, self)
 	if next != null:
@@ -58,7 +56,10 @@ func process_physics(delta: float) -> BaseState:
 		return null
 
 	var mario := player as Mario
-	_update_walk_animation(mario)
+	if not mario.form_controller.is_crouched:
+		mario.walk_animation.advance_pose(mario.animation_player, previous_speed)
+	else:
+		mario.walk_animation.pose_index = 0
 
 	if is_zero_approx(direction) and is_zero_approx(player.body.velocity.x):
 		return idle_state
@@ -67,6 +68,7 @@ func process_physics(delta: float) -> BaseState:
 
 
 func _process_falling(player: BasePlayer, direction: float, delta: float) -> BaseState:
+	var previous_speed := player.body.velocity.x
 	if not _falling:
 		player.air_movement.begin(
 			player.motion_values,
@@ -91,19 +93,13 @@ func _process_falling(player: BasePlayer, direction: float, delta: float) -> Bas
 	if player.scripted_motion_step.is_valid():
 		return null
 	var mario := player as Mario
-	_update_walk_animation(mario)
 	if player.has_floor_support():
+		mario.walk_animation.advance_pose(mario.animation_player, previous_speed)
 		player.air_movement.end(player.motion_values)
 		player.motion_values.remove_modifier(&"passive_fall")
 		_falling = false
 		if is_zero_approx(direction) and is_zero_approx(player.body.velocity.x):
 			return idle_state
-	return null
-
-
-func _update_walk_animation(mario: Mario) -> void:
-	if mario.has_floor_support():
-		mario.walk_animation.apply(mario.animation_player, mario.body.velocity.x)
 	else:
-		# Preserve both the current texture and loop position during passive falls.
-		mario.animation_player.speed_scale = 0.0
+		mario.walk_animation.show_pose(mario.animation_player)
+	return null

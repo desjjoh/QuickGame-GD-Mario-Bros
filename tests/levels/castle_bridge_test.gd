@@ -186,8 +186,10 @@ func _ready() -> void:
 	Input.action_release(ControllerHandler.secondary_action)
 	assert(ending.phase == CastleEndingPresentation.Phase.AT_RESCUE)
 	assert(_camera_left(camera, area) == 2304.0)
-	assert(area.to_local(player.body.global_position).x == 2436.0)
+	var rescue := area.get_node(ending.rescue_path) as CastleRescue
+	assert(player.body.global_position == rescue.player_stop.global_position)
 	assert(player.state_machine.current_state is MarioIdleState)
+	assert(player.sprite.texture == player.form_controller.current_form.idle)
 	level.cancel_ending()
 	assert(not player.scripted_motion_step.is_valid())
 	player.set_physics_process(false)

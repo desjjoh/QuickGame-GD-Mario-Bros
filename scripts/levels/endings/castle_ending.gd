@@ -7,9 +7,6 @@ const COLLAPSE_INTERVAL := 4
 const SKIP_HOLD_TICKS := 2  # The first walk update is tick 3 after axe contact.
 const WALK_SPEED := 90.0  # $18 in the NES horizontal speed byte, or 1.5 px per tick.
 const WALK_MODIFIER := &"castle_ending_walk"
-const THANKS_TICK := 3
-const RESCUE_MESSAGE_TICK := THANKS_TICK + 128
-const FINISH_TICK := 382  # Measured from the final camera step in the 1-4 live route.
 
 @export var area_id: StringName = &"main"
 ## Path from the ending area to its placed CastleBridge.
@@ -27,16 +24,13 @@ var phase := Phase.APPROACH
 var _camera: LevelCamera
 var _bridge: CastleBridge
 var _player: BasePlayer
-var _player_stop: Marker2D
-var _thanks: Label
-var _rescue_message: Label
+var _rescue: CastleRescue
 var _hold_ticks := 0
 var _boss: Bowser
 var _first_collapse_tick := 0
 var _walk_tick := 0
 var _fall_cutoff_y := 0.0
 var _scroll_ticks := 0
-var _rescue_ticks := 0
 var _player_arrived := false
 var _paused_animation := false
 @onready var _collapse_shatter: AudioStreamPlayer = $CollapseShatter
@@ -49,13 +43,8 @@ func bind_area(area: BaseLevelArea) -> void:
 		_bridge.axe.touched.disconnect(_on_axe_touched)
 	_bridge = area.get_node_or_null(bridge_path) as CastleBridge
 	_camera = area.get_node_or_null("Camera2D") as LevelCamera
-	var rescue := area.get_node_or_null(rescue_path)
-	_player_stop = rescue.get_node_or_null("PlayerStop") as Marker2D if rescue != null else null
-	_thanks = rescue.get_node_or_null("Messages/Thanks") as Label if rescue != null else null
-	_rescue_message = (
-		rescue.get_node_or_null("Messages/RescueMessage") as Label if rescue != null else null
-	)
-	if _camera == null or _bridge == null or _player_stop == null:
+	_rescue = area.get_node_or_null(rescue_path) as CastleRescue
+	if _camera == null or _bridge == null or _rescue == null or _rescue.player_stop == null:
 		push_error("Castle Ending requires an area camera, a bridge, and a rescue stop.")
 		return
 	_camera.scroll_stop_left = approach_camera_left
@@ -78,7 +67,8 @@ func start(level: BaseLevel, player: BasePlayer, source: BaseEntity) -> bool:
 		or not is_instance_valid(_bridge)
 		or source != _bridge.axe
 		or player.scripted_motion_step.is_valid()
-		or not is_instance_valid(_player_stop)
+		or not is_instance_valid(_rescue)
+		or not is_instance_valid(_rescue.player_stop)
 		or not is_instance_valid(_camera)
 		or not _camera.acquire_scroll_lock(self)
 	):
@@ -113,7 +103,7 @@ func start(level: BaseLevel, player: BasePlayer, source: BaseEntity) -> bool:
 			lift_spawner.shutdown()
 			lift_spawner.queue_free()
 	_scroll_ticks = 0
-	_rescue_ticks = 0
+	_rescue.reset()
 	_player_arrived = false
 	phase = Phase.HOLD
 	return true
@@ -121,7 +111,9 @@ func start(level: BaseLevel, player: BasePlayer, source: BaseEntity) -> bool:
 
 func _advance(delta: float) -> void:
 	if phase == Phase.AT_RESCUE:
-		_advance_rescue()
+		if _rescue.advance(GameHandler.player_character):
+			phase = Phase.FINISHED
+			_finish.call_deferred()
 		return
 	if phase == Phase.HOLD:
 		_hold_ticks += 1
@@ -143,8 +135,8 @@ func _advance(delta: float) -> void:
 		return
 	if not _player_arrived:
 		_player.advance_scripted_walk(1.0, delta, false)
-		if _player.body.global_position.x >= _player_stop.global_position.x:
-			_player.body.global_position = _player_stop.global_position
+		if _player.body.global_position.x >= _rescue.player_stop.global_position.x:
+			_player.body.global_position = _rescue.player_stop.global_position
 			_player.body.velocity = Vector2.ZERO
 			var states := _player.state_machine
 			if states.current_state == states.initial_state:
@@ -176,22 +168,6 @@ func _advance_bridge(delta: float) -> void:
 		if _bridge.collapse_complete and is_instance_valid(_boss):
 			_boss.begin_bridge_fall()
 	_play_collapse_sound(_bridge.collapse_complete)
-
-
-func _advance_rescue() -> void:
-	_rescue_ticks += 1
-	match _rescue_ticks:
-		THANKS_TICK:
-			if _thanks != null:
-				var luigi := GameHandler.player_character == GameHandler.PlayerCharacter.LUIGI
-				_thanks.text = "THANK YOU %s!" % ("LUIGI" if luigi else "MARIO")
-				_thanks.show()
-		RESCUE_MESSAGE_TICK:
-			if _rescue_message != null:
-				_rescue_message.show()
-		FINISH_TICK:
-			phase = Phase.FINISHED
-			_finish.call_deferred()
 
 
 func _play_collapse_sound(final_piece := false) -> void:
@@ -230,10 +206,8 @@ func cancel() -> void:
 		var level := BaseLevel.containing(self)
 		if level != null:
 			MusicHandler.stop_area(level)
-	if is_instance_valid(_thanks):
-		_thanks.hide()
-	if is_instance_valid(_rescue_message):
-		_rescue_message.hide()
+	if is_instance_valid(_rescue):
+		_rescue.reset()
 	_player = null
 	phase = Phase.APPROACH
 

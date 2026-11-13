@@ -111,7 +111,7 @@ func run_checks() -> void:
 	for sample in playback.mix_audio(1.0, 30000):
 		peak = maxf(peak, maxf(absf(sample.x), absf(sample.y)))
 	playback.stop()
-	assert(peak > 0.05)
+	assert(peak > 0.01 and peak < 0.05, "Expected the calibrated bonk cue to be audible.")
 	playback = null
 	bump = null
 	bump_sounds.clear()

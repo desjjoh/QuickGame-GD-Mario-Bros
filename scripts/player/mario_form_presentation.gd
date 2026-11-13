@@ -178,16 +178,8 @@ func _remember_walk() -> void:
 	var animation := _mario.animation_player
 	if animation.current_animation != &"walk" or not animation.is_playing():
 		return
-	var form := _mario.form_controller.current_form
-	var index := form.walk.find(_mario.sprite.texture)
-	if index >= 0:
-		# Supplied sheets are cyclically ordered NES frames 1, 2, 0.
-		_walk_frame = (index + 1) % 3
-	var duration := animation.get_animation(&"walk").length / 3.0
-	var remaining := duration - fposmod(animation.current_animation_position, duration)
-	var rate := absf(animation.get_playing_speed())
-	if rate > 0.0:
-		_walk_timer = maxi(0, ceili(remaining / rate * 60.0 - 0.0001))
+	_walk_frame = _mario.walk_animation.pose_index
+	_walk_timer = _mario.walk_animation.ticks_left
 
 
 func _set_pose(texture: Texture2D, form: MarioForm) -> void:

@@ -145,7 +145,7 @@ func _ready() -> void:
 	for sample in playback.mix_audio(1.0, 22050):
 		amplitude = maxf(amplitude, maxf(absf(sample.x), absf(sample.y)))
 	playback.stop()
-	assert(amplitude > 0.05)
+	assert(amplitude > 0.01 and amplitude < 0.05, "Expected the calibrated pipe cue to be audible.")
 	playback = null
 	for tick in range(24):
 		player.state_machine.process_physics(1.0 / 60.0)

@@ -1,18 +1,18 @@
 [gd_scene format=4 uid="uid://c547aakap4jow"]
 
 [ext_resource type="Script" uid="uid://dk22h8rhi7sbc" path="res://scripts/levels/block_reward.gd" id="3_atcn4"]
-[ext_resource type="Resource" uid="uid://b5padsqxej18q" path="res://assets/player/forms/super.tres" id="3_gatlq"]
+[ext_resource type="Resource" uid="uid://vehrckrp5rsd" path="res://assets/player/forms/fire.tres" id="3_esy1d"]
 [ext_resource type="TileSet" uid="uid://tveve3vh45yd" path="res://assets/tileset/castle/decorations.tres" id="4_wil8x"]
 [ext_resource type="TileSet" uid="uid://p7ufagqdbq1u" path="res://assets/tileset/castle/entity_layout.tres" id="6_atcn4"]
 [ext_resource type="TileSet" uid="uid://mf4c2d78bbax" path="res://assets/tileset/castle/enemy_layout.tres" id="7_6ynie"]
 [ext_resource type="PackedScene" uid="uid://wlp13xllihs5" path="res://scenes/levels/base/base_level.tscn" id="base"]
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/bowser_spawner.tscn" id="bowser"]
-[ext_resource type="Script" path="res://scenes/entities/enemies/bowser/bowser_flame_source.gd" id="flame_source"]
 [ext_resource type="Resource" uid="uid://cg0b0p2illtvs" path="res://assets/themes/castle.tres" id="castle"]
 [ext_resource type="PackedScene" path="res://scenes/entities/castle/castle_bridge.tscn" id="castle_bridge"]
 [ext_resource type="PackedScene" path="res://scenes/levels/endings/castle_ending.tscn" id="castle_ending"]
 [ext_resource type="PackedScene" path="res://scenes/levels/endings/castle_rescue.tscn" id="castle_rescue"]
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/fire_bar_spawner.tscn" id="fire_bar_spawner"]
+[ext_resource type="Script" uid="uid://ddvrlmpuuo11s" path="res://scenes/entities/enemies/bowser/bowser_flame_source.gd" id="flame_source"]
 [ext_resource type="PackedScene" uid="uid://b5m1vkcrml3t2" path="res://scenes/player/mario/mario.tscn" id="player"]
 [ext_resource type="PackedScene" path="res://scenes/entities/spawners/single_lift_spawner.tscn" id="single_lift"]
 [ext_resource type="TileSet" uid="uid://ieueexne6svp" path="res://assets/tileset/castle/terrain.tres" id="terrain"]
@@ -25,7 +25,7 @@ kind = 3
 ending_presentation = NodePath("Presentations/CastleEnding")
 stage_label = "1-4"
 player_scene = ExtResource("player")
-player_start_configuration = ExtResource("3_gatlq")
+player_start_configuration = ExtResource("3_esy1d")
 
 [node name="MainArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="0" unique_id=250103957]
 process_physics_priority = 110
@@ -124,14 +124,20 @@ position = Vector2(2048, 160)
 [node name="CastleRescue" parent="Areas/MainArea/WorldObjects" parent_id_path=PackedInt32Array(250103957, 827174942) index="9" unique_id=1103567768 instance=ExtResource("castle_rescue")]
 position = Vector2(2304, 0)
 
+[node name="PlayerStop" parent="Areas/MainArea/WorldObjects/CastleRescue" index="0"]
+position = Vector2(134, 208)
+
+[node name="Toad" parent="Areas/MainArea/WorldObjects/CastleRescue" index="1"]
+position = Vector2(144, 177)
+
 [node name="BowserSpawner" parent="Areas/MainArea/WorldObjects" parent_id_path=PackedInt32Array(250103957, 827174942) index="10" unique_id=257338238 instance=ExtResource("bowser")]
 position = Vector2(2160, 128)
+actor_offsets = Array[Vector2]([Vector2(0, 0)])
 
-[node name="BowserFlameSource" type="Node2D" parent="Areas/MainArea/WorldObjects" index="11"]
+[node name="BowserFlameSource" type="Node2D" parent="Areas/MainArea/WorldObjects" parent_id_path=PackedInt32Array(250103957, 827174942) index="11" unique_id=1430499141]
 position = Vector2(1664, 0)
 script = ExtResource("flame_source")
 boss_spawner_path = NodePath("../BowserSpawner")
-actor_offsets = Array[Vector2]([Vector2(0, 0)])
 
 [node name="Camera2D" parent="Areas/MainArea" index="4" unique_id=254826152]
 position = Vector2(128, 120)
@@ -142,10 +148,10 @@ area_right = 2560.0
 position = Vector2(48, 112)
 
 [node name="CastleEnding" parent="Presentations" index="0" unique_id=1174491453 instance=ExtResource("castle_ending")]
-approach_camera_left = 2022.0
-rescue_camera_left = 2304.0
 boss_path = NodePath("WorldObjects/BowserSpawner/Bowser")
 lift_spawner_path = NodePath("WorldObjects/SmallHorizontalLift")
+approach_camera_left = 2022.0
+rescue_camera_left = 2304.0
 
 [editable path="Areas/MainArea"]
 [editable path="Areas/MainArea/WorldObjects/CastleRescue"]

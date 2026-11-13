@@ -2,9 +2,11 @@
 
 [ext_resource type="Texture2D" path="res://assets/items/toad.png" id="toad"]
 [ext_resource type="Theme" path="res://scenes/ui/hud/hud_theme.tres" id="theme"]
+[ext_resource type="Script" path="res://scripts/levels/endings/castle_rescue.gd" id="rescue"]
 
 [node name="CastleRescue" type="Node2D"]
 texture_filter = 1
+script = ExtResource("rescue")
 
 [node name="PlayerStop" type="Marker2D" parent="."]
 position = Vector2(132, 208)
