@@ -22,6 +22,8 @@ PERIODS = (
 )
 NORMAL_LENGTHS = (54, 3, 9, 6, 18, 27, 36, 12)
 CLEAR_LENGTHS = (36, 2, 6, 4, 12, 18, 24, 8)
+CASTLE_CLEAR_LENGTHS = (4, 8, 16, 32, 64, 24, 48, 12)
+CASTLE_CLEAR_PULSE_CONTROLS = (0x90, 0x9b, 0x9a, 0x99, 0x98)
 HURRY_JINGLE_LENGTHS = (3, 6, 12, 24, 48, 18, 36, 8)
 EVENT_PULSE_VOLUME = (
     0, 1, 2, 2, 3, 3, 3, 4,
@@ -36,6 +38,15 @@ PULSE_DUTIES = (0.125, 0.25, 0.5, 0.75)
 # The area counter starts at 8, immediately after the eight-entry area table.
 AREA_PULSE_VOLUME = (0, 4, 4, 5, 5, 6, 7, 8, 0)
 TRACKS = {
+    "castle_clear": (
+        CASTLE_CLEAR_LENGTHS,
+        "81 2c 22 1c 2c 22 1c 85 2c 04 81 2e 24 1e 2e 24 1e 85 2e 04 "
+        "81 32 28 22 32 28 22 85 32 87 36 36 36 84 3a",
+        "5c 54 4c 5c 54 4c 5c 1c 1c 5c 5c 5c 5c 5e 56 4e 5e 56 4e "
+        "5e 1e 1e 5e 5e 5e 5e 62 5a 50 62 5a 50 62 22 22 62 e7 e7 e7 2b",
+        "86 14 81 14 80 14 14 81 14 14 14 14 86 16 81 16 80 16 16 81 16 16 16 16 "
+        "81 28 22 1a 28 22 1a 28 80 28 28 81 28 87 2c 2c 2c 84 30",
+    ),
     "stage_clear": (
         CLEAR_LENGTHS,
         "87 04 06 0c 14 1c 22 86 2c 22 87 04 60 0e 14 1a 24 86 2c 24 "
@@ -76,15 +87,31 @@ def decode(data, lengths, packed=False):
             yield value, duration
 
 
-def render(notes, samples, triangle=False, death=False, sweep=False, area=False, controls=()):
+def castle_clear_melody(notes):
+    melody = []
+    for note, frames in notes:
+        if note == 0x04:
+            # The rest byte leaves the pulse period alone. The castle-clear
+            # envelope immediately writes $98, keeping the previous tone audible.
+            previous_note, previous_frames = melody[-1]
+            melody[-1] = (previous_note, previous_frames + frames)
+        else:
+            melody.append((note, frames))
+    return melody
+
+
+def render(
+    notes, samples, triangle=False, death=False, sweep=False, area=False, controls=(),
+    sustain_long_triangle=False, short_triangle_counter=31,
+):
     output = [0.0] * samples
     offset = 0
     for note, frames in notes:
         count = frames * SAMPLES_PER_FRAME
         audible_count = count
-        if triangle and not death and (area or frames < 18):
-            # Area and short event notes use a 31-quarter-frame triangle counter.
-            audible_count = min(count, 31 * SAMPLES_PER_FRAME // 4)
+        sustained = sustain_long_triangle and frames >= 18
+        if triangle and not death and not sustained and (area or frames < 18):
+            audible_count = min(count, short_triangle_counter * SAMPLES_PER_FRAME // 4)
         period = PERIODS[note // 2]
         if period and offset < samples:
             rate = CPU_HZ / ((32 if triangle else 16) * (period + 1))
@@ -124,22 +151,42 @@ def render(notes, samples, triangle=False, death=False, sweep=False, area=False,
     return output
 
 
+EVENT_LEVEL_CORRECTIONS_DB = {
+    "castle_clear": -9.27,
+    "stage_clear": -7.92,
+    "death": -9.78,
+    "game_over": -6.75,
+}
+HURRY_LEVEL_SCALE = 10 ** (-6.35 / 20)
+
+
 def main():
     folder = Path(__file__).resolve().parents[1] / "assets" / "audio" / "music"
     folder.mkdir(parents=True, exist_ok=True)
     for name, (lengths, melody, harmony, bass) in TRACKS.items():
         notes = list(decode(melody, lengths))
+        castle_clear = name == "castle_clear"
+        if castle_clear:
+            notes = castle_clear_melody(notes)
         count = sum(frames for _, frames in notes) * SAMPLES_PER_FRAME
         death = name == "death"
+        controls = CASTLE_CLEAR_PULSE_CONTROLS if castle_clear else ()
         voices = (
-            render(notes, count, death=death),
-            render(decode(harmony, lengths, packed=True), count, death=death, sweep=death),
-            render(decode(bass, lengths), count, triangle=True, death=death),
+            render(notes, count, death=death, controls=controls),
+            render(
+                decode(harmony, lengths, packed=True), count,
+                death=death, sweep=death, controls=controls,
+            ),
+            render(
+                decode(bass, lengths), count, triangle=True, death=death,
+                short_triangle_counter=15 if castle_clear else 31,
+            ),
         )
+        scale = 10 ** (EVENT_LEVEL_CORRECTIONS_DB[name] / 20)
         if name == "stage_clear":
-            write_track(folder / "stage_clear_pulse.wav", (voices[0],))
+            write_track(folder / "stage_clear_pulse.wav", (voices[0],), scale=scale)
             voices = voices[1:]
-        write_track(folder / f"{name}.wav", voices)
+        write_track(folder / f"{name}.wav", voices, scale=scale)
     melody, harmony, bass = HURRY_JINGLE
     pulse_two = list(decode(melody, HURRY_JINGLE_LENGTHS))
     frames = sum(duration for _, duration in pulse_two)
@@ -148,18 +195,24 @@ def main():
     write_track(
         folder / "hurry_up_pulse_two.wav",
         (render(pulse_two, count, controls=HURRY_PULSE_CONTROLS),),
+        scale=HURRY_LEVEL_SCALE,
     )
     pulse_one = decode(harmony, HURRY_JINGLE_LENGTHS, packed=True)
     write_track(
         folder / "hurry_up_pulse_one.wav",
         (render(pulse_one, count, controls=HURRY_PULSE_CONTROLS),),
+        scale=HURRY_LEVEL_SCALE,
     )
     triangle = decode(bass, HURRY_JINGLE_LENGTHS)
-    write_track(folder / "hurry_up_triangle.wav", (render(triangle, count, triangle=True),))
+    write_track(
+        folder / "hurry_up_triangle.wav",
+        (render(triangle, count, triangle=True),),
+        scale=HURRY_LEVEL_SCALE,
+    )
 
 
-def write_track(path, voices):
-    pcm = b"".join(struct.pack("<h", round(sum(sample))) for sample in zip(*voices))
+def write_track(path, voices, *, scale=1.0):
+    pcm = b"".join(struct.pack("<h", round(round(sum(sample)) * scale)) for sample in zip(*voices))
     with wave.open(str(path), "wb") as stream:
         stream.setparams((1, 2, SAMPLE_RATE, 0, "NONE", "not compressed"))
         stream.writeframes(pcm)

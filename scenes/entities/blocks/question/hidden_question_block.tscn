@@ -2,12 +2,7 @@
 
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/question_block.tscn" id="base"]
 [ext_resource type="Script" path="res://scenes/entities/blocks/question/hidden_question_block.gd" id="hidden"]
-[ext_resource type="Texture2D" path="res://assets/palettes/overworld/tileset/Palette 4 (Coins and Interactibles).png" id="atlas"]
-
-[sub_resource type="AtlasTexture" id="outline"]
-atlas = ExtResource("atlas")
-region = Rect2(48, 32, 16, 16)
-filter_clip = true
+[ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/blocks/hidden-question-block.tres" id="outline"]
 
 [sub_resource type="RectangleShape2D" id="probe"]
 size = Vector2(16, 16)
@@ -19,7 +14,7 @@ script = ExtResource("hidden")
 collision_layer = 0
 
 [node name="Sprite2D" parent="Body"]
-texture = SubResource("outline")
+texture = ExtResource("outline")
 
 [node name="BonkProbe" type="Area2D" parent="Body"]
 position = Vector2(8, 8)

@@ -44,6 +44,8 @@ var _previous_progress_x: float
 var _has_target: bool = false
 var _scroll_lock: WeakRef
 var halfway_left_limit_active := false
+## Temporary cap on the camera's left edge, measured from the area origin.
+var scroll_stop_left := INF
 
 var world_left: float:
 	get:
@@ -146,6 +148,23 @@ func is_scroll_locked() -> bool:
 	return _scroll_lock != null and is_instance_valid(_scroll_lock.get_ref())
 
 
+func advance_scripted_scroll(pixels: float) -> bool:
+	var width := get_viewport_rect().size.x / zoom.x
+	var left := global_position.x - width / 2.0
+	var stop := _maximum_left(width)
+	if left >= stop:
+		return true
+	var next_left := minf(left + pixels, stop)
+	global_position.x = next_left + width / 2.0
+	force_update_scroll()
+	return next_left == stop
+
+
+func _maximum_left(width: float) -> float:
+	var area_max := minf(world_right - width, _area_origin_x() + scroll_stop_left)
+	return maxf(scroll_left_limit, area_max)
+
+
 func follow_target(target: CharacterBody2D) -> void:
 	var mario := target.get_parent() as Mario
 	follow_position(
@@ -191,8 +210,7 @@ func follow_position(
 	# steps against a continuously moving player.
 	if screen_x < full_speed_start:
 		advance *= 0.5
-	var minimum_left := scroll_left_limit
-	var next_left := clampf(left + advance, minimum_left, maxf(minimum_left, world_right - width))
+	var next_left := clampf(left + advance, scroll_left_limit, _maximum_left(width))
 	global_position.x = next_left + width / 2.0
 	force_update_scroll()
 
@@ -201,15 +219,14 @@ func snap_to_arrival(target: CharacterBody2D, sprite_screen_x: float = -1.0) -> 
 	# Arrival at another endpoint explicitly resets right-only camera history.
 	if follow_enabled:
 		var width := get_viewport_rect().size.x / zoom.x
-		var minimum_left := scroll_left_limit
 		var left := clampf(
 			(
 				target.global_position.x
 				- target_origin_offset
 				- (sprite_screen_x if sprite_screen_x >= 0 else full_speed_start)
 			),
-			minimum_left,
-			maxf(minimum_left, world_right - width)
+			scroll_left_limit,
+			_maximum_left(width)
 		)
 		global_position.x = left + width / 2.0
 	reset_target(target)

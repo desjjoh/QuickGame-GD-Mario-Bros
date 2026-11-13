@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/hazards/fire_bar.gd" id="script"]
+
+[node name="FireBar" instance=ExtResource("base")]
+script = ExtResource("script")
+persist_progress = false
+
+[node name="Presentation" type="Node2D" parent="."]
+physics_interpolation_mode = 2

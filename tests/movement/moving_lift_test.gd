@@ -4,6 +4,7 @@ const LEVEL := preload("res://tests/fixtures/sandbox_level.tscn")
 const SPAWNER := preload("res://scenes/entities/spawners/lift_spawner.tscn")
 const SINGLE_SPAWNER := preload("res://scenes/entities/spawners/single_lift_spawner.tscn")
 const STAGE_1_2 := preload("res://scenes/levels/worlds/world 1/1-2.tscn")
+const STAGE_1_4 := preload("res://scenes/levels/worlds/world 1/1-4.tscn")
 const STEP := 1.0 / 60.0
 
 signal stepped
@@ -21,6 +22,9 @@ func _ready() -> void:
 	await _check_1_2_pairs()
 	await _check_single_lift(true)
 	await _check_single_lift(false)
+	await _check_1_4_lift()
+	await _check_custom_lift(true)
+	await _check_custom_lift(false)
 	print("moving_lift_test: PASS")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
@@ -249,6 +253,75 @@ func _check_single_lift(horizontal: bool) -> void:
 	camera.position.x = 640
 	area.update_camera_activity()
 	assert(not spawner.has_node("MovingLift"))
+	level.free()
+	await stepped
+
+
+func _check_1_4_lift() -> void:
+	var level := STAGE_1_4.instantiate() as BaseLevel
+	add_child(level)
+	var player := level.player as Mario
+	player.set_physics_process(false)
+	var area := level.active_area
+	var camera := area.get_node("Camera2D") as LevelCamera
+	camera.follow_enabled = false
+	var spawner := level.world_objects.get_node("SmallHorizontalLift") as EntitySpawner
+	assert(area.to_local(spawner.global_position) == Vector2(2208, 96))
+	camera.global_position.x = spawner.global_position.x - 96.0
+	area.update_camera_activity()
+	var lift := spawner.get_node("MovingLift") as MovingLift
+	assert(lift.motion == MovingLift.Motion.HORIZONTAL and lift.travel_distance == -1)
+	assert(lift.get_activity_rect().size == Vector2(32, 8))
+	assert(not lift.get_node("Presentation/Middle").visible)
+	assert(level.spawn_registry.get_slot(&"enemy", lift) == -1)
+	var start := lift.global_position
+	for tick in range(16):
+		await stepped
+	assert(lift.global_position.x < start.x and lift.global_position.y == start.y)
+
+	player.body.velocity = Vector2(0, 120)
+	player.body.global_position = lift.global_position + Vector2(16, 2)
+	await stepped
+	assert(player.has_floor_support())
+	for tick in range(16):
+		await stepped
+		assert(player.body.global_position - lift.global_position == Vector2(16, 0))
+	player.body.global_position.x = lift.global_position.x + 40
+	await stepped
+	assert(not player.has_floor_support())
+	level.free()
+	await stepped
+
+
+func _check_custom_lift(horizontal: bool) -> void:
+	var level := LEVEL.instantiate() as BaseLevel
+	var area := level.get_node("Areas/MainArea") as BaseLevelArea
+	var spawner := SINGLE_SPAWNER.instantiate() as EntitySpawner
+	spawner.axis = 0 if horizontal else 1
+	spawner.position = Vector2(704, 96)
+	spawner.platform_width = MovingLift.Width.LARGE
+	spawner.travel_distance = 12
+	area.get_node("WorldObjects").add_child(spawner)
+	spawner.owner = level
+	add_child(level)
+	var player := level.player as Mario
+	player.set_physics_process(false)
+	var camera := area.get_node("Camera2D") as LevelCamera
+	camera.follow_enabled = false
+	camera.position.x = 640
+	area.update_camera_activity()
+	var lift := spawner.get_node("MovingLift") as MovingLift
+	assert(lift.get_activity_rect().size == Vector2(64, 8))
+	var direction := Vector2.LEFT if horizontal else Vector2.DOWN
+	player.body.velocity = Vector2(0, 120)
+	player.body.global_position = lift.global_position + Vector2(56, 2)
+	await stepped
+	assert(player.has_floor_support())
+	for tick in range(1, 27):
+		var distance := roundf(pingpong(tick * 15.0 / 16.0, 12.0))
+		assert(lift.position == distance * direction)
+		assert(player.body.global_position - lift.global_position == Vector2(56, 0))
+		await stepped
 	level.free()
 	await stepped
 

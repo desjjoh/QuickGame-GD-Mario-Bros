@@ -38,6 +38,10 @@ func check_fire(is_luigi: bool, theme_name: String) -> void:
 	add_child(level)
 	level.set_physics_process(false)
 	var player := level.player as Mario
+	# This palette trial starts grounded. Let the first terrain step establish support.
+	await get_tree().physics_frame
+	await get_tree().process_frame
+	assert(player.has_floor_support())
 	player.set_physics_process(false)
 	var presentation := player.form_presentation
 	presentation.set_physics_process(false)

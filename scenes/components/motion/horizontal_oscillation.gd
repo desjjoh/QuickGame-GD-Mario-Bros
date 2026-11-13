@@ -1,3 +1,4 @@
+@tool
 extends RefCounted
 ## NES horizontal platform and flying Parakoopa counter motion.
 

@@ -222,16 +222,16 @@ func _apply_growth_normal(form: MarioForm) -> void:
 
 
 func _finish() -> void:
-	var growth := not shrinking and not _igniting
 	var airborne := not _mario.has_floor_support()
+	var resume_move := not shrinking and (not _igniting or airborne)
 	var velocity := _mario.body.velocity
 	cancel()
-	if growth and not _mario.is_dead and not _mario.is_shutdown:
+	if resume_move and not _mario.is_dead and not _mario.is_shutdown:
 		var next_state := _mario.get_node("StateMachine/Move") as MarioMoveState
 		_mario.state_machine.change_state(next_state)
 		_mario.body.velocity = velocity
 		if airborne:
-			next_state.defer_growth_fall_step()
+			next_state.defer_transformation_fall_step()
 		_seek_reference_walk_start()
 	finished.emit()
 

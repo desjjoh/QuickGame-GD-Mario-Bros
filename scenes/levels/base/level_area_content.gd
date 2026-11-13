@@ -2,6 +2,8 @@ class_name LevelAreaContent
 extends Node
 ## Materializes painted entities and captures snapshots; BaseLevel owns lifecycle and storage.
 
+const CASTLE_PART := &"castle_part"
+
 @onready var level: BaseLevel = $"../.."
 
 
@@ -20,18 +22,37 @@ func populate_layout(
 	area: BaseLevelArea, layout: TileMapLayer, saved_entities: Dictionary, enemy_cutoff_x := -INF
 ) -> void:
 	var objects := area.get_node("WorldObjects") as Node2D
-	# Markers remain editable in the scene, but only entities render at runtime.
+	# Hide authoring stamps. Copy scenery cells into the runtime world.
 	layout.hide()
 	if layout.tile_set == null:
 		return
 	if layout.tile_set.get_custom_data_layer_by_name("entity_id") < 0:
 		push_error("EntityLayout TileSet needs an entity_id custom-data layer.")
 		return
+	var scenery: TileMapLayer = null
 	for cell: Vector2i in layout.get_used_cells():
 		var data := layout.get_cell_tile_data(cell)
 		if data == null:
 			continue
 		var entity_id := StringName(str(data.get_custom_data("entity_id")))
+		if entity_id == CASTLE_PART:
+			if scenery == null:
+				scenery = TileMapLayer.new()
+				scenery.name = &"CastleParts"
+				scenery.tile_set = layout.tile_set
+				scenery.texture_filter = layout.texture_filter
+				scenery.collision_enabled = false
+				scenery.navigation_enabled = false
+				objects.add_child(scenery)
+				objects.move_child(scenery, 0)
+				scenery.global_transform = layout.global_transform
+			scenery.set_cell(
+				cell,
+				layout.get_cell_source_id(cell),
+				layout.get_cell_atlas_coords(cell),
+				layout.get_cell_alternative_tile(cell)
+			)
+			continue
 		var scene: PackedScene = level.entity_scenes.get(entity_id)
 		if scene == null:
 			push_error("EntityLayout cell %s has unmapped entity_id '%s'." % [cell, entity_id])
@@ -82,6 +103,8 @@ func capture(area: BaseLevelArea) -> Dictionary:
 		if data == null:
 			continue
 		var id := StringName(str(data.get_custom_data("entity_id")))
+		if id == CASTLE_PART:
+			continue
 		var entity_name := _entity_name(id, cell)
 		var entity := objects.get_node_or_null(NodePath(entity_name)) as BaseEntity
 		if entity != null:

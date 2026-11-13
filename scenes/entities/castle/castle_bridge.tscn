@@ -1,0 +1,38 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/palettes/castle/tileset/Palette 2 (Water and Sky).png" id="deck_art"]
+[ext_resource type="Texture2D" path="res://assets/palettes/castle/tileset/Palette 3 (Pipes and Scenery).png" id="chain_art"]
+[ext_resource type="PackedScene" path="res://scenes/entities/castle/castle_axe.tscn" id="axe"]
+[ext_resource type="Script" path="res://scenes/entities/castle/castle_bridge.gd" id="bridge"]
+
+[sub_resource type="TileSetAtlasSource" id="bridge_tiles"]
+texture = ExtResource("deck_art")
+4:1/0 = 0
+4:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[sub_resource type="TileSet" id="bridge_tileset"]
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("bridge_tiles")
+
+[sub_resource type="AtlasTexture" id="chain"]
+atlas = ExtResource("chain_art")
+region = Rect2(16, 32, 16, 16)
+filter_clip = true
+
+[node name="CastleBridge" type="Node2D"]
+script = ExtResource("bridge")
+
+[node name="Deck" type="TileMapLayer" parent="."]
+z_index = 1
+tile_map_data = PackedByteArray("AAAAAAAAAAAEAAEAAAABAAAAAAAEAAEAAAACAAAAAAAEAAEAAAADAAAAAAAEAAEAAAAEAAAAAAAEAAEAAAAFAAAAAAAEAAEAAAAGAAAAAAAEAAEAAAAHAAAAAAAEAAEAAAAIAAAAAAAEAAEAAAAJAAAAAAAEAAEAAAAKAAAAAAAEAAEAAAALAAAAAAAEAAEAAAAMAAAAAAAEAAEAAAA=")
+tile_set = SubResource("bridge_tileset")
+
+[node name="Chain" type="Sprite2D" parent="."]
+z_index = 1
+position = Vector2(192, -16)
+texture = SubResource("chain")
+centered = false
+
+[node name="Axe" parent="." instance=ExtResource("axe")]
+position = Vector2(208, -32)
+

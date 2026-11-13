@@ -139,6 +139,10 @@ func mark_defeated(hit: EntityHit) -> bool:
 	return true
 
 
+func is_defeated() -> bool:
+	return _defeated
+
+
 func _accept_hit(_hit: EntityHit) -> bool:
 	return false
 
@@ -194,6 +198,14 @@ func projectile_target_bounds() -> Rect2:
 	if _player_contact_shape == null:
 		return Rect2()
 	return PLAYER_CONTACT.bounds(_player_contact_shape)
+
+
+func fireball_target_boxes() -> Array[Rect2]:
+	return [projectile_target_bounds()]
+
+
+func fireball_box_origin_x(_bounds: Rect2) -> float:
+	return body.global_position.x - 8.0
 
 
 func _can_hurt_player() -> bool:

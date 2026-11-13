@@ -2,21 +2,18 @@
 
 [ext_resource type="Texture2D" uid="uid://ca512sora18x6" path="res://assets/palettes/castle/enemies/goomba.png" id="goomba"]
 [ext_resource type="Texture2D" uid="uid://benfeb50qnusc" path="res://assets/palettes/castle/enemies/koopa.png" id="koopa"]
-
-[ext_resource type="Texture2D" path="res://assets/enemies/red-koopa.png" id="red_koopa_art"]
+[ext_resource type="Texture2D" uid="uid://c236w6qqt7obc" path="res://assets/enemies/red-koopa.png" id="red_koopa_art"]
 
 [sub_resource type="TileSetAtlasSource" id="single"]
 resource_name = "Goomba Spawner"
 texture = ExtResource("goomba")
 0:0/0 = 0
-0:0/0/texture_origin = Vector2i(0, 0)
 0:0/0/custom_data_0 = "goomba_spawner"
 
 [sub_resource type="TileSetAtlasSource" id="pair"]
 resource_name = "Goomba Pair Spawner"
 texture = ExtResource("goomba")
 0:0/0 = 0
-0:0/0/texture_origin = Vector2i(0, 0)
 0:0/0/custom_data_0 = "goomba_pair_spawner"
 
 [sub_resource type="TileSetAtlasSource" id="koopa"]
@@ -50,7 +47,6 @@ texture_region_size = Vector2i(16, 32)
 0:0/0/custom_data_0 = "red_koopa_spawner"
 
 [resource]
-tile_size = Vector2i(16, 16)
 custom_data_layer_0/name = "entity_id"
 custom_data_layer_0/type = 4
 sources/0 = SubResource("single")

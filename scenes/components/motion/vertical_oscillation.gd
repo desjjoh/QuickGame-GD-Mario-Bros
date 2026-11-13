@@ -1,3 +1,4 @@
+@tool
 extends RefCounted
 ## NES vertical platform and Red Parakoopa movement in 1/256-pixel units.
 

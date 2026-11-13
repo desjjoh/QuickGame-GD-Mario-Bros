@@ -9,11 +9,32 @@ func _ready() -> void:
 		preload("res://scenes/levels/areas/base_area.tscn").instantiate() as BaseLevelArea
 	)
 	var enemy_layout := preview.get_node("Layouts/EnemyLayout") as TileMapLayer
+	var entity_layout := preview.get_node("Layouts/EntityLayout") as TileMapLayer
+	var hidden_scene := preload("res://scenes/entities/blocks/question/hidden_question_block.tscn")
 	for theme in [overworld, underground, castle]:
 		assert(not theme.entity_markers.has_source(10))
 		assert(not theme.entity_markers.has_source(11))
 		preview.theme = theme
 		preview.apply_theme()
+		var palette_path := "/%s/tileset/" % theme.display_name.to_lower()
+		var hidden_marker := entity_layout.tile_set.get_source(9) as TileSetAtlasSource
+		var hidden_tile := hidden_marker.get_tile_data(Vector2i.ZERO, 0)
+		assert(hidden_tile.get_custom_data("entity_id") == "hidden_question_block")
+		assert(hidden_marker.texture.resource_path.contains(palette_path))
+		var hidden_block := hidden_scene.instantiate() as HiddenQuestionBlock
+		hidden_block.visual_theme = theme
+		add_child(hidden_block)
+		var outline := hidden_block.sprite.texture as AtlasTexture
+		assert(outline.atlas == hidden_marker.texture)
+		assert(outline.region == Rect2(hidden_marker.get_tile_texture_region(Vector2i.ZERO)))
+		hidden_block.free()
+		var spent := theme.terrain.get_source(3) as TileSetAtlasSource
+		var spent_tile := spent.get_tile_data(Vector2i(3, 0), 0)
+		assert(spent_tile.get_collision_polygons_count(0) == 1)
+		assert(spent.texture.resource_path.contains(palette_path))
+		var liquid := theme.decorations.get_source(17) as TileSetAtlasSource
+		assert(liquid.has_tile(Vector2i(3, 0)) and liquid.has_tile(Vector2i(3, 1)))
+		assert(theme.decorations.get_physics_layers_count() == 0)
 		assert(enemy_layout.tile_set.tile_size == Vector2i(16, 16))
 		for source_id in [0, 1]:
 			var source := enemy_layout.tile_set.get_source(source_id) as TileSetAtlasSource
@@ -32,7 +53,7 @@ func _ready() -> void:
 		underground_castle.get_tile_data(Vector2i.ZERO, 0).get_custom_data("entity_id") == "castle"
 	)
 	assert(castle.title_accent_font != null)
-	assert(castle.terrain.get_source_count() == 2)
+	assert(castle.terrain.get_source_count() == 3)
 	assert(castle.decorations.get_source_count() == 4)
 	for source_id in [3, 4, 5, 6]:
 		var marker := castle.entity_markers.get_source(source_id) as TileSetAtlasSource
@@ -80,10 +101,14 @@ func _ready() -> void:
 			level.get_node("Areas/" + area_name + "/Layouts/EntityLayout") as TileMapLayer
 		)
 		markers.set_cell(Vector2i(2, 5), 7, Vector2i.ZERO)
+		markers.set_cell(Vector2i(3, 5), 15, Vector2i(1, 0))
 	add_child(level)
 	var main := level.get_node("Areas/MainArea") as BaseLevelArea
 	var lower := level.get_node("Areas/LowerArea") as BaseLevelArea
 	var main_coin := main.get_node("WorldObjects/coin_2_5") as BaseEntity
+	var castle_parts := main.get_node("WorldObjects/CastleParts") as TileMapLayer
+	assert(castle_parts.visible and not castle_parts.collision_enabled)
+	assert(castle_parts.get_cell_source_id(Vector2i(3, 5)) == 15)
 	assert(main_coin.position == Vector2(32, 80))
 	assert(main_coin.sprite.texture.resource_path.contains("/palettes/overworld/"))
 	assert(main.theme.display_name == "Overworld")
@@ -121,7 +146,8 @@ func _ready() -> void:
 			"/palettes/underground/"
 		)
 	)
-	assert(main_terrain.get_source_count() == 2 and lower_ground.tile_set.get_source_count() == 2)
+	assert(main_terrain.get_source_count() == 4 and lower_ground.tile_set.get_source_count() == 3)
+	assert(main_terrain.has_source(2) and not lower_ground.tile_set.has_source(2))
 	for source_id in [0, 1]:
 		var original := main_terrain.get_source(source_id) as TileSetAtlasSource
 		var themed := lower_ground.tile_set.get_source(source_id) as TileSetAtlasSource
@@ -140,9 +166,9 @@ func _ready() -> void:
 			and lower_decorations.get_physics_layers_count() == 0
 		)
 	)
-	assert(main_decorations.get_source_count() == 4 and lower_decorations.get_source_count() == 4)
-	for index in range(main_decorations.get_source_count()):
-		var id := main_decorations.get_source_id(index)
+	assert(main_decorations.get_source_count() == 5 and lower_decorations.get_source_count() == 4)
+	assert(main_decorations.has_source(16) and not lower_decorations.has_source(16))
+	for id in [0, 3, 9, 17]:
 		assert(lower_decorations.has_source(id))
 		var original := main_decorations.get_source(id) as TileSetAtlasSource
 		var themed := lower_decorations.get_source(id) as TileSetAtlasSource
@@ -154,9 +180,6 @@ func _ready() -> void:
 		)
 		assert(themed.texture.get_size() == original.texture.get_size())
 		assert(themed.get_tiles_count() == original.get_tiles_count())
-		if id == 15:
-			assert(themed.get_tiles_count() == 7 and not themed.has_tile(Vector2i.ZERO))
-			assert(not original.has_tile(Vector2i.ZERO))
 		for tile_index in range(original.get_tiles_count()):
 			var coords := original.get_tile_id(tile_index)
 			assert(themed.has_tile(coords) and themed.has_alternative_tile(coords, 0))
@@ -167,7 +190,7 @@ func _ready() -> void:
 	var original_texture: Texture2D = originals.get_node("Body/Sprite2D").texture
 	originals.free()
 	var underground_count := 0
-	for block in lower.get_node("WorldObjects").get_children():
+	for block in lower.get_node("WorldObjects").find_children("*", "BaseEntity", false, false):
 		assert(block.visual_theme == lower.theme)
 		if block.sprite.texture.resource_path.contains("brick"):
 			underground_count += 1
@@ -192,7 +215,7 @@ func _ready() -> void:
 	)
 	assert(main.theme.resolve_texture(original_texture) == original_texture)
 	# Every supplied counterpart is mapped, including all question animation frames.
-	assert(lower.theme.texture_overrides.size() == 28)
+	assert(lower.theme.texture_overrides.size() == 29)
 	for source_path: String in lower.theme.texture_overrides:
 		var replacement := lower.theme.resolve_texture(load(source_path))
 		assert(
@@ -294,7 +317,7 @@ func _ready() -> void:
 	GameHandler.clear_session()
 	assert(not reward_voice.playing)
 	level.shutdown()
-	for block in lower.get_node("WorldObjects").get_children():
+	for block in lower.get_node("WorldObjects").find_children("*", "BaseEntity", false, false):
 		assert(block.is_shutdown)
 	level.free()
 	for frame in range(6):

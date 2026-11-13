@@ -118,7 +118,7 @@ func _ready() -> void:
 
 
 func update_scripted_walk_animation() -> void:
-	if animation_player.current_animation != &"walk":
+	if not animation_player.is_playing() or animation_player.current_animation != &"walk":
 		animation_player.play(&"walk")
 	walk_animation.apply(animation_player, body.velocity.x)
 

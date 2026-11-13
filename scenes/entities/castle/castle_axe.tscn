@@ -1,0 +1,57 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/base/base_entity.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/castle/castle_axe.gd" id="axe"]
+[ext_resource type="Texture2D" path="res://assets/palettes/castle/tileset/Palette 4 (Coins and Interactibles).png" id="art"]
+[ext_resource type="Script" path="res://scenes/components/presentation/synchronized_animation.gd" id="sync"]
+[ext_resource type="Resource" path="res://scenes/components/presentation/palette_pulse.tres" id="cycle"]
+
+[sub_resource type="AtlasTexture" id="bright"]
+atlas = ExtResource("art")
+region = Rect2(0, 32, 16, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="medium"]
+atlas = ExtResource("art")
+region = Rect2(16, 32, 16, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="dark"]
+atlas = ExtResource("art")
+region = Rect2(32, 32, 16, 16)
+filter_clip = true
+
+[sub_resource type="SpriteFrames" id="frames"]
+animations = [{
+"frames": [{"duration": 1.0, "texture": SubResource("bright")}, {"duration": 1.0, "texture": SubResource("medium")}, {"duration": 1.0, "texture": SubResource("dark")}, {"duration": 1.0, "texture": SubResource("medium")}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="tile_shape"]
+size = Vector2(16, 16)
+
+[node name="CastleAxe" instance=ExtResource("base")]
+script = ExtResource("axe")
+persist_progress = false
+z_index = 1
+
+[node name="Body" type="StaticBody2D" parent="."]
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
+position = Vector2(8, 8)
+shape = SubResource("tile_shape")
+
+[node name="Presentation" type="Node2D" parent="."]
+
+[node name="Sprite" type="AnimatedSprite2D" parent="Presentation"]
+sprite_frames = SubResource("frames")
+centered = false
+
+[node name="PaletteAnimation" type="Node" parent="Presentation" node_paths=PackedStringArray("animated_sprite")]
+script = ExtResource("sync")
+cycle = ExtResource("cycle")
+animated_sprite = NodePath("../Sprite")
+start_enabled = true

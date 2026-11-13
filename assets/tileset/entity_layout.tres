@@ -36,12 +36,31 @@ margins = Vector2i(32, 0)
 0:0/0/custom_data_0 = "reward_brick_alternate"
 
 [sub_resource type="TileSetAtlasSource" id="large_castle"]
-resource_name = "Large Castle (10x11)"
+resource_name = "Large Castle (9x11)"
 texture = ExtResource("large_castle")
-0:0/size_in_atlas = Vector2i(10, 11)
+0:0/size_in_atlas = Vector2i(9, 11)
 0:0/0 = 0
-0:0/0/texture_origin = Vector2i(-40, -80)
+0:0/0/texture_origin = Vector2i(-32, -80)
 0:0/0/custom_data_0 = "large_castle"
+
+[sub_resource type="TileSetAtlasSource" id="castle_parts"]
+resource_name = "Castle parts"
+texture = ExtResource("3_alternate")
+margins = Vector2i(48, 0)
+1:0/0 = 0
+1:0/0/custom_data_0 = "castle_part"
+2:0/0 = 0
+2:0/0/custom_data_0 = "castle_part"
+3:0/0 = 0
+3:0/0/custom_data_0 = "castle_part"
+0:1/0 = 0
+0:1/0/custom_data_0 = "castle_part"
+1:1/0 = 0
+1:1/0/custom_data_0 = "castle_part"
+2:1/0 = 0
+2:1/0/custom_data_0 = "castle_part"
+3:1/0 = 0
+3:1/0/custom_data_0 = "castle_part"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_alternate"]
 resource_name = "Alternate brick entity"
@@ -111,3 +130,4 @@ sources/9 = SubResource("hidden_question")
 sources/12 = SubResource("reward_brick")
 sources/13 = SubResource("reward_brick_alternate")
 sources/14 = SubResource("large_castle")
+sources/15 = SubResource("castle_parts")

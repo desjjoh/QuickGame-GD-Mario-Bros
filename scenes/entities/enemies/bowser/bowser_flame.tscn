@@ -1,0 +1,44 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/entities/enemies/base/base_enemy.tscn" id="base"]
+[ext_resource type="Script" path="res://scenes/entities/enemies/bowser/bowser_flame.gd" id="flame"]
+[ext_resource type="Texture2D" path="res://assets/items/flame.png" id="art"]
+
+[sub_resource type="RectangleShape2D" id="contact"]
+size = Vector2(4, 4)
+
+[node name="BowserFlame" instance=ExtResource("base")]
+script = ExtResource("flame")
+
+[node name="Body" parent="."]
+position = Vector2(0, 0)
+collision_mask = 0
+
+[node name="CollisionShape2D" parent="Body"]
+disabled = true
+
+[node name="Sprite2D" parent="Body"]
+centered = false
+position = Vector2(0, 1)
+texture = ExtResource("art")
+vframes = 2
+
+[node name="EnemyContact" parent="Body"]
+collision_layer = 0
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape2D" parent="Body/BlockHitReceiver"]
+disabled = true
+
+[node name="PlayerContact" type="Area2D" parent="Body"]
+position = Vector2(8, 6)
+collision_layer = 0
+collision_mask = 1024
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body/PlayerContact"]
+shape = SubResource("contact")
+
+[editable path="Body/BlockHitReceiver"]

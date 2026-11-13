@@ -1,27 +1,12 @@
 [gd_resource type="Resource" script_class="MarioForm" format=3 uid="uid://b5padsqxej18q"]
 
-[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario.png" id="sheet"]
-[ext_resource type="Script" path="res://scripts/player/mario_form.gd" id="script"]
-[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-idle.tres" id="idle"]
-[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-jump.tres" id="jump"]
-[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-slide.tres" id="slide"]
 [ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-crouch.tres" id="crouch"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-idle.tres" id="idle"]
 [ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-intermediate.tres" id="intermediate"]
-
-[sub_resource type="AtlasTexture" id="walk0"]
-atlas = ExtResource("sheet")
-region = Rect2(16, 0, 16, 32)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="walk1"]
-atlas = ExtResource("sheet")
-region = Rect2(32, 0, 16, 32)
-filter_clip = true
-
-[sub_resource type="AtlasTexture" id="walk2"]
-atlas = ExtResource("sheet")
-region = Rect2(48, 0, 16, 32)
-filter_clip = true
+[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-jump.tres" id="jump"]
+[ext_resource type="Script" uid="uid://1ugsbwr6iakt" path="res://scripts/player/mario_form.gd" id="script"]
+[ext_resource type="Texture2D" uid="uid://f7m1qain5gau" path="res://assets/player/mario (super)/mario.png" id="sheet"]
+[ext_resource type="Texture2D" path="res://assets/player/mario (super)/mario-slide.tres" id="slide"]
 
 [sub_resource type="AtlasTexture" id="climb0"]
 atlas = ExtResource("sheet")
@@ -36,6 +21,21 @@ filter_clip = true
 [sub_resource type="AtlasTexture" id="shrink"]
 atlas = ExtResource("sheet")
 region = Rect2(144, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="walk0"]
+atlas = ExtResource("sheet")
+region = Rect2(16, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="walk1"]
+atlas = ExtResource("sheet")
+region = Rect2(32, 0, 16, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="walk2"]
+atlas = ExtResource("sheet")
+region = Rect2(48, 0, 16, 32)
 filter_clip = true
 
 [resource]

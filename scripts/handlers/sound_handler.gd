@@ -19,6 +19,25 @@ const SAMPLE_RATE := 44100
 const SAMPLES_PER_FRAME := 735
 const CPU_HZ := 1789773.0
 const PEAK_SAMPLE := 5900
+# Corrections measured through NES_Mix against isolated Mesen cues.
+const PULSE_CUE_CORRECTIONS_DB := {
+	&"bowser_fall": -11.44,
+	&"bump": -11.89,
+	&"coin": -11.64,
+	&"enemy_smack": -10.88,
+	&"extra_life": -11.70,
+	&"fireball": -12.34,
+	&"fireworks": -11.58,
+	&"flagpole": -11.46,
+	&"jump_big": -12.12,
+	&"jump_small": -10.29,
+	&"pause": -11.76,
+	&"pipe": -11.90,
+	&"power_up_grab": -11.88,
+	&"power_up_reveal": -12.98,
+	&"stomp": -12.59,
+	&"timer_tick": -11.78,
+}
 
 var _sounds: Dictionary[StringName, AudioStream] = {}
 var _square_two := AudioStreamPlayer.new()
@@ -37,6 +56,18 @@ func _ready() -> void:
 	_square_two.finished.connect(func(): reward_voice_changed.emit(false))
 	_register_square_two_cues()
 	_register_action_cues()
+	_calibrate_pulse_cues()
+
+
+func _calibrate_pulse_cues() -> void:
+	for cue: StringName in PULSE_CUE_CORRECTIONS_DB:
+		var stream := _sounds[cue] as AudioStreamWAV
+		var pcm := stream.data
+		var scale := db_to_linear(PULSE_CUE_CORRECTIONS_DB[cue])
+		for offset in range(0, pcm.size(), 2):
+			pcm.encode_s16(offset, roundi(pcm.decode_s16(offset) * scale))
+		# Injury shares the pipe stream, so this also calibrates that cue once.
+		stream.data = pcm
 
 
 static func _build_pause_cue() -> AudioStreamWAV:
@@ -102,6 +133,12 @@ func _register_square_two_cues() -> void:
 	blast_pcm.append_array(_build_swept_pulse(0x17c, [24], [0x9f], [0x93], [], {}, false).data)
 	blast.data = blast_pcm
 	_sounds[&"fireworks"] = blast
+	# The final bridge entry switches to the 56-tick Bowser fall cue.
+	var bowser_fall := _build_swept_pulse(0x17c, [48], [0x9f], [0xc4], [], {}, false)
+	var fall_pcm := bowser_fall.data
+	fall_pcm.append_array(_build_swept_pulse(0x475, [8], [0x9f], [0xa4], [], {}, false).data)
+	bowser_fall.data = fall_pcm
+	_sounds[&"bowser_fall"] = bowser_fall
 
 
 func _register_action_cues() -> void:
@@ -117,6 +154,7 @@ func _register_action_cues() -> void:
 	_sounds[&"brick_shatter"] = (
 		load("res://assets/audio/effects/brick_shatter.wav") as AudioStreamWAV
 	)
+	_sounds[&"bowser_flame"] = _build_bowser_flame()
 	_sounds[&"enemy_smack"] = _build_swept_pulse(
 		0xef,
 		[14],
@@ -147,6 +185,65 @@ func _register_action_cues() -> void:
 	_sounds[&"pipe"] = pipe
 	# NES Sfx_PipeDown_Injury uses the same Square 1 routine for both events.
 	_sounds[&"injury"] = pipe
+
+
+static func _build_bowser_flame() -> AudioStreamWAV:
+	# NES noise period $0f uses the long LFSR and a 4068-cycle timer.
+	# The game reads the volume table backward, once every two ticks.
+	var envelope := [
+		5,
+		6,
+		6,
+		7,
+		7,
+		8,
+		9,
+		9,
+		10,
+		10,
+		12,
+		13,
+		13,
+		14,
+		14,
+		15,
+		15,
+		15,
+		15,
+		14,
+		13,
+		12,
+		14,
+		15,
+		15,
+		14,
+		13,
+		12,
+		10,
+		8,
+		6,
+		4
+	]
+	var pcm := PackedByteArray()
+	pcm.resize(envelope.size() * 2 * SAMPLES_PER_FRAME * 2)
+	var register := 1
+	var noise_phase := 0.0
+	var phase_step := CPU_HZ / (4068.0 * SAMPLE_RATE)
+	var noise_peak := PEAK_SAMPLE * (0.00494 / 0.00752) / 2.0
+	var sample := 0
+	# The first control lasts one tick. The final write is muted on that same tick.
+	for index in range(envelope.size() - 1, -1, -1):
+		var amplitude := roundi(noise_peak * int(envelope[index]) / 15.0)
+		var ticks := 1 if index == envelope.size() - 1 else 2
+		for _sample_in_step in range(ticks * SAMPLES_PER_FRAME):
+			noise_phase += phase_step
+			if noise_phase >= 1.0:
+				noise_phase -= 1.0
+				var feedback := (register ^ (register >> 1)) & 1
+				register = (register >> 1) | (feedback << 14)
+			pcm.encode_s16(sample * 2, amplitude if (register & 1) == 0 else -amplitude)
+			sample += 1
+	return _pcm_stream(pcm)
 
 
 func get_sound(cue: StringName) -> AudioStream:

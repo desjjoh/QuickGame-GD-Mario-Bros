@@ -1,6 +1,7 @@
 extends Node
 
 const STAGE := preload("res://scenes/levels/worlds/world 1/1-1.tscn")
+const CASTLE_STAGE := preload("res://scenes/levels/worlds/world 1/1-4.tscn")
 const GAME := preload("res://tests/fixtures/silent_game.tscn")
 
 signal tick_finished
@@ -19,6 +20,8 @@ func _ready() -> void:
 		var regular: AudioStreamWAV = MusicHandler._loops[track]
 		var fast: AudioStreamWAV = MusicHandler._fast_loops[track]
 		var tempo := 2.0 if track == MusicHandler.STARMAN_TRACK else 1.5
+		if track == MusicHandler.Track.CASTLE:
+			tempo = 1.25
 		assert(fast.mix_rate == regular.mix_rate)
 		assert(absf(fast.get_length() * tempo - regular.get_length()) < 0.01)
 
@@ -86,11 +89,12 @@ func _ready() -> void:
 	game.free()
 	await tick_finished
 
-	game = _start_game(75)
+	game = _start_game(75, true, CASTLE_STAGE)
 	level = await _wait_for_level_start()
+	assert(level.active_area.background_music == MusicHandler.Track.CASTLE)
 	assert(GameHandler.time_remaining == 75 and _warning_playing())
 	await _wait_for_warning_end()
-	assert(MusicHandler._voice.stream == MusicHandler._fast_loops[MusicHandler.Track.OVERWORLD])
+	assert(MusicHandler._voice.stream == MusicHandler._fast_loops[MusicHandler.Track.CASTLE])
 	game.free()
 	await tick_finished
 
@@ -119,8 +123,10 @@ func _ready() -> void:
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
-func _start_game(time: int, timer_enabled: bool = true) -> Node:
-	var fixture := STAGE.instantiate() as BaseLevel
+func _start_game(
+	time: int, timer_enabled: bool = true, stage: PackedScene = STAGE
+) -> Node:
+	var fixture := stage.instantiate() as BaseLevel
 	fixture.starting_time = time
 	fixture.timer_enabled = timer_enabled
 	for area in fixture.get_node("Areas").get_children():

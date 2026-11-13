@@ -2,6 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://c5rlcoc6354mt" path="res://assets/palettes/underground/tileset/Palette 3 (Pipes and Scenery).png" id="art_1"]
 [ext_resource type="Texture2D" uid="uid://rojclmop6o2k" path="res://assets/palettes/underground/tileset/Palette 1 (Ground and Stone).png" id="art_2"]
+[ext_resource type="Texture2D" uid="uid://ey7pbemvbc8v" path="res://assets/palettes/underground/tileset/Palette 4 (Coins and Interactibles).png" id="spent_art"]
 
 [sub_resource type="TileSetAtlasSource" id="Source_0"]
 resource_name = "Solid ground"
@@ -45,7 +46,14 @@ texture = ExtResource("art_1")
 6:3/0 = 0
 6:3/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
+[sub_resource type="TileSetAtlasSource" id="spent_question_block"]
+resource_name = "Spent question block"
+texture = ExtResource("spent_art")
+3:0/0 = 0
+3:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
 [resource]
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("Source_0")
 sources/1 = SubResource("Source_1")
+sources/3 = SubResource("spent_question_block")
