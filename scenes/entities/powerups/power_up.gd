@@ -111,7 +111,7 @@ func _check_pickup() -> void:
 		or player.is_dead
 		or player.is_shutdown
 		or player.gameplay_suspended
-		or not PLAYER_CONTACT.touches(pickup, player.enemy_hurtbox)
+		or not PLAYER_CONTACT.touches(pickup, player.enemy_hurtbox, true)
 	):
 		return
 	_removing = true

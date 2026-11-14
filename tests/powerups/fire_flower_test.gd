@@ -16,14 +16,15 @@ func _ready() -> void:
 	for is_luigi in [false, true]:
 		for index in range(FORMS.size()):
 			await check_pickup(is_luigi, index)
+		await check_pickup(is_luigi, 1, true)
 	ControllerHandler.set_physics_process(true)
 	GameHandler.animation_clock.set_physics_process(true)
 	GameHandler.clear_session()
-	print("PASS: Flower rise, global palette, stationary body, and six character/form pickups.")
+	print("PASS: Flower rise, global palette, stationary body, and early and full-rise pickups.")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
 
 
-func check_pickup(is_luigi: bool, index: int) -> void:
+func check_pickup(is_luigi: bool, index: int, early: bool = false) -> void:
 	var level := LEVEL.instantiate() as BaseLevel
 	level.player_start_configuration = FORMS[index]
 	if is_luigi:
@@ -44,6 +45,18 @@ func check_pickup(is_luigi: bool, index: int) -> void:
 	level.world_objects.add_child(block)
 	assert(block.receive_hit(EntityHit.new(player, &"bonk", Vector2.UP)))
 	var flower := level.world_objects.get_node("FireFlower") as PowerUp
+	if early:
+		player.body.global_position = block.global_position + Vector2(-5, 0)
+		await ticks(20)
+		assert(is_instance_valid(flower) and not flower.is_queued_for_deletion())
+		assert(flower._can_pick_up_at_current_height() and flower._emergence_remaining > 0)
+		player.body.global_position.x += 0.96
+		await ticks(3)
+		assert(not is_instance_valid(flower) or flower.is_queued_for_deletion())
+		assert(GameHandler.player_status.powerup_form == PlayerStatus.PowerupForm.FIRE)
+		level.queue_free()
+		await get_tree().process_frame
+		return
 	var world := level.get_node("Areas") as CanvasItem
 	assert(not world.z_as_relative and world.z_index == DRAW_ORDER.WORLD)
 	flower.set_physics_process(false)
