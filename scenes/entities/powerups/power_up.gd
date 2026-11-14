@@ -10,7 +10,6 @@ const PLAYER_CONTACT := preload("res://scenes/components/interactions/player_con
 var _removing := false
 var _emergence_remaining := 0.0
 var _emergence_elapsed := 0.0
-var _previous_interpolation_mode: PhysicsInterpolationMode
 var _level: BaseLevel
 
 @export var pickup: Area2D
@@ -35,8 +34,6 @@ func _ready() -> void:
 ## Configure before entering the tree so pickup follows the emergence threshold.
 func begin_emergence() -> void:
 	_emergence_remaining = EMERGENCE_HEIGHT
-	_previous_interpolation_mode = physics_interpolation_mode
-	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 
 
 func _physics_process(delta: float) -> void:
@@ -66,7 +63,6 @@ func _advance_emergence(delta: float) -> void:
 		position.y -= clearance
 		sprite.offset.y += clearance
 		DRAW_ORDER.apply(sprite, DRAW_ORDER.AVAILABLE_ITEM)
-		physics_interpolation_mode = _previous_interpolation_mode
 		reset_physics_interpolation()
 		pickup.set_deferred("monitoring", true)
 
@@ -111,7 +107,7 @@ func _check_pickup() -> void:
 		or player.is_dead
 		or player.is_shutdown
 		or player.gameplay_suspended
-		or not PLAYER_CONTACT.touches(pickup, player.enemy_hurtbox)
+		or not PLAYER_CONTACT.touches(pickup, player.enemy_hurtbox, true)
 	):
 		return
 	_removing = true

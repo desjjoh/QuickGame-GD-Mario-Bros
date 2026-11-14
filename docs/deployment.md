@@ -7,7 +7,7 @@
 3. Choose the output path and export with **Export With Debug** cleared for a release build.
 4. Launch the exported executable outside the editor. The current preset embeds the PCK in the executable; keep a separate PCK beside it if using a preset that produces one.
 
-Verify title startup, keyboard and controller input, area transitions, audio, and return to title in the exported build.
+Verify title startup, keyboard and controller input, area transitions, audio, and return to title in the exported build. Check that both reward brick variants show their active brick artwork, emerging power-ups can be collected, and Super Mario descends after breaking a brick beside an intact neighbor.
 
 ## Regenerate audio assets
 

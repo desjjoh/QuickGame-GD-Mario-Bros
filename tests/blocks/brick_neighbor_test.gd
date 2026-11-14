@@ -113,11 +113,12 @@ func _ready() -> void:
 						"Gate must expire at tick 16"
 					)
 					if relative < 3:
-						# These jumps leave the shattered cell and enter a neighbor
-						# from the side. The neighbor no longer reverses the jump.
+						# These jumps enter an intact neighbor from the side.
+						# Preserve the first rise, then descend without a second hit.
 						if relative > 0 and k in [3, 5, 19]:
-							assert(p.body.velocity.y < 0.0)
-							assert(pos.y < hit_y)
+							assert(p.body.velocity.y > 0.0)
+							if relative == 1:
+								assert(pos.y < hit_y)
 							continue
 						var target: Dictionary = expected.contact[relative]
 						assert(
@@ -151,6 +152,7 @@ func _ready() -> void:
 					% [k, hit_step, expected_hit_step]
 				)
 			)
+	await check_input_only_jumps(level, brick_scene, row)
 	ControllerHandler.input_left = 0
 	ControllerHandler.input_right = 0
 	ControllerHandler.input_primary = false
@@ -158,3 +160,81 @@ func _ready() -> void:
 	ControllerHandler.set_physics_process(true)
 	print("brick_neighbor_test: PASS")
 	await preload("res://tests/fixtures/finish_test.gd").finish(get_tree())
+
+
+func check_input_only_jumps(level: BaseLevel, scene: PackedScene, row: Array[BaseBlock]) -> void:
+	var breaks := 0
+	for direction in [1.0, -1.0]:
+		for distance in [48.0, 52.0, 56.0, 60.0, 64.0]:
+			for brick in row:
+				if is_instance_valid(brick):
+					brick.free()
+			row.clear()
+			var cells: Array[Rect2] = []
+			for x in [112.0, 128.0, 144.0]:
+				var brick := scene.instantiate() as BaseBlock
+				brick.position = Vector2(x, 128)
+				level.world_objects.add_child(brick)
+				row.append(brick)
+				cells.append(Rect2(brick.global_position, Vector2(16, 16)))
+			await step(func():
+				p.bonk_action.reset_reaction_gate()
+				p.state_machine.stop(false)
+				p.body.global_position = Vector2(136.0 - direction * distance, 208)
+				p.body.velocity = Vector2.ZERO
+				p.body.move_and_slide()
+				p.state_machine.change_state(p.get_node("StateMachine/Idle"))
+				ControllerHandler.input_primary = false
+				ControllerHandler.input_primary_just_pressed = false
+				ControllerHandler.input_secondary = true
+				ControllerHandler.input_right = 1 if direction > 0 else 0
+				ControllerHandler.input_left = 1 if direction < 0 else 0
+			)
+			for tick in range(32):
+				await step(func(): p._physics_process(1.0 / 60.0))
+			assert(p.has_floor_support(), "Input-only jump must start grounded")
+			ControllerHandler.input_primary = true
+			ControllerHandler.input_primary_just_pressed = true
+			var broken := -1
+			var break_tick := -1
+			var descent_tick := -1
+			var broken_depth := 0.0
+			var neighbor_depth := 0.0
+			for tick in range(48):
+				var before_y := p.body.global_position.y
+				await step(func(): p._physics_process(1.0 / 60.0))
+				ControllerHandler.input_primary_just_pressed = false
+				if broken < 0:
+					for index in range(row.size()):
+						if not is_instance_valid(row[index]) or not row[index].visible:
+							broken = index
+							break_tick = tick
+							break
+				if broken < 0:
+					continue
+				var head := p.get_head_position()
+				for index in range(cells.size()):
+					var cell := cells[index]
+					if not cell.has_point(head):
+						continue
+					var depth := cell.end.y - head.y
+					if index == broken:
+						broken_depth = maxf(broken_depth, depth)
+					else:
+						neighbor_depth = maxf(neighbor_depth, depth)
+				if p.body.global_position.y > before_y and descent_tick < 0:
+					descent_tick = tick - break_tick
+				if descent_tick >= 0 and p.has_floor_support():
+					break
+			if broken >= 0:
+				breaks += 1
+				print("Input-only brick jump %s/%s: broken depth=%s, neighbor depth=%s, descent=+%s" %
+					[direction, distance, broken_depth, neighbor_depth, descent_tick])
+				assert(descent_tick > 0, "Mario must descend after breaking the brick")
+				if distance == 56.0:
+					assert(descent_tick == 2, "Seam entry must reverse after the first rise")
+					assert(broken_depth <= 5.0 and neighbor_depth <= 5.0)
+			elif distance == 56.0:
+				assert(false, "The 56 px run-up must break a brick in both directions")
+	ControllerHandler.input_secondary = false
+	assert(breaks > 0, "Input-only jump sweep must exercise a shatter")

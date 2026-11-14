@@ -8,7 +8,7 @@
 | Logical viewport | 256×240 |
 | Initial window | 768×720, bordered and resizable |
 | Stretch | Window-resolution `canvas_items`, fractional scaling with aspect preserved |
-| Physics interpolation | Enabled |
+| Physics interpolation | Off |
 | Windows rendering driver | Direct3D 12 |
 
 Use Godot’s **Project → Project Settings → Input Map** to inspect bindings. See [setup](setup.md#controls) for gameplay controls.
@@ -86,7 +86,7 @@ The game uses 256×240 logical framing with window-resolution canvas_items rende
 
 ## Source configuration and ownership
 
-`Game.stages` defines completion order and currently lists 1-1, 1-2, and 1-3. Clearing the final registered stage returns to the title. **Game → Start Stage Override** selects the starting BaseLevel scene for new runs. Leave it empty to use the first entry. Selecting a registered scene starts at its position in the list. A scene outside the list returns to the title after ordinary completion. The title backdrop is configured separately. Single-stage test fixtures assign `game.stages.assign([scene])`.
+`Game.stages` defines completion order and lists 1-1, 1-2, 1-3, and 1-4. Clearing the final registered stage returns to the title. **Game → Start Stage Override** selects the starting BaseLevel scene for new runs. Leave it empty to use the first entry. Selecting a registered scene starts at its position in the list. A scene outside the list returns to the title after ordinary completion. The title backdrop is configured separately. Single-stage test fixtures assign `game.stages.assign([scene])`.
 
 Use typed GameHandler methods/properties and `player_status` for score, coins, lives, form, top score, stage label, and timer values. Generic `set_session_value()` / `get_session_value()` are for run metadata such as area/arrival IDs; reserved-key writes are rejected. The existing `session_value_changed` signal carries both typed-value and metadata notifications.
 

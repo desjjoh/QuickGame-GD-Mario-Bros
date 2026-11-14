@@ -201,9 +201,18 @@ func prepare_runtime() -> void:
 		var copy := child.duplicate()
 		_set_branch_owner(copy, copy)
 		var packed := PackedScene.new()
-		assert(packed.pack(copy) == OK)
-		_runtime_templates[child.name] = packed
+		# Release exports skip assert expressions, so packing must run separately.
+		var pack_error := packed.pack(copy)
 		copy.free()
+		if pack_error != OK:
+			push_error(
+				(
+					"Could not pack area %s branch %s: %s"
+					% [area_id, child.name, error_string(pack_error)]
+				)
+			)
+			continue
+		_runtime_templates[child.name] = packed
 
 
 func _set_branch_owner(node: Node, root: Node) -> void:

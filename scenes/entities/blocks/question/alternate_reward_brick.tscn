@@ -1,10 +1,8 @@
 [gd_scene format=3]
 [ext_resource type="PackedScene" path="res://scenes/entities/blocks/question/question_block.tscn" id="base"]
 [ext_resource type="Texture2D" path="res://assets/palettes/overworld/interactibles/blocks/brick-alternate.tres" id="brick"]
+[ext_resource type="Script" path="res://scenes/entities/blocks/question/reward_brick.gd" id="script"]
+
 [node name="AlternateRewardBrick" instance=ExtResource("base")]
-[node name="Sprite2D" parent="Body"]
-texture = ExtResource("brick")
-[node name="Active" parent="StateMachine"]
-synchronized_animation = null
-sprite_texture = ExtResource("brick")
-stop_animation_on_enter = true
+script = ExtResource("script")
+brick_texture = ExtResource("brick")

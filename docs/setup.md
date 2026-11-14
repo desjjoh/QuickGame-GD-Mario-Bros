@@ -8,7 +8,7 @@
 
 Open `scenes/levels/worlds/world 1/1-1.tscn` and press **F6** to run 1-1 directly. It is also the default title backdrop, with gameplay disabled. Leave **Game → Presentation → Title Background** empty to use the first entry in **Stages**, or assign another level to override it.
 
-Clearing 1-1 starts 1-2 at the castle doorway. The player walks into the opening pipe automatically. Clearing 1-2 loads 1-3, a single overworld area with treetop terrain, moving lifts, Red Parakoopas, and a Large Castle ending. To start at a later level, set **Game → Start Stage Override** in `scenes/main/game.tscn`. Clear the field to start at 1-1 again.
+Clearing 1-1 starts 1-2 at the castle doorway. The player walks into the opening pipe automatically. Clearing 1-2 loads 1-3, a single overworld area with treetop terrain, moving lifts, Red Parakoopas, and a Large Castle ending. Clearing 1-3 loads 1-4, where the axe triggers the castle rescue sequence. Clearing 1-4 returns to the title. To start at a later level, set **Game → Start Stage Override** in `scenes/main/game.tscn`. Clear the field to start at 1-1 again.
 
 ## Controls
 
