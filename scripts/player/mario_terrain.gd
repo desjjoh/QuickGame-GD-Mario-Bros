@@ -165,8 +165,9 @@ func resolve(player: BasePlayer, before: Vector2, was_rising: bool, crouched: bo
 			var hit := space.intersect_ray(query)
 			var collider: Node = hit.collider if not hit.is_empty() and hit.normal.y > 0.5 else null
 			var shattered := player.bonk_action.shattered_ceiling
+			var entered_neighbor := false
 			if collider == null and is_instance_valid(shattered):
-				# A valid shatter can leave the head inside its temporary solid cell.
+				# The post-shatter step can begin inside a tile, where a ray misses.
 				var point := PhysicsPointQueryParameters2D.new()
 				point.position = to
 				point.collision_mask = player.body.collision_mask
@@ -175,7 +176,16 @@ func resolve(player: BasePlayer, before: Vector2, was_rising: bool, crouched: bo
 					if occupied.collider == shattered:
 						collider = shattered
 						break
-			if collider != null:
+					var body := occupied.collider as StaticBody2D
+					if body != null and body.get_parent() is BaseBlock:
+						entered_neighbor = true
+			if entered_neighbor and collider == null:
+				# Side entry into an intact block stops ascent without a bonk.
+				player.body.velocity.y = player.vertical_movement.speed_with_integer(
+					player.motion_values, 1
+				)
+				player.jump_action.update(player.motion_values, false)
+			elif collider != null:
 				var solid_speed := player.vertical_movement.speed_with_integer(
 					player.motion_values, 1
 				)

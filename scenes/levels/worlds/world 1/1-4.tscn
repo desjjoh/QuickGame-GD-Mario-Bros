@@ -1,7 +1,6 @@
 [gd_scene format=4 uid="uid://c547aakap4jow"]
 
 [ext_resource type="Script" uid="uid://dk22h8rhi7sbc" path="res://scripts/levels/block_reward.gd" id="3_atcn4"]
-[ext_resource type="Resource" uid="uid://vehrckrp5rsd" path="res://assets/player/forms/fire.tres" id="3_esy1d"]
 [ext_resource type="TileSet" uid="uid://tveve3vh45yd" path="res://assets/tileset/castle/decorations.tres" id="4_wil8x"]
 [ext_resource type="TileSet" uid="uid://p7ufagqdbq1u" path="res://assets/tileset/castle/entity_layout.tres" id="6_atcn4"]
 [ext_resource type="TileSet" uid="uid://mf4c2d78bbax" path="res://assets/tileset/castle/enemy_layout.tres" id="7_6ynie"]
@@ -25,7 +24,6 @@ kind = 3
 ending_presentation = NodePath("Presentations/CastleEnding")
 stage_label = "1-4"
 player_scene = ExtResource("player")
-player_start_configuration = ExtResource("3_esy1d")
 
 [node name="MainArea" parent="Areas" parent_id_path=PackedInt32Array(638828059) index="0" unique_id=250103957]
 process_physics_priority = 110
